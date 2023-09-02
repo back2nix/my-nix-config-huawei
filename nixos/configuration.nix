@@ -5,7 +5,9 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  user = "bg";
+in {
   imports = [
     # Include the results of the hardware scan.
     #<home-manager/nixos>
@@ -66,10 +68,33 @@
     # xkbVariant = "workman,";
     #xkbOptions = "grp:win_space_toggle";
     # xkbOptions = "grp:ctrl_shift_toggle";
-
     displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
-    # displayManager.gdm.wayland = false;
+    # desktopManager.gdm.wayland = false;
+
+    # desktopManager.gnome = {
+    #   extraGSettingsOverridePackages = with pkgs; [ gnome.gnome-settings-daemon ];
+    #   extraGSettingsOverrides = ''
+    #     # switch language
+    #     [org.gnome.desktop.wm.keybindings]
+    #     switch-input-source="['<Alt>Shift_L']"
+    #
+    #     # Favorite apps in gnome-shell
+    #     # [org.gnome.settings-daemon.plugins.media-keys]
+    #     # custom-keybindings = "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']";
+    #       [org.gnome.settings-daemon.plugins.media-keys.custom-keybindings.custom0]
+    #       binding='<Primary><Alt>T'
+    #       command='kgx'
+    #       name='Open terminal'
+    #   '';
+    # };
+
+    # Настройка пользовательских клавишных комбинаций
+    # displayManager.sessionCommands = ''
+    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
+    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
+    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
+    # '';
   };
 
   # Enable the GNOME Desktop Environment.
@@ -102,10 +127,13 @@
 
   # users.extraGroups.docker.members = ["username-with-access-to-socket"];
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.bg = {
+  users.users.${user} = {
     isNormalUser = true;
-    description = "bg";
+    description = "${user}";
     extraGroups = ["networkmanager" "wheel" "docker" "podman"]; #
+    # openssh = {
+    #   authorizedKeys.keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnLD+dQsKPhCV3eY0lMUP4fDrECI1Boe6PbnSHY+eqRpkA/Nd5okdyXvynWETivWsKdDRlT3gIVgEHqEv8s4lzxyZx9G2fAgQVVpBLk18G9wkH0ARJcJ0+RStXLy9mwYl8Bw8J6kl1+t0FE9Aa9RNtqKzpPCNJ1Uzg2VxeNIdUXawh77kIPk/6sKyT/QTNb5ruHBcd9WYyusUcOSavC9rZpfEIFF6ZhXv2FFklAwn4ggWzYzzSLJlMHzsCGmkKmTdwKijkGFR5JQ3UVY64r3SSYw09RY1TYN/vQFqTDw8RoGZVTeJ6Er/F/4xiVBlzMvxtBxkjJA9HLd8djzSKs8yf amnesia@amnesia"];
+    # };
     packages = with pkgs; [
       firefox
       google-chrome
@@ -130,7 +158,7 @@
 
   # Enable automatic login for the user.
   services.xserver.displayManager.autoLogin.enable = true;
-  services.xserver.displayManager.autoLogin.user = "bg";
+  services.xserver.displayManager.autoLogin.user = "${user}";
 
   # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
   systemd.services."getty@tty1".enable = false;
@@ -184,8 +212,8 @@
     # https://nixos.wiki/wiki/NixOS_Containers
     # sudo nixos-container root-login wasabi
     bindMounts = {
-      "/home/bg/.ssh/wireguard-keys" = {
-        hostPath = "/home/bg/.ssh/wireguard-keys";
+      "/home/${user}/.ssh/wireguard-keys" = {
+        hostPath = "/home/${user}/.ssh/wireguard-keys";
         isReadOnly = true;
       };
     };
@@ -235,12 +263,12 @@
         wg0 = {
           address = ["10.8.0.3/24"];
           dns = ["1.1.1.1"];
-          privateKeyFile = "/home/bg/.ssh/wireguard-keys/private";
+          privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
           peers = [
             {
               publicKey = "JV4k9fkj8YG6c+O1xzKpEGboQ6E97RF91rRQ+6p1ND8=";
-              presharedKeyFile = "/home/bg/.ssh/wireguard-keys/presharedKeyFile";
+              presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
               allowedIPs = ["0.0.0.0/0"];
               endpoint = "194.28.224.146:51820";
               persistentKeepalive = 0;
