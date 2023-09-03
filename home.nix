@@ -1,8 +1,32 @@
 {
   config,
   pkgs,
+  # inputs,
   ...
 }: {
+  imports = [
+    # inputs.nix-colors.homeManagerModules.default
+    # inputs.xremap-flake.homeManagerModules.default
+  ];
+
+  # services.xremap = {
+  #   withHypr = true;
+  #   config = {
+  #     keymap = [
+  #       {
+  #         name = "Open Terminal";
+  #         remap = {
+  #           super-t = {
+  #             launch = ["kgx"];
+  #           };
+  #         };
+  #       }
+  #     ];
+  #   };
+  # };
+
+  # colorScheme = inputs.nix-colors.colorSchemes.dracula;
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "bg";
@@ -98,7 +122,7 @@
   #
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
-    # EDITOR = "emacs";
+    EDITOR = "nvim";
   };
 
   #environment.systemPackages = [ pkgs.neovim ];
@@ -209,5 +233,25 @@
     ];
   };
 
-  #home.file.".tmux.conf".text = "./tmux.conf";
+  home.file = {
+    # ".tmux.conf".text = "./tmux.conf";
+    # ".tmux.conf".source = "";
+  };
+
+  programs.git = {
+    enable = true;
+    userName = "back2nix";
+    userEmail = "back2nix@list.ru";
+    aliases = {
+      pu = "push";
+      co = "checkout";
+      cm = "commit";
+    };
+  };
+
+  # xdg.mimeApps.defaultApplications = {
+  #   "text/palin" = ["nvim"];
+  #   "video/png" = ["mvp.destop"];
+  #   "video/*" = ["mvp.destop"];
+  # };
 }
