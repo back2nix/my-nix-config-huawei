@@ -1,9 +1,12 @@
+{ config
+, pkgs
+, inputs
+, ...
+}:
+let
+  user = "bg";
+in
 {
-  config,
-  pkgs,
-  # inputs,
-  ...
-}: {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -11,26 +14,27 @@
 
   # services.xremap = {
   #   withHypr = true;
-  #   config = {
-  #     keymap = [
-  #       {
-  #         name = "Open Terminal";
-  #         remap = {
-  #           super-t = {
-  #             launch = ["kgx"];
-  #           };
-  #         };
-  #       }
-  #     ];
-  #   };
+  #   yamlConfig = builtins.readFile ./xremap/config.yml;
+  #   # config = {
+  #   #   keymap = [
+  #   #     {
+  #   #       name = "Open Terminal";
+  #   #       remap = {
+  #   #         super-t = {
+  #   #           launch = ["kgx"];
+  #   #         };
+  #   #       };
+  #   #     }
+  #   #   ];
+  #   # };
   # };
 
   # colorScheme = inputs.nix-colors.colorSchemes.dracula;
 
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "bg";
-  home.homeDirectory = "/home/bg";
+  home.username = "${user}";
+  home.homeDirectory = "/home/${user}";
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -85,6 +89,10 @@
     niv
     distrobox
     dconf
+    # inputs.xremap-flake.packages.${system}.default
+    libnotify
+    tree
+    nix-template
     # gnome.gnome-terminal
   ];
 
