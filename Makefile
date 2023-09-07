@@ -4,7 +4,7 @@ REPO_DIR := my-astronvim-config
 sync:
 	rsync -avP /etc/nixos/* nixos
 	rsync -avP ~/.config/home-manager/* .
-	rsync -avP ~/.config/nvim/lua/user $(REPO_DIR)
+	cd $(REPO_DIR) && make sync
 
 push:
 	git add -u && git commit -m "make push" && git push || (git pull --rebase && git push)
