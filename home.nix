@@ -9,30 +9,54 @@ in
 {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
-    inputs.xremap-flake.homeManagerModules.default
+    # inputs.xremap-flake.homeManagerModules.default
   ];
 
-  services.xremap = {
-    config = {
-      keymap = [
-        {
-          name = "default map";
-          remap = {
-            super-d = {
-              remap = {
-                t = {
-                  launch = [ "telegram-desktop" ];
-                };
-                g = {
-                  launch = [ "google-chrome-stable" ];
-                };
-              };
-            };
-          };
-        }
-      ];
-    };
-  };
+  # services.xremap = {
+  #   config = {
+  #     keymap = [
+  #       {
+  #         name = "default map";
+  #         remap = {
+  #           super-d = {
+  #             remap = {
+  #               t = {
+  #                 launch = [ "telegram-desktop" ];
+  #               };
+  #               g = {
+  #                 launch = [ "google-chrome-stable" ];
+  #               };
+  #             };
+  #           };
+  #         };
+  #       }
+  #       {
+  #         name = "speaker not terminal";
+  #         # application = {
+  #         #   not = [ "kgx" ];
+  #         # };
+  #         remap = {
+  #           M-f = {
+  #             remap = {
+  #               p = {
+  #                 launch = [ "curl" "http://localhost:3111/echo/L_CTRL+L_ALT+P" ];
+  #               };
+  #               c = {
+  #                 launch = [ "curl" "http://localhost:3111/echo/L_CTRL+C" ];
+  #               };
+  #               f = {
+  #                 launch = [ "curl" "http://localhost:3111/echo/L_ALT+F" ];
+  #               };
+  #               z = {
+  #                 launch = [ "curl" "http://localhost:3111/echo/L_ALT+Z" ];
+  #               };
+  #             };
+  #           };
+  #         };
+  #       }
+  #     ];
+  #   };
+  # };
 
   # colorScheme = inputs.nix-colors.colorSchemes.dracula;
 
