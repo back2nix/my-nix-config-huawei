@@ -9,25 +9,30 @@ in
 {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
-    # inputs.xremap-flake.homeManagerModules.default
+    inputs.xremap-flake.homeManagerModules.default
   ];
 
-  # services.xremap = {
-  #   withHypr = true;
-  #   yamlConfig = builtins.readFile ./xremap/config.yml;
-  #   # config = {
-  #   #   keymap = [
-  #   #     {
-  #   #       name = "Open Terminal";
-  #   #       remap = {
-  #   #         super-t = {
-  #   #           launch = ["kgx"];
-  #   #         };
-  #   #       };
-  #   #     }
-  #   #   ];
-  #   # };
-  # };
+  services.xremap = {
+    config = {
+      keymap = [
+        {
+          name = "default map";
+          remap = {
+            super-d = {
+              remap = {
+                t = {
+                  launch = [ "telegram-desktop" ];
+                };
+                g = {
+                  launch = [ "google-chrome-stable" ];
+                };
+              };
+            };
+          };
+        }
+      ];
+    };
+  };
 
   # colorScheme = inputs.nix-colors.colorSchemes.dracula;
 
