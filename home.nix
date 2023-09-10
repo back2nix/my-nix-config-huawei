@@ -234,6 +234,7 @@ in
     };
     shellAliases = {
       ll = "ls -l";
+      ch = "stat --format '%a'";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
       cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";
