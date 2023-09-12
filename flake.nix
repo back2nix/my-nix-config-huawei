@@ -9,6 +9,7 @@
     };
     nix-colors.url = "github:misterio77/nix-colors";
     xremap-flake.url = "github:xremap/nix-flake";
+    # nixpkgs-go_1_21.url = "github:tie/nixpkgs/go121-distpack";
   };
 
   outputs =

@@ -63,6 +63,7 @@ in
     # gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
     # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
     # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
+    # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kitty'
     # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
     enable = true;
     layout = "us,ru";
@@ -149,6 +150,8 @@ in
       tmux
       wget
       direnv
+      kitty
+      gnome.gnome-shell
     ];
   };
 
@@ -269,16 +272,17 @@ in
 
         networking.wg-quick.interfaces = {
           wg0 = {
-            address = [ "10.8.0.3/24" ];
+            address = [ "10.8.0.7/24" ];
             dns = [ "1.1.1.1" ];
             privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
             peers = [
               {
-                publicKey = "JV4k9fkj8YG6c+O1xzKpEGboQ6E97RF91rRQ+6p1ND8=";
+                publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
                 presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
                 allowedIPs = [ "0.0.0.0/0" ];
-                endpoint = "194.28.224.146:51820";
+                # endpoint = "194.28.224.146:51820";
+                endpoint = "166.1.160.225:51820";
                 persistentKeepalive = 0;
               }
             ];
@@ -351,4 +355,9 @@ in
   # hardware.uinput.enable = true;
   # users.groups.uinput.members = [ "${user}" ];
   # users.groups.input.members = [ "${user}" ];
+
+  services.udev.extraRules = ''
+    KERNEL=="uinput", GROUP="${user}", MODE:="0660"
+    KERNEL=="event[0-9]*", GROUP="${user}", MODE:="0660"
+  '';
 }

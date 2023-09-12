@@ -12,6 +12,11 @@ in
     # inputs.xremap-flake.homeManagerModules.default
   ];
 
+  xdg.configFile = {
+    "kitty/kitty.conf".source = ./kitty.conf;
+    "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
+  };
+
   # services.xremap = {
   #   config = {
   #     keymap = [
@@ -122,6 +127,8 @@ in
     libnotify
     tree
     nix-template
+    python3
+    marksman
     # gnome.gnome-terminal
   ];
 
