@@ -129,6 +129,7 @@ in
     nix-template
     python3
     marksman
+    encfs
     # gnome.gnome-terminal
   ];
 
@@ -140,9 +141,11 @@ in
     # # symlink to the Nix store copy.
     # ".screenrc".source = dotfiles/screenrc;
 
-    ".tmux.conf" = {
-      text = builtins.readFile ./tmux/tmux.conf;
-    };
+    ".tmux.conf".source = ./tmux/tmux.conf;
+
+    # ".tmux.conf" = {
+    #   text = builtins.readFile ./tmux/tmux.conf;
+    # };
 
     #".config/nvim/init.lua" = {
     #  text = (builtins.readFile ./init.lua);
