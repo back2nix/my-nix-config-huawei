@@ -1,11 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -80,6 +82,8 @@ in {
 
   programs.direnv.enable = true;
 
+  # my-yandex-browser =
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
@@ -132,8 +136,15 @@ in {
     difftastic
     bat
     tokei
+    # my-yandex-browser
+    # (pkgs.callPackage ./yandex-browser.nix { })
     # gnome.gnome-terminal
   ];
+
+  # nixpkgs.config.allowUnfreePredicate = pkg:
+  #   builtins.elem (lib.getName pkg) [
+  #     "yandex-browser"
+  #   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.

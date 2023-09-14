@@ -351,6 +351,25 @@ in {
     # socks5 127.0.0.1 9063
   '';
 
+  services.privoxy = {
+    enable = true;
+    enableTor = true;
+  };
+
+  services.tor = {
+    enable = true;
+    client.enable = true;
+    client.dns.enable = true;
+    settings = {
+      # ExitNodes = "{ua}, {nl}, {gb}";
+      # ExcludeNodes = "{ru},{by},{kz}";
+      UseBridges = true;
+      ClientTransportPlugin = "obfs4 exec ${pkgs.obfs4}/bin/obfs4proxy";
+      # Bridge = builtins.readFile /home/${user}/.ssh/nix/tor.obfs4.1;
+      Bridge = builtins.readFile /home/${user}/.ssh/nix/tor.obfs4.2;
+    };
+  };
+
   # programs.hyprland.enable = true;
 
   # xremap
