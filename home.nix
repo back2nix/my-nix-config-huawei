@@ -1,12 +1,11 @@
-{ config
-, pkgs
-, inputs
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -130,6 +129,9 @@ in
     python3
     marksman
     encfs
+    difftastic
+    bat
+    tokei
     # gnome.gnome-terminal
   ];
 
@@ -196,19 +198,19 @@ in
       ''
         # >>> mamba initialize >>>
         # !! Contents within this block are managed by 'mamba init' !!
-        export MAMBA_EXE="/nix/store/9dkj1d9xa3dn3yf8dx1h61z0cp3j6832-micromamba-1.2.0/bin/micromamba";
-        export MAMBA_ROOT_PREFIX="/home/bg/micromamba";
-        __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-        if [ $? -eq 0 ]; then
-            eval "$__mamba_setup"
-        else
-            if [ -f "/home/bg/micromamba/etc/profile.d/micromamba.sh" ]; then
-                . "/home/bg/micromamba/etc/profile.d/micromamba.sh"
-            else
-                export  PATH="/home/bg/micromamba/bin:$PATH"  # extra space after export prevents interference from conda init
-            fi
-        fi
-        unset __mamba_setup
+        # export MAMBA_EXE="/nix/store/9dkj1d9xa3dn3yf8dx1h61z0cp3j6832-micromamba-1.2.0/bin/micromamba";
+        # export MAMBA_ROOT_PREFIX="/home/bg/micromamba";
+        # __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+        # if [ $? -eq 0 ]; then
+        #     eval "$__mamba_setup"
+        # else
+        #     if [ -f "/home/bg/micromamba/etc/profile.d/micromamba.sh" ]; then
+        #         . "/home/bg/micromamba/etc/profile.d/micromamba.sh"
+        #     else
+        #         export  PATH="/home/bg/micromamba/bin:$PATH"  # extra space after export prevents interference from conda init
+        #     fi
+        # fi
+        # unset __mamba_setup
         # <<< mamba initialize <<<
 
         DIRSTACKFILE="$HOME/.dirs"
@@ -252,6 +254,13 @@ in
       rd = "readlink -f";
       update = "sudo nixos-rebuild switch";
       hupdate = "home-manager switch";
+      # https://github.com/name-snrl/nixos-configuration/blob/master/modules/home/aliases.nix
+      ip = "ip --color=auto";
+      dt = "difft";
+      bcat = "bat --pager=never --style=changes,rule,numbers,snip";
+      tk = "tokei";
+      sctl = "systemctl";
+      sudo = "sudo ";
     };
     history = {
       size = 10000;
@@ -281,11 +290,6 @@ in
     ];
   };
 
-  home.file = {
-    # ".tmux.conf".text = "./tmux.conf";
-    # ".tmux.conf".source = "";
-  };
-
   programs.git = {
     enable = true;
     userName = "back2nix";
@@ -294,7 +298,29 @@ in
       pu = "push";
       co = "checkout";
       cm = "commit";
+      # dt = "diff";
+      lg = "log --stat";
     };
+    difftastic = {
+      enable = true;
+    };
+    # extraConfig = {
+    #   init.defaultBranch = "main";
+    #   url = {
+    #     "git@github.com:".pushInsteadOf = "https://github.com/";
+    #     "git@gist.github.com:".pushInsteadOf = "https://gist.github.com/";
+    #   };
+    #   pager.difftool = true;
+    #
+    #   diff = {
+    #     tool = "difftastic";
+    #   };
+    #
+    #   difftool = {
+    #     prompt = false;
+    #     "difftastic".cmd = ''difft "$LOCAL" "$REMOTE"'';
+    #   };
+    # };
   };
 
   # xdg.mimeApps.defaultApplications = {
