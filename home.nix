@@ -1,13 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -127,7 +126,7 @@ in
     distrobox
     dconf
     # inputs.xremap-flake.packages.${system}.default
-    libnotify
+    # libnotify
     tree
     nix-template
     python3
