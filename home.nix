@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -135,6 +136,8 @@ in {
     difftastic
     bat
     tokei
+    android-tools
+    patchelf
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
     # gnome.gnome-terminal
@@ -240,6 +243,8 @@ in {
         setopt pushdignoredups
         ## This reverts the +/- operators.
         setopt pushdminus
+
+        export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
       '';
     oh-my-zsh = {
       enable = true;

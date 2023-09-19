@@ -1,13 +1,14 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{
-  config,
-  pkgs,
-  ...
-}: let
+{ config
+, pkgs
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     #<home-manager/nixos>
@@ -18,9 +19,9 @@ in {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
 
-  boot.supportedFilesystems = ["ntfs"];
+  boot.supportedFilesystems = [ "ntfs" ];
 
-  services.xserver.videoDrivers = ["modesetting"];
+  services.xserver.videoDrivers = [ "modesetting" ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -131,7 +132,7 @@ in {
   users.users.${user} = {
     isNormalUser = true;
     description = "${user}";
-    extraGroups = ["networkmanager" "wheel" "docker" "podman"]; #
+    extraGroups = [ "networkmanager" "wheel" "docker" "podman" "input" ]; #
     # openssh = {
     #   authorizedKeys.keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnLD+dQsKPhCV3eY0lMUP4fDrECI1Boe6PbnSHY+eqRpkA/Nd5okdyXvynWETivWsKdDRlT3gIVgEHqEv8s4lzxyZx9G2fAgQVVpBLk18G9wkH0ARJcJ0+RStXLy9mwYl8Bw8J6kl1+t0FE9Aa9RNtqKzpPCNJ1Uzg2VxeNIdUXawh77kIPk/6sKyT/QTNb5ruHBcd9WYyusUcOSavC9rZpfEIFF6ZhXv2FFklAwn4ggWzYzzSLJlMHzsCGmkKmTdwKijkGFR5JQ3UVY64r3SSYw09RY1TYN/vQFqTDw8RoGZVTeJ6Er/F/4xiVBlzMvxtBxkjJA9HLd8djzSKs8yf amnesia@amnesia"];
     # };
@@ -155,7 +156,7 @@ in {
     ];
   };
 
-  environment.shells = with pkgs; [zsh];
+  environment.shells = with pkgs; [ zsh ];
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   # environment.binsh = "${pkgs.dash}/bin/dash";
@@ -174,7 +175,7 @@ in {
   systemd.tmpfiles.rules = [
     "d /var/lib/bluetooth 700 root root - -"
   ];
-  systemd.targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
+  systemd.targets."bluetooth".after = [ "systemd-tmpfiles-setup.service" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -213,7 +214,7 @@ in {
 
   networking.nat = {
     enable = true;
-    internalInterfaces = ["ve-+"];
+    internalInterfaces = [ "ve-+" ];
     externalInterface = "wlp0s20f3";
     # Lazy IPv6 connectivity for the container
     enableIPv6 = true;
@@ -236,67 +237,67 @@ in {
     localAddress = "192.168.100.3";
     hostAddress6 = "fc00::1";
     localAddress6 = "fc00::2";
-    config = {
-      config,
-      pkgs,
-      ...
-    }: {
-      # environment.systemPackages = with pkgs; [
-      #   dante
-      #  ];
-      services._3proxy = {
-        # https://nixos.wiki/wiki/3proxy
-        # https://github.com/3proxy/3proxy/wiki/How-To-(incomplete)#BIND
-        enable = true;
-        services = [
-          {
-            type = "socks";
-            auth = ["none"];
-            acl = [
-              {
-                rule = "allow";
-                users = ["test1"];
-              }
-            ];
-          }
-        ];
-        usersFile = "/etc/3proxy.passwd";
-      };
-
-      environment.etc = {
-        "3proxy.passwd".text = ''
-          test1:CL:password1
-          test2:CR:$1$rkpibm5J$Aq1.9VtYAn0JrqZ8M.1ME.
-        '';
-      };
-
-      networking.wg-quick.interfaces = {
-        wg0 = {
-          address = ["10.8.0.7/24"];
-          dns = ["1.1.1.1"];
-          privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
-
-          peers = [
+    config =
+      { config
+      , pkgs
+      , ...
+      }: {
+        # environment.systemPackages = with pkgs; [
+        #   dante
+        #  ];
+        services._3proxy = {
+          # https://nixos.wiki/wiki/3proxy
+          # https://github.com/3proxy/3proxy/wiki/How-To-(incomplete)#BIND
+          enable = true;
+          services = [
             {
-              publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
-              presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
-              allowedIPs = ["0.0.0.0/0"];
-              # endpoint = "194.28.224.146:51820";
-              endpoint = "166.1.160.225:51820";
-              persistentKeepalive = 0;
+              type = "socks";
+              auth = [ "none" ];
+              acl = [
+                {
+                  rule = "allow";
+                  users = [ "test1" ];
+                }
+              ];
             }
           ];
+          usersFile = "/etc/3proxy.passwd";
         };
-      };
 
-      system.stateVersion = "23.05";
+        environment.etc = {
+          "3proxy.passwd".text = ''
+            test1:CL:password1
+            test2:CR:$1$rkpibm5J$Aq1.9VtYAn0JrqZ8M.1ME.
+          '';
+        };
 
-      networking.firewall = {
-        # enable = true;
-        allowedTCPPorts = [53 80 433 1080 51820];
+        networking.wg-quick.interfaces = {
+          wg0 = {
+            address = [ "10.8.0.7/24" ];
+            dns = [ "1.1.1.1" ];
+            privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
+
+            peers = [
+              {
+                publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
+                presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
+                allowedIPs = [ "0.0.0.0/0" ];
+                # endpoint = "194.28.224.146:51820";
+                endpoint = "166.1.160.225:51820";
+                persistentKeepalive = 0;
+              }
+            ];
+          };
+        };
+
+        system.stateVersion = "23.05";
+
+        networking.firewall = {
+          # enable = true;
+          allowedTCPPorts = [ 53 80 433 1080 51820 ];
+        };
+        # environment.etc."resolv.conf".text = "nameserver 8.8.8.8";
       };
-      # environment.etc."resolv.conf".text = "nameserver 8.8.8.8";
-    };
   };
 
   # Open ports in the firewall.
@@ -377,8 +378,12 @@ in {
   # users.groups.uinput.members = [ "${user}" ];
   # users.groups.input.members = [ "${user}" ];
 
-  services.udev.extraRules = ''
-    KERNEL=="uinput", GROUP="${user}", MODE:="0660"
-    KERNEL=="event[0-9]*", GROUP="${user}", MODE:="0660"
-  '';
+  # not work
+  # services.udev.extraRules = ''
+  #   # KERNEL=="event[0-9]*", GROUP="${user}", MODE:="0660"
+  # KERNEL=="uinput", GROUP = "${user}", MODE:="0660"
+  #   SUBSYSTEM=="input", GROUP="input", MODE="0666"
+  # '';
+
+  services.flatpak.enable = true;
 }
