@@ -1,0 +1,9 @@
+[user]
+	email = back2nix@list.ru
+	name = back2nix
+[credential]
+	helper = store
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[url "git@gist.github.com:"]
+	insteadOf = https://gist.github.com/

@@ -1,13 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -157,6 +156,8 @@ in
     # ".screenrc".source = dotfiles/screenrc;
 
     ".tmux.conf".source = ./tmux/tmux.conf;
+    ".gitconfig".source = ./gitconfig;
+    ".cargo/config".source = ./cargoconfig;
 
     # ".tmux.conf" = {
     #   text = builtins.readFile ./tmux/tmux.conf;
@@ -316,10 +317,10 @@ in
       # dt = "diff";
       lg = "log --stat";
     };
-    difftastic = {
-      enable = true;
-    };
-    # extraConfig = {
+    # difftastic.enable = true; # git diff
+    delta.enable = true; # git diff
+
+    # iniContent = {
     #   init.defaultBranch = "main";
     #   url = {
     #     "git@github.com:".pushInsteadOf = "https://github.com/";
