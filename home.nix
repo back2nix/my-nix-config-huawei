@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -261,6 +262,7 @@ in {
       theme = "agnoster-nix";
     };
     shellAliases = {
+      n = "nvim";
       ll = "ls -l";
       ch = "stat --format '%a'";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
