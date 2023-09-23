@@ -138,15 +138,19 @@ in
     tokei
     android-tools
     patchelf
+    gtk3
+    gnome3.adwaita-icon-theme
+    # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
     # gnome.gnome-terminal
   ];
 
-  # nixpkgs.config.allowUnfreePredicate = pkg:
-  #   builtins.elem (lib.getName pkg) [
-  #     "yandex-browser"
-  #   ];
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+      # "yandex-browser"
+      # "microsoft-edge-stable"
+    ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
   # plain files is through 'home.file'.
@@ -247,6 +251,7 @@ in
         setopt pushdminus
 
         export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
+        export GTK_THEME=Adwaita:dark
       '';
     oh-my-zsh = {
       enable = true;
@@ -262,7 +267,7 @@ in
       theme = "agnoster-nix";
     };
     shellAliases = {
-      n = "nvim";
+      # n = "nvim";
       ll = "ls -l";
       ch = "stat --format '%a'";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
