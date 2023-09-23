@@ -1,13 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -191,6 +190,7 @@ in
   # if you don't want to manage your shell through Home Manager.
   home.sessionVariables = {
     EDITOR = "nvim";
+    GTK_THEME = "Adwaita:dark";
   };
 
   #environment.systemPackages = [ pkgs.neovim ];
@@ -251,7 +251,6 @@ in
         setopt pushdminus
 
         export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
-        export GTK_THEME=Adwaita:dark
       '';
     oh-my-zsh = {
       enable = true;
