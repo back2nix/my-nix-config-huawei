@@ -1,14 +1,13 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{ config
-, pkgs
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # Include the results of the hardware scan.
     #<home-manager/nixos>
@@ -19,9 +18,9 @@ in
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
 
-  boot.supportedFilesystems = [ "ntfs" ];
+  boot.supportedFilesystems = ["ntfs"];
 
-  services.xserver.videoDrivers = [ "modesetting" ];
+  services.xserver.videoDrivers = ["modesetting"];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -107,21 +106,22 @@ in
 
   # Enable sound with pipewire.
   sound.enable = true;
-  hardware.pulseaudio.enable = false;
-  # hardware.pulseaudio.extraConfig = "load-module module-combine-sink";
+  # pavucontol for settings loop back "Monitor of Alder Lake PCH-P High Definition Audio Controller HDMI / DisplayPort 3 Output"
+  hardware.pulseaudio.enable = true;
+  # hardware.pulseaudio.extraConfig = "load-module module-loopback"; # module-combine-sink
   security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # If you want to use JACK applications, uncomment this
-    #jack.enable = true;
-
-    # use the example session manager (no others are packaged yet so this is enabled by default,
-    # no need to redefine it in your config for now)
-    #media-session.enable = true;
-  };
+  # services.pipewire = {
+  #   enable = true;
+  #   alsa.enable = true;
+  #   alsa.support32Bit = true;
+  #   pulse.enable = true;
+  #   # If you want to use JACK applications, uncomment this
+  #   #jack.enable = true;
+  #
+  #   # use the example session manager (no others are packaged yet so this is enabled by default,
+  #   # no need to redefine it in your config for now)
+  #   #media-session.enable = true;
+  # };
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -133,7 +133,7 @@ in
   users.users.${user} = {
     isNormalUser = true;
     description = "${user}";
-    extraGroups = [ "networkmanager" "wheel" "docker" "podman" "input" "audio" ]; #
+    extraGroups = ["networkmanager" "wheel" "docker" "podman" "input" "audio"]; #
     # openssh = {
     #   authorizedKeys.keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnLD+dQsKPhCV3eY0lMUP4fDrECI1Boe6PbnSHY+eqRpkA/Nd5okdyXvynWETivWsKdDRlT3gIVgEHqEv8s4lzxyZx9G2fAgQVVpBLk18G9wkH0ARJcJ0+RStXLy9mwYl8Bw8J6kl1+t0FE9Aa9RNtqKzpPCNJ1Uzg2VxeNIdUXawh77kIPk/6sKyT/QTNb5ruHBcd9WYyusUcOSavC9rZpfEIFF6ZhXv2FFklAwn4ggWzYzzSLJlMHzsCGmkKmTdwKijkGFR5JQ3UVY64r3SSYw09RY1TYN/vQFqTDw8RoGZVTeJ6Er/F/4xiVBlzMvxtBxkjJA9HLd8djzSKs8yf amnesia@amnesia"];
     # };
@@ -157,7 +157,7 @@ in
     ];
   };
 
-  environment.shells = with pkgs; [ zsh ];
+  environment.shells = with pkgs; [zsh];
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   # environment.binsh = "${pkgs.dash}/bin/dash";
@@ -176,7 +176,7 @@ in
   systemd.tmpfiles.rules = [
     "d /var/lib/bluetooth 700 root root - -"
   ];
-  systemd.targets."bluetooth".after = [ "systemd-tmpfiles-setup.service" ];
+  systemd.targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -215,7 +215,7 @@ in
 
   networking.nat = {
     enable = true;
-    internalInterfaces = [ "ve-+" ];
+    internalInterfaces = ["ve-+"];
     externalInterface = "wlp0s20f3";
     # Lazy IPv6 connectivity for the container
     enableIPv6 = true;
@@ -238,67 +238,67 @@ in
     localAddress = "192.168.100.3";
     hostAddress6 = "fc00::1";
     localAddress6 = "fc00::2";
-    config =
-      { config
-      , pkgs
-      , ...
-      }: {
-        # environment.systemPackages = with pkgs; [
-        #   dante
-        #  ];
-        services._3proxy = {
-          # https://nixos.wiki/wiki/3proxy
-          # https://github.com/3proxy/3proxy/wiki/How-To-(incomplete)#BIND
-          enable = true;
-          services = [
-            {
-              type = "socks";
-              auth = [ "none" ];
-              acl = [
-                {
-                  rule = "allow";
-                  users = [ "test1" ];
-                }
-              ];
-            }
-          ];
-          usersFile = "/etc/3proxy.passwd";
-        };
-
-        environment.etc = {
-          "3proxy.passwd".text = ''
-            test1:CL:password1
-            test2:CR:$1$rkpibm5J$Aq1.9VtYAn0JrqZ8M.1ME.
-          '';
-        };
-
-        networking.wg-quick.interfaces = {
-          wg0 = {
-            address = [ "10.8.0.7/24" ];
-            dns = [ "1.1.1.1" ];
-            privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
-
-            peers = [
+    config = {
+      config,
+      pkgs,
+      ...
+    }: {
+      # environment.systemPackages = with pkgs; [
+      #   dante
+      #  ];
+      services._3proxy = {
+        # https://nixos.wiki/wiki/3proxy
+        # https://github.com/3proxy/3proxy/wiki/How-To-(incomplete)#BIND
+        enable = true;
+        services = [
+          {
+            type = "socks";
+            auth = ["none"];
+            acl = [
               {
-                publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
-                presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
-                allowedIPs = [ "0.0.0.0/0" ];
-                # endpoint = "194.28.224.146:51820";
-                endpoint = "166.1.160.225:51820";
-                persistentKeepalive = 0;
+                rule = "allow";
+                users = ["test1"];
               }
             ];
-          };
-        };
-
-        system.stateVersion = "23.05";
-
-        networking.firewall = {
-          # enable = true;
-          allowedTCPPorts = [ 53 80 433 1080 51820 ];
-        };
-        # environment.etc."resolv.conf".text = "nameserver 8.8.8.8";
+          }
+        ];
+        usersFile = "/etc/3proxy.passwd";
       };
+
+      environment.etc = {
+        "3proxy.passwd".text = ''
+          test1:CL:password1
+          test2:CR:$1$rkpibm5J$Aq1.9VtYAn0JrqZ8M.1ME.
+        '';
+      };
+
+      networking.wg-quick.interfaces = {
+        wg0 = {
+          address = ["10.8.0.7/24"];
+          dns = ["1.1.1.1"];
+          privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
+
+          peers = [
+            {
+              publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
+              presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
+              allowedIPs = ["0.0.0.0/0"];
+              # endpoint = "194.28.224.146:51820";
+              endpoint = "166.1.160.225:51820";
+              persistentKeepalive = 0;
+            }
+          ];
+        };
+      };
+
+      system.stateVersion = "23.05";
+
+      networking.firewall = {
+        # enable = true;
+        allowedTCPPorts = [53 80 433 1080 51820];
+      };
+      # environment.etc."resolv.conf".text = "nameserver 8.8.8.8";
+    };
   };
 
   # Open ports in the firewall.

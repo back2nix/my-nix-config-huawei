@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -269,6 +270,7 @@ in {
       # n = "nvim";
       ll = "ls -l";
       ch = "stat --format '%a'";
+      cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
       cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";
