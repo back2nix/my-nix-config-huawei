@@ -1,13 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -325,8 +324,8 @@ in
       # dt = "diff";
       lg = "log --stat";
     };
-    # difftastic.enable = true; # git diff
-    delta.enable = true; # git diff
+    difftastic.enable = true; # git diff
+    # delta.enable = true; # git diff
 
     # iniContent = {
     #   init.defaultBranch = "main";
