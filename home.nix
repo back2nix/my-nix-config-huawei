@@ -139,6 +139,11 @@ in {
     patchelf
     gtk3
     gnome3.adwaita-icon-theme
+    devbox
+    # git diff
+    # diff-so-fancy
+    tig
+    tig # diff and commit view
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
@@ -326,6 +331,12 @@ in {
     };
     difftastic.enable = true; # git diff
     # delta.enable = true; # git diff
+
+    # extraConfig = {
+    #   core = {
+    #     pager = "diff-so-fancy | less --tabs=4 -RFX";
+    #   };
+    # };
 
     # iniContent = {
     #   init.defaultBranch = "main";
