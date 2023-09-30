@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -142,7 +143,6 @@ in {
     devbox
     # git diff
     # diff-so-fancy
-    tig
     tig # diff and commit view
     # microsoft-edge
     # my-yandex-browser
