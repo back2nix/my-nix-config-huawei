@@ -1,13 +1,12 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
-  user = "bg";
-in
 {
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
+  user = "bg";
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
