@@ -70,8 +70,8 @@ in {
     #xkbOptions = "grp:win_space_toggle";
     # xkbOptions = "grp:ctrl_shift_toggle";
     displayManager.gdm.enable = true;
+    displayManager.gdm.wayland = false;
     desktopManager.gnome.enable = true;
-    # desktopManager.gdm.wayland = false;
 
     # desktopManager.gnome = {
     #   extraGSettingsOverridePackages = with pkgs; [ gnome.gnome-settings-daemon ];

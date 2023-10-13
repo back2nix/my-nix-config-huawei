@@ -7,3 +7,7 @@
 	insteadOf = https://github.com/
 [url "git@gist.github.com:"]
 	insteadOf = https://gist.github.com/
+
+[oh-my-zsh]
+	hide-status = 1
+	hide-dirty = 1
