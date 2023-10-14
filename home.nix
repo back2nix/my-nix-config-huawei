@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -150,6 +151,7 @@ in {
     asciinema # record the terminal
     drawio # diagram design
     insomnia # rest client with graphql support
+    opera
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
@@ -158,6 +160,7 @@ in {
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
+      "opera"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];
@@ -281,6 +284,19 @@ in {
     shellAliases = {
       # n = "nvim";
       ll = "ls -l";
+      rem2loc = ''
+        function ssh-port() { 
+                  local port=$((RANDOM % 60000 + 1024)); 
+                  echo ssh -L "$port":localhost:$1 desktop -N;
+                  echo http://localhost:"$port" or https://localhost:"$port"; 
+                  ssh -L "$port":localhost:$1 desktop -N; 
+                }; ssh-port'';
+      rem2loc_norand = ''
+        function ssh-port() { 
+                  echo ssh -L "$2":localhost:$1 desktop -N;
+                  echo http://localhost:"$2" or https://localhost:"$2"; 
+                  ssh -L "$2":localhost:$1 desktop -N; 
+                }; ssh-port'';
       ch = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
