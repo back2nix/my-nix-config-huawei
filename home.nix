@@ -1,12 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -94,7 +95,7 @@ in {
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
     # # fonts?
-    (pkgs.nerdfonts.override {fonts = ["FantasqueSansMono"];})
+    (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
@@ -151,6 +152,7 @@ in {
     drawio # diagram design
     insomnia # rest client with graphql support
     opera
+    fd
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
