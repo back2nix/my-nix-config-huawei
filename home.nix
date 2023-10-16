@@ -160,6 +160,7 @@ in {
     bottom
     sqlite
     zellij
+    gh-dash # github pull request
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
