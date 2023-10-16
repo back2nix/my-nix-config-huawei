@@ -155,6 +155,7 @@ in {
     lazygit
     gdu
     bottom
+    sqlite
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
