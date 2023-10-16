@@ -161,6 +161,7 @@ in {
     sqlite
     zellij
     gh-dash # github pull request
+    hub # create pull request
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
