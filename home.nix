@@ -166,6 +166,8 @@ in {
     pcmanfm
     firefox
     google-chrome
+    gnome.eog # image viewer
+    evince # pdf reader
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
@@ -296,7 +298,8 @@ in {
       theme = "agnoster-nix";
     };
     shellAliases = {
-      # n = "nvim";
+      img = "eog"; # image viewer
+      pdf = "evince"; # pdf reader
       ll = "ls -l";
       z = "zellij";
       n = "nvim";
