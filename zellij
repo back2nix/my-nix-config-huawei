@@ -42,13 +42,13 @@ keybinds {
     }
 
     tmux {
-        bind "[" { SwitchToMode "Scroll"; }
         bind "Ctrl c" { SwitchToMode "Normal"; }
-
-        bind "{" "Left" { MovePaneBackwards ; }
-        bind "}" "Right" { MovePaneBackwards; }
-
         bind "Ctrl a" { Write 1; SwitchToMode "Normal"; }
+
+        bind "[" { SwitchToMode "Scroll"; }
+        bind "{" "Left" { MovePaneBackwards; SwitchToMode "Normal"; }
+        bind "}" "Right" { MovePaneBackwards; SwitchToMode "Normal"; }
+
         bind "\"" { NewPane "Down"; SwitchToMode "Normal"; }
         bind "%" { NewPane "Right"; SwitchToMode "Normal"; }
         bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
