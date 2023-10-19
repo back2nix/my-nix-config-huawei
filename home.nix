@@ -162,6 +162,7 @@ in {
     zellij
     gh-dash # github pull request
     hub # create pull request
+    rm-improved
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
