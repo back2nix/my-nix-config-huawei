@@ -153,7 +153,7 @@ in {
     asciinema # record the terminal
     drawio # diagram design
     insomnia # rest client with graphql support
-    opera
+    # opera
     fd
     lazygit
     gdu
@@ -163,6 +163,9 @@ in {
     gh-dash # github pull request
     hub # create pull request
     rm-improved
+    pcmanfm
+    firefox
+    google-chrome
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
@@ -171,7 +174,8 @@ in {
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
-      "opera"
+      # "opera"
+      "google-chrome"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];
@@ -220,8 +224,6 @@ in {
     EDITOR = "nvim";
     GTK_THEME = "Adwaita:dark";
   };
-
-  #environment.systemPackages = [ pkgs.neovim ];
 
   programs.neovim = {
     enable = true;
