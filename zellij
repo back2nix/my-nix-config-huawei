@@ -6,7 +6,6 @@ plugins {
     session-manager { path "session-manager"; }
 }
 
-
 // If you'd like to override the default keybindings completely, be sure to change "keybinds" to "keybinds clear-defaults=true"
 keybinds {
     //unbind "Ctrl b"
@@ -49,7 +48,7 @@ keybinds {
         bind "{" "Left" { MovePaneBackwards ; }
         bind "}" "Right" { MovePaneBackwards; }
 
-        bind "Ctrl a" { Write 2; SwitchToMode "Normal"; }
+        bind "Ctrl a" { Write 1; SwitchToMode "Normal"; }
         bind "\"" { NewPane "Down"; SwitchToMode "Normal"; }
         bind "%" { NewPane "Right"; SwitchToMode "Normal"; }
         bind "z" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
