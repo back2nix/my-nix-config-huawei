@@ -297,6 +297,7 @@ in {
       # n = "nvim";
       ll = "ls -l";
       z = "zellij";
+      n = "nvim";
       rem2loc = ''
         function ssh-port() { 
                   local port=$((RANDOM % 60000 + 1024)); 
