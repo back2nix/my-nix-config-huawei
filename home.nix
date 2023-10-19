@@ -164,7 +164,7 @@ in {
     hub # create pull request
     rm-improved
     pcmanfm
-    firefox
+    # firefox
     google-chrome
     gnome.eog # image viewer
     evince # pdf reader
