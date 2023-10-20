@@ -144,6 +144,13 @@ in {
     # };
     packages = with pkgs; [
       neovim
+      fzf
+      fd
+      lazygit
+      gdu
+      bottom
+      nodejs_18
+
       obfs4
       vim
       ripgrep

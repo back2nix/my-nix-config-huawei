@@ -109,7 +109,6 @@ in {
     gcc
     xclip
     gnumake
-    fzf
     multipass
     telegram-desktop
     keepassxc
@@ -154,10 +153,6 @@ in {
     drawio # diagram design
     insomnia # rest client with graphql support
     # opera
-    fd
-    lazygit
-    gdu
-    bottom
     sqlite
     zellij
     gh-dash # github pull request
