@@ -16,6 +16,7 @@ keybinds {
         // bind "Alt c" { Copy; }
         unbind "Ctrl b"
         unbind "Ctrl p"
+        unbind "Ctrl t"
         bind "Ctrl q" { SwitchToMode "Pane"; }
     }
 
@@ -130,7 +131,7 @@ keybinds {
     }
     tab {
         bind "Ctrl c" { SwitchToMode "Normal"; }
-        bind "Ctrl t" { SwitchToMode "Normal"; }
+        bind "Ctrl y" { SwitchToMode "Normal"; }
         bind "r" { SwitchToMode "RenameTab"; TabNameInput 0; }
         bind "h" "Left" "Up" "k" { GoToPreviousTab; }
         bind "l" "Right" "Down" "j" { GoToNextTab; }
@@ -204,7 +205,7 @@ keybinds {
         bind "Ctrl o" { SwitchToMode "Session"; }
     }
     shared_except "tab" "locked" {
-        bind "Ctrl t" { SwitchToMode "Tab"; }
+        bind "Ctrl y" { SwitchToMode "Tab"; }
     }
     shared_except "move" "locked" {
         bind "Ctrl h" { SwitchToMode "Move"; }
