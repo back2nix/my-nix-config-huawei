@@ -295,6 +295,18 @@ in {
     shellAliases = {
       img = "eog"; # image viewer
       pdf = "evince"; # pdf reader
+      cover = ''
+        local t=$(mktemp)
+          go test $COVERFLAGS -coverprofile=$t $@ \
+          && go tool cover -func=$t \
+          && unlink $t
+      '';
+      coverweb = ''
+        local t=$(mktemp)
+          go test $COVERFLAGS -coverprofile=$t $@ \
+          && go tool cover -html=$t \
+          && unlink $t
+      '';
       ll = "ls -l";
       z = "zellij";
       n = "nvim";
