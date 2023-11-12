@@ -151,6 +151,7 @@ in {
     glow # terminal markdown viewer
     asciinema # record the terminal
     drawio # diagram design
+    xmind # draw
     insomnia # rest client with graphql support
     # opera
     sqlite
@@ -163,6 +164,7 @@ in {
     google-chrome
     gnome.eog # image viewer
     evince # pdf reader
+    zoom-us
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
@@ -173,6 +175,8 @@ in {
     builtins.elem (lib.getName pkg) [
       # "opera"
       "google-chrome"
+      "zoom"
+      "xmind"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];
@@ -323,13 +327,14 @@ in {
                   echo http://localhost:"$2" or https://localhost:"$2"; 
                   ssh -L "$2":localhost:$1 desktop -N; 
                 }; ssh-port'';
-      ch = "stat --format '%a'";
+      sh = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
+      st = "stat --format '%a'";
       fe = ''
         selected_file=$(rg --files ''${1:-.} | fzf)
         if [ -n "$selected_file" ]; then
-          bat -f "$selected_file" | $EDITOR
+         $EDITOR ''${selected_file%%:*}
         fi
       '';
       # Search content and Edit

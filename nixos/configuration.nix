@@ -230,6 +230,10 @@ in {
     enableIPv6 = true;
   };
 
+  networking.extraHosts = ''
+    127.0.0.1 kafka
+  '';
+
   containers.wasabi = {
     # https://nixos.wiki/wiki/NixOS_Containers
     # sudo nixos-container root-login wasabi
@@ -283,20 +287,16 @@ in {
 
       networking.wg-quick.interfaces = {
         wg0 = {
-          # address = ["10.8.0.7/24"];
-          address = ["10.8.0.5/24"];
+          address = ["10.8.0.12/24"];
           dns = ["1.1.1.1"];
           privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
           peers = [
             {
-              # publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
-              publicKey = "JV4k9fkj8YG6c+O1xzKpEGboQ6E97RF91rRQ+6p1ND8=";
+              publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
               presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
               allowedIPs = ["0.0.0.0/0"];
-              # endpoint = "194.28.224.146:51820";
-              # endpoint = "166.1.160.225:51820";
-              endpoint = "194.28.224.146:51820";
+              endpoint = "166.1.160.225:51820";
               persistentKeepalive = 0;
             }
           ];
