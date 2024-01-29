@@ -287,16 +287,16 @@ in {
 
       networking.wg-quick.interfaces = {
         wg0 = {
-          address = ["10.8.0.12/24"];
+          address = ["10.8.0.5/24"];
           dns = ["1.1.1.1"];
           privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
           peers = [
             {
-              publicKey = "HiSr0nPcBXkTzYpySK7B0rJwGM0LLXbehwTncBCPYhI=";
+              publicKey = "7BAuUi2uyh7jpyeezvgsRo5Seh4GF8L5/QF8WqdPB24=";
               presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
-              allowedIPs = ["0.0.0.0/0"];
-              endpoint = "166.1.160.225:51820";
+              allowedIPs = ["0.0.0.0/0" "::/0"];
+              endpoint = "208.115.223.40:51820";
               persistentKeepalive = 0;
             }
           ];
@@ -399,4 +399,18 @@ in {
   # '';
 
   services.flatpak.enable = true;
+  hardware.bluetooth.enable = true; # enables support for Bluetooth
+  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
+  services.blueman.enable = true;
+
+  hardware.bluetooth.settings = {
+    General = {
+      Enable = "Source,Sink,Media,Socket";
+      Experimental = true;
+    };
+  };
+
+  hardware.pulseaudio.extraConfig = "
+    load-module module-switch-on-connect
+  ";
 }

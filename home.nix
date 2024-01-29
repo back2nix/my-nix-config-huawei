@@ -165,10 +165,17 @@ in {
     gnome.eog # image viewer
     evince # pdf reader
     zoom-us
+    gimp
+    rawtherapee
+    curl-impersonate-chrome
     # microsoft-edge
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
     # gnome.gnome-terminal
+  ];
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "curl-impersonate-chrome-0.5.4"
   ];
 
   nixpkgs.config.allowUnfreePredicate = pkg:
@@ -427,9 +434,10 @@ in {
     # };
   };
 
-  # xdg.mimeApps.defaultApplications = {
-  #   "text/palin" = ["nvim"];
-  #   "video/png" = ["mvp.destop"];
-  #   "video/*" = ["mvp.destop"];
-  # };
+  xdg.mimeApps.defaultApplications = {
+    "text/palin" = ["nvim"];
+    "video/png" = ["mvp.destop"];
+    "video/*" = ["mvp.destop"];
+    "application/pdf" = ["evince"];
+  };
 }
