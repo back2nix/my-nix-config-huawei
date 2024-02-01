@@ -13,24 +13,22 @@
     # nixpkgs-go_1_21.url = "github:tie/nixpkgs/go121-distpack";
   };
 
-  outputs =
-    { nixpkgs
-    , home-manager
-    , # , nix-colors
-      ...
-    } @ inputs:
-    let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
-    in
-    {
-      homeConfigurations."bg" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = {
-          # inherit nix-colors;
-          inherit inputs;
-        };
-        modules = [ ./home.nix ];
+  outputs = {
+    nixpkgs,
+    home-manager,
+    # , nix-colors
+    ...
+  } @ inputs: let
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+  in {
+    homeConfigurations."bg" = home-manager.lib.homeManagerConfiguration {
+      inherit pkgs;
+      extraSpecialArgs = {
+        # inherit nix-colors;
+        inherit inputs;
       };
+      modules = [./home.nix];
     };
+  };
 }
