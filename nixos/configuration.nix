@@ -13,6 +13,7 @@ in {
     #<home-manager/nixos>
     ./hardware-configuration.nix
     ./cachix.nix
+    ./module/wordpress.nix
   ];
 
   # Bootloader.
@@ -184,6 +185,11 @@ in {
   systemd.targets.hybrid-sleep.enable = false;
   systemd.tmpfiles.rules = [
     "d /var/lib/bluetooth 700 root root - -"
+    # "d /var/lib/wordpress/localhost 0750 wordpress wwwrun - -"
+    # "d /var/lib/wordpress/localhost/wp-content 0750 wordpress wwwrun - -"
+    # "d /var/lib/wordpress/localhost/wp-content/plugins 0750 wordpress wwwrun - -"
+    # "d /var/lib/wordpress/localhost/wp-content/themes 0750 wordpress wwwrun - -"
+    # "d /var/lib/wordpress/localhost/wp-content/upgrade 0750 wordpress wwwrun - -"
   ];
   systemd.targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
 
@@ -410,7 +416,24 @@ in {
     };
   };
 
-  hardware.pulseaudio.extraConfig = "
-    load-module module-switch-on-connect
-  ";
+  # hardware.pulseaudio.configFile = pkgs.writeText "default.pa" ''
+  #       load-module module-bluetooth-policy
+  #       load-module module-bluetooth-discover
+  #   ## module fails to load with
+  #   ##   module-bluez5-device.c: Failed to get device path from module arguments
+  #   ##   module.c: Failed to load module "module-bluez5-device" (argument: ""): initialization failed.
+  #   # load-module module-bluez5-device
+  #   # load-module module-bluez5-discover
+  # '';
+  #
+  # hardware.pulseaudio.extraConfig = "
+  #   load-module module-switch-on-connect
+  # ";
+
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16 * 1024;
+    }
+  ];
 }

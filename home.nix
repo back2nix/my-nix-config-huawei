@@ -167,6 +167,12 @@ in {
     zoom-us
     gimp
     rawtherapee
+    ffmpeg_5-full
+    # QT_QPA_PLATFORM=xcb genymotion
+    genymotion
+    qemu
+    # wordpress6_4
+    # virtualbox
     # curl-impersonate-chrome
     # microsoft-edge
     # my-yandex-browser
@@ -184,6 +190,7 @@ in {
       "google-chrome"
       "zoom"
       "xmind"
+      "genymotion"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];
