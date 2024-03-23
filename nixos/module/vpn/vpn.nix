@@ -6,7 +6,7 @@ in {
     # sudo nixos-container root-login wasabi
     bindMounts = {
       "/home/${user}/.ssh/wireguard-keys" = {
-        hostPath = "/etc/nixos/module/vpn";
+        hostPath = "/home/${user}/.ssh/wireguard-keys";
         isReadOnly = true;
       };
     };
@@ -62,7 +62,7 @@ in {
             {
               publicKey = "7BAuUi2uyh7jpyeezvgsRo5Seh4GF8L5/QF8WqdPB24=";
               presharedKeyFile = "/etc/nixos/module/vpn/presharedKeyFile";
-              allowedIPs = [ "0.0.0.0/0" "::/0" ];
+              allowedIPs = ["0.0.0.0/0" "::/0"];
               endpoint = "208.115.223.40:51820";
               persistentKeepalive = 0;
             }
