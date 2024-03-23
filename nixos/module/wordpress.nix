@@ -32,14 +32,20 @@ in {
     # cd /var/lib/wordpress/localhost
     # ln -s wp-content/uploads uploads
     extraConfig = ''
+      $protocol = 'http://';
       define('FS_METHOD', 'direct');
+
       define('WP_CONTENT_DIR', '/var/lib/wordpress/localhost/wp-content');
-      define('WP_CONTENT_URL', 'http://' . $_SERVER['SERVER_NAME'] . '/wp-content');
       define('WP_THEME_DIR', '/var/lib/wordpress/localhost/wp-content/themes');
       define('WP_PLUGIN_DIR', '/var/lib/wordpress/localhost/wp-content/plugins');
-      define('WP_PLUGIN_URL', 'http://' . $_SERVER['SERVER_NAME'] . '/wp-content/plugins');
+
+
       ini_set( 'error_log', '/var/lib/wordpress/localhost/debug.log' );
     '';
+
+    # define('WP_CONTENT_URL', $protocol . $_SERVER['SERVER_NAME'] . '/wp-content');
+    # define('WP_THEME_URL', $protocol . $_SERVER['SERVER_NAME'] . '/wp-content/themes');
+    # define('WP_PLUGIN_URL', $protocol . $_SERVER['SERVER_NAME'] . '/wp-content/plugins');
   };
 
   systemd.tmpfiles.rules = [
