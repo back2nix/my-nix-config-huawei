@@ -56,12 +56,12 @@ in {
         wg0 = {
           address = ["setAddress"];
           dns = ["setDNS"];
-          privateKeyFile = "/etc/nixos/module/vpn/private";
+          privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
           peers = [
             {
               publicKey = "setPublicKey";
-              presharedKeyFile = "/etc/nixos/module/vpn/presharedKeyFile";
+              presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
               allowedIPs = [ "0.0.0.0/0" "::/0" ];
               endpoint = "setEndpoint";
               persistentKeepalive = setPersistentKeepalive;

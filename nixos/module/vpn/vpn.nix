@@ -4,9 +4,10 @@ in {
   containers.wasabi = {
     # https://nixos.wiki/wiki/NixOS_Containers
     # sudo nixos-container root-login wasabi
+    # sudo nixos-container stop wasabi
     bindMounts = {
       "/home/${user}/.ssh/wireguard-keys" = {
-        hostPath = "/home/${user}/.ssh/wireguard-keys";
+        hostPath = "/etc/nixos/module/vpn";
         isReadOnly = true;
       };
     };
@@ -56,12 +57,12 @@ in {
         wg0 = {
           address = ["10.8.0.8/24"];
           dns = ["1.1.1.1"];
-          privateKeyFile = "/etc/nixos/module/vpn/private";
+          privateKeyFile = "/home/${user}/.ssh/wireguard-keys/private";
 
           peers = [
             {
               publicKey = "7BAuUi2uyh7jpyeezvgsRo5Seh4GF8L5/QF8WqdPB24=";
-              presharedKeyFile = "/etc/nixos/module/vpn/presharedKeyFile";
+              presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
               allowedIPs = ["0.0.0.0/0" "::/0"];
               endpoint = "208.115.223.40:51820";
               persistentKeepalive = 0;
