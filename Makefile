@@ -2,7 +2,10 @@ REPO_URL := https://github.com/back2nix/my-astronvim-config
 REPO_DIR := my-astronvim-config
 
 sync:
-	rsync -avP /etc/nixos/* nixos
+	rsync -avP \
+		--exclude='private' \
+		--exclude='presharedKeyFile' \
+		/etc/nixos/* nixos
 	rsync -avP ~/.config/home-manager/* .
 	cd $(REPO_DIR) && make sync
 

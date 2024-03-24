@@ -80,7 +80,7 @@ in {
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
-  home.stateVersion = "23.11"; # Please read the comment before changing.
+  home.stateVersion = "24.05"; # Please read the comment before changing.
 
   programs.direnv.enable = true;
 
@@ -116,7 +116,7 @@ in {
     proxychains
     # arion
     deadnix
-    rnix-lsp
+    # rnix-lsp
     unzip
     cargo
     luarocks
@@ -171,6 +171,8 @@ in {
     # QT_QPA_PLATFORM=xcb genymotion
     genymotion
     qemu
+    firefox
+    anydesk
     # wordpress6_4
     # virtualbox
     # curl-impersonate-chrome
@@ -191,6 +193,7 @@ in {
       "zoom"
       "xmind"
       "genymotion"
+      "anydesk"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];
