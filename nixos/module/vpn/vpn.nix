@@ -4,6 +4,7 @@ in {
   containers.wasabi = {
     # https://nixos.wiki/wiki/NixOS_Containers
     # sudo nixos-container root-login wasabi
+    # journalctl -xe -u wg-quick-wg0.service
     # sudo nixos-container stop wasabi
     bindMounts = {
       "/home/${user}/.ssh/wireguard-keys" = {

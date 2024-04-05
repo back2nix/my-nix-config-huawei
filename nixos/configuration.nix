@@ -165,8 +165,31 @@ in {
       direnv
       kitty
       gnome.gnome-shell
+      shadowsocks-libev
     ];
   };
+
+  # sudo ss-local -v -c ./shadowsocks.json
+  # sudo ss-local -v -c /etc/shadowsocks-libev/config.json
+  # services.shadowsocks = {
+  #   enable = true;
+  # mode = "tcp_and_udp";
+  # port = 8388;
+  # passwordFile = "/home/bg/Documents/code/store/ssh/shadowsocks";
+  # localAddress = 1080;
+  # encryptionMethod = "chacha20-ietf-poly1305";
+  # timeout = 60;
+  # pluginOpts = "server;host=80.209.243.215";
+  # extraConfig = ''{
+  #     "server":["::1", "80.209.243.215"],
+  #     "mode":"tcp_and_udp",
+  #     "server_port":8388,
+  #     "local_port":1080,
+  #     "password":"",
+  #     "timeout":60,
+  #     "method":"chacha20-ietf-poly1305"
+  #   }'';
+  # };
 
   environment.shells = with pkgs; [zsh];
   programs.zsh.enable = true;
