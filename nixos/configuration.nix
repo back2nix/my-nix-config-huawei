@@ -14,6 +14,7 @@ in {
     ./hardware-configuration.nix
     ./cachix.nix
     # ./module/wordpress.nix
+    "/etc/nixos/module/shadowsocks.nix"
     "/etc/nixos/module/vpn/vpn.nix"
   ];
 
