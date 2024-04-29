@@ -1,13 +1,14 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{
-  config,
-  pkgs,
-  ...
-}: let
+{ config
+, pkgs
+, ...
+}:
+let
   user = "bg";
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     #<home-manager/nixos>
@@ -21,9 +22,9 @@ in {
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
 
-  boot.supportedFilesystems = ["ntfs"];
+  boot.supportedFilesystems = [ "ntfs" ];
 
-  services.xserver.videoDrivers = ["modesetting"];
+  services.xserver.videoDrivers = [ "modesetting" ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -141,7 +142,7 @@ in {
   users.users.${user} = {
     isNormalUser = true;
     description = "${user}";
-    extraGroups = ["networkmanager" "wheel" "docker" "podman" "input" "audio"]; #
+    extraGroups = [ "networkmanager" "wheel" "docker" "podman" "input" "audio" ]; #
     # openssh = {
     #   authorizedKeys.keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnLD+dQsKPhCV3eY0lMUP4fDrECI1Boe6PbnSHY+eqRpkA/Nd5okdyXvynWETivWsKdDRlT3gIVgEHqEv8s4lzxyZx9G2fAgQVVpBLk18G9wkH0ARJcJ0+RStXLy9mwYl8Bw8J6kl1+t0FE9Aa9RNtqKzpPCNJ1Uzg2VxeNIdUXawh77kIPk/6sKyT/QTNb5ruHBcd9WYyusUcOSavC9rZpfEIFF6ZhXv2FFklAwn4ggWzYzzSLJlMHzsCGmkKmTdwKijkGFR5JQ3UVY64r3SSYw09RY1TYN/vQFqTDw8RoGZVTeJ6Er/F/4xiVBlzMvxtBxkjJA9HLd8djzSKs8yf amnesia@amnesia"];
     # };
@@ -192,7 +193,7 @@ in {
   #   }'';
   # };
 
-  environment.shells = with pkgs; [zsh];
+  environment.shells = with pkgs; [ zsh ];
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   # environment.binsh = "${pkgs.dash}/bin/dash";
@@ -216,7 +217,7 @@ in {
     # "d /var/lib/wordpress/localhost/wp-content/themes 0750 wordpress wwwrun - -"
     # "d /var/lib/wordpress/localhost/wp-content/upgrade 0750 wordpress wwwrun - -"
   ];
-  systemd.targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
+  systemd.targets."bluetooth".after = [ "systemd-tmpfiles-setup.service" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -255,7 +256,7 @@ in {
 
   networking.nat = {
     enable = true;
-    internalInterfaces = ["ve-+"];
+    internalInterfaces = [ "ve-+" ];
     externalInterface = "wlp0s20f3";
     # Lazy IPv6 connectivity for the container
     enableIPv6 = true;
@@ -312,6 +313,8 @@ in {
     localnet 127.0.0.0/255.0.0.0
 
     [ProxyList]
+    # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
+    # socks5 192.168.0.5 1081
     socks5 127.0.0.1 1080
     # socks5 192.168.100.3 1080
     # socks5 127.0.0.1 8118

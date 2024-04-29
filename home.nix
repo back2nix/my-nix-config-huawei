@@ -1,15 +1,16 @@
-{
-  config,
-  pkgs,
-  inputs,
-  lib,
-  ...
-}: let
+{ config
+, pkgs
+, inputs
+, lib
+, ...
+}:
+let
   user = "bg";
   # zellij = pkgs.callPackage ./zellij.nix {
   #   inherit (pkgs.darwin.apple_sdk.frameworks) DiskArbitration Foundation;
   # };
-in {
+in
+{
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -97,7 +98,7 @@ in {
     # # overrides. You can do that directly here, just don't forget the
     # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
     # # fonts?
-    (pkgs.nerdfonts.override {fonts = ["FantasqueSansMono"];})
+    (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
@@ -173,6 +174,7 @@ in {
     qemu
     firefox
     anydesk
+    audacity
     # wordpress6_4
     # virtualbox
     # curl-impersonate-chrome
@@ -416,7 +418,7 @@ in {
       # dt = "diff";
       lg = "log --stat";
     };
-    difftastic.enable = true; # git diff
+    # difftastic.enable = true; # git diff
     # delta.enable = true; # git diff
 
     # extraConfig = {
@@ -445,9 +447,9 @@ in {
   };
 
   xdg.mimeApps.defaultApplications = {
-    "text/palin" = ["nvim"];
-    "video/png" = ["mvp.destop"];
-    "video/*" = ["mvp.destop"];
-    "application/pdf" = ["evince"];
+    "text/palin" = [ "nvim" ];
+    "video/png" = [ "mvp.destop" ];
+    "video/*" = [ "mvp.destop" ];
+    "application/pdf" = [ "evince" ];
   };
 }
