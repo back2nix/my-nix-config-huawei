@@ -14,6 +14,7 @@ in
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
+    # ./mime.nix
   ];
 
   xdg.configFile = {
@@ -451,5 +452,9 @@ in
     "video/png" = [ "mvp.destop" ];
     "video/*" = [ "mvp.destop" ];
     "application/pdf" = [ "evince" ];
+    "application/x-bzpdf" = [ "evince" ];
+    "application/x-ext-pdf" = [ "evince" ];
+    "application/x-gzpdf" = [ "evince" ];
+    "application/x-xzpdf" = [ "evince" ];
   };
 }
