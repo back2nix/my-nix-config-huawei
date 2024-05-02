@@ -15,6 +15,13 @@ in
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
     # ./mime.nix
+    # ./overlays.nix
+  ];
+
+  nixpkgs.overlays = [
+    (self: super: {
+      yandex-browser = self.callPackage ./overlays/yandex-browser.nix { };
+    })
   ];
 
   xdg.configFile = {
@@ -176,6 +183,7 @@ in
     firefox
     anydesk
     audacity
+    yandex-browser
     # wordpress6_4
     # virtualbox
     # curl-impersonate-chrome
@@ -189,6 +197,8 @@ in
     "curl-impersonate-chrome-0.5.4"
   ];
 
+  nixpkgs.config.allowUnfree = true;
+
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       # "opera"
@@ -197,6 +207,7 @@ in
       "xmind"
       "genymotion"
       "anydesk"
+      # "yandex-browser-stable-24.1.1.940-1"
       # "yandex-browser"
       # "microsoft-edge-stable"
     ];

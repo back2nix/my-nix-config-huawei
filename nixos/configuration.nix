@@ -386,4 +386,9 @@ in
       size = 16 * 1024;
     }
   ];
+
+  # https://github.com/gvolpe/nix-config/blob/0ed3d66f228a6d54f1e9f6e1ef4bc8daec30c0af/system/configuration.nix#L161
+  fonts.packages = with pkgs; [
+    times-newer-roman
+  ];
 }
