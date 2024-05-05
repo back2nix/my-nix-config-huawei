@@ -184,6 +184,7 @@ in
     anydesk
     audacity
     yandex-browser
+    distrobox
     # wordpress6_4
     # virtualbox
     # curl-impersonate-chrome
@@ -469,4 +470,8 @@ in
     "application/x-gzpdf" = [ "evince" ];
     "application/x-xzpdf" = [ "evince" ];
   };
+
+  programs.chromium.extensions = [
+    "padekgcemlokbadohgkifijomclgjgif" # https://chromewebstore.google.com/detail/proxy-switchyomega/padekgcemlokbadohgkifijomclgjgif
+  ];
 }

@@ -312,4 +312,10 @@ in
   fonts.packages = with pkgs; [
     times-newer-roman
   ];
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 }
