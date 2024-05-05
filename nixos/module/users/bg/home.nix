@@ -16,6 +16,7 @@ in
     # inputs.xremap-flake.homeManagerModules.default
     # ./mime.nix
     # ./overlays.nix
+    ./dconf.nix
   ];
 
   nixpkgs.overlays = [
@@ -278,34 +279,6 @@ in
     enableCompletion = true;
     initExtra =
       ''
-        # >>> mamba initialize >>>
-        # !! Contents within this block are managed by 'mamba init' !!
-        # export MAMBA_EXE="/nix/store/9dkj1d9xa3dn3yf8dx1h61z0cp3j6832-micromamba-1.2.0/bin/micromamba";
-        # export MAMBA_ROOT_PREFIX="/home/bg/micromamba";
-        # __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-        # if [ $? -eq 0 ]; then
-        #     eval "$__mamba_setup"
-        # else
-        #     if [ -f "/home/bg/micromamba/etc/profile.d/micromamba.sh" ]; then
-        #         . "/home/bg/micromamba/etc/profile.d/micromamba.sh"
-        #     else
-        #         export  PATH="/home/bg/micromamba/bin:$PATH"  # extra space after export prevents interference from conda init
-        #     fi
-        # fi
-        # unset __mamba_setup
-        # <<< mamba initialize <<<
-
-        DIRSTACKFILE="$HOME/.dirs"
-        if [[ -f $DIRSTACKFILE ]] && [[ $#dirstack -eq 0 ]]; then
-            dirstack=( $''
-      + ''        {(f)"$(< $DIRSTACKFILE)"} )
-            [[ -d $dirstack[1] ]] && cd $dirstack[1]
-        fi
-        chpwd() {
-            print -l $PWD $''
-      + ''        {(u)dirstack} >$DIRSTACKFILE
-        }
-
         DIRSTACKSIZE=90
         setopt autopushd pushdsilent pushdtohome
         ## Remove duplicate entries

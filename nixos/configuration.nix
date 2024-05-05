@@ -24,7 +24,6 @@ in
 
   boot.supportedFilesystems = [ "ntfs" ];
 
-  services.xserver.videoDrivers = [ "modesetting" ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -59,46 +58,57 @@ in
     GTK_THEME = "Adwaita:dark";
   };
 
+  programs.gnupg.agent.pinentryFlavor = "gnome3";
+  programs.dconf.enable = true;
+
+
   # Enable the X11 windowing system.
-  services.xserver = {
-    # gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Alt>Shift_L']"
-    # gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-    # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
-    # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
-    # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kitty'
-    # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
-    enable = true;
-    layout = "us,ru";
-    # xkbVariant = "workman,";
-    #xkbOptions = "grp:win_space_toggle";
-    # xkbOptions = "grp:ctrl_shift_toggle";
-    displayManager.gdm.enable = true;
-    displayManager.gdm.wayland = false;
-    desktopManager.gnome.enable = true;
+  services = {
+    dbus.packages = [ pkgs.dconf ];
+    udev.packages = [ pkgs.gnome3.gnome-settings-daemon ];
+    xserver = {
+      # gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Alt>Shift_L']"
+      # gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+      # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
+      # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
+      # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kitty'
+      # gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
+      enable = true;
+      videoDrivers = [ "modesetting" ];
+      layout = "us,ru";
+      # xkbVariant = "workman,";
+      #xkbOptions = "grp:win_space_toggle";
+      # xkbOptions = "grp:ctrl_shift_toggle";
+      displayManager.gdm.enable = true;
+      displayManager.gdm.wayland = false;
+      # desktopManager.gnome.enable = true;
+      desktopManager.gnome.enable = true;
+      libinput.enable = true;
 
-    # desktopManager.gnome = {
-    #   extraGSettingsOverridePackages = with pkgs; [ gnome.gnome-settings-daemon ];
-    #   extraGSettingsOverrides = ''
-    #     # switch language
-    #     [org.gnome.desktop.wm.keybindings]
-    #     switch-input-source="['<Alt>Shift_L']"
-    #
-    #     # Favorite apps in gnome-shell
-    #     # [org.gnome.settings-daemon.plugins.media-keys]
-    #     # custom-keybindings = "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']";
-    #       [org.gnome.settings-daemon.plugins.media-keys.custom-keybindings.custom0]
-    #       binding='<Primary><Alt>T'
-    #       command='kgx'
-    #       name='Open terminal'
-    #   '';
-    # };
+      # desktopManager.gnome = {
+      #   extraGSettingsOverridePackages = with pkgs; [ gnome.gnome-settings-daemon ];
+      #   extraGSettingsOverrides = ''
+      #     # switch language
+      #     [org.gnome.desktop.wm.keybindings]
+      #     switch-input-source="['<Alt>Shift_L']"
+      #
+      #     # Favorite apps in gnome-shell
+      #     # [org.gnome.settings-daemon.plugins.media-keys]
+      #     # custom-keybindings = "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']";
+      #       [org.gnome.settings-daemon.plugins.media-keys.custom-keybindings.custom0]
+      #       binding='<Primary><Alt>T'
+      #       command='kgx'
+      #       name='Open terminal'
+      #   '';
+      # };
 
-    # Настройка пользовательских клавишных комбинаций
-    # displayManager.sessionCommands = ''
-    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
-    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
-    #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
-    # '';
+      # Настройка пользовательских клавишных комбинаций
+      # displayManager.sessionCommands = ''
+      #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Open Terminal'
+      #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'kgx'
+      #   gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Alt>T'
+      # '';
+    };
   };
 
   # Enable the GNOME Desktop Environment.
@@ -129,7 +139,6 @@ in
   # };
 
   # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
 
   # nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
