@@ -6,7 +6,6 @@
 , ...
 }:
 let
-  user = "bg";
 in
 {
   imports = [
@@ -29,10 +28,6 @@ in
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -138,40 +133,6 @@ in
 
   # nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # users.extraGroups.docker.members = ["username-with-access-to-socket"];
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.${user} = {
-    isNormalUser = true;
-    description = "${user}";
-    extraGroups = [ "networkmanager" "wheel" "docker" "podman" "input" "audio" ]; #
-    # openssh = {
-    #   authorizedKeys.keys = ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCnLD+dQsKPhCV3eY0lMUP4fDrECI1Boe6PbnSHY+eqRpkA/Nd5okdyXvynWETivWsKdDRlT3gIVgEHqEv8s4lzxyZx9G2fAgQVVpBLk18G9wkH0ARJcJ0+RStXLy9mwYl8Bw8J6kl1+t0FE9Aa9RNtqKzpPCNJ1Uzg2VxeNIdUXawh77kIPk/6sKyT/QTNb5ruHBcd9WYyusUcOSavC9rZpfEIFF6ZhXv2FFklAwn4ggWzYzzSLJlMHzsCGmkKmTdwKijkGFR5JQ3UVY64r3SSYw09RY1TYN/vQFqTDw8RoGZVTeJ6Er/F/4xiVBlzMvxtBxkjJA9HLd8djzSKs8yf amnesia@amnesia"];
-    # };
-    packages = with pkgs; [
-      neovim
-      fzf
-      fd
-      lazygit
-      gdu
-      bottom
-      nodejs_18
-
-      obfs4
-      vim
-      ripgrep
-      git
-      wget
-      htop
-      curl
-      tmux
-      wget
-      direnv
-      kitty
-      gnome.gnome-shell
-      shadowsocks-libev
-    ];
-  };
-
   # sudo ss-local -v -c ./shadowsocks.json
   # sudo ss-local -v -c /etc/shadowsocks-libev/config.json
   # services.shadowsocks = {
@@ -198,10 +159,6 @@ in
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   # environment.binsh = "${pkgs.dash}/bin/dash";
-
-  # Enable automatic login for the user.
-  services.xserver.displayManager.autoLogin.enable = true;
-  services.xserver.displayManager.autoLogin.user = "${user}";
 
   # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
   systemd.services."getty@tty1".enable = false;
@@ -240,13 +197,6 @@ in
     # kitty
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
 
   # List services that you want to enable:
 
@@ -322,38 +272,8 @@ in
     # socks5 127.0.0.1 9063
   '';
 
-  services.privoxy = {
-    enable = true;
-    enableTor = true;
-  };
-
-  services.tor = {
-    enable = true;
-    client.enable = true;
-    client.dns.enable = true;
-    settings = {
-      # ExitNodes = "{ua}, {nl}, {gb}";
-      # ExcludeNodes = "{ru},{by},{kz}";
-      UseBridges = true;
-      ClientTransportPlugin = "obfs4 exec ${pkgs.obfs4}/bin/obfs4proxy";
-      # Bridge = builtins.readFile /home/${user}/.ssh/nix/tor.obfs4.1;
-      Bridge = builtins.readFile /home/${user}/.ssh/nix/tor.obfs4.2;
-    };
-  };
 
   # programs.hyprland.enable = true;
-
-  # xremap
-  # hardware.uinput.enable = true;
-  # users.groups.uinput.members = [ "${user}" ];
-  # users.groups.input.members = [ "${user}" ];
-
-  # not work
-  # services.udev.extraRules = ''
-  #   # KERNEL=="event[0-9]*", GROUP="${user}", MODE:="0660"
-  # KERNEL=="uinput", GROUP = "${user}", MODE:="0660"
-  #   SUBSYSTEM=="input", GROUP="input", MODE="0666"
-  # '';
 
   services.flatpak.enable = true;
   hardware.bluetooth.enable = true; # enables support for Bluetooth
