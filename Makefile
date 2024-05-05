@@ -1,21 +1,21 @@
 REPO_URL := https://github.com/back2nix/my-astronvim-config
 REPO_DIR := my-astronvim-config
 
-home:
-	home-manager switch
 
 nix:
 	sudo nixos-rebuild switch
 
-flake:
-	home-manager switch --flake .
+# home:
+# 	home-manager switch
+#
+# flake:
+# 	home-manager switch --flake .
 
 sync:
 	rsync -avP \
 		--exclude='private' \
 		--exclude='presharedKeyFile' \
 		/etc/nixos/* nixos
-	rsync -avP ~/.config/home-manager/* .
 	cd $(REPO_DIR) && make sync
 
 push:

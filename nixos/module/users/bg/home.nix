@@ -313,6 +313,7 @@ in
         setopt pushdminus
 
         export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
       '';
     oh-my-zsh = {
       enable = true;
@@ -324,7 +325,7 @@ in
         "sudo"
         "systemd"
       ];
-      custom = "$HOME/.config/home-manager";
+      custom = "/etc/nixos/module/users/bg";
       theme = "agnoster-nix";
     };
     shellAliases = {

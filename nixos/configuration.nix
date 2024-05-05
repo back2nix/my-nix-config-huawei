@@ -17,6 +17,7 @@ in
     # ./module/wordpress.nix
     "/etc/nixos/module/shadowsocks.nix"
     "/etc/nixos/module/vpn/vpn.nix"
+    ./module/users/users.nix
   ];
 
   # Bootloader.
