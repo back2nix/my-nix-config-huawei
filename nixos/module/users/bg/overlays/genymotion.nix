@@ -1,30 +1,11 @@
-{ gdk-pixbuf
-, xdg-utils
-, cairo
-, fetchurl
-, fontconfig
-, freetype
-, glib
-, gtk3
-, lib
-, libGL
-, libpulseaudio
-, libXext
-, libXi
-, libxkbcommon
-, libXmu
-, libXrender
-, makeWrapper
-, pixman
-, stdenv
-, systemd
-, which
-, xorg
-, zlib
-,
-}:
+{ stdenv, lib, fetchurl, makeWrapper, which, zlib, libGL, glib, xorg, libxkbcommon
+, xdg-utils, libXrender, fontconfig, freetype, systemd, libpulseaudio
+, cairo, gdk-pixbuf, gtk3, pixman
+# For glewinfo
+, libXmu, libXi, libXext }:
+
 let
-  libPath = lib.makeLibraryPath [
+  packages = [
     stdenv.cc.cc
     zlib
     glib
@@ -38,12 +19,13 @@ let
     fontconfig
     freetype
     systemd
-    pixman
     libpulseaudio
-    gtk3
     cairo
     gdk-pixbuf
+    gtk3
+    pixman
   ];
+  libPath = lib.makeLibraryPath packages;
 in
 stdenv.mkDerivation rec {
   pname = "genymotion";
@@ -54,8 +36,7 @@ stdenv.mkDerivation rec {
     sha256 = "sha256-CS1A9udt47bhgnYJqqkCG3z4XaPVHmz417VTsY2ccOA=";
   };
 
-  nativeBuildInputs = [ makeWrapper ];
-  buildInputs = [ which xdg-utils ];
+  nativeBuildInputs = [ makeWrapper which xdg-utils ];
 
   unpackPhase = ''
     mkdir -p phony-home $out/share/applications
@@ -97,7 +78,8 @@ stdenv.mkDerivation rec {
 
     patchExecutable genymotion
     patchExecutable player
-    patchInterpreter qemu/x86_64/bin/{qemu-system-x86_64,qemu-img}
+    patchInterpreter qemu/x86_64/bin/qemu-img
+    patchInterpreter qemu/x86_64/bin/qemu-system-x86_64
 
     patchTool adb
     patchTool aapt
@@ -105,4 +87,18 @@ stdenv.mkDerivation rec {
 
     rm $out/libexec/genymotion/libxkbcommon*
   '';
+
+  meta = with lib; {
+    description = "Fast and easy Android emulation";
+    longDescription = ''
+      Genymotion is a relatively fast Android emulator which comes with
+      pre-configured Android (x86 with OpenGL hardware acceleration) images,
+      suitable for application testing.
+     '';
+    homepage = "https://www.genymotion.com/";
+    sourceProvenance = with sourceTypes; [ binaryNativeCode ];
+    license = licenses.unfree;
+    platforms = ["x86_64-linux"];
+    maintainers = [ maintainers.puffnfresh ];
+  };
 }
