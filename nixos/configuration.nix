@@ -117,7 +117,6 @@ in
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
-  services.lorri.enable = true; # replace default nix-shell
 
   # Enable sound with pipewire.
   sound.enable = true;
@@ -197,6 +196,7 @@ in
     # arion
     # docker-client
     lm_sensors
+    virtualbox
 
     # hyprland
     # waybar
@@ -327,4 +327,17 @@ in
     dates = "weekly";
     options = "--delete-older-than 30d";
   };
+
+  programs.nix-ld.enable = true;
+  nix.settings.trusted-users = [ "root" "bg" ];
+
+  # boot.tmpOnTmpfs = true;
+  # boot.tmpOnTmpfsSize = "20%";
+
+  services.logind.extraConfig = ''
+    RuntimeDirectorySize=16G
+  '';
+  # services.logind.extraConfig = "RuntimeDirectorySize=50%";
+
+  virtualisation.virtualbox.host.enable = true;
 }

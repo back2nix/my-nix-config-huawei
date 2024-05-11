@@ -3,7 +3,7 @@
 
 let
   inherit (import ../../variables.nix) mainUser;
-  home-manager = import (builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/master.tar.gz") { };
+  home-manager = import (builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-23.11.tar.gz") { };
 in
 
 {

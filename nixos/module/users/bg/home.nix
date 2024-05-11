@@ -15,13 +15,14 @@ in
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
     # ./mime.nix
-    # ./overlays.nix
+    #./overlays.nix
     ./dconf.nix
   ];
 
   nixpkgs.overlays = [
     (self: super: {
       yandex-browser = self.callPackage ./overlays/yandex-browser.nix { };
+      genymotion = self.callPackage ./overlays/genymotion.nix { };
     })
   ];
 
@@ -29,6 +30,9 @@ in
     "kitty/kitty.conf".source = ./kitty.conf;
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
   };
+
+  # services.lorri.enable = true;
+
 
   # services.xremap = {
   #   config = {
@@ -90,7 +94,7 @@ in
   # You should not change this value, even if you update Home Manager. If you do
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
-  home.stateVersion = "24.05"; # Please read the comment before changing.
+  home.stateVersion = "23.11"; # Please read the comment before changing.
 
   programs.direnv.enable = true;
 
@@ -165,7 +169,7 @@ in
     insomnia # rest client with graphql support
     # opera
     sqlite
-    zellij
+    # zellij
     gh-dash # github pull request
     hub # create pull request
     rm-improved
@@ -186,6 +190,7 @@ in
     audacity
     yandex-browser
     distrobox
+    zoxide
     # wordpress6_4
     # virtualbox
     # curl-impersonate-chrome
@@ -227,7 +232,7 @@ in
     ".cargo/config".source = ./cargoconfig;
     ".gdbinit".source = ./gdbinit;
     ".gdbinit.d/init".source = ./gdbinit.d_init;
-    ".config/zellij/config.kdl".source = ./zellij;
+    # ".config/zellij/config.kdl".source = ./zellij;
 
     # ".tmux.conf" = {
     #   text = builtins.readFile ./tmux/tmux.conf;
@@ -288,6 +293,8 @@ in
 
         export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
         . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
+        eval "$(zoxide init zsh)" #
       '';
     oh-my-zsh = {
       enable = true;
@@ -318,7 +325,7 @@ in
           && unlink $t
       '';
       ll = "ls -l";
-      z = "zellij";
+      # z = "zellij";
       n = "nvim";
       rem2loc = ''
         function ssh-port() { 
