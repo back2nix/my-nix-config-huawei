@@ -33,4 +33,4 @@ pull:
 	fi
 
 setup: pull
-	rsync -avP $(REPO_DIR)/user ~/.config/nvim/lua/
+	rsync -avP $(REPO_DIR)/plugins ~/.config/nvim/lua/

@@ -198,6 +198,15 @@ in
     # my-yandex-browser
     # (pkgs.callPackage ./yandex-browser.nix { })
     # gnome.gnome-terminal
+
+    # golang
+    go_1_21
+    go-outline
+    gopls
+    gopkgs
+    go-tools
+    delve
+
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
