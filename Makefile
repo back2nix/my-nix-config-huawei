@@ -15,6 +15,7 @@ sync:
 	rsync -avP \
 		--exclude='private' \
 		--exclude='presharedKeyFile' \
+		--exclude='hardware-configuration.nix' \
 		/etc/nixos/* nixos
 	cd $(REPO_DIR) && make sync
 
