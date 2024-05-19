@@ -17,16 +17,20 @@ in
     "/etc/nixos/module/shadowsocks.nix"
     "/etc/nixos/module/vpn/vpn.nix"
     ./module/users/users.nix
+    ./module/change.mac.nix
   ];
 
-  # Bootloader.
+  services.change-mac = {
+    enable = false;
+    interface = "wlp0s20f3";
+    macAddress = "00:11:22:33:44:55";
+  };
+
   boot.loader.systemd-boot.enable = true;
 
   boot.supportedFilesystems = [ "ntfs" ];
 
 
-  networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -197,6 +201,8 @@ in
     # docker-client
     lm_sensors
     virtualbox
+    direnv
+    tcpdump
 
     # hyprland
     # waybar
@@ -331,8 +337,8 @@ in
   programs.nix-ld.enable = true;
   nix.settings.trusted-users = [ "root" "bg" ];
 
-  # boot.tmpOnTmpfs = true;
-  # boot.tmpOnTmpfsSize = "20%";
+  boot.tmpOnTmpfs = true;
+  boot.tmpOnTmpfsSize = "25%";
 
   services.logind.extraConfig = ''
     RuntimeDirectorySize=16G
@@ -340,4 +346,8 @@ in
   # services.logind.extraConfig = "RuntimeDirectorySize=50%";
 
   virtualisation.virtualbox.host.enable = true;
+
+  networking = {
+    hostName = "nixos"; # Define your hostname.
+  };
 }

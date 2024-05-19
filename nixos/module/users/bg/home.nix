@@ -31,7 +31,7 @@ in
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
   };
 
-  # services.lorri.enable = true;
+  services.lorri.enable = true;
 
 
   # services.xremap = {
@@ -206,7 +206,6 @@ in
     gopkgs
     go-tools
     delve
-
   ];
 
   nixpkgs.config.permittedInsecurePackages = [

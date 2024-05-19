@@ -42,7 +42,6 @@ in
       curl
       tmux
       wget
-      direnv
       kitty
       gnome.gnome-shell
       shadowsocks-libev
