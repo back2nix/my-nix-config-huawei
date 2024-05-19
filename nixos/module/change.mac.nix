@@ -34,6 +34,7 @@ in
 
   config = mkMerge [ 
   (mkIf cfg.enable {
+    # sudo systemctl restart change-mac
     systemd.services.change-mac = {
       description = "Change MAC Address Service";
       after = [ "network-pre.target" ];
@@ -50,6 +51,7 @@ in
     };
   })
   (mkIf (!cfg.enable) { 
+    # sudo systemctl restart restore-mac 
     systemd.services.restore-mac = {
       description = "Restore MAC Address Service";
       before = [ "shutdown.target" ];
