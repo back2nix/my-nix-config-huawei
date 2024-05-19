@@ -32,7 +32,8 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkMerge [ 
+  (mkIf cfg.enable {
     systemd.services.change-mac = {
       description = "Change MAC Address Service";
       after = [ "network-pre.target" ];
@@ -47,5 +48,20 @@ in
         RemainAfterExit = true;
       };
     };
-  };
+  })
+  (mkIf (!cfg.enable) { 
+    systemd.services.restore-mac = {
+      description = "Restore MAC Address Service";
+      before = [ "shutdown.target" ];
+      wantedBy = [ "shutdown.target" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        Environment = "PATH=${pkgs.iproute2}/bin:${pkgs.ethtool}/bin:${pkgs.gawk}/bin";
+        ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/module/restore-mac.sh ${cfg.interface}";
+        RemainAfterExit = true;
+      };
+    };
+  })
+  ];
 }

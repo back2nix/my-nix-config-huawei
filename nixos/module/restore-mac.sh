@@ -1,5 +1,4 @@
-#!/usr/bin/env nix-shell
-#! nix-shell -i bash -p ethtool
+#!/usr/bin/env bash
 
 INTERFACE=$1
 
