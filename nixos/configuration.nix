@@ -93,6 +93,8 @@ in
         virtualbox
         direnv
         tcpdump
+        wireshark
+        tshark
     ];
 
     etc."proxychains.conf".text = ''
@@ -122,6 +124,7 @@ in
     nix-ld.enable = true;
     gnupg.agent.pinentryFlavor = "gnome3";
     dconf.enable = true;
+    wireshark.enable = true;
   };
 
   users.defaultUserShell = pkgs.zsh;
@@ -211,6 +214,17 @@ in
       '';
 
     hostName = "nixos"; # Define your hostname.
+
+    # Open ports in the firewall.
+    firewall = {
+      enable = true;
+      extraCommands = ''
+        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+        '';
+    };
   };
 
   services = {

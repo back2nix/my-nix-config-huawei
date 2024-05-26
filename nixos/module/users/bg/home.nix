@@ -6,9 +6,11 @@
 }:
 let
   user = "bg";
+  masterPkg = (import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {});
   # zellij = pkgs.callPackage ./zellij.nix {
   #   inherit (pkgs.darwin.apple_sdk.frameworks) DiskArbitration Foundation;
   # };
+  mitmproxy = masterPkg.mitmproxy;
 in
 {
   imports = [
@@ -20,6 +22,7 @@ in
   ];
 
   nixpkgs.overlays = [
+    # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
     (self: super: {
       yandex-browser = self.callPackage ./overlays/yandex-browser.nix { };
       genymotion = self.callPackage ./overlays/genymotion.nix { };
