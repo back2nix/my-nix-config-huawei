@@ -210,6 +210,8 @@ in
     go-tools
     delve
     mitmproxy
+    gedit
+    libreoffice
   ];
 
   nixpkgs.config.permittedInsecurePackages = [

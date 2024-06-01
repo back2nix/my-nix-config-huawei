@@ -10,13 +10,14 @@ in
     # ./module/wordpress.nix
     ./hardware-configuration.nix
     ./cachix.nix
-    /etc/nixos/module/shadowsocks.nix
-    /etc/nixos/module/vpn/vpn.nix
+    ./module/shadowsocks.nix
+    ./module/vpn/vpn.nix
     ./module/users/users.nix
     ./module/change.mac.nix
   ];
 
   boot = {
+    # kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
 
     supportedFilesystems = [ "ntfs" ];
@@ -38,7 +39,8 @@ in
       driSupport32Bit = true;
     };
 
-    pulseaudio.enable = true;
+    # pulseaudio.enable = true;
+    pulseaudio.enable = false;
 
     bluetooth = {
       enable = true;
@@ -72,8 +74,6 @@ in
     };
   };
 
-
-
   # Enable sound with pipewire.
   sound.enable = true;
   # pavucontol for settings loop back "Monitor of Alder Lake PCH-P High Definition Audio Controller HDMI / DisplayPort 3 Output"
@@ -95,6 +95,7 @@ in
         tcpdump
         wireshark
         tshark
+        pavucontrol
     ];
 
     etc."proxychains.conf".text = ''
@@ -146,6 +147,7 @@ in
       # "d /var/lib/wordpress/localhost/wp-content/upgrade 0750 wordpress wwwrun - -"
     ];
     targets."bluetooth".after = [ "systemd-tmpfiles-setup.service" ];
+    user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -158,10 +160,19 @@ in
   };
 
   virtualisation = {
-    docker.enable = true;
-    docker.rootless = {
+    docker = {
       enable = true;
-      setSocketVariable = true;
+      rootless = {
+        enable = true;
+        setSocketVariable = true;
+      };
+      daemon = {
+        settings = {
+          # registry-mirrors = [ 
+          #   "https://huecker.io" 
+          # ];
+        };
+      };
     };
 
     virtualbox.host.enable = true;
@@ -262,5 +273,14 @@ in
     logind.extraConfig = ''
       RuntimeDirectorySize=16G
       '';
+
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      pulse.enable = true;
+      wireplumber.enable = true;
+      alsa.support32Bit = true;
+      jack.enable = true;
+    };
   };
 }
