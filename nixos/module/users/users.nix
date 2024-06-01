@@ -3,7 +3,7 @@
 
 let
   inherit (import ../../variables.nix) mainUser;
-  home-manager = import (builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-23.11.tar.gz") { };
+  home-manager = import (builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz") { };
 in
 
 {
@@ -49,8 +49,10 @@ in
   };
 
   # Enable automatic login for the user.
-  services.xserver.displayManager.autoLogin.enable = true;
-  services.xserver.displayManager.autoLogin.user = "${mainUser}";
+  services = {
+    displayManager.autoLogin.enable = true;
+    displayManager.autoLogin.user = "${mainUser}";
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

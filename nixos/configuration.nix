@@ -22,8 +22,10 @@ in
 
     supportedFilesystems = [ "ntfs" ];
 
-    tmpOnTmpfs = true;
-    tmpOnTmpfsSize = "25%";
+    tmp = {
+      useTmpfs = true;
+      tmpfsSize = "25%";
+    };
 
     kernel.sysctl = {
       "net.ipv4.ip_forward" = "1";
@@ -123,7 +125,6 @@ in
     zsh.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld.enable = true;
-    gnupg.agent.pinentryFlavor = "gnome3";
     dconf.enable = true;
     wireshark.enable = true;
   };
@@ -132,8 +133,12 @@ in
 
   systemd = {
     # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
-    services."getty@tty1".enable = false;
-    services."autovt@tty1".enable = false;
+    services = {
+      "getty@tty1".enable = false;
+      "autovt@tty1".enable = false;
+      NetworkManager-wait-online.enable = false;
+    };
+
     targets.sleep.enable = false;
     targets.suspend.enable = false;
     targets.hibernate.enable = false;
@@ -152,7 +157,7 @@ in
 
   nixpkgs.config.allowUnfree = true;
 
-  system.stateVersion = "23.05"; # Did you read the comment?
+  system.stateVersion = "23.11"; # Did you read the comment?
 
   nix = {
     package = pkgs.nixFlakes;
@@ -249,14 +254,17 @@ in
 
     udev.packages = [ pkgs.gnome3.gnome-settings-daemon ];
 
+    libinput.enable = true;
+
     xserver = {
       enable = true;
       videoDrivers = [ "modesetting" ];
-      layout = "us,ru";
+      xkb = {
+        layout = "us,ru";
+      };
       displayManager.gdm.enable = true;
       displayManager.gdm.wayland = false;
       desktopManager.gnome.enable = true;
-      libinput.enable = true;
     };
 
     printing.enable = true;
