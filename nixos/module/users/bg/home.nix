@@ -40,6 +40,7 @@ in
     (self: super: {
       yandex-browser = self.callPackage ./overlays/yandex-browser.nix { };
       genymotion = self.callPackage ./overlays/genymotion.nix { };
+      # neovim = masterPkg.neovim;
     })
   ];
 
@@ -213,6 +214,8 @@ in
       gedit
       libreoffice
       gh
+      # neovim
+      # masterPkg.neovim
     ];
 
     file = {

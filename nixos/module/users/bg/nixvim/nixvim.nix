@@ -1,5 +1,7 @@
-{ config
-, ...
+{ 
+  config,
+  pkgs,
+  ...
 }:
 {
   programs = {
@@ -34,28 +36,31 @@
         smartcase = true;
       };
 
-      # extraPlugins = with pkgs.vimPlugins; [
-      #   nvim-gdb
-      # ];
+      extraPlugins = with pkgs.vimPlugins; [
+        # nvim-gdb
+        vim-nix
+      ];
 
       luaLoader.enable = true;
-
-      #extraPlugins = [ pkgs.vimPlugins.hop-nvim ];
 
       plugins = {
         # lightline.enable = true;
         dap = {
           enable = true;
           extensions = {
-            dap-go.enable = true;
+            dap-go = {
+              enable = true;
+            };
             dap-python.enable = true;
             dap-ui = {
               enable = true;
-              controls.enabled = false;
+              controls.enabled = true;
             };
             dap-virtual-text.enable = true;
           };
         };
+
+        barbar.enable = true;
 
         noice = {
           enable = true;
@@ -116,6 +121,7 @@
             bindToCwd = false;
             followCurrentFile = {
               enabled = true;
+              leaveDirsOpen = true;
             };
           };
           window = {
@@ -373,7 +379,7 @@
         }
         {
           key = "<leader>c";
-          action = ":lua buffer_close()<CR>";
+          action = ":bd<CR>";
           options = { desc = "Закрыть буфер";  silent = true; };
         }
         {
@@ -444,17 +450,17 @@
         }
         {
           key = "<leader>bc";
-          action = ":lua buffer_close_all(true)<CR>";
+          action = ":BufferCloseAllButCurrent<CR>";
           options = { desc = "Закрыть все буферы, кроме текущего";  silent = true; };
         }
         {
           key = "<leader>bC";
-          action = ":lua buffer_close_all()<CR>";
+          action = ":BufferCloseAll<CR>";
           options = { desc = "Закрыть все буферы";  silent = true; };
         }
         {
           key = "<leader>bd";
-          action = ":bdelete<CR>";
+          action = ":BufferClose<CR>";
           options = { desc = "Удалить буфер с помощью интерактивного выбора";  silent = true; };
         }
         {
