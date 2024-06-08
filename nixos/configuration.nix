@@ -3,6 +3,12 @@
 , ...
 }:
 let
+  masterPkg = (import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
+      nixpkgs.config = {
+        allowUnfree = true;
+        };
+      });
+
 in
 {
   imports = [
@@ -82,6 +88,11 @@ in
   security.rtkit.enable = true;
 
   environment = {
+    # etc."modprobe.d/alsa-base.conf".text = ''
+    #   options snd-hda-intel position fix=1
+    #   options snd-hda-intel index=0 model=dell-headset-multi,dell-e7x
+    #   '';
+
     sessionVariables = rec {
       GTK_THEME = "Adwaita:dark";
     };
@@ -91,13 +102,14 @@ in
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     systemPackages = with pkgs; [
-      lm_sensors
+        lm_sensors
         virtualbox
         direnv
         tcpdump
         wireshark
         tshark
         pavucontrol
+        masterPkg.lunarvim
     ];
 
     etc."proxychains.conf".text = ''
@@ -290,5 +302,10 @@ in
       alsa.support32Bit = true;
       jack.enable = true;
     };
+
+    # homepage-dashboard = {
+    #   enable = true;
+    #   listenPort = 8082;
+    # };
   };
 }
