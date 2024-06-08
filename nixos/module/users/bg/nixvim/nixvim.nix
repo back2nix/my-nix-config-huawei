@@ -361,11 +361,11 @@
           action = ":w!<CR>";
           options = { desc = "Принудительное сохранение";  silent = true; };
         }
-        {
-          key = "<C-q>";
-          action = ":q!<CR>";
-          options = { desc = "Принудительное закрытие";  silent = true; };
-        }
+        # {
+        #   key = "<C-q>";
+        #   action = ":q!<CR>";
+        #   options = { desc = "Принудительное закрытие";  silent = true; };
+        # }
         {
           key = "<leader>n";
           action = ":enew<CR>";
@@ -373,7 +373,7 @@
         }
         {
           key = "<leader>c";
-          action = ":bd<CR>";
+          action = ":lua buffer_close()<CR>";
           options = { desc = "Закрыть буфер";  silent = true; };
         }
         {
@@ -444,17 +444,17 @@
         }
         {
           key = "<leader>bc";
-          action = ":BufferCloseAllButCurrent<CR>";
+          action = ":lua buffer_close_all(true)<CR>";
           options = { desc = "Закрыть все буферы, кроме текущего";  silent = true; };
         }
         {
           key = "<leader>bC";
-          action = ":BufferCloseAll<CR>";
+          action = ":lua buffer_close_all()<CR>";
           options = { desc = "Закрыть все буферы";  silent = true; };
         }
         {
           key = "<leader>bd";
-          action = ":BufferClose<CR>";
+          action = ":bdelete<CR>";
           options = { desc = "Удалить буфер с помощью интерактивного выбора";  silent = true; };
         }
         {
