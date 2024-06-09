@@ -6,6 +6,7 @@
 {
   imports = [
     ./spell.nix
+    # ./colorscheme.nix
   ];
   programs = {
     nixvim.enable = true;
@@ -53,6 +54,10 @@
       extraPlugins = with pkgs.vimPlugins; [
         # nvim-gdb
         vim-nix
+      ];
+      extraPackages = with pkgs; [
+        fd
+        ripgrep
       ];
 
       luaLoader.enable = true;
@@ -176,6 +181,13 @@
             fzf-native = {
               enable = true;
             };
+          };
+        };
+
+        yanky = {
+          enable = true;
+          picker.telescope = {
+            enable = true;
           };
         };
 
@@ -982,6 +994,12 @@
           key = "<leader>f";
           action = "+find";
           options = { desc = "Telescope/Find";  silent = true; };
+        }
+        {
+          mode = "n";
+          key = "<leader>fy";
+          action = "<cmd>Telescope yank_history<cr>";
+          options = { desc = "История yank";  silent = true; };
         }
         {
           key = "<leader><CR>";
