@@ -322,6 +322,7 @@ in
         theme = "agnoster-nix";
       };
       shellAliases = {
+        open = "xdg-open";
         img = "eog"; # image viewer
         pdf = "evince"; # pdf reader
         cover = ''
