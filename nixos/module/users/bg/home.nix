@@ -33,6 +33,7 @@ in
     ./dconf.nix
     nixvim.homeManagerModules.nixvim
     ./nixvim/nixvim.nix
+    ./tmux/tmux.nix
   ];
 
   nixpkgs.overlays = [
@@ -224,7 +225,7 @@ in
       # # symlink to the Nix store copy.
       # ".screenrc".source = dotfiles/screenrc;
 
-      ".tmux.conf".source = ./tmux/tmux.conf;
+      # ".tmux.conf".source = ./tmux/tmux.conf;
       ".gitconfig".source = ./gitconfig;
       ".cargo/config".source = ./cargoconfig;
       ".gdbinit".source = ./gdbinit;
@@ -295,6 +296,7 @@ in
       enableCompletion = true;
       initExtra =
       ''
+      export LANG=en_US.UTF-8
       DIRSTACKSIZE=90
       setopt autopushd pushdsilent pushdtohome
       ## Remove duplicate entries

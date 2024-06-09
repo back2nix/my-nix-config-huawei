@@ -54,10 +54,22 @@
       extraPlugins = with pkgs.vimPlugins; [
         # nvim-gdb
         vim-nix
+        vim-dadbod
+        vim-dadbod-ui
+        vim-dadbod-completion
       ];
       extraPackages = with pkgs; [
         fd
         ripgrep
+        sqls
+      ];
+
+      autoCmd = [
+        {
+          event = "FileType";
+          pattern = [ "sql" "mysql" "plsql" ];
+          command = "lua require('cmp').setup.buffer({ sources = {{ name = 'vim-dadbod-completion' }} })";
+        }
       ];
 
       luaLoader.enable = true;
@@ -289,45 +301,6 @@
           };
         };
 
-        # lsp = {
-        #   enable = true;
-        #   # keymaps = {
-        #   #   silent = false;
-        #   #   lspBuf = {
-        #       # d = "debug";
-        #         # K = "hover";
-        #         # gD = "references";
-        #         # gd = "definition";
-        #         # gi = "implementation";
-        #         # gt = "type_definition";
-        #         # ca = "code_action";
-        #         # ff = "format";
-        #   #   };
-        #   # };
-        #   servers = {
-        #     gopls = {
-        #       enable = true;
-        #       autostart = true;
-        #     };
-        #
-        #     bashls = {
-        #       enable = true;
-        #       autostart = true;
-        #     };
-        #     html = {
-        #       enable = true;
-        #       autostart = true;
-        #     };
-        #     nil-ls = {
-        #       enable = true;
-        #       autostart = true;
-        #     };
-        #     pyright = {
-        #       enable = true;
-        #       autostart = true;
-        #     };
-        #   };
-        # };
         # Dashboard
         cmp.enable = true;
         cmp-nvim-lsp.enable = true;
@@ -360,6 +333,42 @@
       '';
 
       keymaps = [
+        # autocomplite
+        {
+          key = "<Tab>";
+          action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_next_item() elseif require('luasnip').expand_or_jumpable() then require('luasnip').expand_or_jump() else fallback() end end, { 'i', 's' })";
+          options = { desc = "Выбрать следующий элемент автокомплита"; silent = true; };
+        }
+        {
+          key = "<S-Tab>";
+          action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_prev_item() elseif require('luasnip').jumpable(-1) then require('luasnip').jump(-1) else fallback() end end, { 'i', 's' })";
+          options = { desc = "Выбрать предыдущий элемент автокомплита"; silent = true; };
+        }
+        {
+          key = "<C-d>";
+          action = "lua require('cmp').mapping.scroll_docs(-4)";
+          options = { desc = "Прокрутка автокомплит документации вверх"; silent = true; };
+        }
+        {
+          key = "<C-f>";
+          action = "lua require('cmp').mapping.scroll_docs(4)";
+          options = { desc = "Прокрутка автокомплит документации вниз"; silent = true; };
+        }
+        {
+          key = "<C-Space>";
+          action = "lua require('cmp').mapping.complete()";
+          options = { desc = "Вызвать меню автокомплита"; silent = true; };
+        }
+        {
+          key = "<C-e>";
+          action = "lua require('cmp').mapping.close()";
+          options = { desc = "Закрыть меню автокомплита"; silent = true; };
+        }
+        {
+          key = "<CR>";
+          action = "lua require('cmp').mapping.confirm({ select = true })";
+          options = { desc = "Подтвердить выбор автокомплита"; silent = true; };
+        }
         # astronvim keymaps from chat-gpt4
         {
           action = ":HopWord<CR>";
