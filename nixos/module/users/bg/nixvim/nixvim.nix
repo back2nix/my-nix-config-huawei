@@ -4,10 +4,15 @@
   ...
 }:
 {
+  imports = [
+    ./spell.nix
+  ];
   programs = {
     nixvim.enable = true;
 
     nixvim = {
+      defaultEditor = true;
+
       globals = {
         mapleader = " ";
         maplocalleader = ",";
@@ -25,6 +30,13 @@
       };
 
       opts = {
+        background = "";
+        updatetime = 100;
+        spell = true;
+        spelllang = [
+          "en_us"
+          "ru"
+        ];
         number = true; # Show line numbers
         relativenumber = true; # Show relative line numbers
         incsearch = true;
@@ -34,6 +46,8 @@
         termguicolors = true;
         ignorecase = true;
         smartcase = true;
+        undofile = true;
+        swapfile = false;
       };
 
       extraPlugins = with pkgs.vimPlugins; [
@@ -60,7 +74,15 @@
           };
         };
 
+        cmp-spell.enable = true;
         barbar.enable = true;
+        auto-session = {
+          enable = true;
+          extraOptions = {
+            auto_save_enabled = true;
+            auto_restore_enabled = true;
+          };
+        };
 
         noice = {
           enable = true;
@@ -609,7 +631,7 @@
           mode = ["n" "v"];
           key = "<leader>S";
           action = "+Session";
-          options = { desc = "📄 Buffers"; };
+          options = { desc = "📄 Session"; };
         }
         {
           key = "<leader>Ss";
@@ -617,76 +639,86 @@
           options = { desc = "Сохранить сессию";  silent = true; };
         }
         {
-          key = "<leader>Sl";
-          action = ":SessionLoad<CR>";
-          options = { desc = "Загрузить сессию";  silent = true; };
+          key = "<leader>Sr";
+          action = ":SessionRestore<CR>";
+          options = { desc = "Восстановить сессию";  silent = true; };
         }
-        {
-          key = "<leader>Sd";
-          action = ":SessionDelete<CR>";
-          options = { desc = "Удалить сессию";  silent = true; };
-        }
-        {
-          key = "<leader>SD";
-          action = ":SessionDeleteDirectory<CR>";
-          options = { desc = "Удалить сессию директории";  silent = true; };
-        }
-        {
-          key = "<leader>Sf";
-          action = ":SessionSearch<CR>";
-          options = { desc = "Поиск сессии";  silent = true; };
-        }
-        {
-          key = "<leader>SF";
-          action = ":SessionSearchDirectory<CR>";
-          options = { desc = "Поиск сессий директории";  silent = true; };
-        }
-        {
-          key = "<leader>S.";
-          action = ":SessionLoadCurrentDirectory<CR>";
-          options = { desc = "Загрузить сессию текущей директории";  silent = true; };
-        }
+        # {
+        #   key = "<leader>Ss";
+        #   action = ":SessionSave<CR>";
+        #   options = { desc = "Сохранить сессию";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>Sl";
+        #   action = ":SessionLoad<CR>";
+        #   options = { desc = "Загрузить сессию";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>Sd";
+        #   action = ":SessionDelete<CR>";
+        #   options = { desc = "Удалить сессию";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>SD";
+        #   action = ":SessionDeleteDirectory<CR>";
+        #   options = { desc = "Удалить сессию директории";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>Sf";
+        #   action = ":SessionSearch<CR>";
+        #   options = { desc = "Поиск сессии";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>SF";
+        #   action = ":SessionSearchDirectory<CR>";
+        #   options = { desc = "Поиск сессий директории";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>S.";
+        #   action = ":SessionLoadCurrentDirectory<CR>";
+        #   options = { desc = "Загрузить сессию текущей директории";  silent = true; };
+        # }
         # Package Management Mappings
-        {
-          key = "<leader>pa";
-          action = ":Lazy sync<CR>";
-          options = { desc = "Синхронизировать пакеты";  silent = true; };
-        }
-        {
-          key = "<leader>pi";
-          action = ":Lazy install<CR>";
-          options = { desc = "Установить пакеты";  silent = true; };
-        }
-        {
-          key = "<leader>pm";
-          action = ":Mason<CR>";
-          options = { desc = "Открыть Mason";  silent = true; };
-        }
-        {
-          key = "<leader>pM";
-          action = ":MasonUpdate<CR>";
-          options = { desc = "Обновить Mason";  silent = true; };
-        }
-        {
-          key = "<leader>ps";
-          action = ":Lazy check<CR>";
-          options = { desc = "Проверить пакеты";  silent = true; };
-        }
-        {
-          key = "<leader>pS";
-          action = ":Lazy sync<CR>";
-          options = { desc = "Синхронизировать пакеты";  silent = true; };
-        }
-        {
-          key = "<leader>pu";
-          action = ":Lazy update<CR>";
-          options = { desc = "Обновить пакеты";  silent = true; };
-        }
-        {
-          key = "<leader>pU";
-          action = ":Lazy update<CR>";
-          options = { desc = "Обновить пакеты";  silent = true; };
-        }
+        # {
+        #   key = "<leader>pa";
+        #   action = ":Lazy sync<CR>";
+        #   options = { desc = "Синхронизировать пакеты";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pi";
+        #   action = ":Lazy install<CR>";
+        #   options = { desc = "Установить пакеты";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pm";
+        #   action = ":Mason<CR>";
+        #   options = { desc = "Открыть Mason";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pM";
+        #   action = ":MasonUpdate<CR>";
+        #   options = { desc = "Обновить Mason";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>ps";
+        #   action = ":Lazy check<CR>";
+        #   options = { desc = "Проверить пакеты";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pS";
+        #   action = ":Lazy sync<CR>";
+        #   options = { desc = "Синхронизировать пакеты";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pu";
+        #   action = ":Lazy update<CR>";
+        #   options = { desc = "Обновить пакеты";  silent = true; };
+        # }
+        # {
+        #   key = "<leader>pU";
+        #   action = ":Lazy update<CR>";
+        #   options = { desc = "Обновить пакеты";  silent = true; };
+        # }
         # LSP Mappings
         {
           key = "gD";
@@ -740,7 +772,7 @@
         }
         {
           key = "<leader>lS";
-          action = ":SymbolsOutline<CR>";
+          action = ":Telescope lsp_document_symbols<CR>";
           options = { desc = "Показать символы";  silent = true; };
         }
         {
@@ -947,6 +979,11 @@
         }
         # Telescope Mappings
         {
+          key = "<leader>f";
+          action = "+find";
+          options = { desc = "Telescope/Find";  silent = true; };
+        }
+        {
           key = "<leader><CR>";
           action = ":Telescope resume<CR>";
           options = { desc = "Возобновить предыдущий поиск";  silent = true; };
@@ -1027,6 +1064,11 @@
           options = { desc = "Поиск по тексту (включая скрытые файлы)";  silent = true; };
         }
         {
+          key = "<leader>g";
+          action = "+git";
+          options = { desc = "Git";  silent = true; };
+        }
+        {
           key = "<leader>gb";
           action = ":Telescope git_branches<CR>";
           options = { desc = "Показать ветки Git";  silent = true; };
@@ -1047,6 +1089,11 @@
           options = { desc = "Показать статус Git";  silent = true; };
         }
         {
+          key = "<leader>l";
+          action = "+lsp";
+          options = { desc = "LSP";  silent = true; };
+        }
+        {
           key = "<leader>ls";
           action = ":Telescope lsp_document_symbols<CR>";
           options = { desc = "Показать символы документа";  silent = true; };
@@ -1057,6 +1104,11 @@
           options = { desc = "Показать символы рабочей области";  silent = true; };
         }
         # Terminal Mappings
+        {
+          key = "<leader>t";
+          action = "+terminal";
+          options = { desc = "Terminal";  silent = true; };
+        }
         {
           key = "<leader>tf";
           action = ":FloatermNew<CR>";
@@ -1098,6 +1150,11 @@
           options = { desc = "Открыть плавающий терминал с btm";  silent = true; };
         }
         # UI/UX Mappings
+        {
+          key = "<leader>u";
+          action = "+UI/UX";
+          options = { desc = "UI/UX";  silent = true; };
+        }
         {
           key = "<leader>ua";
           action = ":lua require('nvim-autopairs').toggle()<CR>";
