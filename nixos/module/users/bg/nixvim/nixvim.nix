@@ -1,10 +1,12 @@
 { config
 , pkgs
+, lib
 , ...
 }:
 {
   imports = [
     ./spell.nix
+    ./plugins/persistent-breakpoints.nvim.nix
     # ./colorscheme.nix
   ];
   programs = {
@@ -27,8 +29,8 @@
         register = "unnamedplus";
         # TODO: Make conditional if X11/Wayland enabled
         # providers.wl-copy.enable = true;
-        providers.xclip.enable = true;
-        #providers.xsel.enable = false;
+        providers.xclip.enable = pkgs.stdenv.isLinux;
+        providers.xsel.enable = pkgs.stdenv.isDarwin;
       };
 
       opts = {
@@ -58,6 +60,7 @@
         vim-dadbod
         vim-dadbod-ui
         vim-dadbod-completion
+        dressing-nvim
       ];
       extraPackages = with pkgs; [
         fd
@@ -74,15 +77,73 @@
       ];
 
       luaLoader.enable = true;
-
+      # diffview.enable = true;
 
       plugins = {
         # lightline.enable = true;
+        # persistence = {
+        #   enable = true;
+        #   preSave = ''
+        #   function() vim.api.nvim_exec_autocmds("User", {pattern = "SessionSavePre"}) end,'';
+        # };
+
+        dashboard.enable = true;
+        dressing = {
+          enable = true;
+          settings = {
+            input = {
+              enabled = true;
+              mappings = {
+                i = {
+                  "<C-c>" = "Close";
+                  "<CR>" = "Confirm";
+                  "<Down>" = "HistoryNext";
+                  "<Up>" = "HistoryPrev";
+                };
+                n = {
+                  "<CR>" = "Confirm";
+                  "<Esc>" = "Close";
+                };
+              };
+            };
+            select = {
+              backend = [
+                "telescope"
+                "fzf_lua"
+                "fzf"
+                "builtin"
+                "nui"
+              ];
+              builtin = {
+                mappings = {
+                  "<C-c>" = "Close";
+                  "<CR>" = "Confirm";
+                  "<Esc>" = "Close";
+                };
+              };
+              enabled = true;
+            };
+          };
+        };
+
         dap = {
           enable = true;
           extensions = {
             dap-go = {
               enable = true;
+              dapConfigurations = [{
+                type = "go";
+                name = "Attach remote";
+                mode = "remote";
+                request = "attach";
+              }];
+              delve = {
+                path = "dlv";
+                initializeTimeoutSec = 20;
+                port = "38697";
+                # args = [];
+                buildFlags = "";
+              };
             };
             dap-python.enable = true;
             dap-ui = {
@@ -154,7 +215,9 @@
         lsp-format.enable = true;
         markdown-preview = {
           enable = true;
-          autoClose = true;
+          settings = {
+            auto_close = true;
+          };
         };
 
         # mini.enable = true;
@@ -255,10 +318,44 @@
         treesitter-context.enable = true;
         trouble.enable = true;
         which-key.enable = true;
+        multicursors.enable = true;
+        lastplace.enable = true;
 
         # Language server
         lsp = {
           enable = true;
+
+          keymaps.lspBuf = {
+            K = "hover";
+            gD = "declaration";
+            "<C-k>" = "signature_help";
+            "<leader>rn" = "rename";
+            "<leader>ca" = "code_action";
+          };
+
+          # keymaps.extra = [
+            # {
+            #   key = "gd";
+            #   action = "require('telescope.builtin').lsp_definitions";
+            #   lua = true;
+            # }
+            # {
+            #   key = "gr";
+            #   action = "require('telescope.builtin').lsp_references";
+            #   lua = true;
+            # }
+            # {
+            #   key = "gi";
+            #   action = "require('telescope.builtin').lsp_implementations";
+            #   lua = true;
+            # }
+            # {
+            #   key = "gt";
+            #   action = "require('telescope.builtin').lsp_type_definitions";
+            #   lua = true;
+            # }
+          # ];
+
           servers = {
             # Average webdev LSPs
             gopls = {
@@ -280,7 +377,7 @@
             # Markdown
             marksman.enable = true;
             # Nix
-            nil_ls.enable = true;
+            nil-ls.enable = true;
             # Docker
             dockerls.enable = true;
             # Bash
@@ -310,13 +407,13 @@
             snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
 
             mapping = {
-              "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-              "<C-f>" = "cmp.mapping.scroll_docs(4)";
-              "<C-Space>" = "cmp.mapping.complete()";
-              "<C-e>" = "cmp.mapping.close()";
+              # "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+              # "<C-f>" = "cmp.mapping.scroll_docs(4)";
+              # "<C-Space>" = "cmp.mapping.complete()";
+              # "<C-e>" = "cmp.mapping.close()";
               "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
               "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-              "<CR>" = "cmp.mapping.confirm({ select = true })";
+              # "<CR>" = "cmp.mapping.confirm({ select = true })";
             };
 
             sources = [
@@ -361,7 +458,7 @@
         cmp-buffer.enable = true;
         cmp_luasnip.enable = true;
         cmp-cmdline.enable = false;
-        cmp-tabby.host = "http://127.0.0.1:8080";
+        # cmp-tabby.host = "http://127.0.0.1:8080";
         # vim-lspconfig.enable = true;
       };
 
@@ -381,30 +478,38 @@
         end
 
         require('dap-python').test_runner = "pytest"
-      '';
+        '';
+
+
 
       keymaps = [
+        {
+          mode = [ "n" "v" ];
+          key = "<Leader>m";
+          action = "<cmd>MCstart<cr>";
+          options = { desc = "Create a selection for selected text or word under the cursor"; silent = true; };
+        }
         # autocomplite
-        {
-          key = "<Tab>";
-          action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_next_item() elseif require('luasnip').expand_or_jumpable() then require('luasnip').expand_or_jump() else fallback() end end, { 'i', 's' })";
-          options = { desc = "Выбрать следующий элемент автокомплита"; silent = true; };
-        }
-        {
-          key = "<S-Tab>";
-          action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_prev_item() elseif require('luasnip').jumpable(-1) then require('luasnip').jump(-1) else fallback() end end, { 'i', 's' })";
-          options = { desc = "Выбрать предыдущий элемент автокомплита"; silent = true; };
-        }
-        {
-          key = "<C-d>";
-          action = "lua require('cmp').mapping.scroll_docs(-4)";
-          options = { desc = "Прокрутка автокомплит документации вверх"; silent = true; };
-        }
-        {
-          key = "<C-f>";
-          action = "lua require('cmp').mapping.scroll_docs(4)";
-          options = { desc = "Прокрутка автокомплит документации вниз"; silent = true; };
-        }
+        # {
+        #   key = "<Tab>";
+        #   action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_next_item() elseif require('luasnip').expand_or_jumpable() then require('luasnip').expand_or_jump() else fallback() end end, { 'i', 's' })";
+        #   options = { desc = "Выбрать следующий элемент автокомплита"; silent = true; };
+        # }
+        # {
+        #   key = "<S-Tab>";
+        #   action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_prev_item() elseif require('luasnip').jumpable(-1) then require('luasnip').jump(-1) else fallback() end end, { 'i', 's' })";
+        #   options = { desc = "Выбрать предыдущий элемент автокомплита"; silent = true; };
+        # }
+        # {
+        #   key = "<C-d>";
+        #   action = "lua require('cmp').mapping.scroll_docs(-4)";
+        #   options = { desc = "Прокрутка автокомплит документации вверх"; silent = true; };
+        # }
+        # {
+        #   key = "<C-f>";
+        #   action = "lua require('cmp').mapping.scroll_docs(4)";
+        #   options = { desc = "Прокрутка автокомплит документации вниз"; silent = true; };
+        # }
         {
           key = "<C-Space>";
           action = "lua require('cmp').mapping.complete()";
@@ -673,31 +778,31 @@
           action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
           options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
         }
-        {
-          key = "<C-p>";
-          action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
-        }
-        {
-          key = "<C-k>";
-          action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
-        }
-        {
-          key = "<C-e>";
-          action = ":lua vim.fn['compe#close']('<C-e>')<CR>";
-          options = { desc = "Отменить автодополнение"; silent = true; };
-        }
-        {
-          key = "<C-u>";
-          action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          options = { desc = "Прокрутка вверх в документации автодополнения"; silent = true; };
-        }
-        {
-          key = "<C-d>";
-          action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
-          options = { desc = "Прокрутка вниз в документации автодополнения"; silent = true; };
-        }
+        # {
+        #   key = "<C-p>";
+        #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
+        #   options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
+        # }
+        # {
+        #   key = "<C-k>";
+        #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
+        #   options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
+        # }
+        # {
+        #   key = "<C-e>";
+        #   action = ":lua vim.fn['compe#close']('<C-e>')<CR>";
+        #   options = { desc = "Отменить автодополнение"; silent = true; };
+        # }
+        # {
+        #   key = "<C-u>";
+        #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
+        #   options = { desc = "Прокрутка вверх в документации автодополнения"; silent = true; };
+        # }
+        # {
+        #   key = "<C-d>";
+        #   action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
+        #   options = { desc = "Прокрутка вниз в документации автодополнения"; silent = true; };
+        # }
         # Dashboard Mappings
         # {
         #   key = "<leader>h";
@@ -808,98 +913,99 @@
         #   options = { desc = "Обновить пакеты";  silent = true; };
         # }
         # LSP Mappings
-        {
-          key = "gD";
-          action = ":lua vim.lsp.buf.declaration()<CR>";
-          options = { desc = "Перейти к объявлению"; silent = true; };
-        }
-        {
-          key = "gy";
-          action = ":lua vim.lsp.buf.type_definition()<CR>";
-          options = { desc = "Перейти к определению типа"; silent = true; };
-        }
-        {
-          key = "gd";
-          action = ":lua vim.lsp.buf.definition()<CR>";
-          options = { desc = "Перейти к определению"; silent = true; };
-        }
-        {
-          key = "gI";
-          action = ":lua vim.lsp.buf.implementation()<CR>";
-          options = { desc = "Перейти к реализации"; silent = true; };
-        }
-        {
-          key = "grr";
-          action = ":lua vim.lsp.buf.references()<CR>";
-          options = { desc = "Найти ссылки"; silent = true; };
-        }
-        {
-          key = "<leader>lR";
-          action = ":lua vim.lsp.buf.references()<CR>";
-          options = { desc = "Найти ссылки"; silent = true; };
-        }
+        # {
+        #   key = "gD";
+        #   action = ":lua vim.lsp.buf.declaration()<CR>";
+        #   options = { desc = "Перейти к объявлению"; silent = true; };
+        # }
+        # {
+        #   key = "gy";
+        #   action = ":lua vim.lsp.buf.type_definition()<CR>";
+        #   options = { desc = "Перейти к определению типа"; silent = true; };
+        # }
+        # {
+        #   key = "gd";
+        #   action = ":lua vim.lsp.buf.definition()<CR>";
+        #   options = { desc = "Перейти к определению"; silent = true; };
+        # }
+        # {
+        #   key = "gI";
+        #   action = ":lua vim.lsp.buf.implementation()<CR>";
+        #   options = { desc = "Перейти к реализации"; silent = true; };
+        # }
+        # {
+        #   key = "grr";
+        #   # action = ":lua vim.lsp.buf.references()<CR>";
+        #   action = "require('telescope.builtin').lsp_references";
+        #   options = { desc = "Найти ссылки"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>lR";
+        #   action = ":lua vim.lsp.buf.references()<CR>";
+        #   options = { desc = "Найти ссылки"; silent = true; };
+        # }
         {
           key = "<leader>li";
           action = ":LspInfo<CR>";
           options = { desc = "Информация о LSP"; silent = true; };
         }
-        {
-          key = "<leader>lI";
-          action = ":NullLsInfo<CR>";
-          options = { desc = "Информация о Null-LS"; silent = true; };
-        }
+        # {
+        #   key = "<leader>lI";
+        #   action = ":NullLsInfo<CR>";
+        #   options = { desc = "Информация о Null-LS"; silent = true; };
+        # }
         {
           key = "K";
           action = ":lua vim.lsp.buf.hover()<CR>";
           options = { desc = "Показать описание"; silent = true; };
         }
+        # {
+        #   key = "<leader>lf";
+        #   action = ":lua vim.lsp.buf.formatting()<CR>";
+        #   options = { desc = "Форматировать документ"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>lS";
+        #   action = ":Telescope lsp_document_symbols<CR>";
+        #   options = { desc = "Показать символы"; silent = true; };
+        # }
+        # {
+        #   key = "gl";
+        #   action = ":lua vim.diagnostic.open_float()<CR>";
+        #   options = { desc = "Показать диагностику"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>ld";
+        #   action = ":lua vim.diagnostic.open_float()<CR>";
+        #   options = { desc = "Показать диагностику"; silent = true; };
+        # }
+        # {
+        #   key = "<C-W>d";
+        #   action = ":lua vim.diagnostic.open_float()<CR>";
+        #   options = { desc = "Показать диагностику"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>lD";
+        #   action = ":lua vim.diagnostic.setloclist()<CR>";
+        #   options = { desc = "Добавить диагностику в список локаций"; silent = true; };
+        # }
+        # {
+        #   key = "gra";
+        #   action = ":lua vim.lsp.buf.code_action()<CR>";
+        #   options = { desc = "Предложить действия с кодом"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>la";
+        #   action = ":lua vim.lsp.buf.code_action()<CR>";
+        #   options = { desc = "Предложить действия с кодом"; silent = true; };
+        # }
+        # {
+        #   key = "<leader>lh";
+        #   action = ":lua vim.lsp.buf.signature_help()<CR>";
+        #   options = { desc = "Помощь с сигнатурами"; silent = true; };
+        # }
         {
-          key = "<leader>lf";
-          action = ":lua vim.lsp.buf.formatting()<CR>";
-          options = { desc = "Форматировать документ"; silent = true; };
-        }
-        {
-          key = "<leader>lS";
-          action = ":Telescope lsp_document_symbols<CR>";
-          options = { desc = "Показать символы"; silent = true; };
-        }
-        {
-          key = "gl";
-          action = ":lua vim.diagnostic.open_float()<CR>";
-          options = { desc = "Показать диагностику"; silent = true; };
-        }
-        {
-          key = "<leader>ld";
-          action = ":lua vim.diagnostic.open_float()<CR>";
-          options = { desc = "Показать диагностику"; silent = true; };
-        }
-        {
-          key = "<C-W>d";
-          action = ":lua vim.diagnostic.open_float()<CR>";
-          options = { desc = "Показать диагностику"; silent = true; };
-        }
-        {
-          key = "<leader>lD";
-          action = ":lua vim.diagnostic.setloclist()<CR>";
-          options = { desc = "Добавить диагностику в список локаций"; silent = true; };
-        }
-        {
-          key = "gra";
-          action = ":lua vim.lsp.buf.code_action()<CR>";
-          options = { desc = "Предложить действия с кодом"; silent = true; };
-        }
-        {
-          key = "<leader>la";
-          action = ":lua vim.lsp.buf.code_action()<CR>";
-          options = { desc = "Предложить действия с кодом"; silent = true; };
-        }
-        {
-          key = "<leader>lh";
-          action = ":lua vim.lsp.buf.signature_help()<CR>";
-          options = { desc = "Помощь с сигнатурами"; silent = true; };
-        }
-        {
-          key = "grn";
+          key = "gn";
           action = ":lua vim.lsp.buf.rename()<CR>";
           options = { desc = "Переименовать символ"; silent = true; };
         }
@@ -933,126 +1039,126 @@
           mode = [ "n" "v" ];
           key = "<leader>d";
           action = "+debug";
-          options = { desc = "🛠️ Debug"; };
+          options = { desc = "🛠️ Debug"; silent = true; };
         }
-        {
-          key = "<leader>d?";
-          action = ":lua require('dapui').eval(nil, { enter = true })<cr>";
-          options = { desc = "Оценить выражение"; silent = true; };
-        }
+        # {
+        #   key = "<leader>d?";
+        #   action = ":lua require('dapui').eval(nil, { enter = true })<cr>";
+        #   options = { desc = "Оценить выражение"; silent = true; };
+        # }
         {
           key = "<leader>dc";
-          action = ":lua require'dap'.continue()<CR>";
+          action = ":lua require('dap').continue()<CR>";
           options = { desc = "Запустить/продолжить отладку"; silent = true; };
         }
         {
           key = "<F5>";
-          action = ":lua require'dap'.continue()<CR>";
+          action = ":lua require('dap').continue()<CR>";
           options = { desc = "Запустить/продолжить отладку"; silent = true; };
         }
         {
           key = "<leader>dp";
-          action = ":lua require'dap'.pause()<CR>";
+          action = ":lua require('dap').pause()<CR>";
           options = { desc = "Пауза отладки"; silent = true; };
         }
         {
           key = "<F6>";
-          action = ":lua require'dap'.pause()<CR>";
+          action = ":lua require('dap').pause()<CR>";
           options = { desc = "Пауза отладки"; silent = true; };
         }
         {
           key = "<leader>dr";
-          action = ":lua require'dap'.restart()<CR>";
+          action = ":lua require('dap').restart()<CR>";
           options = { desc = "Перезапустить отладку"; silent = true; };
         }
         {
           key = "<C-F5>";
-          action = ":lua require'dap'.restart()<CR>";
+          action = ":lua require('dap').restart()<CR>";
           options = { desc = "Перезапустить отладку"; silent = true; };
         }
         {
           key = "<leader>ds";
-          action = ":lua require'dap'.run_to_cursor()<CR>";
+          action = ":lua require('dap').run_to_cursor()<CR>";
           options = { desc = "Выполнить до курсора"; silent = true; };
         }
         {
           key = "<leader>dq";
-          action = ":lua require'dap'.close()<CR>";
+          action = ":lua require('dap').close()<CR>";
           options = { desc = "Закрыть отладку"; silent = true; };
         }
         {
           key = "<leader>dQ";
-          action = ":lua require'dap'.terminate()<CR>";
+          action = ":lua require('dap').terminate()<CR>";
           options = { desc = "Завершить отладку"; silent = true; };
         }
         {
           key = "<S-F5>";
-          action = ":lua require'dap'.terminate()<CR>";
+          action = ":lua require('dap').terminate()<CR>";
           options = { desc = "Завершить отладку"; silent = true; };
         }
-        {
-          key = "<leader>db";
-          action = ":lua require'dap'.toggle_breakpoint()<CR>";
-          options = { desc = "Переключить точку останова"; silent = true; };
-        }
+        # {
+        #   key = "<leader>db";
+        #   action = ":lua require('dap').toggle_breakpoint()<CR>";
+        #   options = { desc = "Переключить точку останова"; silent = true; };
+        # }
         {
           key = "<F9>";
-          action = ":lua require'dap'.toggle_breakpoint()<CR>";
+          action = ":lua require('dap').toggle_breakpoint()<CR>";
           options = { desc = "Переключить точку останова"; silent = true; };
         }
-        {
-          key = "<leader>dC";
-          action = ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
-          options = { desc = "Установить условную точку останова"; silent = true; };
-        }
+        # {
+        #   key = "<leader>dC";
+        #   action = ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
+        #   options = { desc = "Установить условную точку останова"; silent = true; };
+        # }
         {
           key = "<S-F9>";
-          action = ":lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
+          action = ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
           options = { desc = "Установить условную точку останова"; silent = true; };
         }
-        {
-          key = "<leader>dB";
-          action = ":lua require'dap'.clear_breakpoints()<CR>";
-          options = { desc = "Очистить точки останова"; silent = true; };
-        }
+        # {
+        #   key = "<leader>dB";
+        #   action = ":lua require('dap').clear_breakpoints()<CR>";
+        #   options = { desc = "Очистить точки останова"; silent = true; };
+        # }
         {
           key = "<leader>do";
-          action = ":lua require'dap'.step_over()<CR>";
+          action = ":lua require('dap').step_over()<CR>";
           options = { desc = "Шаг с обходом"; silent = true; };
         }
         {
           key = "<F10>";
-          action = ":lua require'dap'.step_over()<CR>";
+          action = ":lua require('dap').step_over()<CR>";
           options = { desc = "Шаг с обходом"; silent = true; };
         }
         {
           key = "<leader>di";
-          action = ":lua require'dap'.step_into()<CR>";
+          action = ":lua require('dap').step_into()<CR>";
           options = { desc = "Шаг с заходом"; silent = true; };
         }
         {
           key = "<F11>";
-          action = ":lua require'dap'.step_into()<CR>";
+          action = ":lua require('dap').step_into()<CR>";
           options = { desc = "Шаг с заходом"; silent = true; };
         }
         {
           key = "<leader>dO";
-          action = ":lua require'dap'.step_out()<CR>";
+          action = ":lua require('dap').step_out()<CR>";
           options = { desc = "Шаг с выходом"; silent = true; };
         }
         {
           key = "<S-F11>";
-          action = ":lua require'dap'.step_out()<CR>";
+          action = ":lua require('dap').step_out()<CR>";
           options = { desc = "Шаг с выходом"; silent = true; };
         }
-        {
-          key = "<leader>dE";
-          action = ":lua require'dap.ui.widgets'.hover()<CR>";
-          options = { desc = "Оценить выражение"; silent = true; };
-        }
+        # {
+        #   key = "<leader>dE";
+        #   action = ":lua require('dap.ui).widgets'.hover()<CR>";
+        #   options = { desc = "Оценить выражение"; silent = true; };
+        # }
         {
           key = "<leader>dR";
-          action = ":lua require'dap'.repl.toggle()<CR>";
+          action = ":lua require('dap').repl.toggle()<CR>";
           options = { desc = "Переключить REPL"; silent = true; };
         }
         {
@@ -1196,6 +1302,26 @@
           key = "<leader>lG";
           action = ":Telescope lsp_workspace_symbols<CR>";
           options = { desc = "Показать символы рабочей области"; silent = true; };
+        }
+        {
+          key = "gd";
+          action.__raw = "require('telescope.builtin').lsp_definitions";
+          options = { desc = "Показать определение"; silent = true; };
+        }
+        {
+          key = "gr";
+          action.__raw = "require('telescope.builtin').lsp_references";
+          options = { desc = "Показать ссылки"; silent = true; };
+        }
+        {
+          key = "gi";
+          action.__raw = "require('telescope.builtin').lsp_implementations";
+          options = { desc = "К имплементации"; silent = true; };
+        }
+        {
+          key = "gt";
+          action.__raw = "require('telescope.builtin').lsp_type_definitions";
+          options = { desc = "К определению типа"; silent = true; };
         }
         # Terminal Mappings
         {
@@ -1459,7 +1585,40 @@
         #   key = "<leader>sc";
         #   action = "<cmd>SnipClose<cr>";
         # }
-      ];
+      ] ++ lib.optionals config.programs.nixvim.plugins.dap.extensions.dap-ui.enable [
+          {
+            mode = "n";
+            key = "<leader>d?";
+            action.__raw =
+            ''
+            function()
+              vim.ui.input({ prompt = "Expression: " }, function(expr)
+                if expr then require("dapui").eval(expr, { enter = true }) end
+              end)
+            end
+            '';
+            options = {
+              desc = "Оценить выражение";
+              silent = true;
+            };
+          }
+          # {
+          #   mode = "n";
+          #   key = "<Leader>dC";
+          #   action.__raw =
+          #   ''
+          #   function()
+          #     vim.ui.input({ prompt = "Expression: " }, function(expr)
+          #     if condition then require("dap").set_breakpoint(condition) end
+          #     end)
+          #   end
+          #   '';
+          #   options = {
+          #     desc = "Оценить выражение";
+          #     silent = true;
+          #   };
+          # }
+        ];
     };
   };
 }
