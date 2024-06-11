@@ -209,7 +209,7 @@
         fugitive.enable = true;
         gitsigns = {
           enable = true;
-          settings.current_line_blame = true;
+          # settings.current_line_blame = true;
         };
         leap.enable = true;
         lsp-format.enable = true;
@@ -275,6 +275,19 @@
               enable = true;
             };
           };
+          defaults = {
+            file_ignore_patterns = [ ".git" ".direnv" "target" "node_modules" ];
+            vimgrep_arguments = [
+              "${pkgs.ripgrep}/bin/rg"
+              "--hidden"
+              "--color=never"
+              "--no-heading"
+              "--with-filename"
+              "--line-number"
+              "--column"
+              "--smart-case"
+            ];
+          };
         };
 
         yanky = {
@@ -301,7 +314,19 @@
         treesitter = {
           enable = true;
           indent = true;
-          ensureInstalled = [ "rust" "python" "c" "cpp" "toml" "nix" "go" "java" ];
+          ensureInstalled = [ 
+            "rust" 
+            "python" 
+            "c" 
+            "cpp" 
+            "toml" 
+            "nix" 
+            "go" 
+            "gomod"
+            "gotml"
+            "gowork"
+            "java" 
+          ];
           grammarPackages = with config.programs.nixvim.plugins.treesitter.package.builtGrammars; [
             c
             go
@@ -361,8 +386,59 @@
             gopls = {
               enable = true;
               autostart = true;
+              onAttach.function = ''
+              if not client.server_capabilities.semanticTokensProvider then
+              local semantic = client.config.capabilities.textDocument.semanticTokens
+              client.server_capabilities.semanticTokensProvider = {
+                full = true,
+                legend = {
+                  tokenTypes = semantic.tokenTypes,
+                  tokenModifiers = semantic.tokenModifiers,
+                },
+                range = true,
+              }
+              end
+              '';
+              extraOptions = {
+                settings = {
+                  gopls = {
+                    gofumpt = true;
+                    codelenses = {
+                      gc_details = false;
+                      generate = true;
+                      regenerate_cgo = true;
+                      run_govulncheck = true;
+                      test = true;
+                      tidy = true;
+                      upgrade_dependency = true;
+                      vendor = true;
+                    };
+                    hints = {
+                      assignVariableTypes = true;
+                      compositeLiteralFields = true;
+                      compositeLiteralTypes = true;
+                      constantValues = true;
+                      functionTypeParameters = true;
+                      parameterNames = true;
+                      rangeVariableTypes = true;
+                    };
+                    analyses = {
+                      fieldalignment = true;
+                      nilness = true;
+                      unusedparams = true;
+                      unusedwrite = true;
+                      useany = true;
+                    };
+                    usePlaceholders = true;
+                    completeUnimported = true;
+                    staticcheck = true;
+                    directoryFilters = ["-.git" "-.vscode" "-.idea" "-.vscode-test" "-node_modules"];
+                    semanticTokens = true;
+                  };
+                };
+              };
             };
-
+            nil_ls.enable = true;
             svelte.enable = false; # Svelte
             vuels.enable = false; # Vue
             tsserver.enable = true; # TS/JS
@@ -400,34 +476,46 @@
           };
         };
 
+        luasnip.enable = true;
         cmp = {
           enable = true;
 
           settings = {
             snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
 
+            # mapping = {
+            #   # "<C-d>" = "cmp.mapping.scroll_docs(-4)";
+            #   # "<C-f>" = "cmp.mapping.scroll_docs(4)";
+            #   # "<C-Space>" = "cmp.mapping.complete()";
+            #   # "<C-e>" = "cmp.mapping.close()";
+            #   "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
+            #   "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
+            #   # "<CR>" = "cmp.mapping.confirm({ select = true })";
+            # };
+
             mapping = {
-              # "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-              # "<C-f>" = "cmp.mapping.scroll_docs(4)";
-              # "<C-Space>" = "cmp.mapping.complete()";
-              # "<C-e>" = "cmp.mapping.close()";
-              "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-              "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-              # "<CR>" = "cmp.mapping.confirm({ select = true })";
+              "<C-Space>" = "cmp.mapping.complete()";
+              "<CR>" = "cmp.mapping.confirm()";
+              "<ESC>" = "cmp.mapping.close()";
+              "<Down>" = "cmp.mapping.select_next_item()";
+              "<C-j>" = "cmp.mapping.select_next_item()";
+              "<Tab>" = "cmp.mapping.select_next_item()";
+              "<Up>" = "cmp.mapping.select_prev_item()";
+              "<C-k>" = "cmp.mapping.select_prev_item()";
+              "<S-Tab>" = "cmp.mapping.select_prev_item()";
             };
 
             sources = [
-              {name = "path";}
-              {name = "nvim_lsp";}
-              {name = "cmp_tabby";}
-              {name = "luasnip";}
-              {
-                name = "buffer";
-              # Words from other open buffers can also be suggested.
-              option.get_bufnrs.__raw = "vim.api.nvim_list_bufs";
-            }
-            {name = "neorg";}
-          ];
+              { name = "path";}
+              { name = "nvim_lsp";}
+              { name = "cmp_tabby";}
+              { name = "luasnip";}
+              { name = "buffer"; option.get_bufnrs.__raw = "vim.api.nvim_list_bufs"; }
+              { name = "neorg";}
+              { name = "nvim_lsp_signature_help"; }
+              { name = "treesitter"; }
+              { name = "dap"; }
+            ];
         };
       };
 
@@ -442,6 +530,8 @@
               path = "[path]";
               luasnip = "[snip]";
               buffer = "[buffer]";
+              dap = "[dap]";
+              treesitter= "[treesitter]";
               # neorg = "[neorg]";
               cmp_tabby = "[Tabby]";
             };
@@ -450,6 +540,7 @@
 
         # Dashboard
         # cmp.enable = true;
+        cmp-treesitter.enable = true;
         cmp-nvim-lsp.enable = true;
         cmp-path.enable = true;
         cmp-rg.enable = true;
@@ -458,8 +549,12 @@
         cmp-buffer.enable = true;
         cmp_luasnip.enable = true;
         cmp-cmdline.enable = false;
+        cmp-nvim-lsp-signature-help.enable = true;
         # cmp-tabby.host = "http://127.0.0.1:8080";
         # vim-lspconfig.enable = true;
+        nvim-cmp = {
+          enable = true;
+        };
       };
 
       extraConfigLua = ''

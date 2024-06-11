@@ -202,7 +202,7 @@ in
       audacity
       yandex-browser
       distrobox
-      zoxide
+      # zoxide
 
       # golang
       go_1_21
@@ -274,8 +274,6 @@ in
   };
 
   programs = {
-    direnv.enable = true;
-
     neovim = {
       enable = false;
       defaultEditor = true;
@@ -290,6 +288,16 @@ in
 
     # Let Home Manager install and manage itself.
     home-manager.enable = true;
+
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+    
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+    };
 
     zsh = {
       enable = true;
@@ -307,7 +315,8 @@ in
       export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
       . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
-      eval "$(zoxide init zsh)" #'';
+      # eval "$(zoxide init zsh)"
+      '';
       oh-my-zsh = {
         enable = true;
         plugins = [
@@ -392,16 +401,6 @@ in
       };
       plugins = [
         {
-          # will source zsh-autosuggestions.plugin.zsh
-          name = "zsh-autosuggestions";
-          src = pkgs.fetchFromGitHub {
-            owner = "zsh-users";
-            repo = "zsh-autosuggestions";
-            rev = "v0.4.0";
-            sha256 = "0z6i9wjjklb4lvr7zjhbphibsyx51psv50gm07mbb0kj9058j6kc";
-          };
-        }
-        {
           name = "zsh-nix-shell";
           file = "nix-shell.plugin.zsh";
           src = pkgs.fetchFromGitHub {
@@ -412,6 +411,17 @@ in
           };
         }
       ];
+      zplug = {
+        enable = true;
+        plugins = [
+          { name = "zsh-users/zsh-autosuggestions"; }
+          { name = "zsh-users/zsh-completions"; }
+          { name = "zsh-users/zsh-syntax-highlighting"; }
+          { name = "zsh-users/zsh-history-substring-search"; }
+          { name = "unixorn/warhol.plugin.zsh"; }
+          { name = "notthebee/prompt"; tags = [ as:theme ]; }
+        ];
+      };
     };
 
     git = {
