@@ -8,6 +8,8 @@
     ./spell.nix
     ./plugins/persistent-breakpoints.nvim.nix
     ./plugins/git-blame.nvim.nix
+    ./utils/buffer.nix
+    # ./plugins/dap.nix
     # ./colorscheme.nix
   ];
   programs = {
@@ -34,6 +36,7 @@
       };
 
       opts = {
+        timeoutlen = 100;
         background = "";
         updatetime = 100;
         spell = true;
@@ -74,31 +77,11 @@
           pattern = ["sql" "mysql" "plsql"];
           command = "lua require('cmp').setup.buffer({ sources = {{ name = 'vim-dadbod-completion' }} })";
         }
-        # {
-        #   event = ["VimEnter"];
-        #   pattern = ["*"];
-        #   command = "GitBlameDisable";
-        # }
       ];
 
       luaLoader.enable = true;
-      # diffview.enable = true;
 
       plugins = {
-        # lightline.enable = true;
-        # persistence = {
-        #   enable = true;
-        #   preSave = ''
-        #   function() vim.api.nvim_exec_autocmds("User", {pattern = "SessionSavePre"}) end,'';
-        # };
-
-        # gitblame = {
-        #   enable = true;
-        #   delay = 3000;
-        #   dateFormat = "%r";
-        #   messageTemplate = " <author>, <date>";
-        # };
-
         dashboard.enable = true;
         dressing = {
           enable = true;
@@ -150,6 +133,29 @@
                   mode = "remote";
                   request = "attach";
                 }
+                # {
+                #   type = "go";
+                #   name = "Launch Eparser";
+                #   request = "launch";
+                #   program = "\${workspaceFolder}/cmd/eparser";
+                #   # env = {
+                #   #   CGO_ENABLED = 0;
+                #   # };
+                #   args = [
+                #     "--local-config-enabled"
+                #     "--public-port"
+                #     "7080"
+                #     "--admin-port"
+                #     "7081"
+                #     "--grpc-port"
+                #     "7082"
+                #     "--channelz-port"
+                #     "50851"
+                #   ];
+                #   envFile = "\${workspaceFolder}/.env";
+                #   preLaunchTask = "Build eparser";
+                #   postDebugTask = "Stop eparser";
+                # }
               ];
               delve = {
                 path = "dlv";
@@ -157,6 +163,7 @@
                 port = "38697";
                 # args = [];
                 buildFlags = "";
+                # buildFlags = ''-ldflags "-X 'gitthub.ru/back2nix/placebo/internal/app.Name=myapp' -tags=debug'';
               };
             };
             dap-python.enable = true;
@@ -287,10 +294,14 @@
           extensions = {
             fzf-native = {
               enable = true;
+              fuzzy = true;
+              overrideGenericSorter = true;
+              overrideFileSorter = true;
+              caseMode = "smart_case";
             };
           };
           defaults = {
-            file_ignore_patterns = [".git" ".direnv" "target" "node_modules"];
+            # file_ignore_patterns = [".git" ".direnv" "target" "node_modules"];
             vimgrep_arguments = [
               "${pkgs.ripgrep}/bin/rg"
               "--hidden"
@@ -301,6 +312,53 @@
               "--column"
               "--smart-case"
             ];
+            layout_strategy = "horizontal";
+            layout_config.prompt_position = "top";
+            sorting_strategy = "ascending";
+          };
+          extraOptions = {
+            pickers = {
+              git_files = {
+                disable_devicons = true;
+              };
+              find_files = {
+                disable_devicons = true;
+              };
+              buffers = {
+                disable_devicons = true;
+              };
+              live_grep = {
+                disable_devicons = true;
+              };
+              current_buffer_fuzzy_find = {
+                disable_devicons = true;
+              };
+              lsp_definitions = {
+                disable_devicons = true;
+              };
+              lsp_references = {
+                disable_devicons = true;
+              };
+              diagnostics = {
+                disable_devicons = true;
+              };
+              lsp_dynamic_workspace_symbols = {
+                disable_devicons = true;
+              };
+            };
+          };
+          keymaps = {
+            # "<leader>f" = "git_files";
+            # "<leader>F" = "find_files";
+            # "gb" = "buffers";
+            # "<leader><space>" = "live_grep";
+            # "<leader>/" = "current_buffer_fuzzy_find";
+            # "gd" = "lsp_definitions";
+            # "gr" = "lsp_references";
+            # "gi" = "lsp_implementations";
+            # "gt" = "lsp_type_definition";
+            "<leader>fd" = "diagnostics";
+            "<leader>s" = "lsp_dynamic_workspace_symbols";
           };
         };
 
@@ -364,6 +422,15 @@
         which-key = {
           enable = true;
           plugins.spelling.enabled = false;
+          triggersNoWait = ["`" "'" "<leader>" "g`" "g'" "\"" "<c-r>" "z=" "<Space>"];
+          disable = {
+            buftypes = [];
+            filetypes = [];
+          };
+          triggersBlackList = {
+            i = ["j" "k"];
+            v = ["j" "k"];
+          };
         };
         multicursors.enable = true;
         lastplace.enable = true;
@@ -382,7 +449,14 @@
               yamllint.enable = true;
             };
             formatting = {
-              golines.enable = true;
+              golines = {
+                enable = true;
+                withArgs = ''
+                  {
+                    extra_args = { "--no-reformat-tags" },
+                  }
+                '';
+              };
               gofumpt.enable = true;
               # goimports.enable = true;
               goimports_reviser.enable = true;
@@ -403,17 +477,17 @@
               };
 
               # JS
-              prettier = {
-                enable = true;
-                disableTsServerFormatter = true;
-                withArgs = ''
-                  {
-                    extra_args = { "--single-quote" },
-                  }
-                '';
-              };
+              # prettier = {
+              #   enable = true;
+              #   disableTsServerFormatter = true;
+              #   withArgs = ''
+              #     {
+              #       extra_args = { "--single-quote" },
+              #     }
+              #   '';
+              # };
               stylua.enable = true;
-              yamlfmt.enable = true;
+              # yamlfmt.enable = true;
             };
           };
         };
@@ -427,13 +501,18 @@
           #   "[d" = "goto_prev";
           # };
 
-          keymaps.lspBuf = {
-            K = "hover";
-            gD = "declaration";
-            "<C-k>" = "signature_help";
-            # "<leader>rn" = "rename";
-            "<leader>ca" = "code_action";
-          };
+          # keymaps.lspBuf = {
+          # K = "hover";
+          # gD = "declaration";
+          # "<C-k>" = "signature_help";
+          # # "<leader>rn" = "lua vim.lsp.buf.rename()";
+          # "<leader>ca" = "code_action";
+          # K = "hover";
+          # gD = "references";
+          # gd = "definition";
+          # gi = "implementation";
+          # gt = "type_definition";
+          # };
 
           # keymaps.extra = [
           # {
@@ -560,16 +639,6 @@
           settings = {
             snippet.expand = "function(args) require('luasnip').lsp_expand(args.body) end";
 
-            # mapping = {
-            #   # "<C-d>" = "cmp.mapping.scroll_docs(-4)";
-            #   # "<C-f>" = "cmp.mapping.scroll_docs(4)";
-            #   # "<C-Space>" = "cmp.mapping.complete()";
-            #   # "<C-e>" = "cmp.mapping.close()";
-            #   "<Tab>" = "cmp.mapping(cmp.mapping.select_next_item(), {'i', 's'})";
-            #   "<S-Tab>" = "cmp.mapping(cmp.mapping.select_prev_item(), {'i', 's'})";
-            #   # "<CR>" = "cmp.mapping.confirm({ select = true })";
-            # };
-
             mapping = {
               "<C-Space>" = "cmp.mapping.complete()";
               "<CR>" = "cmp.mapping.confirm()";
@@ -644,8 +713,8 @@
             go = [
               # "goimports"
               "goimports_reviser"
-              "golines"
-              "gofmt"
+              # "golines"
+              # "gofmt"
               "gofumpt"
             ];
             javascript = [["prettierd" "prettier"]];
@@ -682,6 +751,28 @@
       };
 
       extraConfigLua = ''
+        vim.api.nvim_create_user_command("Pwd", 'let @+=expand("%:p") | echo expand("%:p")', {})
+
+        local function myRepl(t)
+          if t.range ~= 0 then
+            vim.cmd "'<,'>s/null/nil/ge | '<,'>s/\\[/\\{/ge | '<,'>s/\\]/\\}/ge"
+          else
+            vim.cmd "%s/null/nil/ge | %s/\\[/\\{/ge | %s/\\]/\\}/ge"
+          end
+        end
+        vim.api.nvim_create_user_command("MyRepl", function(t) myRepl(t) end, { range = true })
+
+        local function myReplQu(t)
+          if t.range ~= 0 then
+            vim.cmd "'<,'>s/\"/'/ge"
+          else
+            vim.cmd "%s/\"/'/ge"
+          end
+        end
+        vim.api.nvim_create_user_command("MyReplQu", function(t) myReplQu(t) end, { range = true })
+
+        vim.api.nvim_set_keymap("x", "<C-t>", ":po<CR>", { noremap = true })
+
         local dap, dapui = require("dap"), require("dapui")
         dap.listeners.before.attach.dapui_config = function()
         dapui.open()
@@ -860,9 +951,17 @@
           }
           {
             key = "<leader>c";
-            action = ":bd<CR>";
+            action = "<cmd>lua buffer_close()<cr>";
             options = {
               desc = "Закрыть буфер";
+              silent = true;
+            };
+          }
+          {
+            key = "<leader>C";
+            action = "<cmd>lua buffer_close(0, true)<cr>";
+            options = {
+              desc = "Закрыть буфер принудительно";
               silent = true;
             };
           }
@@ -961,7 +1060,7 @@
           }
           {
             key = "<leader>bc";
-            action = ":BufferCloseAllButCurrent<CR>";
+            action = "<cmd>lua buffer_close_all(true)<cr>";
             options = {
               desc = "Закрыть все буферы, кроме текущего";
               silent = true;
@@ -977,7 +1076,7 @@
           }
           {
             key = "<leader>bd";
-            action = ":BufferClose<CR>";
+            action = "<cmd>lua buffer_close_all()<cr>";
             options = {
               desc = "Удалить буфер с помощью интерактивного выбора";
               silent = true;
@@ -1287,29 +1386,49 @@
           # {
           #   key = "gD";
           #   action = ":lua vim.lsp.buf.declaration()<CR>";
-          #   options = { desc = "Перейти к объявлению"; silent = true; };
+          #   action = "<cmd>lsp_references<cr>";
+          #   options = {
+          #     desc = "Перейти к объявлению";
+          #     silent = true;
+          #   };
           # }
-          # {
-          #   key = "gy";
-          #   action = ":lua vim.lsp.buf.type_definition()<CR>";
-          #   options = { desc = "Перейти к определению типа"; silent = true; };
-          # }
-          # {
-          #   key = "gd";
-          #   action = ":lua vim.lsp.buf.definition()<CR>";
-          #   options = { desc = "Перейти к определению"; silent = true; };
-          # }
-          # {
-          #   key = "gI";
-          #   action = ":lua vim.lsp.buf.implementation()<CR>";
-          #   options = { desc = "Перейти к реализации"; silent = true; };
-          # }
-          # {
-          #   key = "grr";
-          #   # action = ":lua vim.lsp.buf.references()<CR>";
-          #   action = "require('telescope.builtin').lsp_references";
-          #   options = { desc = "Найти ссылки"; silent = true; };
-          # }
+          {
+            key = "gt";
+            # action = ":lua vim.lsp.buf.type_definition()<CR>";
+            action.__raw = ''function() require("telescope.builtin").lsp_type_definitions { reuse_win = true } end'';
+            options = {
+              desc = "Перейти к определению типа";
+              silent = true;
+            };
+          }
+          {
+            key = "gd";
+            # action = ":lua vim.lsp.buf.definition()<CR>";
+            action.__raw = ''function() require("telescope.builtin").lsp_definitions { reuse_win = true } end'';
+            options = {
+              desc = "Перейти к определению";
+              silent = true;
+            };
+          }
+          {
+            key = "gi";
+            # action = ":lua vim.lsp.buf.implementation()<CR>";
+            action.__raw = ''function() require("telescope.builtin").lsp_implementations { reuse_win = true } end'';
+            options = {
+              desc = "Перейти к реализации";
+              silent = true;
+            };
+          }
+          {
+            key = "gr";
+            # action = ":lua vim.lsp.buf.references()<CR>";
+            # action = "require('telescope.builtin').lsp_references";
+            action.__raw = ''function() require("telescope.builtin").lsp_references() end'';
+            options = {
+              desc = "Найти ссылки";
+              silent = true;
+            };
+          }
           # {
           #   key = "<leader>lR";
           #   action = ":lua vim.lsp.buf.references()<CR>";
@@ -1383,7 +1502,7 @@
           # }
           {
             key = "gn";
-            action = "rename";
+            action = "<CMD>lua vim.lsp.buf.rename()<CR>";
             options = {
               desc = "Переименовать символ";
               silent = true;
@@ -1391,7 +1510,7 @@
           }
           {
             key = "<leader>lr";
-            action = "rename";
+            action = "<CMD>lua vim.lsp.buf.rename()<CR>";
             options = {
               desc = "Переименовать символ";
               silent = true;
@@ -1642,7 +1761,6 @@
             };
           }
           {
-            mode = "n";
             key = "<leader>fy";
             action = "<cmd>Telescope yank_history<cr>";
             options = {
@@ -1814,14 +1932,14 @@
               silent = true;
             };
           }
-          {
-            key = "<leader>gt";
-            action = ":Telescope git_status<CR>";
-            options = {
-              desc = "Показать статус Git";
-              silent = true;
-            };
-          }
+          # {
+          #   key = "<leader>gt";
+          #   action = ":Telescope git_status<CR>";
+          #   options = {
+          #     desc = "Показать статус Git";
+          #     silent = true;
+          #   };
+          # }
           {
             key = "<leader>l";
             action = "+lsp";
@@ -1846,38 +1964,41 @@
               silent = true;
             };
           }
-          {
-            key = "gd";
-            action.__raw = "require('telescope.builtin').lsp_definitions";
-            options = {
-              desc = "Показать определение";
-              silent = true;
-            };
-          }
-          {
-            key = "gr";
-            action.__raw = "require('telescope.builtin').lsp_references";
-            options = {
-              desc = "Показать ссылки";
-              silent = true;
-            };
-          }
-          {
-            key = "gi";
-            action.__raw = "require('telescope.builtin').lsp_implementations";
-            options = {
-              desc = "К имплементации";
-              silent = true;
-            };
-          }
-          {
-            key = "gt";
-            action.__raw = "require('telescope.builtin').lsp_type_definitions";
-            options = {
-              desc = "К определению типа";
-              silent = true;
-            };
-          }
+          # {
+          #   key = "gd";
+          #   action.__raw = "lsp_definitions";
+          #   options = {
+          #     desc = "Показать определение";
+          #     silent = true;
+          #   };
+          # }
+          # {
+          #   key = "gr";
+          #   # action.__raw = "require('telescope.builtin').lsp_references";
+          #   action = "lsp_references";
+          #   options = {
+          #     desc = "Показать ссылки";
+          #     silent = true;
+          #   };
+          # }
+          # {
+          #   key = "gi";
+          #   # action.__raw = "require('telescope.builtin').lsp_implementations";
+          #   action = "implementation";
+          #   options = {
+          #     desc = "К имплементации";
+          #     silent = true;
+          #   };
+          # }
+          # {
+          #   key = "gt";
+          #   # action.__raw = "require('telescope.builtin').lsp_type_definitions";
+          #   action = "lsp_type_definitions";
+          #   options = {
+          #     desc = "К определению типа";
+          #     silent = true;
+          #   };
+          # }
           # Terminal Mappings
           {
             key = "<leader>t";
