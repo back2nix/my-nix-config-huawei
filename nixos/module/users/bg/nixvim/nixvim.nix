@@ -7,6 +7,7 @@
   imports = [
     ./spell.nix
     ./plugins/persistent-breakpoints.nvim.nix
+    ./plugins/git-blame.nvim.nix
     # ./colorscheme.nix
   ];
   programs = {
@@ -73,6 +74,11 @@
           pattern = ["sql" "mysql" "plsql"];
           command = "lua require('cmp').setup.buffer({ sources = {{ name = 'vim-dadbod-completion' }} })";
         }
+        # {
+        #   event = ["VimEnter"];
+        #   pattern = ["*"];
+        #   command = "GitBlameDisable";
+        # }
       ];
 
       luaLoader.enable = true;
@@ -84,6 +90,13 @@
         #   enable = true;
         #   preSave = ''
         #   function() vim.api.nvim_exec_autocmds("User", {pattern = "SessionSavePre"}) end,'';
+        # };
+
+        # gitblame = {
+        #   enable = true;
+        #   delay = 3000;
+        #   dateFormat = "%r";
+        #   messageTemplate = " <author>, <date>";
         # };
 
         dashboard.enable = true;
@@ -348,7 +361,7 @@
         };
         treesitter-context.enable = true;
         trouble.enable = true;
-        plugins.which-key = {
+        which-key = {
           enable = true;
           plugins.spelling.enabled = false;
         };
@@ -1769,15 +1782,19 @@
             key = "<leader>g";
             action = "+git";
             options = {
-              desc = "Git";
+              desc = " Git";
               silent = true;
             };
           }
           {
+            # key = "<leader>gb";
+            # action = ":Telescope git_branches<CR>";
+            # options = { desc = "Показать ветки Git"; silent = true; };
+            mode = "n";
             key = "<leader>gb";
-            action = ":Telescope git_branches<CR>";
+            action = "<cmd>BlameToggle<CR>";
             options = {
-              desc = "Показать ветки Git";
+              desc = "GitBlame";
               silent = true;
             };
           }

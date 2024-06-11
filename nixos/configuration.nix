@@ -1,16 +1,14 @@
-{ config
-, pkgs
-, ...
-}:
-let
-  masterPkg = (import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
-      nixpkgs.config = {
-        allowUnfree = true;
-        };
-      });
-
-in
 {
+  config,
+  pkgs,
+  ...
+}: let
+  masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
+    nixpkgs.config = {
+      allowUnfree = true;
+    };
+  };
+in {
   imports = [
     #<home-manager/nixos>
     # ./module/wordpress.nix
@@ -26,7 +24,7 @@ in
     # kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
 
-    supportedFilesystems = [ "ntfs" ];
+    supportedFilesystems = ["ntfs"];
 
     tmp = {
       useTmpfs = true;
@@ -97,19 +95,19 @@ in
       GTK_THEME = "Adwaita:dark";
     };
 
-    shells = with pkgs; [ zsh ];
+    shells = with pkgs; [zsh];
 
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     systemPackages = with pkgs; [
-        lm_sensors
-        virtualbox
-        direnv
-        tcpdump
-        wireshark
-        tshark
-        pavucontrol
-        masterPkg.lunarvim
+      lm_sensors
+      virtualbox
+      direnv
+      tcpdump
+      wireshark
+      tshark
+      pavucontrol
+      masterPkg.lunarvim
     ];
 
     etc."proxychains.conf".text = ''
@@ -124,19 +122,21 @@ in
       localnet 127.0.0.0/255.0.0.0
 
       [ProxyList]
-      # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
-      # socks5 192.168.0.5 1081
-      socks5 127.0.0.1 1080
-      # socks5 192.168.100.3 1080
-      # socks5 127.0.0.1 8118
-      # socks5 127.0.0.1 9063
-        '';
+        # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
+        # socks5 192.168.0.5 1081
+        socks5 127.0.0.1 1080
+        # socks5 192.168.100.3 1080
+        # socks5 127.0.0.1 8118
+        # socks5 127.0.0.1 9063
+    '';
   };
 
   programs = {
     zsh.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld.enable = true;
+    nix-ld.libraries = with pkgs; [
+    ];
     dconf.enable = true;
     wireshark.enable = true;
   };
@@ -163,8 +163,8 @@ in
       # "d /var/lib/wordpress/localhost/wp-content/themes 0750 wordpress wwwrun - -"
       # "d /var/lib/wordpress/localhost/wp-content/upgrade 0750 wordpress wwwrun - -"
     ];
-    targets."bluetooth".after = [ "systemd-tmpfiles-setup.service" ];
-    user.services.pipewire-pulse.path = [ pkgs.pulseaudio ];
+    targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
+    user.services.pipewire-pulse.path = [pkgs.pulseaudio];
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -185,8 +185,8 @@ in
       };
       daemon = {
         settings = {
-          # registry-mirrors = [ 
-          #   "https://huecker.io" 
+          # registry-mirrors = [
+          #   "https://huecker.io"
           # ];
         };
       };
@@ -222,7 +222,7 @@ in
       options = "--delete-older-than 30d";
     };
 
-    settings.trusted-users = [ "root" "bg" ];
+    settings.trusted-users = ["root" "bg"];
   };
 
   # Enable networking
@@ -231,7 +231,7 @@ in
 
     nat = {
       enable = true;
-      internalInterfaces = [ "ve-+" ];
+      internalInterfaces = ["ve-+"];
       externalInterface = "wlp0s20f3";
       # Lazy IPv6 connectivity for the container
       enableIPv6 = true;
@@ -239,7 +239,7 @@ in
 
     extraHosts = ''
       127.0.0.1 kafka
-      '';
+    '';
 
     hostName = "nixos"; # Define your hostname.
 
@@ -251,7 +251,7 @@ in
         iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
         ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
         ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-        '';
+      '';
     };
   };
 
@@ -262,15 +262,15 @@ in
       macAddress = "00:11:22:33:44:55";
     };
 
-    dbus.packages = [ pkgs.dconf ];
+    dbus.packages = [pkgs.dconf];
 
-    udev.packages = [ pkgs.gnome3.gnome-settings-daemon ];
+    udev.packages = [pkgs.gnome3.gnome-settings-daemon];
 
     libinput.enable = true;
 
     xserver = {
       enable = true;
-      videoDrivers = [ "modesetting" ];
+      videoDrivers = ["modesetting"];
       xkb = {
         layout = "us,ru";
       };
@@ -292,7 +292,7 @@ in
 
     logind.extraConfig = ''
       RuntimeDirectorySize=16G
-      '';
+    '';
 
     pipewire = {
       enable = true;
