@@ -123,6 +123,24 @@
 
         dap = {
           enable = true;
+          signs = {
+            dapBreakpoint = {
+              text = "🟩"; # ●
+              texthl = "DapBreakpoint";
+            };
+            dapBreakpointCondition = {
+              text = "🟦";
+              texthl = "DapBreakpointCondition";
+            };
+            dapLogPoint = {
+              text = "◆";
+              texthl = "DapLogPoint";
+            };
+            dapBreakpointRejected = {
+              text = "🟥";
+              texthl = "DiagnosticError";
+            };
+          };
           extensions = {
             dap-go = {
               enable = true;
@@ -1204,14 +1222,14 @@
               silent = true;
             };
           }
-          {
-            key = "<Down>";
-            action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
-            options = {
-              desc = "Следующее автодополнение (вниз)";
-              silent = true;
-            };
-          }
+          # {
+          #   key = "<Down>";
+          #   action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
+          #   options = {
+          #     desc = "Следующее автодополнение (вниз)";
+          #     silent = true;
+          #   };
+          # }
           {
             key = "<C-n>";
             action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
@@ -1228,14 +1246,14 @@
               silent = true;
             };
           }
-          {
-            key = "<Up>";
-            action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-            options = {
-              desc = "Предыдущее автодополнение (вверх)";
-              silent = true;
-            };
-          }
+          # {
+          #   key = "<Up>";
+          #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
+          #   options = {
+          #     desc = "Предыдущее автодополнение (вверх)";
+          #     silent = true;
+          #   };
+          # }
           # {
           #   key = "<C-p>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";

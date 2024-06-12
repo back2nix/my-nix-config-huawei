@@ -108,6 +108,7 @@ in {
       tshark
       pavucontrol
       masterPkg.lunarvim
+      xclip
     ];
 
     etc."proxychains.conf".text = ''
@@ -290,10 +291,6 @@ in {
 
     blueman.enable = true;
 
-    logind.extraConfig = ''
-      RuntimeDirectorySize=16G
-    '';
-
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -307,5 +304,32 @@ in {
     #   enable = true;
     #   listenPort = 8082;
     # };
+
+    power-profiles-daemon.enable = false;
+
+    tlp = {
+      enable = true;
+      settings = {
+        # CPU_SCALING_GOVERNOR_ON_AC = "performance";
+        # only charge up to 80% of the battery capacity
+        START_CHARGE_THRESH_BAT0 = "75";
+        STOP_CHARGE_THRESH_BAT0 = "80";
+      };
+    };
+    physlock.enable = true;
+    logind = {
+      lidSwitch = "ignore";
+      lidSwitchDocked = "ignore";
+      lidSwitchExternalPower = "ignore";
+      extraConfig = ''
+        RuntimeDirectorySize=16G
+        HandlePowerKey=suspend
+        HandleSuspendKey=suspend
+        HandleHibernateKey=suspend
+        PowerKeyIgnoreInhibited=yes
+        SuspendKeyIgnoreInhibited=yes
+        HibernateKeyIgnoreInhibited=yes
+      '';
+    };
   };
 }
