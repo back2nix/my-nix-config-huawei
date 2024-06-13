@@ -66,6 +66,7 @@
         vim-dadbod-ui
         vim-dadbod-completion
         dressing-nvim
+        jupytext-nvim
       ];
       extraPackages = with pkgs; [
         fd
@@ -84,7 +85,27 @@
       luaLoader.enable = true;
 
       plugins = {
+        ollama = {
+          enable = true;
+          # ssh -L 11434:0.0.0.0:11434 home_desktop -N
+          url = "http://127.0.0.1:11434";
+          # model = "llama3";
+          model = "codestral";
+
+          prompts = {
+            mathproof = {
+              prompt = ''Отвечай пользователю на русском языке'';
+              model = "mistral";
+              inputLabel = "> ";
+            };
+          };
+        };
+
         dashboard.enable = true;
+        indent-blankline.enable = true;
+        jupytext.enable = true;
+        marks.enable = true;
+        # magma-nvim.enable = true;
         improved-search = {
           enable = true;
           keymaps = [
@@ -858,6 +879,7 @@
         vim.api.nvim_set_keymap("x", "<C-t>", ":po<CR>", { noremap = true })
 
         local dap, dapui = require("dap"), require("dapui")
+        require('dap.ext.vscode').load_launchjs()
         dap.listeners.before.attach.dapui_config = function()
         dapui.open()
         end
@@ -1351,10 +1373,10 @@
             };
           }
           {
-            key = "<leader>o";
-            action = ":Neotree focus<CR>";
+            key = "<leader>oo";
+            action = ":Ollama<CR>";
             options = {
-              desc = "Фокус на Neotree";
+              desc = "Ollama";
               silent = true;
             };
           }

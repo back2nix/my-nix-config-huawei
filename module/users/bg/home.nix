@@ -214,6 +214,7 @@ in {
       gh
       # neovim
       # inputs.nixpkgs-unstable.neovim
+      python311Packages.jupytext
     ];
 
     file = {

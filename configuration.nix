@@ -354,13 +354,4 @@
       '';
     };
   };
-
-  users.users.ryan = {
-    initialPassword = "1";
-    isNormalUser = true;
-    description = "ryan";
-    extraGroups = ["networkmanager" "wheel"];
-    packages = with pkgs; [
-    ];
-  };
 }
