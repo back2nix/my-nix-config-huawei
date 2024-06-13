@@ -18,6 +18,7 @@ in {
     ./module/vpn/vpn.nix
     ./module/users/users.nix
     ./module/change.mac.nix
+    ./module/tor.nix
   ];
 
   boot = {
@@ -45,7 +46,15 @@ in {
       driSupport32Bit = true;
     };
 
-    # pulseaudio.enable = true;
+    # pulseaudio = {
+    #   enable = true;
+    #   systemWide = true;
+    #   support32Bit = true;
+    #   tcp = {
+    #     enable = true;
+    #     anonymousClients = {allowedIpRanges = ["127.0.0.1" "192.168.7.0/24"];};
+    #   };
+    # };
     pulseaudio.enable = false;
 
     bluetooth = {
@@ -178,6 +187,7 @@ in {
   };
 
   virtualisation = {
+    # waydroid.enable = true;
     docker = {
       enable = true;
       rootless = {
@@ -234,6 +244,7 @@ in {
       enable = true;
       internalInterfaces = ["ve-+"];
       externalInterface = "wlp0s20f3";
+      # externalInterface = "tornet";
       # Lazy IPv6 connectivity for the container
       enableIPv6 = true;
     };
@@ -246,13 +257,13 @@ in {
 
     # Open ports in the firewall.
     firewall = {
-      enable = true;
-      extraCommands = ''
-        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-      '';
+      # enable = true;
+      # extraCommands = ''
+      #   iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+      #   iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+      #   ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+      #   ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+      # '';
     };
   };
 
@@ -275,8 +286,12 @@ in {
       xkb = {
         layout = "us,ru";
       };
-      displayManager.gdm.enable = true;
-      displayManager.gdm.wayland = false;
+      displayManager = {
+        gdm = {
+          enable = true;
+          wayland = false;
+        };
+      };
       desktopManager.gnome.enable = true;
     };
 

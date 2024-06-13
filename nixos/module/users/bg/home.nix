@@ -1,30 +1,31 @@
-{ config
-, pkgs
-, inputs
-, lib
-, ...
-}:
-let
+{
+  config,
+  pkgs,
+  inputs,
+  lib,
+  ...
+}: let
   user = "bg";
-  masterPkg = (import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
+  masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
     nixpkgs.config = {
       allowUnfree = true;
-      allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-        "google-chrome"                                        
-      ];                                                       
+      allowUnfreePredicate = pkg:
+        builtins.elem (lib.getName pkg) [
+          "google-chrome"
+        ];
     };
-  });
+  };
 
   nixvim = import (builtins.fetchGit {
     url = "https://github.com/nix-community/nixvim";
     # When using a different channel you can use `ref = "nixos-<version>"` to set it here
+    ref = "nixos-24.05";
   });
   # zellij = pkgs.callPackage ./zellij.nix {
   #   inherit (pkgs.darwin.apple_sdk.frameworks) DiskArbitration Foundation;
   # };
   # mitmproxy = masterPkg.mitmproxy;
-in
-{
+in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
@@ -39,12 +40,11 @@ in
   nixpkgs.overlays = [
     # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
     (self: super: {
-      yandex-browser = self.callPackage ./overlays/yandex-browser.nix { };
-      genymotion = self.callPackage ./overlays/genymotion.nix { };
+      yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
+      genymotion = self.callPackage ./overlays/genymotion.nix {};
       # neovim = masterPkg.neovim;
     })
   ];
-
 
   xdg.configFile = {
     "kitty/kitty.conf".source = ./kitty.conf;
@@ -99,9 +99,7 @@ in
   #   };
   # };
 
-    # colorScheme = inputs.nix-colors.colorSchemes.dracula;
-
-
+  # colorScheme = inputs.nix-colors.colorSchemes.dracula;
 
   home = {
     username = "${user}";
@@ -116,7 +114,7 @@ in
       # # overrides. You can do that directly here, just don't forget the
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
-      (pkgs.nerdfonts.override { fonts = [  "FiraCode" "DroidSansMono" ]; }) # "FantasqueSansMono"
+      (pkgs.nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];}) # "FantasqueSansMono"
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
@@ -260,17 +258,17 @@ in
     allowUnfree = true;
 
     allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      # "opera"
-      "google-chrome"
-      "zoom"
-      "xmind"
-      "genymotion"
-      "anydesk"
-      # "yandex-browser-stable-24.1.1.940-1"
-      # "yandex-browser"
-      # "microsoft-edge-stable"
-    ];
+      builtins.elem (lib.getName pkg) [
+        # "opera"
+        "google-chrome"
+        "zoom"
+        "xmind"
+        "genymotion"
+        "anydesk"
+        # "yandex-browser-stable-24.1.1.940-1"
+        # "yandex-browser"
+        # "microsoft-edge-stable"
+      ];
   };
 
   programs = {
@@ -293,7 +291,7 @@ in
       enable = true;
       enableZshIntegration = true;
     };
-    
+
     direnv = {
       enable = true;
       enableZshIntegration = true;
@@ -302,20 +300,19 @@ in
     zsh = {
       enable = true;
       enableCompletion = true;
-      initExtra =
-      ''
-      export LANG=en_US.UTF-8
-      DIRSTACKSIZE=90
-      setopt autopushd pushdsilent pushdtohome
-      ## Remove duplicate entries
-      setopt pushdignoredups
-      ## This reverts the +/- operators.
-      setopt pushdminus
+      initExtra = ''
+        export LANG=en_US.UTF-8
+        DIRSTACKSIZE=90
+        setopt autopushd pushdsilent pushdtohome
+        ## Remove duplicate entries
+        setopt pushdignoredups
+        ## This reverts the +/- operators.
+        setopt pushdminus
 
-      export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
-      . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+        export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
+        . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
-      # eval "$(zoxide init zsh)"
+        # eval "$(zoxide init zsh)"
       '';
       oh-my-zsh = {
         enable = true;
@@ -335,49 +332,49 @@ in
         img = "eog"; # image viewer
         pdf = "evince"; # pdf reader
         cover = ''
-        local t=$(mktemp)
-        go test $COVERFLAGS -coverprofile=$t $@ \
-        && go tool cover -func=$t \
-        && unlink $t
+          local t=$(mktemp)
+          go test $COVERFLAGS -coverprofile=$t $@ \
+          && go tool cover -func=$t \
+          && unlink $t
         '';
         coverweb = ''
-        local t=$(mktemp)
-        go test $COVERFLAGS -coverprofile=$t $@ \
-        && go tool cover -html=$t \
-        && unlink $t
+          local t=$(mktemp)
+          go test $COVERFLAGS -coverprofile=$t $@ \
+          && go tool cover -html=$t \
+          && unlink $t
         '';
         ll = "ls -l";
         # z = "zellij";
         n = "nvim";
         rem2loc = ''
-        function ssh-port() { 
-          local port=$((RANDOM % 60000 + 1024)); 
-          echo ssh -L "$port":localhost:$1 desktop -N;
-          echo http://localhost:"$port" or https://localhost:"$port"; 
-          ssh -L "$port":localhost:$1 desktop -N; 
-        }; ssh-port'';
+          function ssh-port() { 
+            local port=$((RANDOM % 60000 + 1024)); 
+            echo ssh -L "$port":localhost:$1 desktop -N;
+            echo http://localhost:"$port" or https://localhost:"$port"; 
+            ssh -L "$port":localhost:$1 desktop -N; 
+          }; ssh-port'';
         rem2loc_norand = ''
-        function ssh-port() { 
-          echo ssh -L "$2":localhost:$1 desktop -N;
-          echo http://localhost:"$2" or https://localhost:"$2"; 
-          ssh -L "$2":localhost:$1 desktop -N; 
-        }; ssh-port'';
+          function ssh-port() { 
+            echo ssh -L "$2":localhost:$1 desktop -N;
+            echo http://localhost:"$2" or https://localhost:"$2"; 
+            ssh -L "$2":localhost:$1 desktop -N; 
+          }; ssh-port'';
         sh = "stat --format '%a'";
         cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
         cdgo = "cd ~/Documents/code/github.com/back2nix";
         st = "stat --format '%a'";
         fe = ''
-        selected_file=$(rg --files ''${1:-.} | fzf)
-        if [ -n "$selected_file" ]; then
-        $EDITOR ''${selected_file%%:*}
-        fi
+          selected_file=$(rg --files ''${1:-.} | fzf)
+          if [ -n "$selected_file" ]; then
+          $EDITOR ''${selected_file%%:*}
+          fi
         '';
         # Search content and Edit
         se = ''
-        fileline=$(rg -n ''${1:-.} | fzf --preview 'bat -f `echo {} | cut -d ":" -f 1` -r `echo {} | cut -d ":" -f 2`:$((`echo {} | cut -d ":" -f 2`+150))' | awk '{print $1}' | sed 's/.$//')
-        if [[ -n $fileline ]]; then
-        $EDITOR ''${fileline%%:*} +''${fileline##*:}
-        fi
+          fileline=$(rg -n ''${1:-.} | fzf --preview 'bat -f `echo {} | cut -d ":" -f 1` -r `echo {} | cut -d ":" -f 2`:$((`echo {} | cut -d ":" -f 2`+150))' | awk '{print $1}' | sed 's/.$//')
+          if [[ -n $fileline ]]; then
+          $EDITOR ''${fileline%%:*} +''${fileline##*:}
+          fi
         '';
         fl = ''git log --oneline --color=always | fzf --ansi --preview=" echo { } | cut - d ' ' - f 1 | xargs - I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1 | xargs git log --pretty=short -n 1'';
         gd = "git diff --name-only --diff-filter=d $@ | xargs bat --diff";
@@ -414,12 +411,15 @@ in
       zplug = {
         enable = true;
         plugins = [
-          { name = "zsh-users/zsh-autosuggestions"; }
-          { name = "zsh-users/zsh-completions"; }
-          { name = "zsh-users/zsh-syntax-highlighting"; }
-          { name = "zsh-users/zsh-history-substring-search"; }
-          { name = "unixorn/warhol.plugin.zsh"; }
-          { name = "notthebee/prompt"; tags = [ as:theme ]; }
+          {name = "zsh-users/zsh-autosuggestions";}
+          {name = "zsh-users/zsh-completions";}
+          {name = "zsh-users/zsh-syntax-highlighting";}
+          {name = "zsh-users/zsh-history-substring-search";}
+          {name = "unixorn/warhol.plugin.zsh";}
+          {
+            name = "notthebee/prompt";
+            tags = [as:theme];
+          }
         ];
       };
     };
@@ -469,13 +469,13 @@ in
   };
 
   xdg.mimeApps.defaultApplications = {
-    "text/palin" = [ "nvim" ];
-    "video/png" = [ "mvp.destop" ];
-    "video/*" = [ "mvp.destop" ];
-    "application/pdf" = [ "evince" ];
-    "application/x-bzpdf" = [ "evince" ];
-    "application/x-ext-pdf" = [ "evince" ];
-    "application/x-gzpdf" = [ "evince" ];
-    "application/x-xzpdf" = [ "evince" ];
+    "text/palin" = ["nvim"];
+    "video/png" = ["mvp.destop"];
+    "video/*" = ["mvp.destop"];
+    "application/pdf" = ["evince"];
+    "application/x-bzpdf" = ["evince"];
+    "application/x-ext-pdf" = ["evince"];
+    "application/x-gzpdf" = ["evince"];
+    "application/x-xzpdf" = ["evince"];
   };
 }

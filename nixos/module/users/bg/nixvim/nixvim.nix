@@ -83,6 +83,57 @@
 
       plugins = {
         dashboard.enable = true;
+        improved-search = {
+          enable = true;
+          keymaps = [
+            {
+              action = "stable_next";
+              key = "n";
+              mode = [
+                "n"
+                "x"
+                "o"
+              ];
+            }
+            {
+              action = "stable_previous";
+              key = "N";
+              mode = [
+                "n"
+                "x"
+                "o"
+              ];
+            }
+            {
+              action = "current_word";
+              key = "!";
+              mode = "n";
+              options = {
+                desc = "Search current word without moving";
+              };
+            }
+            {
+              action = "in_place";
+              key = "!";
+              mode = "x";
+            }
+            {
+              action = "forward";
+              key = "*";
+              mode = "x";
+            }
+            {
+              action = "backward";
+              key = "#";
+              mode = "x";
+            }
+            {
+              action = "in_place";
+              key = "|";
+              mode = "n";
+            }
+          ];
+        };
         dressing = {
           enable = true;
           settings = {
@@ -125,20 +176,25 @@
           enable = true;
           signs = {
             dapBreakpoint = {
-              text = "🟩"; # ●
+              text = "🟢"; # ● 🟩
               texthl = "DapBreakpoint";
             };
             dapBreakpointCondition = {
-              text = "🟦";
+              text = "⚡"; # 🟦
               texthl = "DapBreakpointCondition";
             };
             dapLogPoint = {
-              text = "◆";
+              text = "📝"; # 🖊️ ◆ 🔵 🔴 🟣 🟡
               texthl = "DapLogPoint";
             };
             dapBreakpointRejected = {
-              text = "🟥";
+              text = "❌"; # 🟥
               texthl = "DiagnosticError";
+            };
+            #               
+            dapStopped = {
+              text = "→"; # ▶️ ⏸️ ⏹️ ⏺️ ⏬🔽🎦📎🔗📌
+              texthl = "DapStopped"; # ▶️ ⏸️ ⏯️ ⏹️ ⏺️ ⏭️ ⏮️
             };
           };
           extensions = {
@@ -193,6 +249,11 @@
           };
         };
 
+        debugprint = {
+          enable = true;
+          # extraOptions.keymaps =
+        };
+
         cmp-spell.enable = true;
         barbar.enable = true;
         auto-session = {
@@ -244,7 +305,10 @@
         #comment.enable = true;
         #comment-nvim.enable = true;
         commentary.enable = true;
-        diffview.enable = true;
+        diffview = {
+          enable = true;
+          diffBinaries = true;
+        };
         fugitive.enable = true;
         gitsigns = {
           enable = true;
@@ -372,7 +436,7 @@
             # "<leader><space>" = "live_grep";
             # "<leader>/" = "current_buffer_fuzzy_find";
             # "gd" = "lsp_definitions";
-            # "gr" = "lsp_references";
+            "gI" = "lsp_incoming_calls";
             # "gi" = "lsp_implementations";
             # "gt" = "lsp_type_definition";
             "<leader>fd" = "diagnostics";
@@ -810,15 +874,6 @@
 
       keymaps =
         [
-          {
-            mode = ["n" "v"];
-            key = "<Leader>m";
-            action = "<cmd>MCstart<cr>";
-            options = {
-              desc = "Create a selection for selected text or word under the cursor";
-              silent = true;
-            };
-          }
           # autocomplite
           # {
           #   key = "<Tab>";
@@ -1412,7 +1467,6 @@
           # }
           {
             key = "gt";
-            # action = ":lua vim.lsp.buf.type_definition()<CR>";
             action.__raw = ''function() require("telescope.builtin").lsp_type_definitions { reuse_win = true } end'';
             options = {
               desc = "Перейти к определению типа";
@@ -1421,7 +1475,6 @@
           }
           {
             key = "gd";
-            # action = ":lua vim.lsp.buf.definition()<CR>";
             action.__raw = ''function() require("telescope.builtin").lsp_definitions { reuse_win = true } end'';
             options = {
               desc = "Перейти к определению";
@@ -1430,7 +1483,6 @@
           }
           {
             key = "gi";
-            # action = ":lua vim.lsp.buf.implementation()<CR>";
             action.__raw = ''function() require("telescope.builtin").lsp_implementations { reuse_win = true } end'';
             options = {
               desc = "Перейти к реализации";
@@ -1439,19 +1491,12 @@
           }
           {
             key = "gr";
-            # action = ":lua vim.lsp.buf.references()<CR>";
-            # action = "require('telescope.builtin').lsp_references";
             action.__raw = ''function() require("telescope.builtin").lsp_references() end'';
             options = {
               desc = "Найти ссылки";
               silent = true;
             };
           }
-          # {
-          #   key = "<leader>lR";
-          #   action = ":lua vim.lsp.buf.references()<CR>";
-          #   options = { desc = "Найти ссылки"; silent = true; };
-          # }
           {
             key = "<leader>li";
             action = ":LspInfo<CR>";
@@ -1598,10 +1643,22 @@
             };
           }
           {
-            key = "<leader>dp";
-            action = ":lua require('dap').pause()<CR>";
+            mode = ["n" "v"];
+            key = "<Leader>dP";
+            # action = "function() require('dap.ui.widgets').preview() end";
+            action = ":lua require('dap.ui.widgets').preview()<CR>";
             options = {
-              desc = "Пауза отладки";
+              desc = "Preview";
+              silent = true;
+            };
+          }
+          {
+            key = "<leader>dp";
+            # action = ":lua require('dap').pause()<CR>";
+            action = ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<CR>";
+            options = {
+              # desc = "Пауза отладки";
+              desc = "DapLogPoint";
               silent = true;
             };
           }
