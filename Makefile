@@ -16,7 +16,8 @@ sync:
 		--exclude='private' \
 		--exclude='presharedKeyFile' \
 		--exclude='hardware-configuration.nix' \
-		/etc/nixos/* nixos
+		--exclude='Makefile' \
+		/etc/nixos/* .
 	cd $(REPO_DIR) && make sync
 
 push:
