@@ -34,3 +34,10 @@ pull:
 
 setup: pull
 	rsync -avP $(REPO_DIR)/plugins ~/.config/nvim/lua/
+
+### testing on vm
+build:
+	nix build .#nixosConfigurations.nixos.config.system.build.vm
+
+run/nographic:
+	QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic; reset

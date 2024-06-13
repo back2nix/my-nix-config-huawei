@@ -1,26 +1,25 @@
 {
+  inputs,
   config,
   pkgs,
-  inputs,
   lib,
   ...
 }: let
-  user = "bg";
-  masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
-    nixpkgs.config = {
-      allowUnfree = true;
-      allowUnfreePredicate = pkg:
-        builtins.elem (lib.getName pkg) [
-          "google-chrome"
-        ];
-    };
-  };
-
-  nixvim = import (builtins.fetchGit {
-    url = "https://github.com/nix-community/nixvim";
-    # When using a different channel you can use `ref = "nixos-<version>"` to set it here
-    ref = "nixos-24.05";
-  });
+  inherit (import ../../../variables.nix) mainUser;
+  # masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
+  #   nixpkgs.config = {
+  #     allowUnfree = true;
+  #     allowUnfreePredicate = pkg:
+  #       builtins.elem (lib.getName pkg) [
+  #         "google-chrome"
+  #       ];
+  #   };
+  # };
+  # nixvim = import (builtins.fetchGit {
+  #   url = "https://github.com/nix-community/nixvim";
+  #   # When using a different channel you can use `ref = "nixos-<version>"` to set it here
+  #   ref = "nixos-24.05";
+  # });
   # zellij = pkgs.callPackage ./zellij.nix {
   #   inherit (pkgs.darwin.apple_sdk.frameworks) DiskArbitration Foundation;
   # };
@@ -30,21 +29,21 @@ in {
     # inputs.nix-colors.homeManagerModules.default
     # inputs.xremap-flake.homeManagerModules.default
     # ./mime.nix
-    #./overlays.nix
+    # ./overlays.nix
+    # inputs.nixvim.nixosModules.nixvim
     ./dconf.nix
-    nixvim.homeManagerModules.nixvim
-    ./nixvim/nixvim.nix
     ./tmux/tmux.nix
+    ./nixvim/nixvim.nix
   ];
 
-  nixpkgs.overlays = [
-    # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
-    (self: super: {
-      yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
-      genymotion = self.callPackage ./overlays/genymotion.nix {};
-      # neovim = masterPkg.neovim;
-    })
-  ];
+  # inputs.nixpkgs.overlays = [
+  #   # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
+  #   (self: super: {
+  #     yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
+  #     genymotion = self.callPackage ./overlays/genymotion.nix {};
+  #     # neovim = masterPkg.neovim;
+  #   })
+  # ];
 
   xdg.configFile = {
     "kitty/kitty.conf".source = ./kitty.conf;
@@ -102,8 +101,8 @@ in {
   # colorScheme = inputs.nix-colors.colorSchemes.dracula;
 
   home = {
-    username = "${user}";
-    homeDirectory = "/home/${user}";
+    username = "${mainUser}";
+    homeDirectory = "/home/${mainUser}";
     stateVersion = "23.11";
     packages = with pkgs; [
       # # Adds the 'hello' command to your environment. It prints a friendly
@@ -198,7 +197,7 @@ in {
       firefox
       anydesk
       audacity
-      yandex-browser
+      # yandex-browser
       distrobox
       # zoxide
 
@@ -209,12 +208,12 @@ in {
       gopkgs
       go-tools
       delve
-      masterPkg.mitmproxy
+      # inputs.nixpkgs-unstable.mitmproxy
       gedit
       libreoffice
       gh
       # neovim
-      # masterPkg.neovim
+      # inputs.nixpkgs-unstable.neovim
     ];
 
     file = {
@@ -265,7 +264,7 @@ in {
         "xmind"
         "genymotion"
         "anydesk"
-        # "yandex-browser-stable-24.1.1.940-1"
+        # "yandex-browser-stable-24.4.1.915-1"
         # "yandex-browser"
         # "microsoft-edge-stable"
       ];

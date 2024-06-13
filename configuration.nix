@@ -1,14 +1,28 @@
 {
+  inputs,
   config,
   pkgs,
+  lib,
   ...
-}: let
-  masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
-    nixpkgs.config = {
-      allowUnfree = true;
-    };
+}:
+# let
+# masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
+#   nixpkgs.config = {
+#     allowUnfree = true;
+#   };
+# };
+# in
+{
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions =
+      lib.optionalString (config.nix.package == pkgs.nixFlakes)
+      "experimental-features = nix-command flakes";
   };
-in {
+
+  nixpkgs.config.allowUnfree = true;
+  # nixpkgs-unstable.config.allowUnfree = true;
+
   imports = [
     #<home-manager/nixos>
     # ./module/wordpress.nix
@@ -16,9 +30,9 @@ in {
     ./cachix.nix
     ./module/shadowsocks.nix
     ./module/vpn/vpn.nix
-    ./module/users/users.nix
     ./module/change.mac.nix
-    ./module/tor.nix
+    ./module/users/users.nix
+    # ./module/tor.nix
   ];
 
   boot = {
@@ -116,7 +130,7 @@ in {
       wireshark
       tshark
       pavucontrol
-      masterPkg.lunarvim
+      # inputs.nixpkgs-unstable.lunarvim
       xclip
     ];
 
@@ -177,14 +191,7 @@ in {
     user.services.pipewire-pulse.path = [pkgs.pulseaudio];
   };
 
-  nixpkgs.config.allowUnfree = true;
-
   system.stateVersion = "23.11"; # Did you read the comment?
-
-  nix = {
-    package = pkgs.nixFlakes;
-    extraOptions = "experimental-features = nix-command flakes";
-  };
 
   virtualisation = {
     # waydroid.enable = true;
@@ -257,13 +264,13 @@ in {
 
     # Open ports in the firewall.
     firewall = {
-      # enable = true;
-      # extraCommands = ''
-      #   iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-      #   iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-      #   ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-      #   ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-      # '';
+      enable = true;
+      extraCommands = ''
+        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
+        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+      '';
     };
   };
 
@@ -327,8 +334,8 @@ in {
       settings = {
         # CPU_SCALING_GOVERNOR_ON_AC = "performance";
         # only charge up to 80% of the battery capacity
-        START_CHARGE_THRESH_BAT0 = "75";
-        STOP_CHARGE_THRESH_BAT0 = "80";
+        # START_CHARGE_THRESH_BAT0 = "75";
+        # STOP_CHARGE_THRESH_BAT0 = "80";
       };
     };
     physlock.enable = true;
@@ -346,5 +353,14 @@ in {
         HibernateKeyIgnoreInhibited=yes
       '';
     };
+  };
+
+  users.users.ryan = {
+    initialPassword = "1";
+    isNormalUser = true;
+    description = "ryan";
+    extraGroups = ["networkmanager" "wheel"];
+    packages = with pkgs; [
+    ];
   };
 }

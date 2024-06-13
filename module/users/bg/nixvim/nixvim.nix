@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   lib,
@@ -9,6 +10,7 @@
     ./plugins/persistent-breakpoints.nvim.nix
     ./plugins/git-blame.nvim.nix
     ./utils/buffer.nix
+    inputs.nixvim.homeManagerModules.nixvim
     # ./plugins/dap.nix
     # ./colorscheme.nix
   ];
