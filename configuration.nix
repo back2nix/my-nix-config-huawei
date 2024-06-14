@@ -120,9 +120,20 @@
 
     shells = with pkgs; [zsh];
 
-    # List packages installed in system profile. To search, run:
-    # $ nix search wget
+    # https://discourse.nixos.org/t/tips-tricks-for-nixos-desktop/28488/2
+    # чтобы запускать бинарники на nix
     systemPackages = with pkgs; [
+      (let
+        base = pkgs.appimageTools.defaultFhsEnvArgs;
+      in
+        pkgs.buildFHSUserEnv (base
+          // {
+            name = "fhs";
+            targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
+            profile = "export FHS=1";
+            runScript = "zsh";
+            extraOutputsToInstall = ["dev"];
+          }))
       lm_sensors
       virtualbox
       direnv

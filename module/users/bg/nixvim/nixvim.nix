@@ -4,7 +4,9 @@
   pkgs,
   lib,
   ...
-}: {
+}: let
+  response_format = "Respond EXACTLY in this format:\n```$ftype\n<your code>\n```";
+in {
   imports = [
     ./spell.nix
     ./plugins/persistent-breakpoints.nvim.nix
@@ -89,8 +91,8 @@
           enable = true;
           # ssh -L 11434:0.0.0.0:11434 home_desktop -N
           url = "http://127.0.0.1:11434";
-          # model = "llama3";
-          model = "codestral";
+          model = "llama3";
+          # model = "codestral";
 
           prompts = {
             mathproof = {
