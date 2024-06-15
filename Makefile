@@ -42,3 +42,7 @@ build:
 
 run/nographic:
 	QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic; reset
+
+### flake
+switch:
+	sudo nixos-rebuild switch --flake /etc/nixos#nixos
