@@ -24,16 +24,14 @@
   # nixpkgs-unstable.config.allowUnfree = true;
 
   imports = [
-    #<home-manager/nixos>
-    # ./module/wordpress.nix
     ./hardware-configuration.nix
     ./cachix.nix
     ./module/shadowsocks.nix
-    ./module/vpn/vpn.nix
     ./module/change.mac.nix
     ./module/users/users.nix
     ./sops/sops.nix
-    # inputs.sops-nix.nixosModules.sops
+    # ./module/wordpress.nix
+    # ./module/vpn/vpn.nix
     # ./module/tor.nix
   ];
 
