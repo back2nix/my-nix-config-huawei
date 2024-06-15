@@ -213,6 +213,7 @@ in {
       # neovim
       # inputs.nixpkgs-unstable.neovim
       python311Packages.jupytext
+      eza
     ];
 
     file = {
@@ -325,7 +326,15 @@ in {
         theme = "agnoster-nix";
       };
       shellAliases = {
+        # https://github.com/jonringer/nixpkgs-config/blob/987c6e3d647e90ef2bbd00171b5c1bb8bf5e1757/bash.nix#L159
+        ls = "eza ";
+        ll = "eza -l --color=always";
+        la = "eza -a --color=always";
+        lla = "eza -al --color=always";
+        gco = "git checkout";
         open = "xdg-open";
+        nfl = "nix flake lock";
+        nflu = "nix flake lock --update-input";
         img = "eog"; # image viewer
         pdf = "evince"; # pdf reader
         cover = ''
@@ -340,7 +349,6 @@ in {
           && go tool cover -html=$t \
           && unlink $t
         '';
-        ll = "ls -l";
         # z = "zellij";
         n = "nvim";
         rem2loc = ''
