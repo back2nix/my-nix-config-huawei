@@ -50,8 +50,6 @@ in {
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
   };
 
-  services.lorri.enable = true;
-
   # services.xremap = {
   #   config = {
   #     keymap = [
