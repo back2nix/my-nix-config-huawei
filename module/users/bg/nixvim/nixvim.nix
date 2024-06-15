@@ -691,6 +691,7 @@ in {
                       unusedparams = true;
                       unusedwrite = true;
                       useany = true;
+                      fillstruct = true;
                     };
                     usePlaceholders = true;
                     completeUnimported = true;
@@ -709,7 +710,8 @@ in {
             tailwindcss.enable = true; # TailwindCSS
             html.enable = true; # HTML
             astro.enable = true; # AstroJS
-            phpactor.enable = true; # PHP
+            # phpactor.enable = true; # PHP
+            jsonls.enable = true;
 
             # Python
             pyright.enable = true;

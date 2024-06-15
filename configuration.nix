@@ -32,20 +32,10 @@
     ./module/vpn/vpn.nix
     ./module/change.mac.nix
     ./module/users/users.nix
+    ./sops/sops.nix
     # inputs.sops-nix.nixosModules.sops
     # ./module/tor.nix
   ];
-
-  sops = {
-    defaultSopsFile = ./secrets/secrets.yaml;
-    age.keyFile = "/home/bg/.config/sops/age/keys.txt";
-    age.generateKey = true;
-    secrets.example-key = {};
-    secrets."myservice/my_subdir/my_secret" = {};
-    secrets.example-key.mode = "0440";
-    secrets.example-key.owner = config.users.users.nobody.name;
-    secrets.example-key.group = config.users.users.nobody.group;
-  };
 
   boot = {
     # kernelPackages = pkgs.linuxPackages_latest;

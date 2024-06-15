@@ -16,6 +16,10 @@
       url = "github:nix-community/nixvim/nixos-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    musnix = {
+      url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -29,9 +33,10 @@
       system = "x86_64-linux";
       specialArgs = {inherit inputs;};
       modules = [
-        ./configuration.nix
+        inputs.musnix.nixosModules.musnix
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
+        ./configuration.nix
         {
           home-manager = {
             useGlobalPkgs = true;
