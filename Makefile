@@ -1,6 +1,9 @@
 REPO_URL := https://github.com/back2nix/my-astronvim-config
 REPO_DIR := my-astronvim-config
 
+### flake
+switch:
+	sudo nixos-rebuild switch --flake .#nixos
 
 nix:
 	sudo nixos-rebuild switch
@@ -15,10 +18,10 @@ sync:
 	rsync -avP \
 		--exclude='private' \
 		--exclude='presharedKeyFile' \
-		--exclude='hardware-configuration.nix' \
 		--exclude='Makefile' \
 		/etc/nixos/* .
 	cd $(REPO_DIR) && make sync
+# --exclude='hardware-configuration.nix' \
 
 push:
 	git add -u && git commit -m "make push" && git push || (git pull --rebase && git push)
@@ -42,7 +45,3 @@ build:
 
 run/nographic:
 	QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic; reset
-
-### flake
-switch:
-	sudo nixos-rebuild switch --flake /etc/nixos#nixos

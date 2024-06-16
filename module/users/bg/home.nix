@@ -39,8 +39,11 @@ in {
   # inputs.nixpkgs.overlays = [
   #   # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
   #   (self: super: {
-  #     yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
-  #     genymotion = self.callPackage ./overlays/genymotion.nix {};
+  #     # yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
+  #     # genymotion = self.callPackage ./overlays/genymotion.nix {};
+  #     bashdbInteractive = self.bashdb.overrideAttrs {
+  #       buildInputs = (super.buildInputs or []) ++ [self.bashInteractive];
+  #     };
   #     # neovim = masterPkg.neovim;
   #   })
   # ];
@@ -214,6 +217,8 @@ in {
       # inputs.nixpkgs-unstable.neovim
       python311Packages.jupytext
       eza
+      bashdb
+      nodejs_18
     ];
 
     file = {

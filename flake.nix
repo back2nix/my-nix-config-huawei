@@ -38,6 +38,7 @@
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         ./configuration.nix
+        (import ./overlays)
         {
           home-manager = {
             useGlobalPkgs = true;

@@ -4,5 +4,5 @@ presharedKeyFile
 vpn.conf
 shadowsocks.json
 shadowsocks*.json
-hardware-configuration.nix
+# hardware-configuration.nix
 *.qcow2

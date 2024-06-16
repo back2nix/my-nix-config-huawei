@@ -5,17 +5,40 @@
   lib,
   ...
 }: let
-  response_format = "Respond EXACTLY in this format:\n```$ftype\n<your code>\n```";
+  # response_format = "Respond EXACTLY in this format:\n```$ftype\n<your code>\n```";
+  # inherit (lib.nvim.languages) mkEnable;
+  ### FAIL not working!!!
+  sh-config = lib.mkIf pkgs.stdenv.isLinux {
+    type = "bashdb";
+    request = "launch";
+    name = "Launch file";
+    pathBashdb = "${pkgs.bashdb}/bin/bashdb";
+    pathBashdbLib = "${pkgs.bashdb}/share/bashdb/lib/";
+    file = ''\$\{file}'';
+    program = ''\$\{file}'';
+    cwd = ''\$\{workspaceFolder}'';
+    pathCat = "cat";
+    pathBash = "${pkgs.bash}/bin/bash";
+    pathMkfifo = "mkfifo";
+    pathPkill = "pkill";
+    args = {};
+    env = {};
+    terminalKind = "integrated";
+    showDebugOutput = true;
+    trace = true;
+  };
 in {
   imports = [
     ./spell.nix
     ./plugins/persistent-breakpoints.nvim.nix
     ./plugins/git-blame.nvim.nix
     ./utils/buffer.nix
+    # ./plugins/bash
     inputs.nixvim.homeManagerModules.nixvim
     # ./plugins/dap.nix
     # ./colorscheme.nix
   ];
+
   programs = {
     nixvim.enable = true;
 
@@ -199,6 +222,15 @@ in {
 
         dap = {
           enable = true;
+
+          adapters = {
+            executables = {
+              bashdb = lib.mkIf pkgs.stdenv.isLinux {
+                command = "${pkgs.bashdb}/bin/bashdb";
+              };
+            };
+          };
+
           signs = {
             dapBreakpoint = {
               text = "🟢"; # ● 🟩
@@ -271,6 +303,10 @@ in {
               controls.enabled = true;
             };
             dap-virtual-text.enable = true;
+          };
+
+          configurations = {
+            sh = lib.optionals pkgs.stdenv.isLinux [sh-config];
           };
         };
 
