@@ -12,13 +12,13 @@
     type = "bashdb";
     request = "launch";
     name = "Launch file";
-    pathBashdb = "${pkgs.bashdb}/bin/bashdb";
-    pathBashdbLib = "${pkgs.bashdb}/share/bashdb/lib/";
+    pathBashdb = "${pkgs.bashdbInteractive}/bin/bashdb";
+    pathBashdbLib = "${pkgs.bashdbInteractive}/share/bashdb/lib/";
     file = ''\$\{file}'';
     program = ''\$\{file}'';
     cwd = ''\$\{workspaceFolder}'';
     pathCat = "cat";
-    pathBash = "${pkgs.bash}/bin/bash";
+    pathBash = "${pkgs.bashInteractive}/bin/bash";
     pathMkfifo = "mkfifo";
     pathPkill = "pkill";
     args = {};
@@ -226,7 +226,7 @@ in {
           adapters = {
             executables = {
               bashdb = lib.mkIf pkgs.stdenv.isLinux {
-                command = "${pkgs.bashdb}/bin/bashdb";
+                command = "${pkgs.bashdbInteractive}/bin/bashdb";
               };
             };
           };
@@ -934,7 +934,31 @@ in {
         end
 
         require('dap-python').test_runner = "pytest"
+
+
       '';
+      # require('dap').set_log_level('DEBUG')
+
+      # dap.adapters.bashdb = {
+      #   type = 'executable',
+      #   command = '${pkgs.bashdbInteractive}/bin/bashdb',
+      #   args = {}
+      # }
+
+      # dap.configurations.sh = {
+      #   {
+      #     type = 'bashdb',
+      #     request = 'launch',
+      #     name = "Launch Bash debugger",
+      #     program = '\$\{file}',
+      #     cwd = '\$\{workspaceFolder}',
+      #     stopOnEntry = true,
+      #     args = {},
+      #     -- bashdb-specific settings
+      #     terminal = 'integrated',
+      #     console = 'integratedTerminal',
+      #   },
+      # }
 
       keymaps =
         [

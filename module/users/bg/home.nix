@@ -217,7 +217,9 @@ in {
       # inputs.nixpkgs-unstable.neovim
       python311Packages.jupytext
       eza
-      bashdb
+      bashInteractive
+      bashdbInteractive
+      bash-completion
       nodejs_18
     ];
 
@@ -276,6 +278,9 @@ in {
   };
 
   programs = {
+    # bash.enable = true;
+    # bash.package = pkgs.bashInteractive;
+
     neovim = {
       enable = false;
       defaultEditor = true;
