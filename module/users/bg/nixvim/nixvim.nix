@@ -187,6 +187,10 @@ in {
           settings = {
             input = {
               enabled = true;
+              default_prompt = "Input";
+              trim_prompt = true;
+              border = "rounded";
+              relative = "cursor";
               mappings = {
                 i = {
                   "<C-c>" = "Close";
@@ -222,14 +226,6 @@ in {
 
         dap = {
           enable = true;
-
-          adapters = {
-            executables = {
-              bashdb = lib.mkIf pkgs.stdenv.isLinux {
-                command = "${pkgs.bashdbInteractive}/bin/bashdb";
-              };
-            };
-          };
 
           signs = {
             dapBreakpoint = {
@@ -305,6 +301,13 @@ in {
             dap-virtual-text.enable = true;
           };
 
+          adapters = {
+            executables = {
+              bashdb = lib.mkIf pkgs.stdenv.isLinux {
+                command = "${pkgs.bashdbInteractive}/bin/bashdb";
+              };
+            };
+          };
           configurations = {
             sh = lib.optionals pkgs.stdenv.isLinux [sh-config];
           };
@@ -325,25 +328,25 @@ in {
           };
         };
 
-        noice = {
-          enable = true;
-          lsp.override = {
-            "vim.lsp.util.convert_input_to_markdown_lines" = true;
-            "vim.lsp.util.stylize_markdown" = true;
-            "cmp.entry.get_documentation" = true;
-          };
-          presets = {
-            bottom_search = true;
-            command_palette = true;
-            long_message_to_split = true;
-            inc_rename = true;
-            lsp_doc_border = false;
-          };
-          popupmenu = {
-            enabled = true;
-            backend = "cmp";
-          };
-        };
+        # noice = {
+        #   enable = true;
+        #   lsp.override = {
+        #     "vim.lsp.util.convert_input_to_markdown_lines" = true;
+        #     "vim.lsp.util.stylize_markdown" = true;
+        #     "cmp.entry.get_documentation" = true;
+        #   };
+        #   presets = {
+        #     bottom_search = true;
+        #     command_palette = true;
+        #     long_message_to_split = true;
+        #     inc_rename = true;
+        #     lsp_doc_border = false;
+        #   };
+        #   popupmenu = {
+        #     enabled = true;
+        #     backend = "cmp";
+        #   };
+        # };
 
         airline = {
           enable = true;
@@ -966,28 +969,28 @@ in {
           # {
           #   key = "<Tab>";
           #   action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_next_item() elseif require('luasnip').expand_or_jumpable() then require('luasnip').expand_or_jump() else fallback() end end, { 'i', 's' })";
-          #   options = { desc = "Выбрать следующий элемент автокомплита"; silent = true; };
+          #   options = { desc = "Select the next autocomplete item"; silent = true; };
           # }
           # {
           #   key = "<S-Tab>";
           #   action = "lua require('cmp').mapping(function(fallback) if require('cmp').visible() then require('cmp').select_prev_item() elseif require('luasnip').jumpable(-1) then require('luasnip').jump(-1) else fallback() end end, { 'i', 's' })";
-          #   options = { desc = "Выбрать предыдущий элемент автокомплита"; silent = true; };
+          #   options = { desc = "Select the previous autocomplete item"; silent = true; };
           # }
           # {
           #   key = "<C-d>";
           #   action = "lua require('cmp').mapping.scroll_docs(-4)";
-          #   options = { desc = "Прокрутка автокомплит документации вверх"; silent = true; };
+          #   options = { desc = "Scroll autocomplete documentation up"; silent = true; };
           # }
           # {
           #   key = "<C-f>";
           #   action = "lua require('cmp').mapping.scroll_docs(4)";
-          #   options = { desc = "Прокрутка автокомплит документации вниз"; silent = true; };
+          #   options = { desc = "Scroll autocomplete documentation down"; silent = true; };
           # }
           {
             key = "<C-Space>";
             action = "lua require('cmp').mapping.complete()";
             options = {
-              desc = "Вызвать меню автокомплита";
+              desc = "Invoke autocomplete menu";
               silent = true;
             };
           }
@@ -995,7 +998,7 @@ in {
             key = "<C-e>";
             action = "lua require('cmp').mapping.close()";
             options = {
-              desc = "Закрыть меню автокомплита";
+              desc = "Close autocomplete menu";
               silent = true;
             };
           }
@@ -1003,7 +1006,7 @@ in {
             key = "<CR>";
             action = "lua require('cmp').mapping.confirm({ select = true })";
             options = {
-              desc = "Подтвердить выбор автокомплита";
+              desc = "Confirm autocomplete selection";
               silent = true;
             };
           }
@@ -1011,7 +1014,7 @@ in {
           {
             action = ":HopWord<CR>";
             options = {
-              desc = "прыгать по буквам";
+              desc = "Jump by letters";
               silent = true;
             };
             key = "s";
@@ -1019,7 +1022,7 @@ in {
           {
             action = ":HopLine<CR>";
             options = {
-              desc = "прыгать по буквам";
+              desc = "Jump by letters";
               silent = true;
             };
             key = "S";
@@ -1029,7 +1032,7 @@ in {
             key = "<C-Up>";
             action = ":resize +2<CR>";
             options = {
-              desc = "Увеличить размер окна вверх";
+              desc = "Increase window size upwards";
               silent = true;
             };
           }
@@ -1037,7 +1040,7 @@ in {
             key = "<C-Down>";
             action = ":resize -2<CR>";
             options = {
-              desc = "Уменьшить размер окна вниз";
+              desc = "Decrease window size downwards";
               silent = true;
             };
           }
@@ -1045,7 +1048,7 @@ in {
             key = "<C-Left>";
             action = ":vertical resize -2<CR>";
             options = {
-              desc = "Уменьшить размер окна влево";
+              desc = "Decrease window size to the left";
               silent = true;
             };
           }
@@ -1053,7 +1056,7 @@ in {
             key = "<C-Right>";
             action = ":vertical resize +2<CR>";
             options = {
-              desc = "Увеличить размер окна вправо";
+              desc = "Increase window size to the right";
               silent = true;
             };
           }
@@ -1061,7 +1064,7 @@ in {
             key = "<C-k>";
             action = "<C-w>k";
             options = {
-              desc = "Переместиться в окно сверху";
+              desc = "Move to the window above";
               silent = true;
             };
           }
@@ -1069,7 +1072,7 @@ in {
             key = "<C-j>";
             action = "<C-w>j";
             options = {
-              desc = "Переместиться в окно снизу";
+              desc = "Move to the window below";
               silent = true;
             };
           }
@@ -1077,7 +1080,7 @@ in {
             key = "<C-h>";
             action = "<C-w>h";
             options = {
-              desc = "Переместиться в окно слева";
+              desc = "Move to the window on the left";
               silent = true;
             };
           }
@@ -1085,7 +1088,7 @@ in {
             key = "<C-l>";
             action = "<C-w>l";
             options = {
-              desc = "Переместиться в окно справа";
+              desc = "Move to the window on the right";
               silent = true;
             };
           }
@@ -1093,20 +1096,20 @@ in {
             key = "<C-s>";
             action = ":w!<CR>";
             options = {
-              desc = "Принудительное сохранение";
+              desc = "Force save";
               silent = true;
             };
           }
           # {
           #   key = "<C-q>";
           #   action = ":q!<CR>";
-          #   options = { desc = "Принудительное закрытие";  silent = true; };
+          #   options = { desc = "Force close";  silent = true; };
           # }
           {
             key = "<leader>n";
             action = ":enew<CR>";
             options = {
-              desc = "Создать новый файл";
+              desc = "Create a new file";
               silent = true;
             };
           }
@@ -1114,7 +1117,7 @@ in {
             key = "<leader>c";
             action = "<cmd>lua buffer_close()<cr>";
             options = {
-              desc = "Закрыть буфер";
+              desc = "Close buffer";
               silent = true;
             };
           }
@@ -1122,7 +1125,7 @@ in {
             key = "<leader>C";
             action = "<cmd>lua buffer_close(0, true)<cr>";
             options = {
-              desc = "Закрыть буфер принудительно";
+              desc = "Force close buffer";
               silent = true;
             };
           }
@@ -1130,7 +1133,7 @@ in {
             key = "]t";
             action = ":tabnext<CR>";
             options = {
-              desc = "Следующая вкладка";
+              desc = "Next tab";
               silent = true;
             };
           }
@@ -1138,7 +1141,7 @@ in {
             key = "[t";
             action = ":tabprevious<CR>";
             options = {
-              desc = "Предыдущая вкладка";
+              desc = "Previous tab";
               silent = true;
             };
           }
@@ -1148,7 +1151,7 @@ in {
             action = "gcc";
             options.remap = true;
             options = {
-              desc = "Закомментить строку";
+              desc = "Comment line";
               silent = true;
             };
           }
@@ -1158,7 +1161,7 @@ in {
             action = "gc";
             options.remap = true;
             options = {
-              desc = "Закомментить";
+              desc = "Comment";
               silent = true;
             };
           }
@@ -1166,7 +1169,7 @@ in {
             key = "\\";
             action = ":split<CR>";
             options = {
-              desc = "Горизонтальное разделение";
+              desc = "Horizontal split";
               silent = true;
             };
           }
@@ -1174,7 +1177,7 @@ in {
             key = "|";
             action = ":vsplit<CR>";
             options = {
-              desc = "Вертикальное разделение";
+              desc = "Vertical split";
               silent = true;
             };
           }
@@ -1189,7 +1192,7 @@ in {
             key = "]b";
             action = ":bnext<CR>";
             options = {
-              desc = "Следующий буфер";
+              desc = "Next buffer";
               silent = true;
             };
           }
@@ -1197,25 +1200,25 @@ in {
             key = "[b";
             action = ":bprevious<CR>";
             options = {
-              desc = "Предыдущий буфер";
+              desc = "Previous buffer";
               silent = true;
             };
           }
           # {
           #   key = ">b";
           #   action = ":BufferMoveNext<CR>";
-          #   options = { desc = "Переместить буфер вправо";  silent = true; };
+          #   options = { desc = "Move buffer right";  silent = true; };
           # }
           # {
           #   key = "<b";
           #   action = ":BufferMovePrevious<CR>";
-          #   options = { desc = "Переместить буфер влево";  silent = true; };
+          #   options = { desc = "Move buffer left";  silent = true; };
           # }
           {
             key = "<leader>bb";
             action = ":Telescope buffers<CR>";
             options = {
-              desc = "Перейти к буферу с помощью интерактивного выбора";
+              desc = "Switch to buffer using interactive selection";
               silent = true;
             };
           }
@@ -1223,7 +1226,7 @@ in {
             key = "<leader>bc";
             action = "<cmd>lua buffer_close_all(true)<cr>";
             options = {
-              desc = "Закрыть все буферы, кроме текущего";
+              desc = "Close all buffers, кроме текущего";
               silent = true;
             };
           }
@@ -1231,7 +1234,7 @@ in {
             key = "<leader>bC";
             action = ":BufferCloseAll<CR>";
             options = {
-              desc = "Закрыть все буферы";
+              desc = "Close all buffers";
               silent = true;
             };
           }
@@ -1239,7 +1242,7 @@ in {
             key = "<leader>bd";
             action = "<cmd>lua buffer_close_all()<cr>";
             options = {
-              desc = "Удалить буфер с помощью интерактивного выбора";
+              desc = "Delete buffer using interactive selection";
               silent = true;
             };
           }
@@ -1247,7 +1250,7 @@ in {
             key = "<leader>bl";
             action = ":BufferCloseBuffersLeft<CR>";
             options = {
-              desc = "Закрыть все буферы слева от текущего";
+              desc = "Close all buffers to the left of the current one";
               silent = true;
             };
           }
@@ -1255,7 +1258,7 @@ in {
             key = "<leader>bp";
             action = ":bprevious<CR>";
             options = {
-              desc = "Перейти к предыдущему буферу";
+              desc = "Switch to the previous buffer";
               silent = true;
             };
           }
@@ -1263,7 +1266,7 @@ in {
             key = "<leader>br";
             action = ":BufferCloseBuffersRight<CR>";
             options = {
-              desc = "Закрыть все буферы справа от текущего";
+              desc = "Close all buffers to the right of the current one";
               silent = true;
             };
           }
@@ -1271,7 +1274,7 @@ in {
             key = "<leader>bse";
             action = ":BufferOrderByExtension<CR>";
             options = {
-              desc = "Сортировать буферы по расширению";
+              desc = "Sort buffers by extension";
               silent = true;
             };
           }
@@ -1279,7 +1282,7 @@ in {
             key = "<leader>bsi";
             action = ":BufferOrderByBufferNumber<CR>";
             options = {
-              desc = "Сортировать буферы по номеру";
+              desc = "Sort buffers by number";
               silent = true;
             };
           }
@@ -1287,7 +1290,7 @@ in {
             key = "<leader>bsm";
             action = ":BufferOrderByLastModification<CR>";
             options = {
-              desc = "Сортировать буферы по последней модификации";
+              desc = "Sort buffers by last modification";
               silent = true;
             };
           }
@@ -1295,7 +1298,7 @@ in {
             key = "<leader>bsp";
             action = ":BufferOrderByFullPath<CR>";
             options = {
-              desc = "Сортировать буферы по полному пути";
+              desc = "Sort buffers by full path";
               silent = true;
             };
           }
@@ -1303,7 +1306,7 @@ in {
             key = "<leader>bsr";
             action = ":BufferOrderByRelativePath<CR>";
             options = {
-              desc = "Сортировать буферы по относительному пути";
+              desc = "Sort buffers by relative path";
               silent = true;
             };
           }
@@ -1311,7 +1314,7 @@ in {
             key = "<leader>b\\";
             action = ":split | Telescope buffers<CR>";
             options = {
-              desc = "Открыть буфер в новом горизонтальном разделе с помощью интерактивного выбора";
+              desc = "Open buffer in new horizontal split using interactive selection";
               silent = true;
             };
           }
@@ -1319,7 +1322,7 @@ in {
             key = "<leader>b|";
             action = ":vsplit | Telescope buffers<CR>";
             options = {
-              desc = "Открыть буфер в новом вертикальном разделе с помощью интерактивного выбора";
+              desc = "Open buffer in new vertical split using interactive selection";
               silent = true;
             };
           }
@@ -1337,7 +1340,7 @@ in {
             key = "<C-Space>";
             action = ":lua vim.fn.complete(vim.fn.col('.'), vim.fn['compe#complete']())<CR>";
             options = {
-              desc = "Открыть меню автодополнения";
+              desc = "Open autocomplete menu";
               silent = true;
             };
           }
@@ -1345,7 +1348,7 @@ in {
             key = "<CR>";
             action = ":lua vim.fn['compe#confirm']('<CR>')<CR>";
             options = {
-              desc = "Выбрать автодополнение";
+              desc = "Select autocomplete";
               silent = true;
             };
           }
@@ -1353,7 +1356,7 @@ in {
             key = "<Tab>";
             action = ":lua vim.fn  ? '<Plug>(vsnip-jump-next)' : '<Tab>'<CR>";
             options = {
-              desc = "Следующее положение фрагмента";
+              desc = "Next snippet position";
               silent = true;
             };
           }
@@ -1361,7 +1364,7 @@ in {
             key = "<S-Tab>";
             action = ":lua vim.fn['vsnip#jumpable'](-1) ? '<Plug>(vsnip-jump-prev)' : '<S-Tab>'<CR>";
             options = {
-              desc = "Предыдущее положение фрагмента";
+              desc = "Previous snippet position";
               silent = true;
             };
           }
@@ -1369,7 +1372,7 @@ in {
           #   key = "<Down>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
           #   options = {
-          #     desc = "Следующее автодополнение (вниз)";
+          #     desc = "Next autocomplete (down)";
           #     silent = true;
           #   };
           # }
@@ -1377,7 +1380,7 @@ in {
             key = "<C-n>";
             action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
             options = {
-              desc = "Следующее автодополнение (вниз)";
+              desc = "Next autocomplete (down)";
               silent = true;
             };
           }
@@ -1385,7 +1388,7 @@ in {
             key = "<C-j>";
             action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
             options = {
-              desc = "Следующее автодополнение (вниз)";
+              desc = "Next autocomplete (down)";
               silent = true;
             };
           }
@@ -1393,34 +1396,34 @@ in {
           #   key = "<Up>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
           #   options = {
-          #     desc = "Предыдущее автодополнение (вверх)";
+          #     desc = "Previous autocomplete (up)";
           #     silent = true;
           #   };
           # }
           # {
           #   key = "<C-p>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          #   options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
+          #   options = { desc = "Previous autocomplete (up)"; silent = true; };
           # }
           # {
           #   key = "<C-k>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          #   options = { desc = "Предыдущее автодополнение (вверх)"; silent = true; };
+          #   options = { desc = "Previous autocomplete (up)"; silent = true; };
           # }
           # {
           #   key = "<C-e>";
           #   action = ":lua vim.fn['compe#close']('<C-e>')<CR>";
-          #   options = { desc = "Отменить автодополнение"; silent = true; };
+          #   options = { desc = "Cancel autocomplete"; silent = true; };
           # }
           # {
           #   key = "<C-u>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': -4 })<CR>";
-          #   options = { desc = "Прокрутка вверх в документации автодополнения"; silent = true; };
+          #   options = { desc = "Scroll up in autocomplete documentation"; silent = true; };
           # }
           # {
           #   key = "<C-d>";
           #   action = ":lua vim.fn['compe#scroll']({ 'delta': +4 })<CR>";
-          #   options = { desc = "Прокрутка вниз в документации автодополнения"; silent = true; };
+          #   options = { desc = "Scroll down in autocomplete documentation"; silent = true; };
           # }
           # Dashboard Mappings
           # {
@@ -1432,7 +1435,7 @@ in {
             key = "<leader>e";
             action = ":Neotree toggle<CR>";
             options = {
-              desc = "Переключить Neotree";
+              desc = "Toggle Neotree";
               silent = true;
             };
           }
@@ -1455,7 +1458,7 @@ in {
             key = "<leader>Ss";
             action = ":SessionSave<CR>";
             options = {
-              desc = "Сохранить сессию";
+              desc = "Save session";
               silent = true;
             };
           }
@@ -1463,75 +1466,75 @@ in {
             key = "<leader>Sr";
             action = ":SessionRestore<CR>";
             options = {
-              desc = "Восстановить сессию";
+              desc = "Restore session";
               silent = true;
             };
           }
           # {
           #   key = "<leader>Ss";
           #   action = ":SessionSave<CR>";
-          #   options = { desc = "Сохранить сессию";  silent = true; };
+          #   options = { desc = "Save session";  silent = true; };
           # }
           # {
           #   key = "<leader>Sl";
           #   action = ":SessionLoad<CR>";
-          #   options = { desc = "Загрузить сессию";  silent = true; };
+          #   options = { desc = "Load session";  silent = true; };
           # }
           # {
           #   key = "<leader>Sd";
           #   action = ":SessionDelete<CR>";
-          #   options = { desc = "Удалить сессию";  silent = true; };
+          #   options = { desc = "Delete session";  silent = true; };
           # }
           # {
           #   key = "<leader>SD";
           #   action = ":SessionDeleteDirectory<CR>";
-          #   options = { desc = "Удалить сессию директории";  silent = true; };
+          #   options = { desc = "Delete session директории";  silent = true; };
           # }
           # {
           #   key = "<leader>Sf";
           #   action = ":SessionSearch<CR>";
-          #   options = { desc = "Поиск сессии";  silent = true; };
+          #   options = { desc = "Search session";  silent = true; };
           # }
           # {
           #   key = "<leader>SF";
           #   action = ":SessionSearchDirectory<CR>";
-          #   options = { desc = "Поиск сессий директории";  silent = true; };
+          #   options = { desc = "Search directory sessions";  silent = true; };
           # }
           # {
           #   key = "<leader>S.";
           #   action = ":SessionLoadCurrentDirectory<CR>";
-          #   options = { desc = "Загрузить сессию текущей директории";  silent = true; };
+          #   options = { desc = "Load session текущей директории";  silent = true; };
           # }
           # Package Management Mappings
           # {
           #   key = "<leader>pa";
           #   action = ":Lazy sync<CR>";
-          #   options = { desc = "Синхронизировать пакеты";  silent = true; };
+          #   options = { desc = "Sync packages";  silent = true; };
           # }
           # {
           #   key = "<leader>pi";
           #   action = ":Lazy install<CR>";
-          #   options = { desc = "Установить пакеты";  silent = true; };
+          #   options = { desc = "Install packages";  silent = true; };
           # }
           # {
           #   key = "<leader>pm";
           #   action = ":Mason<CR>";
-          #   options = { desc = "Открыть Mason";  silent = true; };
+          #   options = { desc = "Open Mason";  silent = true; };
           # }
           # {
           #   key = "<leader>pM";
           #   action = ":MasonUpdate<CR>";
-          #   options = { desc = "Обновить Mason";  silent = true; };
+          #   options = { desc = "Update Mason";  silent = true; };
           # }
           # {
           #   key = "<leader>ps";
           #   action = ":Lazy check<CR>";
-          #   options = { desc = "Проверить пакеты";  silent = true; };
+          #   options = { desc = "Check packages";  silent = true; };
           # }
           # {
           #   key = "<leader>pS";
           #   action = ":Lazy sync<CR>";
-          #   options = { desc = "Синхронизировать пакеты";  silent = true; };
+          #   options = { desc = "Sync packages";  silent = true; };
           # }
           # {
           #   key = "<leader>pu";
@@ -1549,7 +1552,7 @@ in {
           #   action = ":lua vim.lsp.buf.declaration()<CR>";
           #   action = "<cmd>lsp_references<cr>";
           #   options = {
-          #     desc = "Перейти к объявлению";
+          #     desc = "Go to declaration";
           #     silent = true;
           #   };
           # }
@@ -1557,7 +1560,7 @@ in {
             key = "gt";
             action.__raw = ''function() require("telescope.builtin").lsp_type_definitions { reuse_win = true } end'';
             options = {
-              desc = "Перейти к определению типа";
+              desc = "Go to type definition";
               silent = true;
             };
           }
@@ -1565,7 +1568,7 @@ in {
             key = "gd";
             action.__raw = ''function() require("telescope.builtin").lsp_definitions { reuse_win = true } end'';
             options = {
-              desc = "Перейти к определению";
+              desc = "Go to definition";
               silent = true;
             };
           }
@@ -1573,7 +1576,7 @@ in {
             key = "gi";
             action.__raw = ''function() require("telescope.builtin").lsp_implementations { reuse_win = true } end'';
             options = {
-              desc = "Перейти к реализации";
+              desc = "Go to implementation";
               silent = true;
             };
           }
@@ -1581,7 +1584,7 @@ in {
             key = "gr";
             action.__raw = ''function() require("telescope.builtin").lsp_references() end'';
             options = {
-              desc = "Найти ссылки";
+              desc = "Find references";
               silent = true;
             };
           }
@@ -1589,73 +1592,73 @@ in {
             key = "<leader>li";
             action = ":LspInfo<CR>";
             options = {
-              desc = "Информация о LSP";
+              desc = "LSP info";
               silent = true;
             };
           }
           # {
           #   key = "<leader>lI";
           #   action = ":NullLsInfo<CR>";
-          #   options = { desc = "Информация о Null-LS"; silent = true; };
+          #   options = { desc = "Null-LS info"; silent = true; };
           # }
           {
             key = "K";
             action = ":lua vim.lsp.buf.hover()<CR>";
             options = {
-              desc = "Показать описание";
+              desc = "Show hover";
               silent = true;
             };
           }
           # {
           #   key = "<leader>lf";
           #   action = ":lua vim.lsp.buf.formatting()<CR>";
-          #   options = { desc = "Форматировать документ"; silent = true; };
+          #   options = { desc = "Format document"; silent = true; };
           # }
           # {
           #   key = "<leader>lS";
           #   action = ":Telescope lsp_document_symbols<CR>";
-          #   options = { desc = "Показать символы"; silent = true; };
+          #   options = { desc = "Show symbols"; silent = true; };
           # }
           # {
           #   key = "gl";
           #   action = ":lua vim.diagnostic.open_float()<CR>";
-          #   options = { desc = "Показать диагностику"; silent = true; };
+          #   options = { desc = "Show diagnostics"; silent = true; };
           # }
           # {
           #   key = "<leader>ld";
           #   action = ":lua vim.diagnostic.open_float()<CR>";
-          #   options = { desc = "Показать диагностику"; silent = true; };
+          #   options = { desc = "Show diagnostics"; silent = true; };
           # }
           # {
           #   key = "<C-W>d";
           #   action = ":lua vim.diagnostic.open_float()<CR>";
-          #   options = { desc = "Показать диагностику"; silent = true; };
+          #   options = { desc = "Show diagnostics"; silent = true; };
           # }
           # {
           #   key = "<leader>lD";
           #   action = ":lua vim.diagnostic.setloclist()<CR>";
-          #   options = { desc = "Добавить диагностику в список локаций"; silent = true; };
+          #   options = { desc = "Add diagnostic to location list"; silent = true; };
           # }
           # {
           #   key = "gra";
           #   action = ":lua vim.lsp.buf.code_action()<CR>";
-          #   options = { desc = "Предложить действия с кодом"; silent = true; };
+          #   options = { desc = "Suggest code actions"; silent = true; };
           # }
           # {
           #   key = "<leader>la";
           #   action = ":lua vim.lsp.buf.code_action()<CR>";
-          #   options = { desc = "Предложить действия с кодом"; silent = true; };
+          #   options = { desc = "Suggest code actions"; silent = true; };
           # }
           # {
           #   key = "<leader>lh";
           #   action = ":lua vim.lsp.buf.signature_help()<CR>";
-          #   options = { desc = "Помощь с сигнатурами"; silent = true; };
+          #   options = { desc = "Signature help"; silent = true; };
           # }
           {
             key = "gn";
             action = "<CMD>lua vim.lsp.buf.rename()<CR>";
             options = {
-              desc = "Переименовать символ";
+              desc = "Rename symbol";
               silent = true;
             };
           }
@@ -1663,7 +1666,7 @@ in {
             key = "<leader>lr";
             action = "<CMD>lua vim.lsp.buf.rename()<CR>";
             options = {
-              desc = "Переименовать символ";
+              desc = "Rename symbol";
               silent = true;
             };
           }
@@ -1671,7 +1674,7 @@ in {
             key = "<leader>ls";
             action = ":lua vim.lsp.buf.document_symbol()<CR>";
             options = {
-              desc = "Показать символы документа";
+              desc = "Show document symbols";
               silent = true;
             };
           }
@@ -1679,7 +1682,7 @@ in {
             key = "<leader>lG";
             action = "workspace_symbol";
             options = {
-              desc = "Показать символы рабочей области";
+              desc = "Show workspace symbols";
               silent = true;
             };
           }
@@ -1687,7 +1690,7 @@ in {
             key = "]d";
             action = ":lua vim.diagnostic.goto_next()<CR>";
             options = {
-              desc = "Перейти к следующей диагностике";
+              desc = "Go to next diagnostic";
               silent = true;
             };
           }
@@ -1695,7 +1698,7 @@ in {
             key = "[d";
             action = ":lua vim.diagnostic.goto_prev()<CR>";
             options = {
-              desc = "Перейти к предыдущей диагностике";
+              desc = "Go to previous diagnostic";
               silent = true;
             };
           }
@@ -1712,13 +1715,13 @@ in {
           # {
           #   key = "<leader>d?";
           #   action = ":lua require('dapui').eval(nil, { enter = true })<cr>";
-          #   options = { desc = "Оценить выражение"; silent = true; };
+          #   options = { desc = "Evaluate expression"; silent = true; };
           # }
           {
             key = "<leader>dc";
             action = ":lua require('dap').continue()<CR>";
             options = {
-              desc = "Запустить/продолжить отладку";
+              desc = "Start/continue debug";
               silent = true;
             };
           }
@@ -1726,7 +1729,7 @@ in {
             key = "<F5>";
             action = ":lua require('dap').continue()<CR>";
             options = {
-              desc = "Запустить/продолжить отладку";
+              desc = "Start/continue debug";
               silent = true;
             };
           }
@@ -1745,7 +1748,7 @@ in {
             # action = ":lua require('dap').pause()<CR>";
             action = ":lua require('dap').set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<CR>";
             options = {
-              # desc = "Пауза отладки";
+              # desc = "Pause debug";
               desc = "DapLogPoint";
               silent = true;
             };
@@ -1754,7 +1757,7 @@ in {
             key = "<F6>";
             action = ":lua require('dap').pause()<CR>";
             options = {
-              desc = "Пауза отладки";
+              desc = "Pause debug";
               silent = true;
             };
           }
@@ -1762,7 +1765,7 @@ in {
             key = "<leader>dr";
             action = ":lua require('dap').restart()<CR>";
             options = {
-              desc = "Перезапустить отладку";
+              desc = "Restart debug";
               silent = true;
             };
           }
@@ -1770,7 +1773,7 @@ in {
             key = "<C-F5>";
             action = ":lua require('dap').restart()<CR>";
             options = {
-              desc = "Перезапустить отладку";
+              desc = "Restart debug";
               silent = true;
             };
           }
@@ -1778,7 +1781,7 @@ in {
             key = "<leader>ds";
             action = ":lua require('dap').run_to_cursor()<CR>";
             options = {
-              desc = "Выполнить до курсора";
+              desc = "Run to cursor";
               silent = true;
             };
           }
@@ -1786,7 +1789,7 @@ in {
             key = "<leader>dq";
             action = ":lua require('dap').close()<CR>";
             options = {
-              desc = "Закрыть отладку";
+              desc = "Close debug";
               silent = true;
             };
           }
@@ -1794,7 +1797,7 @@ in {
             key = "<leader>dQ";
             action = ":lua require('dap').terminate()<CR>";
             options = {
-              desc = "Завершить отладку";
+              desc = "Terminate debug";
               silent = true;
             };
           }
@@ -1802,46 +1805,46 @@ in {
             key = "<S-F5>";
             action = ":lua require('dap').terminate()<CR>";
             options = {
-              desc = "Завершить отладку";
+              desc = "Terminate debug";
               silent = true;
             };
           }
           # {
           #   key = "<leader>db";
           #   action = ":lua require('dap').toggle_breakpoint()<CR>";
-          #   options = { desc = "Переключить точку останова"; silent = true; };
+          #   options = { desc = "Toggle breakpoint"; silent = true; };
           # }
           {
             key = "<F9>";
             action = ":lua require('dap').toggle_breakpoint()<CR>";
             options = {
-              desc = "Переключить точку останова";
+              desc = "Toggle breakpoint";
               silent = true;
             };
           }
           # {
           #   key = "<leader>dC";
           #   action = ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
-          #   options = { desc = "Установить условную точку останова"; silent = true; };
+          #   options = { desc = "Set conditional breakpoint"; silent = true; };
           # }
           {
             key = "<S-F9>";
             action = ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>";
             options = {
-              desc = "Установить условную точку останова";
+              desc = "Set conditional breakpoint";
               silent = true;
             };
           }
           # {
           #   key = "<leader>dB";
           #   action = ":lua require('dap').clear_breakpoints()<CR>";
-          #   options = { desc = "Очистить точки останова"; silent = true; };
+          #   options = { desc = "Clear breakpoints"; silent = true; };
           # }
           {
             key = "<leader>do";
             action = ":lua require('dap').step_over()<CR>";
             options = {
-              desc = "Шаг с обходом";
+              desc = "Step over";
               silent = true;
             };
           }
@@ -1849,7 +1852,7 @@ in {
             key = "<F10>";
             action = ":lua require('dap').step_over()<CR>";
             options = {
-              desc = "Шаг с обходом";
+              desc = "Step over";
               silent = true;
             };
           }
@@ -1857,7 +1860,7 @@ in {
             key = "<leader>di";
             action = ":lua require('dap').step_into()<CR>";
             options = {
-              desc = "Шаг с заходом";
+              desc = "Step into";
               silent = true;
             };
           }
@@ -1865,7 +1868,7 @@ in {
             key = "<F11>";
             action = ":lua require('dap').step_into()<CR>";
             options = {
-              desc = "Шаг с заходом";
+              desc = "Step into";
               silent = true;
             };
           }
@@ -1873,7 +1876,7 @@ in {
             key = "<leader>dO";
             action = ":lua require('dap').step_out()<CR>";
             options = {
-              desc = "Шаг с выходом";
+              desc = "Step out";
               silent = true;
             };
           }
@@ -1881,20 +1884,20 @@ in {
             key = "<S-F11>";
             action = ":lua require('dap').step_out()<CR>";
             options = {
-              desc = "Шаг с выходом";
+              desc = "Step out";
               silent = true;
             };
           }
           # {
           #   key = "<leader>dE";
           #   action = ":lua require('dap.ui).widgets'.hover()<CR>";
-          #   options = { desc = "Оценить выражение"; silent = true; };
+          #   options = { desc = "Evaluate expression"; silent = true; };
           # }
           {
             key = "<leader>dR";
             action = ":lua require('dap').repl.toggle()<CR>";
             options = {
-              desc = "Переключить REPL";
+              desc = "Toggle REPL";
               silent = true;
             };
           }
@@ -1902,7 +1905,7 @@ in {
             key = "<leader>du";
             action = ":lua require'dapui'.toggle()<CR>";
             options = {
-              desc = "Переключить UI отладчика";
+              desc = "Toggle debugger UI";
               silent = true;
             };
           }
@@ -1910,7 +1913,7 @@ in {
             key = "<leader>dh";
             action = ":lua require'dap.ui.widgets'.hover()<CR>";
             options = {
-              desc = "Подсказка отладчика";
+              desc = "Debugger hint";
               silent = true;
             };
           }
@@ -1927,7 +1930,7 @@ in {
             key = "<leader>fy";
             action = "<cmd>Telescope yank_history<cr>";
             options = {
-              desc = "История yank";
+              desc = "Yank history";
               silent = true;
             };
           }
@@ -1935,7 +1938,7 @@ in {
             key = "<leader><CR>";
             action = ":Telescope resume<CR>";
             options = {
-              desc = "Возобновить предыдущий поиск";
+              desc = "Resume previous search";
               silent = true;
             };
           }
@@ -1943,7 +1946,7 @@ in {
             key = "<leader>f'";
             action = ":Telescope marks<CR>";
             options = {
-              desc = "Показать закладки";
+              desc = "Show bookmarks";
               silent = true;
             };
           }
@@ -1951,7 +1954,7 @@ in {
             key = "<leader>fb";
             action = ":Telescope buffers<CR>";
             options = {
-              desc = "Показать буферы";
+              desc = "Show buffers";
               silent = true;
             };
           }
@@ -1959,7 +1962,7 @@ in {
             key = "<leader>fc";
             action = ":Telescope grep_string<CR>";
             options = {
-              desc = "Поиск слова под курсором";
+              desc = "Search word under cursor";
               silent = true;
             };
           }
@@ -1967,7 +1970,7 @@ in {
             key = "<leader>fC";
             action = ":Telescope commands<CR>";
             options = {
-              desc = "Показать команды";
+              desc = "Show commands";
               silent = true;
             };
           }
@@ -1975,7 +1978,7 @@ in {
             key = "<leader>ff";
             action = ":Telescope find_files<CR>";
             options = {
-              desc = "Найти файлы";
+              desc = "Find files";
               silent = true;
             };
           }
@@ -1983,7 +1986,7 @@ in {
             key = "<leader>fF";
             action = ":Telescope find_files hidden=true<CR>";
             options = {
-              desc = "Найти файлы (включая скрытые)";
+              desc = "Find files (including hidden)";
               silent = true;
             };
           }
@@ -1991,7 +1994,7 @@ in {
             key = "<leader>fh";
             action = ":Telescope help_tags<CR>";
             options = {
-              desc = "Показать справочные теги";
+              desc = "Show help tags";
               silent = true;
             };
           }
@@ -1999,7 +2002,7 @@ in {
             key = "<leader>fk";
             action = ":Telescope keymaps<CR>";
             options = {
-              desc = "Показать сочетания клавиш";
+              desc = "Show keymaps";
               silent = true;
             };
           }
@@ -2007,7 +2010,7 @@ in {
             key = "<leader>fm";
             action = ":Telescope man_pages<CR>";
             options = {
-              desc = "Показать страницы man";
+              desc = "Show man pages";
               silent = true;
             };
           }
@@ -2015,7 +2018,7 @@ in {
             key = "<leader>fn";
             action = ":Telescope notify<CR>";
             options = {
-              desc = "Показать уведомления";
+              desc = "Show notifications";
               silent = true;
             };
           }
@@ -2023,7 +2026,7 @@ in {
             key = "<leader>fo";
             action = ":Telescope oldfiles<CR>";
             options = {
-              desc = "Показать недавно открытые файлы";
+              desc = "Show recently opened files";
               silent = true;
             };
           }
@@ -2031,7 +2034,7 @@ in {
             key = "<leader>fr";
             action = ":Telescope registers<CR>";
             options = {
-              desc = "Показать регистры";
+              desc = "Show registers";
               silent = true;
             };
           }
@@ -2039,7 +2042,7 @@ in {
             key = "<leader>ft";
             action = ":Telescope colorscheme<CR>";
             options = {
-              desc = "Показать цветовые схемы";
+              desc = "Show colorschemes";
               silent = true;
             };
           }
@@ -2047,7 +2050,7 @@ in {
             key = "<leader>fw";
             action = ":Telescope live_grep<CR>";
             options = {
-              desc = "Поиск по тексту";
+              desc = "Search text";
               silent = true;
             };
           }
@@ -2055,7 +2058,7 @@ in {
             key = "<leader>fW";
             action = ":Telescope live_grep hidden=true<CR>";
             options = {
-              desc = "Поиск по тексту (включая скрытые файлы)";
+              desc = "Search text (включая скрытые файлы)";
               silent = true;
             };
           }
@@ -2070,7 +2073,7 @@ in {
           {
             # key = "<leader>gb";
             # action = ":Telescope git_branches<CR>";
-            # options = { desc = "Показать ветки Git"; silent = true; };
+            # options = { desc = "Show Git branches"; silent = true; };
             mode = "n";
             key = "<leader>gb";
             action = "<cmd>BlameToggle<CR>";
@@ -2083,7 +2086,7 @@ in {
             key = "<leader>gc";
             action = ":Telescope git_commits<CR>";
             options = {
-              desc = "Показать коммиты Git";
+              desc = "Show Git commits";
               silent = true;
             };
           }
@@ -2091,7 +2094,7 @@ in {
             key = "<leader>gC";
             action = ":Telescope git_bcommits<CR>";
             options = {
-              desc = "Показать коммиты текущего файла";
+              desc = "Show commits of current file";
               silent = true;
             };
           }
@@ -2099,7 +2102,7 @@ in {
           #   key = "<leader>gt";
           #   action = ":Telescope git_status<CR>";
           #   options = {
-          #     desc = "Показать статус Git";
+          #     desc = "Show Git status";
           #     silent = true;
           #   };
           # }
@@ -2115,7 +2118,7 @@ in {
             key = "<leader>ls";
             action = ":Telescope lsp_document_symbols<CR>";
             options = {
-              desc = "Показать символы документа";
+              desc = "Show document symbols";
               silent = true;
             };
           }
@@ -2123,7 +2126,7 @@ in {
             key = "<leader>lG";
             action = ":Telescope lsp_workspace_symbols<CR>";
             options = {
-              desc = "Показать символы рабочей области";
+              desc = "Show workspace symbols";
               silent = true;
             };
           }
@@ -2131,7 +2134,7 @@ in {
           #   key = "gd";
           #   action.__raw = "lsp_definitions";
           #   options = {
-          #     desc = "Показать определение";
+          #     desc = "Show definition";
           #     silent = true;
           #   };
           # }
@@ -2140,7 +2143,7 @@ in {
           #   # action.__raw = "require('telescope.builtin').lsp_references";
           #   action = "lsp_references";
           #   options = {
-          #     desc = "Показать ссылки";
+          #     desc = "Show references";
           #     silent = true;
           #   };
           # }
@@ -2149,7 +2152,7 @@ in {
           #   # action.__raw = "require('telescope.builtin').lsp_implementations";
           #   action = "implementation";
           #   options = {
-          #     desc = "К имплементации";
+          #     desc = "To implementation";
           #     silent = true;
           #   };
           # }
@@ -2158,7 +2161,7 @@ in {
           #   # action.__raw = "require('telescope.builtin').lsp_type_definitions";
           #   action = "lsp_type_definitions";
           #   options = {
-          #     desc = "К определению типа";
+          #     desc = "To type definition";
           #     silent = true;
           #   };
           # }
@@ -2175,7 +2178,7 @@ in {
             key = "<leader>tf";
             action = ":FloatermNew<CR>";
             options = {
-              desc = "Открыть плавающий терминал";
+              desc = "Open floating terminal";
               silent = true;
             };
           }
@@ -2183,7 +2186,7 @@ in {
             key = "<F7>";
             action = ":FloatermNew<CR>";
             options = {
-              desc = "Открыть плавающий терминал";
+              desc = "Open floating terminal";
               silent = true;
             };
           }
@@ -2191,7 +2194,7 @@ in {
             key = "<leader>th";
             action = ":split | terminal<CR>";
             options = {
-              desc = "Открыть горизонтальный терминал";
+              desc = "Open horizontal terminal";
               silent = true;
             };
           }
@@ -2199,7 +2202,7 @@ in {
             key = "<leader>tv";
             action = ":vsplit | terminal<CR>";
             options = {
-              desc = "Открыть вертикальный терминал";
+              desc = "Open vertical terminal";
               silent = true;
             };
           }
@@ -2207,7 +2210,7 @@ in {
             key = "<leader>tl";
             action = ":FloatermNew lazygit<CR>";
             options = {
-              desc = "Открыть плавающий терминал с lazygit";
+              desc = "Open floating terminal with lazygit";
               silent = true;
             };
           }
@@ -2215,7 +2218,7 @@ in {
             key = "<leader>tn";
             action = ":FloatermNew node<CR>";
             options = {
-              desc = "Открыть плавающий терминал с node";
+              desc = "Open floating terminal с node";
               silent = true;
             };
           }
@@ -2223,7 +2226,7 @@ in {
             key = "<leader>tp";
             action = ":FloatermNew python<CR>";
             options = {
-              desc = "Открыть плавающий терминал с python";
+              desc = "Open floating terminal with python";
               silent = true;
             };
           }
@@ -2231,7 +2234,7 @@ in {
             key = "<leader>tt";
             action = ":FloatermNew btm<CR>";
             options = {
-              desc = "Открыть плавающий терминал с btm";
+              desc = "Open floating terminal с btm";
               silent = true;
             };
           }
@@ -2248,7 +2251,7 @@ in {
             key = "<leader>ua";
             action = ":lua require('nvim-autopairs').toggle()<CR>";
             options = {
-              desc = "Переключить автопары";
+              desc = "Toggle autopairs";
               silent = true;
             };
           }
@@ -2256,7 +2259,7 @@ in {
             key = "<leader>uA";
             action = ":lua require('rooter').toggle()<CR>";
             options = {
-              desc = "Переключить автоматическое определение корневой директории";
+              desc = "Toggle auto root detection";
               silent = true;
             };
           }
@@ -2264,7 +2267,7 @@ in {
             key = "<leader>ub";
             action = ":lua require('toggle-bg').toggle()<CR>";
             options = {
-              desc = "Переключить фон";
+              desc = "Toggle background";
               silent = true;
             };
           }
@@ -2272,7 +2275,7 @@ in {
             key = "<leader>uc";
             action = ":lua require('completion').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить автодополнение (буфер)";
+              desc = "Toggle autocomplete (buffer)";
               silent = true;
             };
           }
@@ -2280,7 +2283,7 @@ in {
             key = "<leader>uC";
             action = ":lua require('completion').toggle_global()<CR>";
             options = {
-              desc = "Переключить автодополнение (глобально)";
+              desc = "Toggle autocomplete (global)";
               silent = true;
             };
           }
@@ -2288,7 +2291,7 @@ in {
             key = "<leader>ud";
             action = ":lua require('diagnostics').toggle()<CR>";
             options = {
-              desc = "Переключить диагностику";
+              desc = "Toggle diagnostics";
               silent = true;
             };
           }
@@ -2296,7 +2299,7 @@ in {
             key = "<leader>uD";
             action = ":lua require('notify').dismiss()<CR>";
             options = {
-              desc = "Отклонить уведомления";
+              desc = "Dismiss notifications";
               silent = true;
             };
           }
@@ -2304,7 +2307,7 @@ in {
             key = "<leader>uf";
             action = ":lua require('formatting').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить автоформатирование (буфер)";
+              desc = "Toggle autoformat (buffer)";
               silent = true;
             };
           }
@@ -2312,7 +2315,7 @@ in {
             key = "<leader>uF";
             action = ":lua require('formatting').toggle_global()<CR>";
             options = {
-              desc = "Переключить автоформатирование (глобально)";
+              desc = "Toggle autoformat (global)";
               silent = true;
             };
           }
@@ -2320,7 +2323,7 @@ in {
             key = "<leader>ug";
             action = ":lua require('signcolumn').toggle()<CR>";
             options = {
-              desc = "Переключить колонку знаков";
+              desc = "Toggle sign column";
               silent = true;
             };
           }
@@ -2328,7 +2331,7 @@ in {
             key = "<leader>u>";
             action = ":lua require('foldcolumn').toggle()<CR>";
             options = {
-              desc = "Переключить колонку сворачивания";
+              desc = "Toggle fold column";
               silent = true;
             };
           }
@@ -2336,7 +2339,7 @@ in {
             key = "<leader>uh";
             action = ":lua require('lsp_inlay_hints').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить подсказки LSP (буфер)";
+              desc = "Toggle LSP hints (buffer)";
               silent = true;
             };
           }
@@ -2344,7 +2347,7 @@ in {
             key = "<leader>uH";
             action = ":lua require('lsp_inlay_hints').toggle_global()<CR>";
             options = {
-              desc = "Переключить подсказки LSP (глобально)";
+              desc = "Toggle LSP hints (global)";
               silent = true;
             };
           }
@@ -2352,7 +2355,7 @@ in {
             key = "<leader>ui";
             action = ":lua require('indent_setting').toggle()<CR>";
             options = {
-              desc = "Переключить настройку отступов";
+              desc = "Toggle indent settings";
               silent = true;
             };
           }
@@ -2360,7 +2363,7 @@ in {
             key = "<leader>u|";
             action = ":lua require('indent_guides').toggle()<CR>";
             options = {
-              desc = "Переключить направляющие отступов";
+              desc = "Toggle indent guides";
               silent = true;
             };
           }
@@ -2368,7 +2371,7 @@ in {
             key = "<leader>ul";
             action = ":lua require('statusline').toggle()<CR>";
             options = {
-              desc = "Переключить строку состояния";
+              desc = "Toggle statusline";
               silent = true;
             };
           }
@@ -2376,7 +2379,7 @@ in {
             key = "<leader>uL";
             action = ":lua require('codelens').toggle()<CR>";
             options = {
-              desc = "Переключить CodeLens";
+              desc = "Toggle CodeLens";
               silent = true;
             };
           }
@@ -2384,7 +2387,7 @@ in {
             key = "<leader>un";
             action = ":lua require('line_numbering').change()<CR>";
             options = {
-              desc = "Изменить нумерацию строк";
+              desc = "Change line numbering";
               silent = true;
             };
           }
@@ -2392,7 +2395,7 @@ in {
             key = "<leader>uN";
             action = ":lua require('notify').toggle()<CR>";
             options = {
-              desc = "Переключить уведомления";
+              desc = "Toggle notifications";
               silent = true;
             };
           }
@@ -2400,7 +2403,7 @@ in {
             key = "<leader>up";
             action = ":lua require('paste_mode').toggle()<CR>";
             options = {
-              desc = "Переключить режим вставки";
+              desc = "Toggle insert mode";
               silent = true;
             };
           }
@@ -2408,7 +2411,7 @@ in {
             key = "<leader>ur";
             action = ":lua require('reference_highlighting').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить выделение ссылок (буфер)";
+              desc = "Toggle link highlights (buffer)";
               silent = true;
             };
           }
@@ -2416,7 +2419,7 @@ in {
             key = "<leader>uR";
             action = ":lua require('reference_highlighting').toggle_global()<CR>";
             options = {
-              desc = "Переключить выделение ссылок (глобально)";
+              desc = "Toggle link highlights (global)";
               silent = true;
             };
           }
@@ -2424,7 +2427,7 @@ in {
             key = "<leader>us";
             action = ":lua require('spellcheck').toggle()<CR>";
             options = {
-              desc = "Переключить проверку орфографии";
+              desc = "Toggle spell check";
               silent = true;
             };
           }
@@ -2432,7 +2435,7 @@ in {
             key = "<leader>uS";
             action = ":lua require('conceal').toggle()<CR>";
             options = {
-              desc = "Переключить скрытие текста";
+              desc = "Toggle conceal";
               silent = true;
             };
           }
@@ -2440,7 +2443,7 @@ in {
             key = "<leader>ut";
             action = ":lua require('tabline').toggle()<CR>";
             options = {
-              desc = "Переключить табы";
+              desc = "Toggle tabs";
               silent = true;
             };
           }
@@ -2448,7 +2451,7 @@ in {
             key = "<leader>uu";
             action = ":lua require('url_highlighting').toggle()<CR>";
             options = {
-              desc = "Переключить выделение URL";
+              desc = "Toggle URL highlighting";
               silent = true;
             };
           }
@@ -2456,7 +2459,7 @@ in {
             key = "<leader>uw";
             action = ":lua require('wrap').toggle()<CR>";
             options = {
-              desc = "Переключить перенос строк";
+              desc = "Toggle line wrapping";
               silent = true;
             };
           }
@@ -2464,7 +2467,7 @@ in {
             key = "<leader>uy";
             action = ":lua require('syntax_highlighting').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить подсветку синтаксиса (буфер)";
+              desc = "Toggle syntax highlighting (buffer)";
               silent = true;
             };
           }
@@ -2472,7 +2475,7 @@ in {
             key = "<leader>uY";
             action = ":lua require('lsp_semantic_tokens').toggle_buffer()<CR>";
             options = {
-              desc = "Переключить LSP семантические токены (буфер)";
+              desc = "Toggle LSP semantic tokens (buffer)";
               silent = true;
             };
           }
@@ -2480,7 +2483,7 @@ in {
             key = "<leader>uz";
             action = ":lua require('color_highlighting').toggle()<CR>";
             options = {
-              desc = "Переключить подсветку цвета";
+              desc = "Toggle color highlighting";
               silent = true;
             };
           }
@@ -2557,7 +2560,7 @@ in {
               end
             '';
             options = {
-              desc = "Оценить выражение";
+              desc = "Evaluate expression";
               silent = true;
             };
           }
@@ -2573,7 +2576,7 @@ in {
           #   end
           #   '';
           #   options = {
-          #     desc = "Оценить выражение";
+          #     desc = "Evaluate expression";
           #     silent = true;
           #   };
           # }
