@@ -221,6 +221,8 @@ in {
       bashdbInteractive
       bash-completion
       nodejs_18
+      lunarvim
+      yazi
     ];
 
     file = {
