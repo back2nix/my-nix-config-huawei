@@ -262,26 +262,20 @@ in {
                 }
                 # {
                 #   type = "go";
-                #   name = "Launch Eparser";
+                #   name = "Launch Prog";
                 #   request = "launch";
-                #   program = "\${workspaceFolder}/cmd/eparser";
+                #   program = "\${workspaceFolder}/cmd/prog";
                 #   # env = {
                 #   #   CGO_ENABLED = 0;
                 #   # };
                 #   args = [
-                #     "--local-config-enabled"
-                #     "--public-port"
+                #     "--arg0"
+                #     "--arg1"
                 #     "7080"
-                #     "--admin-port"
-                #     "7081"
-                #     "--grpc-port"
-                #     "7082"
-                #     "--channelz-port"
-                #     "50851"
                 #   ];
                 #   envFile = "\${workspaceFolder}/.env";
-                #   preLaunchTask = "Build eparser";
-                #   postDebugTask = "Stop eparser";
+                #   preLaunchTask = "Build prog";
+                #   postDebugTask = "Stop prog";
                 # }
               ];
               delve = {

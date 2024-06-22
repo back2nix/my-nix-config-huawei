@@ -30,6 +30,7 @@
     ./module/change.mac.nix
     ./module/users/users.nix
     ./sops/sops.nix
+    # ./hyperland.nix
     # ./module/wordpress.nix
     # ./module/vpn/vpn.nix
     # ./module/tor.nix
