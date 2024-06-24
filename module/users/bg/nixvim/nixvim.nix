@@ -33,6 +33,7 @@ in {
     ./plugins/persistent-breakpoints.nvim.nix
     ./plugins/git-blame.nvim.nix
     ./utils/buffer.nix
+    ./plugins/oil.nix
     # ./plugins/bash
     inputs.nixvim.homeManagerModules.nixvim
     # ./plugins/dap.nix
