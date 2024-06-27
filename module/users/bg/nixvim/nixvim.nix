@@ -34,6 +34,8 @@ in {
     ./plugins/git-blame.nvim.nix
     ./utils/buffer.nix
     ./plugins/oil.nix
+    ./plugins/lspsaga.nix
+    ./plugins/git-worktree.nix
     # ./plugins/bash
     inputs.nixvim.homeManagerModules.nixvim
     # ./plugins/dap.nix
@@ -111,6 +113,13 @@ in {
       luaLoader.enable = true;
 
       plugins = {
+        # nvim-ufo = {
+        #   enable = true;
+        # };
+        # git-worktree = {
+        #   enable = true;
+        #   enableTelescope = true;
+        # };
         ollama = {
           enable = true;
           # ssh -L 11434:0.0.0.0:11434 home_desktop -N
@@ -594,7 +603,7 @@ in {
                 enable = true;
                 withArgs = ''
                   {
-                    extra_args = { "--no-reformat-tags" },
+                    extra_args = { "--no-reformat-tags", "--max-len=128" },
                   }
                 '';
               };

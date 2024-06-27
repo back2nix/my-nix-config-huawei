@@ -44,7 +44,7 @@
 
     tmp = {
       useTmpfs = true;
-      tmpfsSize = "25%";
+      tmpfsSize = "95%";
     };
 
     kernel.sysctl = {
@@ -357,7 +357,7 @@
       lidSwitchDocked = "ignore";
       lidSwitchExternalPower = "ignore";
       extraConfig = ''
-        RuntimeDirectorySize=16G
+        RuntimeDirectorySize=36G
         HandlePowerKey=suspend
         HandleSuspendKey=suspend
         HandleHibernateKey=suspend
