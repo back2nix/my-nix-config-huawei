@@ -30,6 +30,7 @@
     ./module/change.mac.nix
     ./module/users/users.nix
     ./sops/sops.nix
+    ./module/dns.nix
     # ./hyperland.nix
     # ./module/wordpress.nix
     # ./module/vpn/vpn.nix
@@ -287,6 +288,16 @@
   };
 
   services = {
+    # fprintd = {
+    # enable = true;
+    # package = pkgs.fprintd-tod;
+    # tod = {
+    #   enable = true;
+    #   # driver = pkgs.libfprint-2-tod1-goodix;
+    #   driver = pkgs.libfprint-3-tod1-vfs0090;
+    # };
+    # }; # $ sudo fprintd-enroll --finger right-index-finger <user>
+
     lorri.enable = true;
     change-mac = {
       enable = false;
