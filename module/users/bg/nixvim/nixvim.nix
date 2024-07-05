@@ -34,7 +34,7 @@ in {
     ./plugins/git-blame.nvim.nix
     ./utils/buffer.nix
     ./plugins/oil.nix
-    ./plugins/lspsaga.nix
+    # ./plugins/lspsaga.nix
     ./plugins/git-worktree.nix
     # ./plugins/bash
     inputs.nixvim.homeManagerModules.nixvim
@@ -582,7 +582,8 @@ in {
             v = ["j" "k"];
           };
         };
-        multicursors.enable = true;
+        # multicursors.enable = true;
+        # ERROR: [Hydra.nvim] Option "hint.border" has been deprecated and will be removed on 2024-02-01 -- See hint.float_opts
         lastplace.enable = true;
 
         none-ls = {

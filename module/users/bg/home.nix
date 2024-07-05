@@ -223,6 +223,7 @@ in {
       nodejs_18
       lunarvim
       yazi
+      blender
     ];
 
     file = {

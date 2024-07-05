@@ -30,26 +30,28 @@
     sops-nix,
     ...
   } @ inputs: {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = {inherit inputs;};
-      modules = [
-        inputs.musnix.nixosModules.musnix
-        sops-nix.nixosModules.sops
-        home-manager.nixosModules.home-manager
-        ./configuration.nix
-        (import ./overlays)
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            users."bg" = import ./module/users/bg/home.nix; # CHANGE ME
-            extraSpecialArgs = {
-              inherit inputs;
+    nixosConfigurations = {
+      nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs;};
+        modules = [
+          inputs.musnix.nixosModules.musnix
+          sops-nix.nixosModules.sops
+          home-manager.nixosModules.home-manager
+          ./configuration.nix
+          (import ./overlays)
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users."bg" = import ./module/users/bg/home.nix; # CHANGE ME
+              extraSpecialArgs = {
+                inherit inputs;
+              };
             };
-          };
-        }
-      ];
+          }
+        ];
+      };
     };
   };
 }
