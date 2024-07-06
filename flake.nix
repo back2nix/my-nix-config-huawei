@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -26,28 +27,54 @@
     self,
     nixpkgs,
     nixpkgs-unstable,
+    nixpkgs-master,
     home-manager,
     sops-nix,
     ...
   } @ inputs: {
-    nixosConfigurations = {
+    lsFiles = path:
+      map (f: "${path}/${f}") (
+        builtins.filter (i: builtins.readFileType "${path}/${i}" == "regular") (
+          builtins.attrNames (builtins.readDir path)
+        )
+      );
+    nixosConfigurations = let
+      system = "x86_64-linux";
+      pkgs-master = import inputs.nixpkgs-master {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      pkgs-unstable = import inputs.nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in {
       nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {inherit inputs;};
+        inherit system;
+        specialArgs = {
+          inherit self inputs pkgs-master pkgs-unstable;
+        };
         modules = [
           inputs.musnix.nixosModules.musnix
           sops-nix.nixosModules.sops
-          home-manager.nixosModules.home-manager
           ./configuration.nix
-          (import ./overlays)
+          # (import ./overlays)
+
+          {
+            imports =
+              self.lsFiles ./overlays;
+          }
+
+          home-manager.nixosModules.home-manager
           {
             home-manager = {
+              extraSpecialArgs = {
+                inherit self inputs pkgs-master pkgs-unstable;
+              };
+
               useGlobalPkgs = true;
               useUserPackages = true;
               users."bg" = import ./module/users/bg/home.nix; # CHANGE ME
-              extraSpecialArgs = {
-                inherit inputs;
-              };
             };
           }
         ];

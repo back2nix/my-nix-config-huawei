@@ -2,28 +2,12 @@
   inputs,
   config,
   pkgs,
+  pkgs-master,
+  pkgs-unstable,
   lib,
   ...
 }: let
   inherit (import ../../../variables.nix) mainUser;
-  # masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
-  #   nixpkgs.config = {
-  #     allowUnfree = true;
-  #     allowUnfreePredicate = pkg:
-  #       builtins.elem (lib.getName pkg) [
-  #         "google-chrome"
-  #       ];
-  #   };
-  # };
-  # nixvim = import (builtins.fetchGit {
-  #   url = "https://github.com/nix-community/nixvim";
-  #   # When using a different channel you can use `ref = "nixos-<version>"` to set it here
-  #   ref = "nixos-24.05";
-  # });
-  # zellij = pkgs.callPackage ./zellij.nix {
-  #   inherit (pkgs.darwin.apple_sdk.frameworks) DiskArbitration Foundation;
-  # };
-  # mitmproxy = masterPkg.mitmproxy;
 in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default

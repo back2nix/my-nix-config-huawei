@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  pkgs-unstable,
   ...
 }: let
   inherit (import ../../variables.nix) mainUser;

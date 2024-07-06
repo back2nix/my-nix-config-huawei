@@ -2,6 +2,8 @@
   inputs,
   config,
   pkgs,
+  pkgs-master,
+  pkgs-unstable,
   lib,
   ...
 }:
@@ -143,8 +145,8 @@
       wireshark
       tshark
       pavucontrol
-      # inputs.nixpkgs-unstable.lunarvim
       xclip
+      pkgs-master.serpl
     ];
 
     etc."proxychains.conf".text = ''
