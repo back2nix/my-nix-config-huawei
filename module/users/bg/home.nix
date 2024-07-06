@@ -212,6 +212,8 @@ in {
       rnr # пакетное рекурсивное переименование
       difftastic # difft
       pkgs-master.serpl # replacy like a vscode
+      pkgs-master.golangci-lint
+      pkgs-master.golangci-lint-langserver
       kondo # delete depedenc
     ];
 

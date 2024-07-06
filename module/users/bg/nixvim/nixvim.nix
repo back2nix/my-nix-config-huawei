@@ -656,8 +656,7 @@ in {
           # K = "hover";
           # gD = "declaration";
           # "<C-k>" = "signature_help";
-          # # "<leader>rn" = "lua vim.lsp.buf.rename()";
-          # "<leader>ca" = "code_action";
+          # "<leader>ga" = "code_action";
           # K = "hover";
           # gD = "references";
           # gd = "definition";
@@ -690,6 +689,7 @@ in {
 
           servers = {
             # Average webdev LSPs
+            golangci-lint-ls.enable = true;
             gopls = {
               enable = true;
               autostart = true;
@@ -734,7 +734,13 @@ in {
                       nilness = true;
                       unusedparams = true;
                       unusedwrite = true;
+                      unusedvariable = true;
+                      fillreturns = true;
+                      fillswitch = true;
+                      undeclared = true;
                       useany = true;
+                      embeddirective = true;
+                      deprecated = true;
                       fillstruct = true;
                     };
                     usePlaceholders = true;
@@ -1561,6 +1567,7 @@ in {
           #     silent = true;
           #   };
           # }
+
           {
             key = "gt";
             action.__raw = ''function() require("telescope.builtin").lsp_type_definitions { reuse_win = true } end'';
@@ -1614,6 +1621,14 @@ in {
               silent = true;
             };
           }
+          {
+            key = "<leader>ga";
+            action = ":lua vim.lsp.buf.code_action()<CR>";
+            options = {
+              desc = "code action";
+              silent = true;
+            };
+          }
           # {
           #   key = "<leader>lf";
           #   action = ":lua vim.lsp.buf.formatting()<CR>";
@@ -1639,26 +1654,14 @@ in {
           #   action = ":lua vim.diagnostic.open_float()<CR>";
           #   options = { desc = "Show diagnostics"; silent = true; };
           # }
-          # {
-          #   key = "<leader>lD";
-          #   action = ":lua vim.diagnostic.setloclist()<CR>";
-          #   options = { desc = "Add diagnostic to location list"; silent = true; };
-          # }
-          # {
-          #   key = "gra";
-          #   action = ":lua vim.lsp.buf.code_action()<CR>";
-          #   options = { desc = "Suggest code actions"; silent = true; };
-          # }
-          # {
-          #   key = "<leader>la";
-          #   action = ":lua vim.lsp.buf.code_action()<CR>";
-          #   options = { desc = "Suggest code actions"; silent = true; };
-          # }
-          # {
-          #   key = "<leader>lh";
-          #   action = ":lua vim.lsp.buf.signature_help()<CR>";
-          #   options = { desc = "Signature help"; silent = true; };
-          # }
+          {
+            key = "<leader>gh";
+            action = ":lua vim.lsp.buf.signature_help()<CR>";
+            options = {
+              desc = "Signature help";
+              silent = true;
+            };
+          }
           {
             key = "gn";
             action = "<CMD>lua vim.lsp.buf.rename()<CR>";

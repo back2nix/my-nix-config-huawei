@@ -139,7 +139,7 @@
             extraOutputsToInstall = ["dev"];
           }))
       lm_sensors
-      virtualbox
+      # virtualbox
       direnv
       tcpdump
       wireshark
@@ -225,7 +225,7 @@
       };
     };
 
-    virtualbox.host.enable = true;
+    # virtualbox.host.enable = true;
 
     podman = {
       enable = true;
