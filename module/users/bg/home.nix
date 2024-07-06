@@ -208,6 +208,11 @@ in {
       lunarvim
       yazi
       blender
+      lazydocker
+      rnr # пакетное рекурсивное переименование
+      difftastic # difft
+      pkgs-master.serpl # replacy like a vscode
+      kondo # delete depedenc
     ];
 
     file = {
@@ -265,6 +270,7 @@ in {
   };
 
   programs = {
+    thefuck.enable = true;
     # bash.enable = true;
     # bash.package = pkgs.bashInteractive;
 
@@ -308,6 +314,7 @@ in {
         export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
         # . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
         # eval "$(zoxide init zsh)"
+        export PATH=$PATH:$HOME/.cargo/bin
       '';
       oh-my-zsh = {
         enable = true;
