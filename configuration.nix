@@ -33,6 +33,7 @@
     ./module/users/users.nix
     ./sops/sops.nix
     ./module/dns.nix
+    # ./module/wine.nix
     # ./hyperland.nix
     # ./module/wordpress.nix
     # ./module/vpn/vpn.nix

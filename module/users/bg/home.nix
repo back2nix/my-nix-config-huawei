@@ -216,6 +216,7 @@ in {
       pkgs-master.golangci-lint-langserver
       kondo # delete depedenc
       hyperfine # замер времени запуска
+      # bottles # Wine Easy-to-use wineprefix manager
     ];
 
     file = {
@@ -338,9 +339,11 @@ in {
       in {
         # https://github.com/jonringer/nixpkgs-config/blob/987c6e3d647e90ef2bbd00171b5c1bb8bf5e1757/bash.nix#L159
         screen2text = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
-        s2t = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
+        s2t = "${pkgs-master.normcap}/bin/normcap -l eng";
+        s2tf = "${pkgs-master.gnome-frog}/bin/frog";
         en = "${pkgs-master.normcap}/bin/normcap -l eng";
         ru = "${pkgs-master.normcap}/bin/normcap -l rus";
+
         ls = "eza ";
         ll = "eza -l --color=always";
         la = "eza -a --color=always";
