@@ -147,7 +147,6 @@ in {
       nix-template
       marksman
       encfs
-      difftastic
       bat
       tokei
       android-tools
@@ -209,12 +208,14 @@ in {
       yazi
       blender
       lazydocker
+      dive # A tool for exploring each layer in a docker image
       rnr # пакетное рекурсивное переименование
       difftastic # difft
       pkgs-master.serpl # replacy like a vscode
       pkgs-master.golangci-lint
       pkgs-master.golangci-lint-langserver
       kondo # delete depedenc
+      hyperfine # замер времени запуска
     ];
 
     file = {
@@ -272,6 +273,7 @@ in {
   };
 
   programs = {
+    lazygit.enable = config.programs.git.enable;
     thefuck.enable = true;
     # bash.enable = true;
     # bash.package = pkgs.bashInteractive;
@@ -331,12 +333,19 @@ in {
         custom = "/etc/nixos/module/users/bg";
         theme = "agnoster-nix";
       };
-      shellAliases = {
+      shellAliases = let
+        normcap_lang = "-l eng rus";
+      in {
         # https://github.com/jonringer/nixpkgs-config/blob/987c6e3d647e90ef2bbd00171b5c1bb8bf5e1757/bash.nix#L159
+        screen2text = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
+        s2t = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
+        en = "${pkgs-master.normcap}/bin/normcap -l eng";
+        ru = "${pkgs-master.normcap}/bin/normcap -l rus";
         ls = "eza ";
         ll = "eza -l --color=always";
         la = "eza -a --color=always";
         lla = "eza -al --color=always";
+        tree = "eza --tree";
         gco = "git checkout";
         open = "xdg-open";
         nfl = "nix flake lock";
