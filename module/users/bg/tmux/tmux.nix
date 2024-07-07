@@ -209,59 +209,35 @@
 
     plugins = with pkgs; [
       tmuxPlugins.copycat
-      tmuxPlugins.resurrect
       tmuxPlugins.sensible
-      tmuxPlugins.prefix-highlight
-      # tmuxPlugins.tmux-update-display # not yet available on nix, but can be loaded with tpm
       tmuxPlugins.yank
-      {
-        plugin = tmuxPlugins.continuum;
-        extraConfig = ''
-          set -g @continuum-restore 'on'
-          set -g @continuum-save-interval '60' # minutes
-        '';
-      }
-      {
-        plugin = tmuxPlugins.cpu;
-        extraConfig = ''
-          ### I can put these all in the color scheme section at the bottom,
-          ### maybe? then use #{cpu_bg_color} instead of the color strings I'm
-          ### using
-          # set -g @cpu_low_fg_color "#[fg=colour246]"
-          # set -g @cpu_medium_fg_color "#[fg=colour246]"
-          # set -g @cpu_high_fg_color "#[fg=colour246]"
-          # set -g @cpu_low_bg_color "#[bg=colour237]"
-          # set -g @cpu_medium_bg_color "#[bg=colour237]"
-          # set -g @cpu_high_bg_color "#[bg=colour237]"
-          set -g @cpu_percentage_format " cpu: %3.1f%% "
-
-          # set -g @ram_low_fg_color "#[fg=colour246]"
-          # set -g @ram_medium_fg_color "#[fg=colour246]"
-          # set -g @ram_high_fg_color "#[fg=colour246]"
-          # set -g @ram_low_bg_color "#[bg=colour239]"
-          # set -g @ram_medium_bg_color "#[bg=colour239]"
-          # set -g @ram_high_bg_color "#[bg=colour239]"
-          set -g @ram_percentage_format " mem: %3.1f%% "
-
-
-          set-option -g status-right '#[fg=colour82, bg=colour22]#{cpu_percentage}'
-          set-option -ag status-right '#[fg=colour82, bg=colour22]#{ram_percentage}'
-        '';
-      }
       {
         plugin = tmuxPlugins.battery;
         extraConfig = ''
-          set-option  -ag status-right '#[fg=colour246, bg=colour239, nobold, nounderscore, noitalics] batt: #{battery_percentage} '
+          set-option  -g status-right '#[fg=colour246, bg=colour239, nobold, nounderscore, noitalics] batt: #{battery_percentage} '
         '';
       }
       tmuxPlugins.vim-tmux-navigator
-      tmuxPlugins.resurrect
-      {
-        plugin = tmuxPlugins.continuum;
-        extraConfig = ''
-          set -g @continuum-restore 'on'
-        '';
-      }
+      # tmuxPlugins.prefix-highlight
+      # tmuxPlugins.tmux-update-display # not yet available on nix, but can be loaded with tpm
+      # tmuxPlugins.resurrect
+      # {
+      # plugin = tmuxPlugins.continuum;
+      # extraConfig = ''
+      #   set -g @continuum-restore 'on'
+      #   set -g @continuum-save-interval '60' # minutes
+      # '';
+      # }
+      # {
+      #   plugin = tmuxPlugins.cpu;
+      #   extraConfig = ''
+      #     set -g @cpu_percentage_format " cpu: %3.1f%% "
+      #     set -g @ram_percentage_format " mem: %3.1f%% "
+
+      #     set-option -g status-right '#[fg=colour82, bg=colour22]#{cpu_percentage}'
+      #     set-option -g status-right '#[fg=colour82, bg=colour22]#{ram_percentage}'
+      #   '';
+      # }
     ];
   };
 }
