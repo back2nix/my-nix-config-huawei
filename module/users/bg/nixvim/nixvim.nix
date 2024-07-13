@@ -2,6 +2,7 @@
   inputs,
   config,
   pkgs,
+  pkgs-master,
   lib,
   ...
 }: let
@@ -41,6 +42,12 @@ in {
     # ./plugins/dap.nix
     # ./colorscheme.nix
   ];
+
+  home = {
+    packages = with pkgs; [
+      gomodifytags
+    ];
+  };
 
   programs = {
     nixvim.enable = true;
@@ -85,9 +92,14 @@ in {
         smartcase = true;
         undofile = true;
         swapfile = false;
+        list = true;
+        listchars.__raw = "{ tab = '» ', trail = '·', nbsp = '␣' }";
+        cursorline = true;
+        hlsearch = true;
+        breakindent = true;
       };
 
-      extraPlugins = with pkgs.vimPlugins; [
+      extraPlugins = with pkgs-master.vimPlugins; [
         # nvim-gdb
         vim-nix
         vim-dadbod
@@ -96,7 +108,7 @@ in {
         dressing-nvim
         jupytext-nvim
       ];
-      extraPackages = with pkgs; [
+      extraPackages = with pkgs-master; [
         fd
         ripgrep
         sqls
@@ -370,7 +382,7 @@ in {
           numbers = "ordinal";
         };
 
-        #comment.enable = true;
+        comment.enable = true;
         #comment-nvim.enable = true;
         commentary.enable = true;
         diffview = {
@@ -587,6 +599,7 @@ in {
         lastplace.enable = true;
 
         none-ls = {
+          tempDir = "/tmp";
           enable = true;
           enableLspFormat = true;
           updateInInsert = false;
@@ -594,10 +607,13 @@ in {
             code_actions = {
               gitsigns.enable = true;
               statix.enable = true;
+              gomodifytags.enable = true;
+              impl.enable = true;
             };
             diagnostics = {
               statix.enable = true;
               yamllint.enable = true;
+              codespell.enable = true;
             };
             formatting = {
               golines = {
@@ -611,6 +627,8 @@ in {
               gofumpt.enable = true;
               # goimports.enable = true;
               goimports_reviser.enable = true;
+
+              sqlformat.enable = true;
 
               # Nix
               alejandra.enable = true;
@@ -1118,7 +1136,7 @@ in {
           # }
           {
             key = "<leader>n";
-            action = ":enew<CR>";
+            action = ":new<CR>";
             options = {
               desc = "Create a new file";
               silent = true;

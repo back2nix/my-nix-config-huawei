@@ -220,6 +220,8 @@ in {
       hyperfine # замер времени запуска
       btop
       inkscape-with-extensions
+      pkgs-master.nix-init
+      pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
     ];
 
@@ -354,8 +356,8 @@ in {
 
   xdg.mimeApps.defaultApplications = {
     "text/palin" = ["nvim"];
-    "video/png" = ["mvp.destop"];
-    "video/*" = ["mvp.destop"];
+    "video/png" = ["mvp.desktop"];
+    "video/*" = ["mvp.desktop"];
     "application/pdf" = ["evince"];
     "application/x-bzpdf" = ["evince"];
     "application/x-ext-pdf" = ["evince"];

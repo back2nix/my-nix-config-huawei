@@ -46,7 +46,7 @@
         # "kubectl"
         # "kubectx"
         "systemd"
-        "command-not-found"
+        # "command-not-found"
       ];
       custom = "/etc/nixos/module/users/bg";
       theme = "agnoster-nix";
