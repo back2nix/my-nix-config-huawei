@@ -115,7 +115,6 @@ in {
       multipass
       pkgs-master.telegram-desktop
       keepassxc
-      docker-compose
       proxychains
       # arion
       deadnix

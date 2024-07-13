@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
+    nixpkgs-23-11.url = "github:nixos/nixpkgs/nixos-23.11";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,6 +22,11 @@
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # arion = {
+    #   url = "github:hercules-ci/arion";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
@@ -28,8 +34,10 @@
     nixpkgs,
     nixpkgs-unstable,
     nixpkgs-master,
+    nixpkgs-23-11,
     home-manager,
     sops-nix,
+    # arion,
     ...
   } @ inputs: {
     lsFiles = path:
@@ -48,15 +56,20 @@
         inherit system;
         config.allowUnfree = true;
       };
+      pkgs-23-11 = import inputs.nixpkgs-23-11 {
+        inherit system;
+        config.allowUnfree = true;
+      };
     in {
       nixos = nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
-          inherit self inputs pkgs-master pkgs-unstable;
+          inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
         };
         modules = [
           inputs.musnix.nixosModules.musnix
           sops-nix.nixosModules.sops
+          # arion.nixosModules.arion
           ./configuration.nix
           # (import ./overlays)
 
@@ -69,7 +82,7 @@
           {
             home-manager = {
               extraSpecialArgs = {
-                inherit self inputs pkgs-master pkgs-unstable;
+                inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
               };
 
               useGlobalPkgs = true;

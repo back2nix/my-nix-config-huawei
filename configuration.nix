@@ -33,6 +33,8 @@
     ./module/users/users.nix
     ./sops/sops.nix
     ./module/dns.nix
+    ./module/podman.nix
+    # ./module/arion.nix
     # ./module/wine.nix
     # ./hyperland.nix
     # ./module/wordpress.nix
@@ -148,6 +150,11 @@
       pavucontrol
       xclip
       pkgs-master.serpl
+      # pkgs.arion
+      # pkgs.docker-client
+      # pkgs.arion
+      # pkgs.podman-compose
+      # pkgs.podman-tui
     ];
 
     etc."proxychains.conf".text = ''
@@ -211,30 +218,32 @@
 
   virtualisation = {
     # waydroid.enable = true;
-    docker = {
-      enable = true;
-      rootless = {
-        enable = true;
-        setSocketVariable = true;
-      };
-      daemon = {
-        settings = {
-          # registry-mirrors = [
-          #   "https://huecker.io"
-          # ];
-        };
-      };
-    };
+    # docker = {
+    #   enable = false;
+    #   rootless = {
+    #     enable = true;
+    #     setSocketVariable = true;
+    #   };
+    #   daemon = {
+    #     settings = {
+    #       # registry-mirrors = [
+    #       #   "https://huecker.io"
+    #       # ];
+    #     };
+    #   };
+    # };
 
     # virtualbox.host.enable = true;
 
-    podman = {
-      enable = true;
-      #dockerCompat = true;
-      defaultNetwork.settings = {
-        dns_enabled = true;
-      };
-    };
+    #podman = {
+    #  enable = true;
+    #  #dockerCompat = true;
+    #  dockerSocket.enable = true;
+    #  # defaultNetwork.dnsname.enable = true;
+    #  defaultNetwork.settings = {
+    #    dns_enabled = true;
+    #  };
+    #};
   };
 
   swapDevices = [
