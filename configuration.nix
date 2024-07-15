@@ -33,7 +33,11 @@
     ./module/users/users.nix
     ./sops/sops.nix
     ./module/dns.nix
-    ./module/podman.nix
+
+    # ./module/podman.nix
+    # or
+    ./module/docker.nix
+
     # ./module/arion.nix
     # ./module/wine.nix
     # ./hyperland.nix
