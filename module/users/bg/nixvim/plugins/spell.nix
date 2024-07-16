@@ -1,6 +1,4 @@
-{ config, ... }:
-
-let
+{config, ...}: let
   nvim-spell-ru-utf8-dictionary = builtins.fetchurl {
     url = "http://ftp.vim.org/vim/runtime/spell/ru.utf-8.spl";
     sha256 = "0kf5vbk7lmwap1k4y4c1fm17myzbmjyzwz0arh5v6810ibbknbgb";
@@ -20,8 +18,7 @@ let
     url = "http://ftp.vim.org/vim/runtime/spell/en.utf-8.sug";
     sha256 = "1v1jr4rsjaxaq8bmvi92c93p4b14x2y1z95zl7bjybaqcmhmwvjv";
   };
-in
-{
+in {
   home.file."${config.xdg.configHome}/nvim/spell/ru.utf-8.spl".source = nvim-spell-ru-utf8-dictionary;
   home.file."${config.xdg.configHome}/nvim/spell/ru.utf-8.sug".source = nvim-spell-ru-utf8-suggestions;
 

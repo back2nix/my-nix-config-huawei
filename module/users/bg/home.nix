@@ -14,12 +14,14 @@ in {
     # inputs.xremap-flake.homeManagerModules.default
     # ./mime.nix
     # ./overlays.nix
-    # inputs.nixvim.nixosModules.nixvim
+    # inputs.nixvim.homeManagerModules.nixvim
     ./dconf.nix
     ./tmux/tmux.nix
     ./zsh/zsh.nix
     # ./zsh/zsh_zinit.nix
-    ./nixvim/nixvim.nix
+    # ./nixvim/nixvim.nix
+    ./nixvim.nix
+    ./nixvim/plugins/spell.nix
   ];
 
   # inputs.nixpkgs.overlays = [
@@ -222,6 +224,7 @@ in {
       pkgs-master.nix-init
       pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
+      gomodifytags
     ];
 
     file = {
