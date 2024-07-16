@@ -40,7 +40,7 @@ in {
     # ./plugins/bash
     inputs.nixvim.homeManagerModules.nixvim
     # ./plugins/dap.nix
-    # ./colorscheme.nix
+    # ./plugins/colorscheme.nix
   ];
 
   home = {
