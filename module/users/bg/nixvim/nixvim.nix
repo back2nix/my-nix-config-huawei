@@ -30,10 +30,10 @@
   };
 in {
   imports = [
-    ./spell.nix
+    ./plugins/spell.nix
     ./plugins/persistent-breakpoints.nvim.nix
     ./plugins/git-blame.nvim.nix
-    ./utils/buffer.nix
+    ./plugins/buffer.nix
     ./plugins/oil.nix
     # ./plugins/lspsaga.nix
     ./plugins/git-worktree.nix
