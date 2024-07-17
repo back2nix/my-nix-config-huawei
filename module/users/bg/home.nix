@@ -21,7 +21,7 @@ in {
     # ./zsh/zsh_zinit.nix
     # ./nixvim/nixvim.nix
     ./nixvim.nix
-    ./nixvim/plugins/spell.nix
+    # ./nixvim/plugins/spell.nix
   ];
 
   # inputs.nixpkgs.overlays = [
@@ -225,6 +225,8 @@ in {
       pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
+      gpu-screen-recorder-gtk
+      simplescreenrecorder
     ];
 
     file = {
