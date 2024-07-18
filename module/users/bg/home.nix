@@ -225,7 +225,6 @@ in {
       pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
-      gpu-screen-recorder-gtk
       simplescreenrecorder
     ];
 
