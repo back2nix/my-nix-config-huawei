@@ -185,9 +185,17 @@
   programs = {
     zsh.enable = true;
     ssh.setXAuthLocation = true;
-    nix-ld.enable = true;
-    nix-ld.libraries = with pkgs; [
-    ];
+    nix-ld = {
+      package = inputs.nix-ld-rs;
+      enable = true;
+      libraries = with pkgs; [
+        gcc
+        icu
+        libcxx
+        stdenv.cc.cc.lib
+        zlib
+      ];
+    };
     dconf.enable = true;
     wireshark.enable = true;
   };

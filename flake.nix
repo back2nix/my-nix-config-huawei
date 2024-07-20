@@ -23,6 +23,10 @@
       url = "github:musnix/musnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-ld-rs = {
+      url = "github:nix-community/nix-ld-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # arion = {
     #   url = "github:hercules-ci/arion";
