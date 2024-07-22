@@ -22,6 +22,7 @@ in {
     # ./nixvim/nixvim.nix
     ./nixvim.nix
     # ./nixvim/plugins/spell.nix
+    ./nix-tools.nix
   ];
 
   # inputs.nixpkgs.overlays = [
@@ -142,7 +143,6 @@ in {
       screenkey
       wshowkeys
       # gnome-frog
-      alejandra
       niv
       distrobox
       dconf
@@ -221,7 +221,6 @@ in {
       hyperfine # замер времени запуска
       btop
       inkscape-with-extensions
-      pkgs-master.nix-init
       pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
