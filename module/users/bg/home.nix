@@ -234,10 +234,10 @@ in {
       # ".screenrc".source = dotfiles/screenrc;
 
       # ".tmux.conf".source = ./tmux/tmux.conf;
-      ".gitconfig".source = ./gitconfig;
-      ".cargo/config".source = ./cargoconfig;
-      ".gdbinit".source = ./gdbinit;
-      ".gdbinit.d/init".source = ./gdbinit.d_init;
+      ".gitconfig".source = ./gitconfig.txt;
+      ".cargo/config".source = ./cargoconfig.txt;
+      ".gdbinit".source = ./gdbinit.txt;
+      ".gdbinit.d/init".source = ./gdbinit.d_init.txt;
       # ".config/zellij/config.kdl".source = ./zellij;
 
       # ".tmux.conf" = {
