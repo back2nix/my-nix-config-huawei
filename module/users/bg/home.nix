@@ -172,7 +172,7 @@ in {
       hub # create pull request
       rm-improved
       pcmanfm
-      google-chrome
+      pkgs-master.google-chrome
       gnome.eog # image viewer
       evince # pdf reader
       zoom-us
