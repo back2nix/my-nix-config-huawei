@@ -22,8 +22,8 @@
           "server_port": 8388,
           "local_port": 1080,
           "password": "${config.sops.placeholder."shadowsocks/password"}",
-          "timeout": 60,
-          "method": "rc4-md5",
+          "timeout": 5,
+          "method": "aes-128-gcm",
           "fast_open": true
       }
     '';

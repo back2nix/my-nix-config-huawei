@@ -154,6 +154,7 @@
       pavucontrol
       xclip
       pkgs-master.serpl
+      sops
       # pkgs.arion
       # pkgs.docker-client
       # pkgs.arion
