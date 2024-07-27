@@ -270,6 +270,26 @@
         "type": "github"
       }
     },
+    "nix-index-database": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1721531260,
+        "narHash": "sha256-O72uxk4gYFQDwNkoBioyrR3GK9EReZmexCStBaORMW8=",
+        "owner": "Mic92",
+        "repo": "nix-index-database",
+        "rev": "b6db9fd8dc59bb2ccb403f76d16ba8bbc1d5263d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "nix-index-database",
+        "type": "github"
+      }
+    },
     "nix-ld-rs": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -444,11 +464,11 @@
         "nvim-spell-ru-utf8-suggestions": "nvim-spell-ru-utf8-suggestions"
       },
       "locked": {
-        "lastModified": 1721851964,
-        "narHash": "sha256-rluxNglnFLwJOLpG7Hfb6W3qn2wUa7v0/e16oXkH5QA=",
+        "lastModified": 1722065917,
+        "narHash": "sha256-HOiJqynmgkAG103R1O/2eIfPQ+xXTUK+ccR1lC8F0Q0=",
         "owner": "back2nix",
         "repo": "nixvim",
-        "rev": "6306bab825fc5dae32d23c2df02aeb69ba9379cf",
+        "rev": "dca4fd9fcf9093dfe6464fddde9cff57f5032a4b",
         "type": "github"
       },
       "original": {
@@ -534,6 +554,7 @@
       "inputs": {
         "home-manager": "home-manager",
         "musnix": "musnix",
+        "nix-index-database": "nix-index-database",
         "nix-ld-rs": "nix-ld-rs",
         "nixpkgs": "nixpkgs",
         "nixpkgs-23-11": "nixpkgs-23-11",

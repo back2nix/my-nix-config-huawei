@@ -23,6 +23,7 @@ in {
     ./nixvim.nix
     # ./nixvim/plugins/spell.nix
     ./nix-tools.nix
+    # inputs.nix-index-database.hmModules.nix-index
   ];
 
   # inputs.nixpkgs.overlays = [
