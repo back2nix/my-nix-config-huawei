@@ -283,6 +283,19 @@ in {
   };
 
   programs = {
+    nix-index = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    jq.enable = true;
+
+    fzf = {
+      enable = true;
+      enableZshIntegration = true;
+      tmux.enableShellIntegration = true;
+    };
+
     lazygit.enable = config.programs.git.enable;
     thefuck.enable = true;
     # bash.enable = true;
