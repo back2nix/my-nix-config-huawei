@@ -89,17 +89,17 @@
       # z = "zellij";
       n = "nvim";
       rem2loc = ''
-        function ssh-port() { 
-          local port=$((RANDOM % 60000 + 1024)); 
+        function ssh-port() {
+          local port=$((RANDOM % 60000 + 1024));
           echo ssh -L "$port":localhost:$1 desktop -N;
-          echo http://localhost:"$port" or https://localhost:"$port"; 
-          ssh -L "$port":localhost:$1 desktop -N; 
+          echo http://localhost:"$port" or https://localhost:"$port";
+          ssh -L "$port":localhost:$1 desktop -N;
         }; ssh-port'';
       rem2loc_norand = ''
-        function ssh-port() { 
+        function ssh-port() {
           echo ssh -L "$2":localhost:$1 desktop -N;
-          echo http://localhost:"$2" or https://localhost:"$2"; 
-          ssh -L "$2":localhost:$1 desktop -N; 
+          echo http://localhost:"$2" or https://localhost:"$2";
+          ssh -L "$2":localhost:$1 desktop -N;
         }; ssh-port'';
       sh = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
@@ -165,18 +165,67 @@
       }
     ];
     zplug = {
-      enable = true;
-      plugins = [
-        # {name = "zsh-users/zsh-autosuggestions";}
-        # {name = "zsh-users/zsh-completions";}
-        # {name = "zsh-users/zsh-syntax-highlighting";}
-        {name = "zsh-users/zsh-history-substring-search";}
-        {name = "unixorn/warhol.plugin.zsh";}
-        {
-          name = "notthebee/prompt";
-          tags = [as:theme];
-        }
-      ];
+      # enable = true;
+      # plugins = [
+      #   # {name = "zsh-users/zsh-autosuggestions";}
+      #   # {name = "zsh-users/zsh-completions";}
+      #   # {name = "zsh-users/zsh-syntax-highlighting";}
+      #   {name = "zsh-users/zsh-history-substring-search";}
+      #   {name = "unixorn/warhol.plugin.zsh";}
+      #   {
+      #     name = "notthebee/prompt";
+      #     tags = [as:theme];
+      #   }
+      # ];
+      # plugins = [
+      #   {
+      #     name = "plugins/colored-man-pages";
+      #     tags = [from:oh-my-zsh];
+      #   }
+      #   {
+      #     name = "plugins/colorize";
+      #     tags = [from:oh-my-zsh];
+      #   }
+      #   {
+      #     name = "plugins/command-not-found";
+      #     tags = [from:oh-my-zsh];
+      #   }
+      #   # {
+      #   #   name = "plugins/fd";
+      #   #   tags = [from:oh-my-zsh];
+      #   # }
+      #   # {
+      #   #   name = "plugins/fzf";
+      #   #   tags = [from:oh-my-zsh];
+      #   # }
+      #   {
+      #     name = "plugins/git";
+      #     tags = [from:oh-my-zsh];
+      #   }
+      #   # {
+      #   #   name = "plugins/ripgrep";
+      #   #   tags = [from:oh-my-zsh];
+      #   # }
+      #   # {
+      #   #   name = "plugins/tmux";
+      #   #   tags = [from:oh-my-zsh];
+      #   # }
+      #   {
+      #     name = "plugins/tmux";
+      #     tags = [from:oh-my-zsh];
+      #   }
+      #   # {
+      #   #   name = "plugins/vi-mode";
+      #   #   tags = [from:oh-my-zsh];
+      #   # }
+      #   # { name = "plugins/cargo";             tags = [from:oh-my-zsh]; }
+      #   # { name = "plugins/direnv";            tags = [from:oh-my-zsh]; }
+      #   # { name = "plugins/pass";              tags = [from:oh-my-zsh]; }
+      #   # { name = "plugins/rsync";             tags = [from:oh-my-zsh]; }
+      #   # { name = "plugins/"; tags = [from:oh-my-zsh]; }
+      #   # {name = "kutsan/zsh-system-clipboard";} # IMPORTANT
+      #   # { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; }
+      # ];
     };
   };
 }

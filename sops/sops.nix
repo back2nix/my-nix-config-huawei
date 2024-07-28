@@ -19,7 +19,7 @@
               "${config.sops.placeholder."shadowsocks/server"}"
           ],
           "mode": "tcp_and_udp",
-          "server_port": 8388,
+          "server_port": 443,
           "local_port": 1080,
           "password": "${config.sops.placeholder."shadowsocks/password"}",
           "timeout": 5,

@@ -52,10 +52,10 @@
 
     supportedFilesystems = ["ntfs"];
 
-    tmp = {
-      useTmpfs = true;
-      tmpfsSize = "95%";
-    };
+    # tmp = {
+    #   useTmpfs = true;
+    #   tmpfsSize = "95%";
+    # };
 
     kernel.sysctl = {
       "net.ipv4.ip_forward" = "1";
