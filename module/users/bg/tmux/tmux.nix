@@ -44,6 +44,11 @@
       bind % split-window -h -c "#{pane_current_path}"
       bind c new-window -c "#{pane_current_path}"
 
+      # Add these lines to restore 'v' key functionality
+      bind -T copy-mode-vi v send-keys -X begin-selection
+      bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
+      bind -T copy-mode-vi r send-keys -X rectangle-toggle
+
       # Other bindings
       bind a last-window
 
