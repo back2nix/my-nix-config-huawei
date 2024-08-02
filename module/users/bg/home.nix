@@ -226,7 +226,6 @@ in {
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
       simplescreenrecorder
-      pkgs-master.delta # diff tools not only git
     ];
 
     file = {

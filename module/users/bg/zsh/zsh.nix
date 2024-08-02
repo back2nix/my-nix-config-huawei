@@ -62,7 +62,7 @@
       # s2tf = "${pkgs-master.gnome-frog}/bin/frog";
       en = "${pkgs-master.normcap}/bin/normcap -l eng";
       ru = "${pkgs-master.normcap}/bin/normcap -l rus";
-
+      diff = ''${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
       ls = "eza ";
       ll = "eza -l --color=always";
       la = "eza -a --color=always";
