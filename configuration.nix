@@ -33,6 +33,8 @@
     ./module/users/users.nix
     ./sops/sops.nix
     ./module/dns.nix
+    ./module/xray/xray.nix
+    # ./module/xray/default.nix
 
     # ./module/podman.nix
     # or

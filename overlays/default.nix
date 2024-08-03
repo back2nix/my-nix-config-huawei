@@ -36,6 +36,18 @@
       bashdbInteractive = final.bashdb.overrideAttrs {
         buildInputs = (prev.buildInputs or []) ++ [final.bashInteractive];
       };
+      # xray = prev.xray.overrideAttrs (oldAttrs: rec {
+      #   version = "1.8.23";
+      #   src = prev.fetchFromGitHub {
+      #     owner = "XTLS";
+      #     repo = "Xray-core";
+      #     rev = "v${version}";
+      #     sha256 = "sha256-DnGwxJTfBNeVwAQhWIdRU1w6kMHJ0Vs3vEvwlFe59i8=";
+      #   };
+      #   vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      #   proxyVendor = true;
+      #   vendorSha256 = lib.fakeSha256;
+      # });
     })
 
     # Overlay 3: Define overlays in other files

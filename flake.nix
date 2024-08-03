@@ -31,6 +31,8 @@
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
+    # nur.url = "github:nix-community/NUR";
+
     # arion = {
     #   url = "github:hercules-ci/arion";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +47,7 @@
     nixpkgs-23-11,
     home-manager,
     sops-nix,
+    # nur,
     # arion,
     ...
   } @ inputs: {
@@ -77,13 +80,22 @@
         modules = [
           inputs.musnix.nixosModules.musnix
           sops-nix.nixosModules.sops
+          # ./module/xray/default.nix
           # arion.nixosModules.arion
           ./configuration.nix
           # (import ./overlays)
+          # {nixpkgs.overlays = [nur.overlay];}
+          # ({pkgs, ...}: let
+          #   nur-no-pkgs = import nur {
+          #     nurpkgs = import nixpkgs {system = "x86_64-linux";};
+          #   };
+          # in {
+          #   imports = [nur-no-pkgs.repos.iopq.modules.xraya];
+          #   services.xraya.enable = true;
+          # })
 
           {
-            imports =
-              self.lsFiles ./overlays;
+            imports = self.lsFiles ./overlays;
           }
 
           home-manager.nixosModules.home-manager

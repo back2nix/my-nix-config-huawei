@@ -226,6 +226,7 @@ in {
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
       simplescreenrecorder
+      sshuttle
     ];
 
     file = {
