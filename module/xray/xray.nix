@@ -24,7 +24,7 @@ in {
       content = ''
         {
           "log": {
-            "loglevel": "debug",
+            "loglevel": "warring",
             "access": "/tmp/access.log",
             "error": "/tmp/error.log"
           },
@@ -129,7 +129,7 @@ in {
       content = ''
         {
           "log": {
-            "loglevel": "debug"
+            "loglevel": "warring"
           },
           "routing": {
             "domainStrategy": "IPOnDemand",
