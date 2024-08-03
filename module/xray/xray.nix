@@ -11,15 +11,15 @@ in {
   };
   users.groups."${user}" = {};
 
-  networking.firewall.allowedTCPPorts = [443 10086];
-  networking.firewall.allowedUDPPorts = [443 10086];
+  networking.firewall.allowedTCPPorts = [443 10086 1080 10809];
+  networking.firewall.allowedUDPPorts = [443 10086 1080 10809];
   sops = {
     secrets = {
       uuid = {};
       privateKey = {};
       publicKey = {};
     };
-    templates."xray.json" = {
+    templates."xray-server.json" = {
       owner = "${user}";
       content = ''
         {
@@ -124,15 +124,88 @@ in {
         }
       '';
     };
+    templates."xray-client.json" = {
+      owner = "${user}";
+      content = ''
+        {
+          "log": {
+            "loglevel": "debug"
+          },
+          "routing": {
+            "domainStrategy": "IPOnDemand",
+            "rules": [
+                {
+                    "type": "field",
+                    "ip": [
+                        "geoip:private"
+                    ],
+                    "outboundTag": "direct"
+                }
+            ]
+          },
+          "inbounds": [
+            {
+                "port": 1081,
+                "listen": "127.0.0.1",
+                "protocol": "socks",
+                "settings": {
+                    "udp": true
+                }
+            },
+            {
+              "port": 10809,
+              "listen": "127.0.0.1",
+              "protocol": "http"
+            }
+          ],
+          "outbounds": [
+          {
+            "protocol": "vless",
+            "settings": {
+              "vnext": [
+                {
+                  "address": "${config.sops.placeholder."shadowsocks/server"}",
+                  "port": 10086,
+                  "users": [
+                    {
+                      "id": "${config.sops.placeholder.uuid}",
+                      "flow": "xtls-rprx-vision",
+                      "encryption": "none"
+                    }
+                  ]
+                }
+              ]
+            },
+            "streamSettings": {
+              "network": "tcp",
+              "security": "reality",
+              "realitySettings": {
+                "serverName": "www.google.com",
+                "fingerprint": "firefox",
+                "shortId": "114514",
+                "publicKey": "${config.sops.placeholder.publicKey}",
+                "spiderX": "/"
+              }
+            }
+          },
+          {
+            "protocol": "freedom",
+            "tag": "direct"
+          }
+        ]
+        }
+      '';
+    };
   };
 
   services.xray = {
     enable = true;
-    # package = pkgs-master.xray;
-    package =
-      pkgs-master.xray.overrideAttrs
-      (prev: {patches = prev.patches or [] ++ [./disable-splice.patch];});
-    settingsFile = config.sops.templates."xray.json".path;
+    package = pkgs-master.xray;
+    # package =
+    #   pkgs-master.xray.overrideAttrs
+    #   (prev: {patches = prev.patches or [] ++ [./disable-splice.patch];});
+    # settingsFile = config.sops.templates."xray-server.json".path;
+    settingsFile = config.sops.templates."xray-client.json".path;
   };
   systemd.services.xray = {
     wants = ["sops-nix.service"];

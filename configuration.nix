@@ -178,7 +178,7 @@
       [ProxyList]
         # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
         # socks5 192.168.0.5 1081
-        socks5 127.0.0.1 1080
+        socks5 127.0.0.1 1081
         # socks5 192.168.100.3 1080
         # socks5 127.0.0.1 8118
         # socks5 127.0.0.1 9063
