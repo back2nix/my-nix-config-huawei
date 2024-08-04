@@ -5,13 +5,13 @@
     domains = ["~."]; # "use as default interface for all requests"
     # (see man resolved.conf)
     # let Avahi handle mDNS publication
+    # DNSOverTLS=opportunistic
     extraConfig = ''
-      DNSOverTLS=opportunistic
+      DNSOverTLS=yes
       MulticastDNS=resolve
     '';
     llmnr = "true";
   };
-
   networking.nameservers = [
     "1.1.1.1#cloudflare-dns.com"
     "8.8.8.8#dns.google"
