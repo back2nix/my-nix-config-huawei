@@ -23,6 +23,10 @@
     };
   };
 
+  virtualisation.multipass = {
+    enable = true;
+  };
+
   virtualisation.containers.registries.search = [
     "docker.io"
   ];
@@ -42,5 +46,6 @@
     # pkgs-master.podman-tui
     pkgs-master.docker-client
     pkgs-master.distrobox
+    pkgs-master.docker-compose
   ];
 }

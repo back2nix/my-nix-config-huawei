@@ -28,13 +28,14 @@
   imports = [
     ./hardware-configuration.nix
     ./cachix.nix
-    ./module/shadowsocks.nix
     ./module/change.mac.nix
     ./module/users/users.nix
     ./sops/sops.nix
     ./module/dns.nix
+    # ./module/shadowsocks.nix
+    # ./module/vpn/wireguard.nix
+    # ./module/tor.nix
     ./module/xray/xray.nix
-    # ./module/xray/default.nix
 
     # ./module/podman.nix
     # or
@@ -44,8 +45,6 @@
     # ./module/wine.nix
     # ./hyperland.nix
     # ./module/wordpress.nix
-    # ./module/vpn/vpn.nix
-    # ./module/tor.nix
   ];
 
   boot = {
