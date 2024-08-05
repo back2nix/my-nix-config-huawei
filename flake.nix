@@ -78,6 +78,7 @@
           inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
         };
         modules = [
+          ./module/spoofdpi.nix
           inputs.musnix.nixosModules.musnix
           sops-nix.nixosModules.sops
           # ./module/xray/default.nix

@@ -7,7 +7,7 @@
     # let Avahi handle mDNS publication
     # DNSOverTLS=opportunistic
     extraConfig = ''
-      DNSOverTLS=yes
+      DNSOverTLS=opportunistic
       MulticastDNS=resolve
     '';
     llmnr = "true";
