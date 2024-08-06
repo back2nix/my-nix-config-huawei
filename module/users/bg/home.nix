@@ -379,6 +379,8 @@ in {
       "fddjpichkajmnkjhcmpbbjdmmcodnkej" # РуТрекер
       # "nlmmgnhgdeffjkdckmikfpnddkbbfkkk" # Lightning Autofill
       "jpbjcnkcffbooppibceonlgknpkniiff" # global-speed
+      # "dbclpoekepcmadpkeaelmhiheolhjflj" # User agent switcher
+      # "mnjggcdmjocbbbhaepdhchncahnbgone" # sponsorblock for yt/inv
     ];
   };
 
