@@ -227,6 +227,7 @@ in {
       gomodifytags
       simplescreenrecorder
       sshuttle
+      # chromium
     ];
 
     file = {
@@ -366,8 +367,18 @@ in {
       # };
     };
 
+    # chromium.enable = true;
     chromium.extensions = [
-      "padekgcemlokbadohgkifijomclgjgif" # https://chromewebstore.google.com/detail/proxy-switchyomega/padekgcemlokbadohgkifijomclgjgif
+      "padekgcemlokbadohgkifijomclgjgif" # Proxy SwitchyOmega
+      "dmghijelimhndkbmpgbldicpogfkceaj" # Dark Mode
+      "jhlfcnmbhnelhkfoicmfkdhbhaonadoh" # DarkPDF
+      "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
+      "dhdgffkkebhmkfjojejmpbldmpobfkfo" # Tampermonkey + https://raw.githubusercontent.com/ilyhalight/voice-over-translation/master/dist/vot.user.js
+      "pihphjfnfjmdbhakhjifipfdgbpenobg" # DocsAfterDark
+      "nffaoalbilbmmfgbnbgppjihopabppdk" # Video Speed Controller
+      "fddjpichkajmnkjhcmpbbjdmmcodnkej" # РуТрекер
+      # "nlmmgnhgdeffjkdckmikfpnddkbbfkkk" # Lightning Autofill
+      # jpbjcnkcffbooppibceonlgknpkniiff # global-speed
     ];
   };
 
