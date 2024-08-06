@@ -79,6 +79,7 @@
         };
         modules = [
           ./module/spoofdpi.nix
+          ./module/spoofdpi_with_proxy.nix
           inputs.musnix.nixosModules.musnix
           sops-nix.nixosModules.sops
           # ./module/xray/default.nix

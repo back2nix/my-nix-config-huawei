@@ -5,15 +5,15 @@
   ...
 }:
 with lib; let
-  cfg = config.services.spoofdpi;
+  cfg = config.services.spoofdpi_with_proxy;
 in {
-  options.services.spoofdpi = {
+  options.services.spoofdpi_with_proxy = {
     enable = mkEnableOption "SpoofDPI service";
 
     package = mkOption {
       type = types.package;
-      default = pkgs.callPackage ./spoofDPI/spoofdpi.nix {};
-      defaultText = literalExpression "pkgs.spoofdpi";
+      default = pkgs.callPackage ./spoofDPI/spoofdpi_with_proxy.nix {};
+      defaultText = literalExpression "pkgs.spoofdpi_with_proxy";
       description = "The package to use.";
     };
 
@@ -26,7 +26,7 @@ in {
 
     port = mkOption rec {
       type = types.port;
-      default = 18080;
+      default = 18081;
       example = default;
       description = "Port.";
     };
@@ -34,7 +34,7 @@ in {
     openFirewall = mkOption {
       type = types.bool;
       default = false;
-      description = "Open `services.spoofdpi.port`.";
+      description = "Open `services.spoofdpi_with_proxy.port`.";
     };
 
     dns = mkOption rec {
@@ -81,7 +81,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    systemd.services.spoofdpi = {
+    systemd.services.spoofdpi_with_proxy = {
       wantedBy = ["multi-user.target"];
       after = ["network.target"];
       serviceConfig = {

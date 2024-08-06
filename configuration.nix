@@ -49,6 +49,7 @@
   ];
 
   services.spoofdpi.enable = true;
+  services.spoofdpi_with_proxy.enable = true;
 
   boot = {
     # kernelPackages = pkgs.linuxPackages_latest;
