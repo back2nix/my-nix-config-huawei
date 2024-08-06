@@ -227,6 +227,8 @@ in {
       gomodifytags
       simplescreenrecorder
       sshuttle
+      dig
+      inetutils
       # chromium
     ];
 
