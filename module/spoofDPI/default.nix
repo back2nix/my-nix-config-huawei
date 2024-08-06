@@ -8,13 +8,16 @@ buildGoModule rec {
   version = "0.10.4";
 
   src = fetchFromGitHub {
-    owner = "xvzc";
+    # owner = "xvzc";
+    owner = "back2nix";
     repo = "spoofDPI";
-    rev = "v${version}";
-    sha256 = "sha256-I93XhIrdCXmoiG6u617toFaB1YALMK8jabCGTp3u4os=";
+    rev = "fc0e4a57963d7a42d05b6376346d1895b1a56b33";
+    sha256 = "sha256-hZZGR6Lq84LN0hX2BMB1O7jpExgkwuKJU0faSqxxZPM=";
+    # sha256-I93XhIrdCXmoiG6u617toFaB1YALMK8jabCGTp3u4os=
   };
 
-  vendorHash = "sha256-kmp+8MMV1AHaSvLnvYL17USuv7xa3NnsCyCbqq9TvYE=";
+  # sha256-kmp+8MMV1AHaSvLnvYL17USuv7xa3NnsCyCbqq9TvYE=
+  vendorHash = "sha256-7mFpEQYckeNHlez0tfqjBz4OKFBxCcjzSs5KQXs8bmw=";
 
   subPackages = [
     "cmd/spoof-dpi"
@@ -27,8 +30,8 @@ buildGoModule rec {
 
   meta = with lib; {
     description = "A simple and fast anti-censorship tool written in Go";
-    homepage = "https://github.com/xvzc/SpoofDPI";
+    homepage = "https://github.com/back2nix/SpoofDPI";
+    # homepage = "https://github.com/xvzc/SpoofDPI";
     license = licenses.asl20;
   };
 }
-
