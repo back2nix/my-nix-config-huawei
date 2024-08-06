@@ -104,13 +104,13 @@ in {
           "policy": {
             "levels": {
               "0": {
-                "handshake": 4,
-                "connIdle": 300,
-                "uplinkOnly": 2,
-                "downlinkOnly": 5,
+                "handshake": 1,
+                "connIdle": 120,
+                "uplinkOnly": 1,
+                "downlinkOnly": 1,
                 "statsUserUplink": true,
                 "statsUserDownlink": true,
-                "bufferSize": 4
+                "bufferSize": 32
               }
             },
             "system": {
@@ -120,7 +120,10 @@ in {
               "statsOutboundDownlink": true
             }
           },
-          "stats": {}
+          "stats": {},
+          "buffer": {
+            "size": 16
+          }
         }
       '';
     };
