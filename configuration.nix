@@ -31,7 +31,8 @@
     ./module/change.mac.nix
     ./module/users/users.nix
     ./sops/sops.nix
-    ./module/dns.nix
+    # ./module/dns.nix
+    ./module/security.nix
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
     # ./module/tor.nix
