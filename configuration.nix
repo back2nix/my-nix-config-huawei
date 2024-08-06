@@ -30,6 +30,7 @@
     ./cachix.nix
     ./module/change.mac.nix
     ./module/users/users.nix
+    # ./module/miredo.nix
     ./sops/sops.nix
     # ./module/dns.nix
     ./module/security.nix
@@ -181,7 +182,7 @@
       [ProxyList]
         # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
         # socks5 192.168.0.5 1081
-        socks5 127.0.0.1 1081
+        socks5 127.0.0.1 1082
         # socks5 192.168.100.3 1080
         # socks5 127.0.0.1 8118
         # socks5 127.0.0.1 9063
