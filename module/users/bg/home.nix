@@ -375,10 +375,10 @@ in {
       "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
       "dhdgffkkebhmkfjojejmpbldmpobfkfo" # Tampermonkey + https://raw.githubusercontent.com/ilyhalight/voice-over-translation/master/dist/vot.user.js
       "pihphjfnfjmdbhakhjifipfdgbpenobg" # DocsAfterDark
-      "nffaoalbilbmmfgbnbgppjihopabppdk" # Video Speed Controller
+      # "nffaoalbilbmmfgbnbgppjihopabppdk" # Video Speed Controller
       "fddjpichkajmnkjhcmpbbjdmmcodnkej" # РуТрекер
       # "nlmmgnhgdeffjkdckmikfpnddkbbfkkk" # Lightning Autofill
-      # jpbjcnkcffbooppibceonlgknpkniiff # global-speed
+      "jpbjcnkcffbooppibceonlgknpkniiff" # global-speed
     ];
   };
 
