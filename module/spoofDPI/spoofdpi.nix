@@ -29,5 +29,6 @@ buildGoModule rec {
     description = "A simple and fast anti-censorship tool written in Go";
     homepage = "https://github.com/xvzc/SpoofDPI";
     license = licenses.asl20;
+    mainProgram = "spoof-dpi";
   };
 }
