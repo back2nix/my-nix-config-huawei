@@ -11,8 +11,8 @@ in {
   };
   users.groups."${user}" = {};
 
-  networking.firewall.allowedTCPPorts = [443 10086 1080 10809];
-  networking.firewall.allowedUDPPorts = [443 10086 1080 10809];
+  networking.firewall.allowedTCPPorts = [443 1081 10809];
+  networking.firewall.allowedUDPPorts = [443 1081 10809];
   sops = {
     secrets = {
       uuid = {};
@@ -50,7 +50,7 @@ in {
           },
           "inbounds": [
             {
-              "port": 10086,
+              "port": 443,
               "listen": "0.0.0.0",
               "protocol": "vless",
               "settings": {
@@ -71,7 +71,10 @@ in {
                   "serverNames": [
                     "www.google.com",
                     "www.microsoft.com",
-                    "www.bing.com"
+                    "www.bing.com",
+                    "expresscomcleaning.com",
+                    "usa.lg.pq.hosting",
+                    "ref-server.com"
                   ],
                   "privateKey": "${config.sops.placeholder.privateKey}",
                   "shortIds": [
@@ -168,7 +171,7 @@ in {
               "vnext": [
                 {
                   "address": "${config.sops.placeholder."shadowsocks/server"}",
-                  "port": 10086,
+                  "port": 443,
                   "users": [
                     {
                       "id": "${config.sops.placeholder.uuid}",
@@ -183,7 +186,7 @@ in {
               "network": "tcp",
               "security": "reality",
               "realitySettings": {
-                "serverName": "www.google.com",
+                "serverName": "www.microsoft.com",
                 "fingerprint": "firefox",
                 "shortId": "114514",
                 "publicKey": "${config.sops.placeholder.publicKey}",
