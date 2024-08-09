@@ -161,6 +161,7 @@
       xclip
       pkgs-master.serpl
       sops
+      sshs
       # pkgs.arion
       # pkgs.docker-client
       # pkgs.arion
