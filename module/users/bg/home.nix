@@ -230,6 +230,8 @@ in {
       dig
       inetutils
       # chromium
+
+      (pkgs.writeScriptBin "print-files" (builtins.readFile ./bash/print-files.sh))
     ];
 
     file = {
