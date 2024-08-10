@@ -155,13 +155,13 @@
       # virtualbox
       direnv
       tcpdump
-      wireshark
       tshark
       pavucontrol
       xclip
       pkgs-master.serpl
       sops
       sshs
+      pkgs.libcap
       # pkgs.arion
       # pkgs.docker-client
       # pkgs.arion
@@ -205,8 +205,15 @@
       ];
     };
     dconf.enable = true;
-    wireshark.enable = true;
+    wireshark = {
+      enable = true;
+      package = pkgs-master.wireshark;
+    };
   };
+
+  # system.activationScripts.wireshark-capabilities = ''
+  #   ${pkgs.libcap.out}/bin/setcap cap_net_raw,cap_net_admin+ep ${pkgs.wireshark}/bin/dumpcap
+  # '';
 
   users.defaultUserShell = pkgs.zsh;
 
@@ -340,6 +347,12 @@
     dbus.packages = [pkgs.dconf];
 
     udev.packages = [pkgs.gnome3.gnome-settings-daemon];
+
+    udev = {
+      extraRules = ''
+        SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
+      '';
+    };
 
     libinput.enable = true;
 

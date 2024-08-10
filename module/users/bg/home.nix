@@ -15,6 +15,7 @@ in {
     # ./mime.nix
     # ./overlays.nix
     # inputs.nixvim.homeManagerModules.nixvim
+    ./chrome-ssl-keylog.nix
     ./dconf.nix
     ./tmux/tmux.nix
     ./zsh/zsh.nix
@@ -397,5 +398,12 @@ in {
     "application/x-ext-pdf" = ["evince"];
     "application/x-gzpdf" = ["evince"];
     "application/x-xzpdf" = ["evince"];
+  };
+
+  programs.chrome-with-ssl-keylog = {
+    enable = true;
+    keylogFile = "/tmp/sslkeylog.txt";
+    # Если вы хотите использовать другой пакет Chrome, раскомментируйте следующую строку:
+    # package = pkgs.google-chrome-beta;
   };
 }
