@@ -233,6 +233,7 @@ in {
       # chromium
 
       (pkgs.writeScriptBin "print-files" (builtins.readFile ./bash/print-files.sh))
+      (pkgs.writeScriptBin "smart-replace" (builtins.readFile ./bash/smart-replace.sh))
     ];
 
     file = {
