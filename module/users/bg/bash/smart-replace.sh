@@ -122,14 +122,29 @@ echo "Total: Made $total_changes replacement(s) in $total_files file(s)"
 
 # Переименование директории, если указан флаг -m
 if $move_directory; then
-    parent_dir=$(dirname "$directory")
-    dir_name=$(basename "$directory")
+    if [ "$directory" = "." ]; then
+        # Если директория не указана явно, используем текущую директорию
+        current_dir=$(pwd)
+        parent_dir=$(dirname "$current_dir")
+        dir_name=$(basename "$current_dir")
+    else
+        # Если директория указана явно, используем её
+        parent_dir=$(dirname "$directory")
+        dir_name=$(basename "$directory")
+    fi
+
     new_dir_name="${dir_name//$old_word/$new_word}"
 
     if [ "$dir_name" != "$new_dir_name" ]; then
         new_path="$parent_dir/$new_dir_name"
-        mv "$directory" "$new_path"
-        echo "Renamed directory '$directory' to '$new_path'"
+        mv "$(realpath "$directory")" "$new_path"
+        echo "Renamed directory '$(realpath "$directory")' to '$new_path'"
+
+        # Если мы переименовали текущую директорию, переходим в неё
+        if [ "$directory" = "." ]; then
+            cd "$new_path"
+            echo "Moved to the renamed directory: $new_path"
+        fi
     else
         echo "Directory name unchanged."
     fi
