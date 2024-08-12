@@ -464,11 +464,11 @@
         "nvim-spell-ru-utf8-suggestions": "nvim-spell-ru-utf8-suggestions"
       },
       "locked": {
-        "lastModified": 1723329282,
-        "narHash": "sha256-8GAslViHYnR5mUuHO+cHJHQXjoAvEQkcrQfhZ3Bk15c=",
+        "lastModified": 1723450971,
+        "narHash": "sha256-CFvUfykyPK0wX0ZKK3SD0Bjki/GWjJWicPaWk4nzncU=",
         "owner": "back2nix",
         "repo": "nixvim",
-        "rev": "d51d9009ab8213ac19981340e993434a49844c9b",
+        "rev": "87e880ce06d63082ad64cf76de28400e6e3dd9e4",
         "type": "github"
       },
       "original": {

@@ -32,8 +32,8 @@
     ./module/users/users.nix
     # ./module/miredo.nix
     ./sops/sops.nix
-    # ./module/dns.nix
-    ./module/security.nix
+    ./module/dns.nix
+    # ./module/security.nix
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
     # ./module/tor.nix

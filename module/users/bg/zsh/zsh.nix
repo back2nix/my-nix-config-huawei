@@ -34,6 +34,17 @@
 
       export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
       export PATH=$PATH:$HOME/.cargo/bin
+
+      cdroot() {
+        local git_root
+        git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+        if [ -n "$git_root" ]; then
+          cd "$git_root"
+          echo "Changed to project root: $git_root"
+        else
+          echo "Not in a Git repository or Git is not installed."
+        fi
+      }
     '';
     oh-my-zsh = {
       enable = true;
