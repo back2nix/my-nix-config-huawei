@@ -1,5 +1,9 @@
-{pkgs-master, ...}: {
-  home.packages = with pkgs-master; [
+{
+  pkgs,
+  pkgs-master,
+  ...
+}: {
+  home.packages = with pkgs; [
     alejandra
     nix-init # <- generate nix package expressions from url
     nix-inspect # <- configuration inspector
