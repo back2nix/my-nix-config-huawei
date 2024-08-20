@@ -19,7 +19,7 @@ in {
 
     address = mkOption rec {
       type = types.str;
-      default = "127.0.0.1";
+      default = "0.0.0.0";
       example = default;
       description = "Listen address.";
     };
@@ -105,6 +105,7 @@ in {
 
     networking.firewall = mkIf cfg.openFirewall {
       allowedTCPPorts = [cfg.port];
+      allowedUDPPorts = [cfg.port];
     };
   };
 }

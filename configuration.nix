@@ -317,7 +317,7 @@
 
     # Open ports in the firewall.
     firewall = {
-      enable = true;
+      enable = false;
       extraCommands = ''
         iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
         iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081

@@ -11,8 +11,8 @@ in {
   };
   users.groups."${user}" = {};
 
-  networking.firewall.allowedTCPPorts = [443 1081 10809];
-  networking.firewall.allowedUDPPorts = [443 1081 10809];
+  networking.firewall.allowedTCPPorts = [443 1081 3080 10809];
+  networking.firewall.allowedUDPPorts = [443 1081 3080 10809];
   sops = {
     secrets = {
       uuid = {};

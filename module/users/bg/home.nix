@@ -230,6 +230,7 @@ in {
       sshuttle
       dig
       inetutils
+      # pkgs-master.youtube-dl
       # chromium
 
       (pkgs.writeScriptBin "print-files" (builtins.readFile ./bash/print-files.sh))
