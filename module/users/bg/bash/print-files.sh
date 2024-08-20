@@ -2,16 +2,17 @@
 
 print_files() {
   local directory="$1"
-  local prefix="$2"
+  local current_path="$2"
   local include_patterns="$3"
   local exclude_patterns="$4"
 
   for file in "$directory"/*; do
+    local relative_path="${current_path}$(basename "$file")"
     if [ -d "$file" ]; then
-      print_files "$file" "$prefix$(basename "$file")/" "$include_patterns" "$exclude_patterns"
+      print_files "$file" "${relative_path}/" "$include_patterns" "$exclude_patterns"
     elif [ -f "$file" ]; then
-      if check_file "$file" "$include_patterns" "$exclude_patterns"; then
-        echo "File: $prefix$(basename "$file")"
+      if check_file "$relative_path" "$include_patterns" "$exclude_patterns"; then
+        echo "File: $relative_path"
         echo '```'
         cat "$file"
         echo '```'
@@ -22,17 +23,17 @@ print_files() {
 }
 
 check_file() {
-  local file="$1"
+  local file_path="$1"
   local include_patterns="$2"
   local exclude_patterns="$3"
-  local filename=$(basename "$file")
+  local filename=$(basename "$file_path")
   local ext="${filename##*.}"
 
   # Если список исключений не пуст и файл соответствует паттерну, исключаем файл
   if [ -n "$exclude_patterns" ]; then
     IFS=',' read -ra exclude_array <<< "$exclude_patterns"
     for pattern in "${exclude_array[@]}"; do
-      if [[ "$filename" == $pattern || "$ext" == "$pattern" ]]; then
+      if [[ "$file_path" =~ $pattern || "$filename" =~ $pattern || "$ext" == "$pattern" ]]; then
         return 1
       fi
     done
@@ -46,7 +47,7 @@ check_file() {
   # Если список включений не пуст, проверяем соответствие файла паттерну
   IFS=',' read -ra include_array <<< "$include_patterns"
   for pattern in "${include_array[@]}"; do
-    if [[ "$filename" == $pattern || "$ext" == "$pattern" ]]; then
+    if [[ "$file_path" =~ $pattern || "$filename" =~ $pattern || "$ext" == "$pattern" ]]; then
       return 0
     fi
   done
@@ -56,7 +57,7 @@ check_file() {
 
 print_usage() {
   echo "Usage: $0 <directory> [--include|-i patterns] [--exclude|-e patterns]"
-  echo "Example: $0 /path/to/directory -i go,md,txt,hello.txt -e log,tmp,plugin.nix"
+  echo "Example: $0 /path/to/directory -i go,md,txt,hello.txt,folder/hello.txt -e log,tmp,plugin.nix,folder/excluded.txt"
   exit 1
 }
 
