@@ -78,6 +78,11 @@
         set -u window-status-current-style \;\
         set -u window-status-current-format \;\
         refresh-client -S
+
+      # Отключение Shift+Space
+      unbind -n S-Space
+      # Отключение Ctrl+A+M
+      unbind M-m
     '';
   };
 }

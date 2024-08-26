@@ -14,6 +14,7 @@
       PLATFORM_PROFILE_ON_AC = "performance";
       START_CHARGE_THRESH_BAT0 = "75";
       STOP_CHARGE_THRESH_BAT0 = "80";
+      USB_AUTOSUSPEND = 0; # Отключаем автоприостановку USB-устройств
     };
   };
 
@@ -43,9 +44,10 @@
 
   boot.kernelParams = [
     "intel_pstate=active"
-    "processor.max_cstate=3"
-    "intel_idle.max_cstate=3"
+    "processor.max_cstate=5"
+    "intel_idle.max_cstate=5"
   ];
 
-  powerManagement.powertop.enable = true;
+  # Отключаем powertop, так как он может агрессивно управлять энергопотреблением
+  powerManagement.powertop.enable = false;
 }

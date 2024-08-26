@@ -42,7 +42,8 @@
     # ./module/podman.nix
     # or
     ./module/docker.nix
-    ./powersave.nix
+    # ./powersave.nix
+    ./powersave-small.nix
 
     # ./module/arion.nix
     # ./module/wine.nix
