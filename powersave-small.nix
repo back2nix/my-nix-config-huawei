@@ -12,8 +12,8 @@
       CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
       PLATFORM_PROFILE_ON_AC = "performance";
-      START_CHARGE_THRESH_BAT0 = "75";
-      STOP_CHARGE_THRESH_BAT0 = "80";
+      # START_CHARGE_THRESH_BAT0 = "75";
+      # STOP_CHARGE_THRESH_BAT0 = "80";
       USB_AUTOSUSPEND = 0; # Отключаем автоприостановку USB-устройств
     };
   };
