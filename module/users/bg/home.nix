@@ -230,6 +230,7 @@ in {
       sshuttle
       dig
       inetutils
+      git-lfs
       # pkgs-master.youtube-dl
       # chromium
 
@@ -337,6 +338,7 @@ in {
 
     git = {
       enable = true;
+      lfs.enable = true;
       userName = "back2nix";
       userEmail = "back2nix@list.ru";
       aliases = {
