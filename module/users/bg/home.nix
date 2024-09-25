@@ -234,8 +234,8 @@ in {
       # pkgs-master.youtube-dl
       # chromium
 
-      (pkgs.writeScriptBin "printfiles" (builtins.readFile ./bash/print-files.sh))
-      (pkgs.writeScriptBin "smartreplace" (builtins.readFile ./bash/smart-replace.sh))
+      (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
+      (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
     ];
 
     file = {

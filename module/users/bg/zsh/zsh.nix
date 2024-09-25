@@ -9,6 +9,9 @@
 }: {
   imports = [
   ];
+
+  home.file.".config/nixpkgs/zsh-completions/_mfiles".source = ./_mfiles;
+
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
@@ -16,6 +19,9 @@
     autocd = true;
 
     initExtra = ''
+      fpath=(${config.home.homeDirectory}/.config/nixpkgs/zsh-completions $fpath)
+      autoload -U compinit && compinit
+
       ORIGINAL_PROMPT="$PROMPT"
       update_prompt() {
         if [[ -n $IN_NIX_SHELL ]]; then
