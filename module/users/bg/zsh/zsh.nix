@@ -105,18 +105,29 @@
       '';
       # z = "zellij";
       n = "nvim";
+      # Usage:
+      # ssh-port <remote_port> [server]
+      #
+      # Examples:
+      # ssh-port 8080           # Uses 'desktop' as the server
+      # ssh-port 8080 myserver  # Uses 'myserver' as the server
+      #
+      # This function creates an SSH tunnel, forwarding a random local port
+      # to the specified remote port on the given server (or 'desktop' if not specified).
       rem2loc = ''
         function ssh-port() {
-          local port=$((RANDOM % 60000 + 1024));
-          echo ssh -L "$port":localhost:$1 desktop -N;
-          echo http://localhost:"$port" or https://localhost:"$port";
-          ssh -L "$port":localhost:$1 desktop -N;
+        local port=$((RANDOM % 60000 + 1024));
+        local server=$2;
+        echo ssh -L "$port":localhost:$1 "$server" -N;
+        echo http://localhost:"$port" or https://localhost:"$port";
+        ssh -L "$port":localhost:$1 "$server" -N;
         }; ssh-port'';
       rem2loc_norand = ''
         function ssh-port() {
-          echo ssh -L "$2":localhost:$1 desktop -N;
-          echo http://localhost:"$2" or https://localhost:"$2";
-          ssh -L "$2":localhost:$1 desktop -N;
+        local server=$3;
+        echo ssh -L "$2":localhost:$1 "$server" -N;
+        echo http://localhost:"$2" or https://localhost:"$2";
+        ssh -L "$2":localhost:$1 "$server" -N;
         }; ssh-port'';
       sh = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
