@@ -312,6 +312,8 @@
 
     extraHosts = ''
       127.0.0.1 kafka
+      127.0.0.1 devlis.com
+      127.0.0.1 model.devlis.com
     '';
 
     hostName = "nixos"; # Define your hostname.

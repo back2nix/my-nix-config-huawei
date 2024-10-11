@@ -114,7 +114,7 @@
       #
       # This function creates an SSH tunnel, forwarding a random local port
       # to the specified remote port on the given server (or 'desktop' if not specified).
-      rem2loc = ''
+      r2l = ''
         function ssh-port() {
         local port=$((RANDOM % 60000 + 1024));
         local server=$2;
@@ -122,12 +122,30 @@
         echo http://localhost:"$port" or https://localhost:"$port";
         ssh -L "$port":localhost:$1 "$server" -N;
         }; ssh-port'';
-      rem2loc_norand = ''
+      r2l-port = ''
         function ssh-port() {
         local server=$3;
         echo ssh -L "$2":localhost:$1 "$server" -N;
         echo http://localhost:"$2" or https://localhost:"$2";
         ssh -L "$2":localhost:$1 "$server" -N;
+        }; ssh-port'';
+      # vim /etc/ssh/sshd_config
+      # GatewayPorts yes
+      # systemctl restart ssh
+      l2r = ''
+        function ssh-port() {
+        local port=$((RANDOM % 60000 + 1024));
+        local server=$2;
+        echo ssh -R "$port":0.0.0.0:$1 "$server" -N;
+        echo http://"$server":"$port" or https://"$server":"$port";
+        ssh -R "$port":0.0.0.0:$1 "$server" -N;
+        }; ssh-port'';
+      l2r-port = ''
+        function ssh-port() {
+        local server=$3;
+        echo ssh -R "$2":0.0.0.0:$1 "$server" -N;
+        echo http://"$server":"$2" or https://"$server":"$2";
+        ssh -R "$2":0.0.0.0:$1 "$server" -N;
         }; ssh-port'';
       sh = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
