@@ -180,6 +180,11 @@
       sshs
       pkgs.libcap
       pkgs.docker-compose
+
+      # work
+      # tpm2-tss
+      openvpn3
+
       # pkgs.arion
       # pkgs.docker-client
       # pkgs.arion
@@ -209,6 +214,7 @@
   };
 
   programs = {
+    openvpn3.enable = true;
     zsh.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld = {
@@ -332,6 +338,7 @@
       macAddress = "00:11:22:33:44:55";
     };
 
+    # mkdir -p /etc/openvpn3/configs
     dbus.packages = [pkgs.dconf];
 
     udev.packages = [pkgs.gnome3.gnome-settings-daemon];

@@ -26,6 +26,7 @@
     };
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    openvpn3-pr.url = "github:JarvisCraft/nixpkgs/openvpn3-v22_dev";
   };
   outputs = {
     self,
@@ -35,6 +36,7 @@
     nixpkgs-23-11,
     home-manager,
     sops-nix,
+    openvpn3-pr,
     ...
   } @ inputs: {
     lsFiles = path:
@@ -73,6 +75,13 @@
               {
                 imports = self.lsFiles ./overlays;
               }
+              ({pkgs, ...}: {
+                nixpkgs.overlays = [
+                  (final: prev: {
+                    openvpn3 = openvpn3-pr.legacyPackages.${system}.openvpn3;
+                  })
+                ];
+              })
               home-manager.nixosModules.home-manager
               {
                 home-manager = {

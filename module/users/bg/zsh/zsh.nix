@@ -209,6 +209,11 @@
         file = "nix-shell.plugin.zsh";
         src = pkgs.zsh-nix-shell;
       }
+      {
+        name = "vi-mode";
+        src = pkgs.zsh-vi-mode;
+        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+      }
     ];
     zplug = {
       # enable = true;

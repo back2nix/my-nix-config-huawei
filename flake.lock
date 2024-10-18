@@ -550,6 +550,22 @@
         "url": "http://ftp.vim.org/vim/runtime/spell/ru.utf-8.sug"
       }
     },
+    "openvpn3-pr": {
+      "locked": {
+        "lastModified": 1728338456,
+        "narHash": "sha256-ZpKx6a+wRQWjR78RtN6xMTITVAYwV7j0VinojtMjtRc=",
+        "owner": "JarvisCraft",
+        "repo": "nixpkgs",
+        "rev": "35d43e231eaf929beb41d76d6ab98e995f41dfa1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "JarvisCraft",
+        "ref": "openvpn3-v22_dev",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
@@ -561,6 +577,7 @@
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvim": "nixvim",
+        "openvpn3-pr": "openvpn3-pr",
         "sops-nix": "sops-nix"
       }
     },
