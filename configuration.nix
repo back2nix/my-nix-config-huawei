@@ -32,16 +32,18 @@
     ./module/users/users.nix
     # ./module/miredo.nix
     ./sops/sops.nix
-    ./module/dns.nix
+    # ./module/dns.nix
     # ./module/security.nix
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
     # ./module/tor.nix
     ./module/xray/xray.nix
 
-    # ./module/podman.nix
+    ./module/network-configuration.nix
+    ./module/podman.nix
     # or
-    ./module/docker.nix
+    # ./module/docker.nix
+    # ./module/virtualisation-configuration.nix
     # ./powersave.nix
     ./powersave-small.nix
 
@@ -164,6 +166,7 @@
       sops
       sshs
       pkgs.libcap
+      pkgs.docker-compose
       # pkgs.arion
       # pkgs.docker-client
       # pkgs.arion
@@ -295,41 +298,6 @@
     };
 
     settings.trusted-users = ["root" "bg"];
-  };
-
-  # Enable networking
-  networking = {
-    networkmanager.enable = true;
-
-    nat = {
-      enable = true;
-      internalInterfaces = ["ve-+"];
-      externalInterface = "wlp0s20f3";
-      # externalInterface = "tornet";
-      # Lazy IPv6 connectivity for the container
-      enableIPv6 = true;
-    };
-
-    extraHosts = ''
-      127.0.0.1 kafka
-      127.0.0.1 devlis.com
-      127.0.0.1 model.devlis.com
-    '';
-
-    hostName = "nixos"; # Define your hostname.
-
-    # Open ports in the firewall.
-    firewall = {
-      enable = false;
-      allowedTCPPorts = [18082 18081];
-      allowedUDPPorts = [18082 18081];
-      extraCommands = ''
-        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-        iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-        ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-      '';
-    };
   };
 
   services = {

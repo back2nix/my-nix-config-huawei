@@ -15,9 +15,7 @@
       };
       daemon = {
         settings = {
-          # registry-mirrors = [
-          #   "https://huecker.io"
-          # ];
+          dns = ["8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
         };
       };
     };
