@@ -36,8 +36,6 @@ in {
       127.0.0.1 model.devlis.com
     '';
 
-    hostName = "nixos"; # Define your hostname.
-
     nftables.enable = true;
     # Open ports in the firewall.
     firewall = {

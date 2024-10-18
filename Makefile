@@ -48,3 +48,6 @@ run/nographic:
 
 update/nixvim:
 	nix flake lock --update-input nixvim
+
+switch/asus:
+	sudo nixos-rebuild switch --flake .#asus

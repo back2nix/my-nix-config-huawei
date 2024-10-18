@@ -6,26 +6,49 @@
   services.tlp = {
     enable = true;
     settings = {
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
+      CPU_SCALING_GOVERNOR_ON_AC = "powersave";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+      CPU_ENERGY_PERF_POLICY_ON_AC = "power";
       PLATFORM_PROFILE_ON_BAT = "low-power";
-      PLATFORM_PROFILE_ON_AC = "performance";
+      PLATFORM_PROFILE_ON_AC = "low-power";
       # START_CHARGE_THRESH_BAT0 = "75";
       # STOP_CHARGE_THRESH_BAT0 = "80";
       USB_AUTOSUSPEND = 0; # Отключаем автоприостановку USB-устройств
     };
   };
 
+  systemd.targets.sleep.enable = true;
+  systemd.targets.suspend.enable = true;
+  systemd.targets.hibernate.enable = true;
+  systemd.targets.hybrid-sleep.enable = true;
+
   services.logind = {
     lidSwitch = "suspend";
-    lidSwitchExternalPower = "lock";
+    lidSwitchExternalPower = "suspend";
+    # lidSwitchExternalPower = "lock";
     extraConfig = ''
       HandlePowerKey=suspend
+      HandleSuspendKey=suspend
+      HandleHibernateKey=hibernate
+      HandleLidSwitch=suspend
+      HandleLidSwitchExternalPower=suspend
       IdleAction=suspend
-      IdleActionSec=15min
+      IdleActionSec=1min
     '';
+  };
+
+  services.acpid = {
+    enable = true;
+    handlers = {
+      lid-close = {
+        event = "button/lid.*";
+        action = ''
+          echo "Lid closed at $(date)" >> /tmp/lid.log
+          systemctl suspend
+        '';
+      };
+    };
   };
 
   services.power-profiles-daemon.enable = false;
@@ -36,7 +59,10 @@
       sleep-inactive-ac-type='suspend'
       sleep-inactive-ac-timeout=3600
       sleep-inactive-battery-type='suspend'
-      sleep-inactive-battery-timeout=1800
+      sleep-inactive-battery-timeout=600
+      power-button-action='suspend'
+      lid-close-ac-action='suspend'
+      lid-close-battery-action='suspend'
     '';
   };
 

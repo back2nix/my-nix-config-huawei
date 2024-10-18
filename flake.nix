@@ -1,6 +1,5 @@
 {
-  description = "A simple NixOS flake";
-
+  description = "A multi-device NixOS flake";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -15,9 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim = {
-      # url = "github:nix-community/nixvim/nixos-24.05";
       url = "github:back2nix/nixvim";
-      # inputs.nixpkgs.follows = "nixpkgs";
     };
     musnix = {
       url = "github:musnix/musnix";
@@ -27,18 +24,9 @@
       url = "github:nix-community/nix-ld-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-
-    # nur.url = "github:nix-community/NUR";
-
-    # arion = {
-    #   url = "github:hercules-ci/arion";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
-
   outputs = {
     self,
     nixpkgs,
@@ -47,8 +35,6 @@
     nixpkgs-23-11,
     home-manager,
     sops-nix,
-    # nur,
-    # arion,
     ...
   } @ inputs: {
     lsFiles = path:
@@ -71,49 +57,40 @@
         inherit system;
         config.allowUnfree = true;
       };
-    in {
-      nixos = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
+      mkSystem = deviceName: extraModules:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
+          };
+          modules =
+            [
+              ./module/spoofdpi.nix
+              ./module/spoofdpi_with_proxy.nix
+              inputs.musnix.nixosModules.musnix
+              sops-nix.nixosModules.sops
+              ./configuration.nix
+              {
+                imports = self.lsFiles ./overlays;
+              }
+              home-manager.nixosModules.home-manager
+              {
+                home-manager = {
+                  extraSpecialArgs = {
+                    inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
+                  };
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  users."bg" = import ./module/users/bg/home.nix;
+                };
+              }
+              ./devices/${deviceName}
+            ]
+            ++ extraModules;
         };
-        modules = [
-          ./module/spoofdpi.nix
-          ./module/spoofdpi_with_proxy.nix
-          inputs.musnix.nixosModules.musnix
-          sops-nix.nixosModules.sops
-          # ./module/xray/default.nix
-          # arion.nixosModules.arion
-          ./configuration.nix
-          # (import ./overlays)
-          # {nixpkgs.overlays = [nur.overlay];}
-          # ({pkgs, ...}: let
-          #   nur-no-pkgs = import nur {
-          #     nurpkgs = import nixpkgs {system = "x86_64-linux";};
-          #   };
-          # in {
-          #   imports = [nur-no-pkgs.repos.iopq.modules.xraya];
-          #   services.xraya.enable = true;
-          # })
-
-          {
-            imports = self.lsFiles ./overlays;
-          }
-
-          home-manager.nixosModules.home-manager
-          {
-            home-manager = {
-              extraSpecialArgs = {
-                inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
-              };
-
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              users."bg" = import ./module/users/bg/home.nix; # CHANGE ME
-            };
-          }
-        ];
-      };
+    in {
+      asus = mkSystem "asus-ux3405m" [];
+      huawei = mkSystem "huawei-rlef-x" [];
     };
   };
 }

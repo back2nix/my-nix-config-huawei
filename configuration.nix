@@ -26,7 +26,8 @@
   # nixpkgs-unstable.config.allowUnfree = true;
 
   imports = [
-    ./hardware-configuration.nix
+    # ./devices/asus-ux3405m/hardware-configuration.nix
+    # ./devices/huawei-rlef-x/hardware-configuration.nix
     ./cachix.nix
     ./module/change.mac.nix
     ./module/users/users.nix
@@ -57,6 +58,18 @@
   services.spoofdpi_with_proxy.enable = true;
 
   boot = {
+    # asus
+    kernelParams = ["i915.force_probe=7d55"];
+    extraModprobeConfig = ''
+      options bluetooth disable_ertm=1
+      options snd-hda-intel model=asus-zenbook
+    '';
+    loader.grub.extraFiles = {
+      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}"; # https://github.com/smallcms/asus_zenbook_ux3405ma
+    };
+    loader.grub.extraConfig = ''
+      acpi /ssdt-csc3551.aml
+    '';
     # kernelPackages = pkgs.linuxPackages_latest;
     loader.systemd-boot.enable = true;
 
@@ -230,10 +243,11 @@
       NetworkManager-wait-online.enable = false;
     };
 
-    targets.sleep.enable = false;
-    targets.suspend.enable = false;
-    targets.hibernate.enable = false;
-    targets.hybrid-sleep.enable = false;
+    # targets.sleep.enable = false;
+    # targets.suspend.enable = false;
+    # targets.hibernate.enable = false;
+    # targets.hybrid-sleep.enable = false;
+
     tmpfiles.rules = [
       "d /var/lib/bluetooth 700 root root - -"
       # "d /var/lib/wordpress/localhost 0750 wordpress wwwrun - -"

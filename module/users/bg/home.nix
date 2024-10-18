@@ -234,6 +234,10 @@ in {
       # pkgs-master.youtube-dl
       # chromium
 
+      # work
+      tpm2-tss
+      openvpn3
+
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
     ];
