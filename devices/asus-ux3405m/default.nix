@@ -65,4 +65,8 @@
     };
     hardware.bolt.enable = true;
   };
+
+  services.xserver.displayManager.sessionCommands = ''
+    ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --scale 1.2x1.2
+  '';
 }
