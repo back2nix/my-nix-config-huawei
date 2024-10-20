@@ -17,6 +17,9 @@
     enable = true;
     autosuggestion.enable = true;
     enableCompletion = true;
+    # enableVteIntegration = true;
+    syntaxHighlighting.enable = true;
+
     autocd = true;
 
     initExtra = ''
@@ -43,7 +46,7 @@
       export PATH=$PATH:$HOME/.cargo/bin
 
       # Set ZVM_VI_INSERT_ESCAPE_BINDKEY to Ctrl+C
-      export ZVM_VI_INSERT_ESCAPE_BINDKEY='^C'
+      # export ZVM_VI_INSERT_ESCAPE_BINDKEY='^C'
 
       cdroot() {
         local git_root
@@ -91,13 +94,23 @@
       enable = true;
       plugins = [
         "git"
-        # "web-search"
         "extract"
         "adb"
         "sudo"
+        "systemd"
+        "argocd"
+        "direnv"
+        "git"
+        "golang"
+        "httpie"
+        "nomad"
+        "pass"
+        "podman"
+        "ssh-agent"
+        # "helm"
+        # "web-search"
         # "kubectl"
         # "kubectx"
-        "systemd"
         # "command-not-found"
       ];
       custom = "/etc/nixos/module/users/bg";
@@ -217,103 +230,37 @@
     };
     history = {
       size = 10000;
+      extended = true;
+      ignoreDups = true;
+      expireDuplicatesFirst = true;
       path = "${config.xdg.dataHome}/zsh/history";
     };
-    plugins = [
-      {
-        name = "zsh-nix-shell";
-        file = "nix-shell.plugin.zsh";
-        src = pkgs.fetchFromGitHub {
-          owner = "chisui";
-          repo = "zsh-nix-shell";
-          rev = "v0.5.0";
-          sha256 = "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
-        };
-      }
-      {
-        name = "nix-zsh-completions";
-        src = pkgs.nix-zsh-completions;
-      }
-      {
-        name = "zsh-syntax-highlighting";
-        src = pkgs.zsh-syntax-highlighting;
-        file = "share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh";
-      }
-      {
-        name = "zsh-nix-shell";
-        file = "nix-shell.plugin.zsh";
-        src = pkgs.zsh-nix-shell;
-      }
-      {
-        name = "vi-mode";
-        src = pkgs.zsh-vi-mode;
-        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
-        # https://github.com/jeffreytse/zsh-vi-mode?tab=readme-ov-file#custom-escape-key
-        # ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
-      }
-    ];
-    zplug = {
-      # enable = true;
-      # plugins = [
-      #   # {name = "zsh-users/zsh-autosuggestions";}
-      #   # {name = "zsh-users/zsh-completions";}
-      #   # {name = "zsh-users/zsh-syntax-highlighting";}
-      #   {name = "zsh-users/zsh-history-substring-search";}
-      #   {name = "unixorn/warhol.plugin.zsh";}
-      #   {
-      #     name = "notthebee/prompt";
-      #     tags = [as:theme];
-      #   }
-      # ];
-      # plugins = [
-      #   {
-      #     name = "plugins/colored-man-pages";
-      #     tags = [from:oh-my-zsh];
-      #   }
-      #   {
-      #     name = "plugins/colorize";
-      #     tags = [from:oh-my-zsh];
-      #   }
-      #   {
-      #     name = "plugins/command-not-found";
-      #     tags = [from:oh-my-zsh];
-      #   }
-      #   # {
-      #   #   name = "plugins/fd";
-      #   #   tags = [from:oh-my-zsh];
-      #   # }
-      #   # {
-      #   #   name = "plugins/fzf";
-      #   #   tags = [from:oh-my-zsh];
-      #   # }
-      #   {
-      #     name = "plugins/git";
-      #     tags = [from:oh-my-zsh];
-      #   }
-      #   # {
-      #   #   name = "plugins/ripgrep";
-      #   #   tags = [from:oh-my-zsh];
-      #   # }
-      #   # {
-      #   #   name = "plugins/tmux";
-      #   #   tags = [from:oh-my-zsh];
-      #   # }
-      #   {
-      #     name = "plugins/tmux";
-      #     tags = [from:oh-my-zsh];
-      #   }
-      #   # {
-      #   #   name = "plugins/vi-mode";
-      #   #   tags = [from:oh-my-zsh];
-      #   # }
-      #   # { name = "plugins/cargo";             tags = [from:oh-my-zsh]; }
-      #   # { name = "plugins/direnv";            tags = [from:oh-my-zsh]; }
-      #   # { name = "plugins/pass";              tags = [from:oh-my-zsh]; }
-      #   # { name = "plugins/rsync";             tags = [from:oh-my-zsh]; }
-      #   # { name = "plugins/"; tags = [from:oh-my-zsh]; }
-      #   # {name = "kutsan/zsh-system-clipboard";} # IMPORTANT
-      #   # { name = "romkatv/powerlevel10k"; tags = [ as:theme depth:1 ]; }
-      # ];
-    };
+    plugins = let
+      mkZshPlugin = {
+        pkg,
+        file ? "${pkg.pname}.plugin.zsh",
+      }: {
+        name = pkg.pname;
+        src = pkg.src;
+        inherit file;
+      };
+    in
+      with pkgs; [
+        (mkZshPlugin {pkg = zsh-vi-mode;})
+        (mkZshPlugin {pkg = zsh-autosuggestions;})
+        (mkZshPlugin {pkg = zsh-autopair;})
+        (mkZshPlugin {pkg = zsh-history-substring-search;})
+        (mkZshPlugin {pkg = nix-zsh-completions;})
+        (mkZshPlugin {pkg = zsh-abbr;})
+        (mkZshPlugin {pkg = zsh-you-should-use;})
+        (mkZshPlugin {pkg = zsh-nix-shell;})
+        # (mkZshPlugin {pkg = zsh-z;})
+        (mkZshPlugin {pkg = zsh-fzf-tab;})
+        (mkZshPlugin {pkg = zsh-autoenv;})
+        (mkZshPlugin {pkg = zsh-navigation-tools;})
+        (mkZshPlugin {pkg = zsh-fzf-history-search;})
+        (mkZshPlugin {pkg = zsh-fast-syntax-highlighting;})
+        # (mkZshPlugin {pkg = zsh-syntax-highlighting;})
+      ];
   };
 }
