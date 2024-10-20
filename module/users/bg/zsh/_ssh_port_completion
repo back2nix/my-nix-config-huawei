@@ -1,0 +1,29 @@
+#compdef r2l r2l-port l2r l2r-port
+
+_ssh_port_completion() {
+    local state
+
+    _arguments \
+        '1: :->port' \
+        '2: :->host' \
+        '3: :->remote_port'
+
+    case $state in
+        port)
+            _message 'port number'
+            ;;
+        host)
+            if [[ -f $HOME/.ssh/config ]]; then
+                local -a hosts
+                hosts=(${${${(@M)${(f)"$(cat $HOME/.ssh/config)"}:#Host *}#Host }:#*[*?]*})
+                _describe -t hosts 'host' hosts
+            fi
+            _hosts
+            ;;
+        remote_port)
+            _message 'remote port number (for r2l-port and l2r-port only)'
+            ;;
+    esac
+}
+
+compdef _ssh_port_completion r2l r2l-port l2r l2r-port

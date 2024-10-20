@@ -11,6 +11,7 @@
   ];
 
   home.file.".config/nixpkgs/zsh-completions/_mfiles".source = ./_mfiles;
+  home.file.".config/nixpkgs/zsh-completions/_ssh_port_completion".source = ./_ssh_port_completion;
 
   programs.zsh = {
     enable = true;
@@ -41,6 +42,9 @@
       export XDG_DATA_DIRS=$XDG_DATA_DIRS:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share
       export PATH=$PATH:$HOME/.cargo/bin
 
+      # Set ZVM_VI_INSERT_ESCAPE_BINDKEY to Ctrl+C
+      export ZVM_VI_INSERT_ESCAPE_BINDKEY='^C'
+
       cdroot() {
         local git_root
         git_root=$(git rev-parse --show-toplevel 2>/dev/null)
@@ -50,6 +54,37 @@
         else
           echo "Not in a Git repository or Git is not installed."
         fi
+      }
+
+      # Define the functions directly instead of using aliases
+      r2l() {
+        local port=$((RANDOM % 60000 + 1024))
+        local server=$2
+        echo ssh -L "$port":localhost:$1 "$server" -N
+        echo http://localhost:"$port" or https://localhost:"$port"
+        ssh -L "$port":localhost:$1 "$server" -N
+      }
+
+      r2l-port() {
+        local server=$3
+        echo ssh -L "$2":localhost:$1 "$server" -N
+        echo http://localhost:"$2" or https://localhost:"$2"
+        ssh -L "$2":localhost:$1 "$server" -N
+      }
+
+      l2r() {
+        local port=$((RANDOM % 60000 + 1024))
+        local server=$2
+        echo ssh -R "$port":0.0.0.0:$1 "$server" -N
+        echo http://"$server":"$port" or https://"$server":"$port"
+        ssh -R "$port":0.0.0.0:$1 "$server" -N
+      }
+
+      l2r-port() {
+        local server=$3
+        echo ssh -R "$2":0.0.0.0:$1 "$server" -N
+        echo http://"$server":"$2" or https://"$server":"$2"
+        ssh -R "$2":0.0.0.0:$1 "$server" -N
       }
     '';
     oh-my-zsh = {
@@ -114,39 +149,39 @@
       #
       # This function creates an SSH tunnel, forwarding a random local port
       # to the specified remote port on the given server (or 'desktop' if not specified).
-      r2l = ''
-        function ssh-port() {
-        local port=$((RANDOM % 60000 + 1024));
-        local server=$2;
-        echo ssh -L "$port":localhost:$1 "$server" -N;
-        echo http://localhost:"$port" or https://localhost:"$port";
-        ssh -L "$port":localhost:$1 "$server" -N;
-        }; ssh-port'';
-      r2l-port = ''
-        function ssh-port() {
-        local server=$3;
-        echo ssh -L "$2":localhost:$1 "$server" -N;
-        echo http://localhost:"$2" or https://localhost:"$2";
-        ssh -L "$2":localhost:$1 "$server" -N;
-        }; ssh-port'';
-      # vim /etc/ssh/sshd_config
-      # GatewayPorts yes
-      # systemctl restart ssh
-      l2r = ''
-        function ssh-port() {
-        local port=$((RANDOM % 60000 + 1024));
-        local server=$2;
-        echo ssh -R "$port":0.0.0.0:$1 "$server" -N;
-        echo http://"$server":"$port" or https://"$server":"$port";
-        ssh -R "$port":0.0.0.0:$1 "$server" -N;
-        }; ssh-port'';
-      l2r-port = ''
-        function ssh-port() {
-        local server=$3;
-        echo ssh -R "$2":0.0.0.0:$1 "$server" -N;
-        echo http://"$server":"$2" or https://"$server":"$2";
-        ssh -R "$2":0.0.0.0:$1 "$server" -N;
-        }; ssh-port'';
+      # r2l = ''
+      #   function ssh-port() {
+      #   local port=$((RANDOM % 60000 + 1024));
+      #   local server=$2;
+      #   echo ssh -L "$port":localhost:$1 "$server" -N;
+      #   echo http://localhost:"$port" or https://localhost:"$port";
+      #   ssh -L "$port":localhost:$1 "$server" -N;
+      #   }; ssh-port'';
+      # r2l-port = ''
+      #   function ssh-port() {
+      #   local server=$3;
+      #   echo ssh -L "$2":localhost:$1 "$server" -N;
+      #   echo http://localhost:"$2" or https://localhost:"$2";
+      #   ssh -L "$2":localhost:$1 "$server" -N;
+      #   }; ssh-port'';
+      # # vim /etc/ssh/sshd_config
+      # # GatewayPorts yes
+      # # systemctl restart ssh
+      # l2r = ''
+      #   function ssh-port() {
+      #   local port=$((RANDOM % 60000 + 1024));
+      #   local server=$2;
+      #   echo ssh -R "$port":0.0.0.0:$1 "$server" -N;
+      #   echo http://"$server":"$port" or https://"$server":"$port";
+      #   ssh -R "$port":0.0.0.0:$1 "$server" -N;
+      #   }; ssh-port'';
+      # l2r-port = ''
+      #   function ssh-port() {
+      #   local server=$3;
+      #   echo ssh -R "$2":0.0.0.0:$1 "$server" -N;
+      #   echo http://"$server":"$2" or https://"$server":"$2";
+      #   ssh -R "$2":0.0.0.0:$1 "$server" -N;
+      #   }; ssh-port'';
       sh = "stat --format '%a'";
       cdspeak = "cd ~/Documents/code/github.com/back2nix/speaker";
       cdgo = "cd ~/Documents/code/github.com/back2nix";
@@ -213,6 +248,8 @@
         name = "vi-mode";
         src = pkgs.zsh-vi-mode;
         file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+        # https://github.com/jeffreytse/zsh-vi-mode?tab=readme-ov-file#custom-escape-key
+        # ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
       }
     ];
     zplug = {
