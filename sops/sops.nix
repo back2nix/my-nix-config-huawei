@@ -9,23 +9,27 @@
     secrets.example-key.owner = config.users.users.nobody.name;
     secrets.example-key.group = config.users.users.nobody.group;
 
-    secrets."shadowsocks/password" = {};
-    secrets."shadowsocks/server" = {};
+    secrets."xray/server" = {};
+    secrets."xray/privateKey" = {};
+    secrets."xray/publicKey" = {};
+    secrets."xray/uuid" = {};
 
-    templates."shadowsocks.json".content = ''
-      {
-          "server": [
-              "::1",
-              "${config.sops.placeholder."shadowsocks/server"}"
-          ],
-          "mode": "tcp_and_udp",
-          "server_port": 443,
-          "local_port": 1080,
-          "password": "${config.sops.placeholder."shadowsocks/password"}",
-          "timeout": 5,
-          "method": "aes-128-gcm",
-          "fast_open": true
-      }
-    '';
+    # secrets."shadowsocks/password" = {};
+    # secrets."shadowsocks/server" = {};
+    # templates."shadowsocks.json".content = ''
+    #   {
+    #       "server": [
+    #           "::1",
+    #           "${config.sops.placeholder."shadowsocks/server"}"
+    #       ],
+    #       "mode": "tcp_and_udp",
+    #       "server_port": 443,
+    #       "local_port": 1080,
+    #       "password": "${config.sops.placeholder."shadowsocks/password"}",
+    #       "timeout": 5,
+    #       "method": "aes-128-gcm",
+    #       "fast_open": true
+    #   }
+    # '';
   };
 }

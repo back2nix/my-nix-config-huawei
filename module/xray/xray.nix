@@ -14,11 +14,6 @@ in {
   networking.firewall.allowedTCPPorts = [443 1081 3080 10809];
   networking.firewall.allowedUDPPorts = [443 1081 3080 10809];
   sops = {
-    secrets = {
-      uuid = {};
-      privateKey = {};
-      publicKey = {};
-    };
     templates."xray-server.json" = {
       owner = "${user}";
       content = ''
@@ -56,7 +51,7 @@ in {
               "settings": {
                 "clients": [
                   {
-                    "id": "${config.sops.placeholder.uuid}",
+                    "id": \"${config.sops.placeholder."xray/uuid"}\",
                     "flow": "xtls-rprx-vision"
                   }
                 ],
@@ -76,7 +71,7 @@ in {
                     "usa.lg.pq.hosting",
                     "ref-server.com"
                   ],
-                  "privateKey": "${config.sops.placeholder.privateKey}",
+                  "privateKey": \"${config.sops.placeholder."xray/privateKey"}\",
                   "shortIds": [
                     "",
                     "114514"
@@ -170,11 +165,11 @@ in {
             "settings": {
               "vnext": [
                 {
-                  "address": "${config.sops.placeholder."shadowsocks/server"}",
+                  "address": "${config.sops.placeholder."xray/server"}",
                   "port": 443,
                   "users": [
                     {
-                      "id": "${config.sops.placeholder.uuid}",
+                      "id": "${config.sops.placeholder."xray/uuid"}",
                       "flow": "xtls-rprx-vision",
                       "encryption": "none"
                     }
@@ -189,7 +184,7 @@ in {
                 "serverName": "www.microsoft.com",
                 "fingerprint": "firefox",
                 "shortId": "114514",
-                "publicKey": "${config.sops.placeholder.publicKey}",
+                "publicKey": "${config.sops.placeholder."xray/publicKey"}",
                 "spiderX": "/"
               }
             }

@@ -38,18 +38,18 @@
     '';
   };
 
-  services.acpid = {
-    enable = true;
-    handlers = {
-      lid-close = {
-        event = "button/lid.*";
-        action = ''
-          echo "Lid closed at $(date)" >> /tmp/lid.log
-          systemctl suspend
-        '';
-      };
-    };
-  };
+  # services.acpid = {
+  #   enable = true;
+  #   handlers = {
+  #     lid-close = {
+  #       event = "button/lid.*";
+  #       action = ''
+  #         echo "Lid closed at $(date)" >> /tmp/lid.log
+  #         systemctl suspend
+  #       '';
+  #     };
+  #   };
+  # };
 
   services.power-profiles-daemon.enable = false;
 
