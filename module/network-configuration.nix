@@ -3,7 +3,7 @@
   config,
   ...
 }: let
-  domainNameServers = ["1.1.1.1" "1.0.0.1" "8.8.8.8" "8.8.4.4"];
+  domainNameServers = ["127.0.0.53" "1.1.1.1" "1.0.0.1" "8.8.8.8" "8.8.4.4"];
 in {
   systemd.network = {
     enable = true;
@@ -24,7 +24,6 @@ in {
     nat = {
       enable = true;
       internalInterfaces = ["ve-+"];
-      externalInterface = "wlp0s20f3";
       # externalInterface = "tornet";
       # Lazy IPv6 connectivity for the container
       enableIPv6 = true;
@@ -32,8 +31,8 @@ in {
 
     extraHosts = ''
       127.0.0.1 kafka
-      127.0.0.1 devlis.com
-      127.0.0.1 model.devlis.com
+      127.0.0.1 devils
+      127.0.0.1 model.devils
     '';
 
     nftables.enable = true;
