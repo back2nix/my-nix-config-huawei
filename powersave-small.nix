@@ -23,18 +23,16 @@
   systemd.targets.hibernate.enable = true;
   systemd.targets.hybrid-sleep.enable = true;
 
+  security.pam.services.gdm.enableGnomeKeyring = true;
+
   services.logind = {
     lidSwitch = "suspend";
-    lidSwitchExternalPower = "suspend";
+    # lidSwitchExternalPower = "suspend";
     # lidSwitchExternalPower = "lock";
     extraConfig = ''
-      HandlePowerKey=suspend
       HandleSuspendKey=suspend
-      HandleHibernateKey=hibernate
       HandleLidSwitch=suspend
       HandleLidSwitchExternalPower=suspend
-      IdleAction=suspend
-      IdleActionSec=1min
     '';
   };
 

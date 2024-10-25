@@ -105,7 +105,9 @@ in {
       # # overrides. You can do that directly here, just don't forget the
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
-      (pkgs.nerdfonts.override {fonts = ["FiraCode" "DroidSansMono"];}) # "FantasqueSansMono"
+      (pkgs.nerdfonts.override {
+        fonts = ["FiraCode" "DroidSansMono"];
+      }) # "FantasqueSansMono"
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
@@ -235,7 +237,8 @@ in {
       # chromium
 
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
-      (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
+      (pkgs.writeScriptBin "mreplace"
+        (builtins.readFile ./bash/smart-replace.sh))
     ];
 
     file = {
@@ -272,9 +275,7 @@ in {
   };
 
   nixpkgs.config = {
-    permittedInsecurePackages = [
-      "curl-impersonate-chrome-0.5.4"
-    ];
+    permittedInsecurePackages = ["curl-impersonate-chrome-0.5.4"];
 
     allowUnfree = true;
 

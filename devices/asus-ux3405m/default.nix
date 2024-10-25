@@ -5,9 +5,7 @@
   modulesPath,
   ...
 }: {
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
+  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
 
   networking.hostName = "asus-ux3405m";
 
@@ -16,13 +14,21 @@
     extraModprobeConfig = ''
       options snd-hda-intel model=asus-zenbook
     '';
-    loader.grub.extraFiles = {
-      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
-    };
+    loader.grub.extraFiles = {"ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";};
     loader.grub.extraConfig = ''
       acpi /ssdt-csc3551.aml
     '';
-    initrd.availableKernelModules = ["xhci_pci" "ahci" "thunderbolt" "vmd" "usb_storage" "nvme" "rtsx_usb_sdmmc" "uas" "sd_mod"];
+    initrd.availableKernelModules = [
+      "xhci_pci"
+      "ahci"
+      "thunderbolt"
+      "vmd"
+      "usb_storage"
+      "nvme"
+      "rtsx_usb_sdmmc"
+      "uas"
+      "sd_mod"
+    ];
     initrd.kernelModules = [];
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
@@ -39,21 +45,39 @@
     options = ["fmask=0077" "dmask=0077"];
   };
 
-  swapDevices = [
-    {device = "/dev/disk/by-uuid/e2c52285-0430-4b2d-9a09-ce90c536311f";}
-  ];
+  swapDevices = [{device = "/dev/disk/by-uuid/e2c52285-0430-4b2d-9a09-ce90c536311f";}];
 
   networking.useDHCP = lib.mkDefault true;
   networking.nat.externalInterface = "wlo1";
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
+  hardware = {};
+
   hardware = {
-    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    cpu.intel.updateMicrocode =
+      lib.mkDefault config.hardware.enableRedistributableFirmware;
     ipu6 = {
       enable = true;
       platform = "ipu6epmtl";
     };
+    opengl = {
+      enable = true;
+      driSupport = true;
+      driSupport32Bit = true;
+      extraPackages = with pkgs; [
+        intel-media-driver # LIBVA_DRIVER_NAME=iHD
+        intel-compute-runtime # OpenCL support
+        vaapiIntel # LIBVA_DRIVER_NAME=i965
+        vaapiVdpau
+        libvdpau-va-gl
+      ];
+    };
+  };
+
+  environment.variables = {
+    LIBVA_DRIVER_NAME = "iHD";
+    MOZ_DISABLE_RDD_SANDBOX = "1"; # Может помочь с некоторыми проблемами рендеринга
   };
 
   services = {
