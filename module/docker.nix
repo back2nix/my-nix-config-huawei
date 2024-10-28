@@ -6,44 +6,51 @@
   pkgs-23-11,
   ...
 }: {
+  # sudo systemctl daemon-reload
+  # sudo systemctl restart docker
+  # systemctl --user restart docker
   virtualisation = {
     docker = {
       enable = true;
+      liveRestore = false;
+      storageDriver =
+        if config.fileSystems."/".fsType == "btrfs"
+        then "btrfs"
+        else "overlay2";
       rootless = {
         enable = true;
         setSocketVariable = true;
+        daemon = {settings = {};};
       };
+      autoPrune.enable = true;
       daemon = {
         settings = {
-          dns = ["8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
+          # data-root = "/home/docker";
+          # ip = "127.0.0.1";
+          dns = ["127.0.0.11" "8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
         };
       };
     };
   };
 
-  virtualisation.multipass = {
-    enable = true;
+  virtualisation.oci-containers.backend = "docker";
+
+  boot.kernel.sysctl = {
+    "kernel.unprivileged_userns_clone" = 1;
+    "net.ipv4.ip_unprivileged_port_start" = 0;
   };
 
-  virtualisation.containers.registries.search = [
-    "docker.io"
-  ];
+  virtualisation.multipass = {enable = true;};
 
-  # Note: need to create the zfs mount manually
-  # bin/nixos/podman-setup-zfs-storage
-
-  virtualisation.containers.registries.insecure = [
-    "localhost:5000"
-    "localhost:29003"
-    "dev.ilx.yjpark.org"
-  ];
+  virtualisation.containers.registries.search = ["docker.io"];
+  virtualisation.containers.registries.insecure = ["localhost:5000" "localhost:29003" "dev.ilx.yjpark.org"];
 
   environment.systemPackages = with pkgs; [
-    # pkgs-23-11.arion
-    # pkgs-master.podman-compose
-    # pkgs-master.podman-tui
     pkgs-master.docker-client
     pkgs-master.distrobox
     pkgs-master.docker-compose
+    slirp4netns # Важно для rootless networking
+    fuse-overlayfs # Важно для storage driver
+    shadow # Для usermod и других утилит управления пользователями
   ];
 }

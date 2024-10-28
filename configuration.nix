@@ -41,9 +41,9 @@
     ./module/xray/xray.nix
 
     ./module/network-configuration.nix
-    ./module/podman.nix
+    # ./module/podman.nix
     # or
-    # ./module/docker.nix
+    ./module/docker.nix
     # ./module/virtualisation-configuration.nix
     # ./powersave.nix
     ./powersave-small.nix
@@ -148,9 +148,7 @@
     #   options snd-hda-intel index=0 model=dell-headset-multi,dell-e7x
     #   '';
 
-    sessionVariables = rec {
-      GTK_THEME = "Adwaita:dark";
-    };
+    sessionVariables = rec {GTK_THEME = "Adwaita:dark";};
 
     shells = with pkgs; [zsh];
 
@@ -180,6 +178,7 @@
       sshs
       pkgs.libcap
       pkgs.docker-compose
+      git
 
       # work
       # tpm2-tss
@@ -220,13 +219,7 @@
     nix-ld = {
       package = inputs.nix-ld-rs;
       enable = true;
-      libraries = with pkgs; [
-        gcc
-        icu
-        libcxx
-        stdenv.cc.cc.lib
-        zlib
-      ];
+      libraries = with pkgs; [gcc icu libcxx stdenv.cc.cc.lib zlib];
     };
     dconf.enable = true;
     wireshark = {
@@ -306,9 +299,7 @@
   ];
 
   # https://github.com/gvolpe/nix-config/blob/0ed3d66f228a6d54f1e9f6e1ef4bc8daec30c0af/system/configuration.nix#L161
-  fonts.packages = with pkgs; [
-    times-newer-roman
-  ];
+  fonts.packages = with pkgs; [times-newer-roman];
 
   nix = {
     gc = {
@@ -354,9 +345,7 @@
     xserver = {
       enable = true;
       videoDrivers = ["modesetting"];
-      xkb = {
-        layout = "us,ru";
-      };
+      xkb = {layout = "us,ru";};
       displayManager = {
         gdm = {
           enable = true;
