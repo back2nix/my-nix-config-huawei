@@ -33,6 +33,7 @@ in {
       127.0.0.1 kafka
       127.0.0.1 devils
       127.0.0.1 model.devils
+      127.0.0.1 host.docker.internal
     '';
 
     nftables.enable = true;
