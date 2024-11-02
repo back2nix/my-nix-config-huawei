@@ -182,7 +182,7 @@
 
       # work
       # tpm2-tss
-      # openvpn3
+      pkgs-master.openvpn3
 
       # pkgs.arion
       # pkgs.docker-client
@@ -222,10 +222,10 @@
       libraries = with pkgs; [gcc icu libcxx stdenv.cc.cc.lib zlib];
     };
     dconf.enable = true;
-    wireshark = {
-      enable = true;
-      package = pkgs-master.wireshark;
-    };
+    # wireshark = {
+    #   enable = true;
+    #   package = pkgs-master.wireshark;
+    # };
   };
 
   # system.activationScripts.wireshark-capabilities = ''

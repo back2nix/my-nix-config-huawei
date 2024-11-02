@@ -85,4 +85,11 @@ in {
       StartupNotify=true
     '';
   };
+
+  programs.chrome-with-ssl-keylog = {
+    enable = true;
+    keylogFile = "/tmp/sslkeylog.txt";
+    # Если вы хотите использовать другой пакет Chrome, раскомментируйте следующую строку:
+    # package = pkgs.google-chrome-beta;
+  };
 }
