@@ -179,6 +179,7 @@
       pkgs.libcap
       pkgs.docker-compose
       git
+      lsof
 
       # work
       # tpm2-tss
