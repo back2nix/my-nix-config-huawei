@@ -20,14 +20,12 @@ in {
       description = "Default path to the SSL keylog file if KEYLOG_FILE env var is not set";
     };
   };
-
   config = lib.mkIf cfg.enable {
     home.packages = [
       (pkgs-master.symlinkJoin {
         name = "chrome-with-ssl-keylog";
         paths = [
           (pkgs-master.writeScriptBin "chrome-ssl-keylog" ''
-            #!${pkgs-master.stdenv.shell}
             KEYLOG_FILE=''${KEYLOG_FILE:-${cfg.keylogFile}}
             KEYLOG_DIR=$(dirname "$KEYLOG_FILE")
             mkdir -p "$KEYLOG_DIR"
@@ -39,7 +37,6 @@ in {
               "$@"
           '')
           (pkgs-master.writeScriptBin "wireshark-with-keylog" ''
-            #!${pkgs-master.stdenv.shell}
             KEYLOG_FILE=''${KEYLOG_FILE:-${cfg.keylogFile}}
             if [ ! -f "$KEYLOG_FILE" ]; then
               echo "SSL keylog file not found: $KEYLOG_FILE"
@@ -60,7 +57,6 @@ in {
         '';
       })
     ];
-
     home.file.".local/share/applications/chrome-ssl-keylog.desktop".text = ''
       [Desktop Entry]
       Name=Google Chrome (SSL Keylog)
@@ -72,7 +68,6 @@ in {
       MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
       StartupNotify=true
     '';
-
     home.file.".local/share/applications/wireshark-with-keylog.desktop".text = ''
       [Desktop Entry]
       Name=Wireshark (with SSL Keylog)
@@ -84,12 +79,5 @@ in {
       MimeType=application/vnd.tcpdump.pcap;application/x-pcapng;application/x-snoop;application/x-iptrace;application/x-lanalyzer;application/x-nettl;application/x-radcom;
       StartupNotify=true
     '';
-  };
-
-  programs.chrome-with-ssl-keylog = {
-    enable = true;
-    keylogFile = "/tmp/sslkeylog.txt";
-    # Если вы хотите использовать другой пакет Chrome, раскомментируйте следующую строку:
-    # package = pkgs.google-chrome-beta;
   };
 }

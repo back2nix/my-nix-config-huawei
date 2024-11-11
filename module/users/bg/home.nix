@@ -15,17 +15,18 @@ in {
     # ./mime.nix
     # ./overlays.nix
     # inputs.nixvim.homeManagerModules.nixvim
-    # ./chrome-ssl-keylog.nix
+    ./chrome-ssl-keylog.nix
     ./dconf.nix
     ./tmux/tmux.nix
     ./zsh/zsh.nix
-    # ./zsh/zsh_zinit.nix
-    # ./nixvim/nixvim.nix
     ./nixvim.nix
-    # ./nixvim/plugins/spell.nix
     ./nix-tools.nix
-    # inputs.nix-index-database.hmModules.nix-index
   ];
+
+  programs.chrome-with-ssl-keylog = {
+    enable = true;
+    keylogFile = "/tmp/sslkeylog.txt";
+  };
 
   # inputs.nixpkgs.overlays = [
   #   # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
@@ -236,6 +237,7 @@ in {
       git-lfs
       # pkgs-master.youtube-dl
       # chromium
+      # wireshark-with-keylog
 
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace"
