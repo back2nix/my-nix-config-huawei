@@ -235,6 +235,7 @@ in {
       dig
       inetutils
       git-lfs
+      xh
       # pkgs-master.youtube-dl
       # chromium
       # wireshark-with-keylog
