@@ -3,54 +3,64 @@
   pkgs,
   ...
 }: {
+  # enable powertop auto tuning on startup.
+  powerManagement = {
+    powertop.enable = true;
+    cpuFreqGovernor = "powersave"; # Явное указание governor'а
+  };
+
+  # Better scheduling for CPU cycles - thanks System76!!!
+  services.system76-scheduler.settings.cfsProfiles.enable = true;
+  # Enable thermald, the temperature management daemon. (only necessary if on Intel CPUs)
+  services.thermald.enable = true;
+  # Disable GNOMEs power management
+  services.power-profiles-daemon.enable = false;
+  # Enable TLP (better than gnomes internal power manager)
+
   services.tlp = {
     enable = true;
     settings = {
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance-power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power"; # Изменено на более агрессивное энергосбережение
       PLATFORM_PROFILE_ON_BAT = "low-power";
-      #AC
       CPU_SCALING_GOVERNOR_ON_AC = "powersave";
       CPU_ENERGY_PERF_POLICY_ON_AC = "balance-power";
       PLATFORM_PROFILE_ON_AC = "low-power";
-      # START_CHARGE_THRESH_BAT0 = "75";
-      # STOP_CHARGE_THRESH_BAT0 = "80";
-      USB_AUTOSUSPEND = 0; # Отключаем автоприостановку USB-устройств
+      USB_AUTOSUSPEND = 0;
+
+      # Добавленные настройки для лучшего контроля температуры
+      CPU_MAX_PERF_ON_BAT =
+        60; # Ограничение максимальной производительности на батарее
+      CPU_MAX_PERF_ON_AC =
+        80; # Ограничение максимальной производительности при питании
+      CPU_BOOST_ON_BAT = 0; # Отключение турбо-буста на батарее
+      CPU_BOOST_ON_AC = 1; # Включение турбо-буста при питании
+
+      # Настройки для Intel P-state
+      INTEL_PSTATE_ON_BAT = "powersave";
+      INTEL_PSTATE_ON_AC = "powersave";
+
+      # Дополнительные настройки энергосбережения
+      RUNTIME_PM_ON_BAT = "auto";
+      RUNTIME_PM_ON_AC = "auto";
     };
   };
 
+  # Остальные настройки без изменений
   systemd.targets.sleep.enable = true;
   systemd.targets.suspend.enable = true;
   systemd.targets.hibernate.enable = true;
   systemd.targets.hybrid-sleep.enable = true;
-
   security.pam.services.gdm.enableGnomeKeyring = true;
 
   services.logind = {
     lidSwitch = "suspend";
-    # lidSwitchExternalPower = "suspend";
-    # lidSwitchExternalPower = "lock";
     extraConfig = ''
       HandleSuspendKey=suspend
       HandleLidSwitch=suspend
       HandleLidSwitchExternalPower=suspend
     '';
   };
-
-  # services.acpid = {
-  #   enable = true;
-  #   handlers = {
-  #     lid-close = {
-  #       event = "button/lid.*";
-  #       action = ''
-  #         echo "Lid closed at $(date)" >> /tmp/lid.log
-  #         systemctl suspend
-  #       '';
-  #     };
-  #   };
-  # };
-
-  services.power-profiles-daemon.enable = false;
 
   services.xserver.desktopManager.gnome = {
     extraGSettingsOverrides = ''
@@ -65,15 +75,12 @@
     '';
   };
 
-  services.thermald.enable = true;
-
   boot.kernelParams = [
     "intel_pstate=active"
     "processor.max_cstate=5"
     "intel_idle.max_cstate=5"
     "workqueue.power_efficient=y"
+    "pcie_aspm=powersave" # Добавлен параметр для энергосбережения PCIe
+    "intel_pstate=no_hwp" # Отключение аппаратного управления производительностью
   ];
-
-  # Отключаем powertop, так как он может агрессивно управлять энергопотреблением
-  powerManagement.powertop.enable = false;
 }
