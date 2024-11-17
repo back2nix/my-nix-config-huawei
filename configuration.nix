@@ -323,7 +323,10 @@
     # };
     # }; # $ sudo fprintd-enroll --finger right-index-finger <user>
 
-    lorri.enable = true;
+    lorri = {
+      enable = true;
+      package = pkgs-master.lorri;
+    };
     change-mac = {
       enable = false;
       interface = "wlp0s20f3";
