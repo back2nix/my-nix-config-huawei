@@ -30,6 +30,22 @@
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
 
       set -g fish_greeting
+
+      set -g theme_display_user yes
+      set -g theme_hide_hostname no
+      set -g color_user_bg black
+      set -g color_user_str yellow
+      set -g color_dir_bg blue
+      set -g color_dir_str black
+      set -g color_git_dirty_bg yellow
+      set -g color_git_dirty_str black
+      set -g color_git_bg green
+      set -g color_git_str black
+      set -g color_status_nonzero_bg black
+      set -g color_status_nonzero_str red
+      set -g color_status_superuser_bg black
+      set -g color_status_superuser_str yellow
+      set -g VIRTUAL_ENV_DISABLE_PROMPT 1
     '';
 
     plugins = [
@@ -47,12 +63,22 @@
       {
         name = "agnoster";
         src = pkgs.fetchFromGitHub {
-          owner = "jeanlucthumm";
+          owner = "back2nix";
           repo = "theme-agnoster";
-          rev = "502ff4f34224c9aa90a8d0a3ad517940eaf4d4fd";
-          sha256 = "12gc6mw5cb3pdqp8haqx9abgjw64v3960g0f0hgb122xa3z7qldm";
+          rev = "4e9237196d4bc34743f61a79f8492ede661b690a";
+          sha256 = "sha256-WS0/2ygFtd3wqAMza/B2Z3Eh7VLSSyJHCTxrHEjXQy4=";
         };
       }
+      # theme
+      # {
+      #   name = "agnoster";
+      #   src = pkgs.fetchFromGitHub {
+      #     owner = "jeanlucthumm";
+      #     repo = "theme-agnoster";
+      #     rev = "502ff4f34224c9aa90a8d0a3ad517940eaf4d4fd";
+      #     sha256 = "12gc6mw5cb3pdqp8haqx9abgjw64v3960g0f0hgb122xa3z7qldm";
+      #   };
+      # }
       # Автодополнение путей
       {
         name = "autopair";
@@ -86,6 +112,27 @@
     ];
 
     functions = {
+      # prompt_virtual_env = ''
+      #   set envs
+
+      #   if test "$CONDA_DEFAULT_ENV"
+      #   set envs $envs "conda[$CONDA_DEFAULT_ENV]"
+      #   end
+
+      #   if test "$VIRTUAL_ENV"
+      #   set py_env (basename $VIRTUAL_ENV)
+      #   set envs $envs "py[$py_env]"
+      #   end
+
+      #   # Show only if we're in a nix-shell
+      #   if test "$IN_NIX_SHELL"
+      #   set envs $envs "nix[$IN_NIX_SHELL]"
+      #   end
+
+      #   if test "$envs"
+      #   prompt_segment $color_virtual_env_bg $color_virtual_env_str (string join " " $envs)
+      #   end
+      # '';
       # Аналог вашей функции cdroot
       cdroot = ''
         set -l git_root (git rev-parse --show-toplevel 2>/dev/null)
@@ -203,49 +250,16 @@
     };
 
     shellInit = ''
-      # Basic theme settings
-      set -g theme_display_git yes
-      set -g theme_display_git_dirty yes
-      set -g theme_display_git_untracked yes
-      set -g theme_display_nix yes
-      set -g theme_powerline_fonts yes
-      set -g theme_nerd_fonts yes
+      # if command -q nix-your-shell
+      #   nix-your-shell fish | source
+      # end
 
-      # Отключаем ненужные сегменты
-      set -g theme_display_vagrant no
-      set -g theme_display_docker_machine no
-      set -g theme_display_k8s_context no
-      set -g theme_display_virtualenv yes
-      set -g theme_display_hostname no
-      set -g theme_show_exit_status no
-
-      # Настройка отображения путей и сегментов
-      set -g fish_prompt_pwd_dir_length 1         # Сокращать промежуточные директории до 1 символа
-      set -g AGNOSTER_SEGMENT_SEPARATOR " "        # Пробел между сегментами
-
-      # Кастомизация отображения nix-shell
-      # set -g AGNOSTER_NIX_DISPLAY "nix[impure]"    # Формат отображения nix-shell
-
-      # Git symbols
-      set -g theme_git_dirty_symbol "±"            # Символ для измененного репозитория
-
-      # Completion for nix
-      complete -f -c nix -a "(commandline -opc)"
-
-      if test -n "$IN_NIX_SHELL"
-          set PROMPT $PROMPT"❄ "
-      end
-
-      if command -q nix-your-shell
-        nix-your-shell fish | source
-      end
-
-      if test (id -u) -eq 0
-        set -g fish_color_cwd red
-        set -g fish_color_user red
-        set -g fish_color_host red
-        set -g agnoster_color_user_root red  # Agnoster-specific setting
-      end
+      # if test (id -u) -eq 0
+      #   set -g fish_color_cwd red
+      #   set -g fish_color_user red
+      #   set -g fish_color_host red
+      #   set -g agnoster_color_user_root red  # Agnoster-specific setting
+      # end
     '';
   };
 
