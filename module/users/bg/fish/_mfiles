@@ -1,0 +1,10 @@
+#compdef mfiles
+
+_mfiles() {
+  _arguments \
+    '*-i[include pattern]:pattern:_files' \
+    '*-e[exclude pattern]:pattern:_files' \
+    '--keep-comments[preserve comments]'
+}
+
+_mfiles "$@"

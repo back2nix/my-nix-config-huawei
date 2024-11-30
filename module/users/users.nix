@@ -8,10 +8,11 @@
 }: let
   inherit (import ../../variables.nix) mainUser;
 in {
-  users.users.root = {shell = pkgs.zsh;};
+  users.users.root = {shell = pkgs.fish;};
 
   home-manager.users.root = {...}: {
-    imports = [./bg/zsh/zsh.nix];
+    imports = [./bg/zsh/zsh.nix ./bg/fish/fish.nix ./bg/nixvim.nix];
+    # imports = [./bg/fish/fish.nix];
     home = {
       stateVersion = "23.11"; # используйте ту же версию, что и в вашем home.nix
       username = "root";

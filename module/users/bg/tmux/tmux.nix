@@ -12,7 +12,8 @@
     baseIndex = 1;
     prefix = "C-a";
     sensibleOnTop = true;
-    shell = "${pkgs.zsh}/bin/zsh";
+    # shell = "${pkgs.zsh}/bin/zsh";
+    shell = "${pkgs.fish}/bin/fish";
     terminal = "screen-256color";
     plugins = with pkgs; [
       tmuxPlugins.copycat

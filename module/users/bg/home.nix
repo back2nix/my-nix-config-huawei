@@ -18,7 +18,8 @@ in {
     ./chrome-ssl-keylog.nix
     ./dconf.nix
     ./tmux/tmux.nix
-    ./zsh/zsh.nix
+    # ./zsh/zsh.nix
+    ./fish/fish.nix
     ./nixvim.nix
     ./nix-tools.nix
   ];

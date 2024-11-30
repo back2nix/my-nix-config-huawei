@@ -70,7 +70,9 @@
     loader.grub.extraConfig = ''
       acpi /ssdt-csc3551.aml
     '';
-    # kernelPackages = pkgs.linuxPackages_latest;
+    # kernelPackages = pkgs.linuxPackages_testing;
+    # kernelPackages = pkgs-master.linuxPackages_testing;
+    # pkgs.linuxPackages_5_9
     loader.systemd-boot.enable = true;
 
     supportedFilesystems = ["ntfs"];
@@ -150,7 +152,7 @@
 
     sessionVariables = rec {GTK_THEME = "Adwaita:dark";};
 
-    shells = with pkgs; [zsh];
+    shells = with pkgs; [fish];
 
     # https://discourse.nixos.org/t/tips-tricks-for-nixos-desktop/28488/2
     # чтобы запускать бинарники на nix
@@ -163,7 +165,7 @@
             name = "fhs";
             targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
             profile = "export FHS=1";
-            runScript = "zsh";
+            runScript = "fish";
             extraOutputsToInstall = ["dev"];
           }))
       lm_sensors
@@ -216,6 +218,7 @@
   programs = {
     openvpn3.enable = true;
     zsh.enable = true;
+    fish.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld = {
       package = inputs.nix-ld-rs;
@@ -233,7 +236,7 @@
   #   ${pkgs.libcap.out}/bin/setcap cap_net_raw,cap_net_admin+ep ${pkgs.wireshark}/bin/dumpcap
   # '';
 
-  users.defaultUserShell = pkgs.zsh;
+  users.defaultUserShell = pkgs.fish;
 
   systemd = {
     # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
