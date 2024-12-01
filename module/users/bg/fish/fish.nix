@@ -11,28 +11,22 @@
   home.file.".config/fish/completions/_ssh_port_completion.fish".source =
     ./_ssh_port_completion;
 
-  programs.fish = {
-    enable = true;
+    programs.fish = {
+      enable = true;
 
     # Включаем интерактивные функции
     interactiveShellInit = ''
       # Настройка окружения
       set -gx LANG en_US.UTF-8
       set -gx PATH $PATH $HOME/.cargo/bin
-
-      # Настройка direnv
       direnv hook fish | source
-
-      # Поддержка цветного вывода для IP
       set -gx IP_COLOR true
-
-      # Настройка fzf
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
 
       set -g fish_greeting
 
       set -g theme_display_user yes
-      set -g theme_hide_hostname no
+      set -g theme_hide_hostname yes
       set -g color_user_bg black
       set -g color_user_str yellow
       set -g color_dir_bg blue
@@ -65,8 +59,8 @@
         src = pkgs.fetchFromGitHub {
           owner = "back2nix";
           repo = "theme-agnoster";
-          rev = "4e9237196d4bc34743f61a79f8492ede661b690a";
-          sha256 = "sha256-WS0/2ygFtd3wqAMza/B2Z3Eh7VLSSyJHCTxrHEjXQy4=";
+          rev = "af089ebf112e357c47894c9fd74a1dfd31a9f767";
+          sha256 = "sha256-P4vQHfzf+cJa6qOa4AZN123FEF3euaFPClfNBda3iig=";
         };
       }
       # theme
