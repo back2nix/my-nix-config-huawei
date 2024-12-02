@@ -19,6 +19,7 @@
       # Настройка окружения
       set -gx LANG en_US.UTF-8
       set -gx PATH $PATH $HOME/.cargo/bin
+      set -g fish_complete_path_as_name true
       direnv hook fish | source
       set -gx IP_COLOR true
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
@@ -148,25 +149,25 @@
       '';
 
       r2l-port = ''
-        local server=$3
-        echo ssh -L "$2":localhost:$1 "$server" -N
-        echo http://localhost:"$2" or https://localhost:"$2"
-        ssh -L "$2":localhost:$1 "$server" -N
+        set server $argv[3]
+        echo ssh -L "$argv[2]":localhost:$argv[1] "$server" -N
+        echo http://localhost:"$argv[2]" or https://localhost:"$argv[2]"
+        ssh -L "$argv[2]":localhost:$argv[1] "$server" -N
       '';
 
       l2r = ''
-        local port=$((RANDOM % 60000 + 1024))
-        local server=$2
-        echo ssh -R "$port":0.0.0.0:$1 "$server" -N
+        set port (random 1024 61024)
+        set server $argv[2]
+        echo ssh -R "$port":0.0.0.0:$argv[1] "$server" -N
         echo http://"$server":"$port" or https://"$server":"$port"
-        ssh -R "$port":0.0.0.0:$1 "$server" -N
+        ssh -R "$port":0.0.0.0:$argv[1] "$server" -N
       '';
 
       l2r-port = ''
-        local server=$3
-        echo ssh -R "$2":0.0.0.0:$1 "$server" -N
-        echo http://"$server":"$2" or https://"$server":"$2"
-        ssh -R "$2":0.0.0.0:$1 "$server" -N
+        set server $argv[3]
+        echo ssh -R "$argv[2]":0.0.0.0:$argv[1] "$server" -N
+        echo http://"$server":"$argv[2]" or https://"$server":"$argv[2]"
+        ssh -R "$argv[2]":0.0.0.0:$argv[1] "$server" -N
       '';
 
       # Аналогичные функции для r2l-port, l2r, l2r-port можно добавить по такому же принципу
@@ -199,49 +200,45 @@
       tk = "tokei";
       sctl = "systemctl";
 
-      # screen2text = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
-      # s2t = "${pkgs-master.normcap}/bin/normcap -l eng";
-      # # s2tf = "${pkgs-master.gnome-frog}/bin/frog";
-      # en = "${pkgs-master.normcap}/bin/normcap -l eng";
-      # ru = "${pkgs-master.normcap}/bin/normcap -l rus";
+      screen2text = "${pkgs-master.normcap}/bin/normcap ${normcap_lang}";
+      s2t = "${pkgs-master.normcap}/bin/normcap -l eng";
+      en = "${pkgs-master.normcap}/bin/normcap -l eng";
+      ru = "${pkgs-master.normcap}/bin/normcap -l rus";
       # diff = ''
       #   ${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
-      # # cover = ''
-      # #   local t=$(mktemp)
-      # #   go test $COVERFLAGS -coverprofile=$t $@ \
-      # #   && go tool cover -func=$t \
-      # #   && unlink $t
-      # # '';
-      # # coverweb = ''
-      # #   local t=$(mktemp)
-      # #   go test $COVERFLAGS -coverprofile=$t $@ \
-      # #   && go tool cover -html=$t \
-      # #   && unlink $t
-      # # '';
 
-      st = "stat --format '%a'";
+      # st = "stat --format '%a'";
       # fe = ''
-      #   selected_file=$(rg --files ''${1:-.} | fzf)
-      #   if [ -n "$selected_file" ]; then
-      #   $EDITOR ''${selected_file%%:*}
-      #   fi
+      #   set selected_file (rg --files $argv[1] | fzf)
+      #   if test -n "$selected_file"
+      #   $EDITOR $selected_file
+      #   end
       # '';
-      # # Search content and Edit
+
       # se = ''
-      #   fileline=$(rg -n ''${1:-.} | fzf --preview 'bat -f `echo {} | cut -d ":" -f 1` -r `echo {} | cut -d ":" -f 2`:$((`echo {} | cut -d ":" -f 2`+150))' | awk '{print $1}' | sed 's/.$//')
-      #   if [[ -n $fileline ]]; then
-      #   $EDITOR ''${fileline%%:*} +''${fileline##*:}
-      #   fi
+      #   set fileline (rg -n $argv[1] | fzf --preview 'bat -f (echo {} | cut -d ":" -f 1) -r (echo {} | cut -d ":" -f 2):(math (echo {} | cut -d ":" -f 2) + 150)' | awk '{print $1}' | string replace -r '.$' '\')
+      #   if test -n "$fileline"
+      #   $EDITOR (string split ':' $fileline)[1] +(string split ':' $fileline)[2]
+      #   end
       # '';
+
       # fl = ''
-      #   git log --oneline --color=always | fzf --ansi --preview=" echo { } | cut - d ' ' - f 1 | xargs - I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1 | xargs git log --pretty=short -n 1'';
-      # gd = "git diff --name-only --diff-filter=d $@ | xargs bat --diff";
-      cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-*";
+      #   set commit (git log --oneline --color=always | fzf --ansi --preview="echo {} | cut -d ' ' -f 1 | xargs -I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1)
+      #   if test -n "$commit"
+      #   git log --pretty=short -n 1 $commit
+      #   end
+      # '';
+
+      # gd = ''
+      #   git diff --name-only --diff-filter=d $argv | xargs bat --diff
+      # '';
+
+      cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";
       clip = "head -c -1|xclip -i -selection clipboard";
       rd = "readlink -f";
       sudo = "sudo ";
-    };
+      };
 
     shellInit = ''
       # if command -q nix-your-shell
