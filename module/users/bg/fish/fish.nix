@@ -204,34 +204,35 @@
       s2t = "${pkgs-master.normcap}/bin/normcap -l eng";
       en = "${pkgs-master.normcap}/bin/normcap -l eng";
       ru = "${pkgs-master.normcap}/bin/normcap -l rus";
-      # diff = ''
-      #   ${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
 
-      # st = "stat --format '%a'";
-      # fe = ''
-      #   set selected_file (rg --files $argv[1] | fzf)
-      #   if test -n "$selected_file"
-      #   $EDITOR $selected_file
-      #   end
-      # '';
+      diff = ''
+        ${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
 
-      # se = ''
-      #   set fileline (rg -n $argv[1] | fzf --preview 'bat -f (echo {} | cut -d ":" -f 1) -r (echo {} | cut -d ":" -f 2):(math (echo {} | cut -d ":" -f 2) + 150)' | awk '{print $1}' | string replace -r '.$' '\')
-      #   if test -n "$fileline"
-      #   $EDITOR (string split ':' $fileline)[1] +(string split ':' $fileline)[2]
-      #   end
-      # '';
+      st = "stat --format '%a'";
+      fe = ''
+        set selected_file (rg --files $argv[1] | fzf)
+        if test -n "$selected_file"
+        $EDITOR $selected_file
+        end
+      '';
 
-      # fl = ''
-      #   set commit (git log --oneline --color=always | fzf --ansi --preview="echo {} | cut -d ' ' -f 1 | xargs -I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1)
-      #   if test -n "$commit"
-      #   git log --pretty=short -n 1 $commit
-      #   end
-      # '';
+      se = ''
+        set fileline (rg -n $argv[1] | fzf --preview 'bat -f (echo {} | cut -d ":" -f 1) -r (echo {} | cut -d ":" -f 2):(math (echo {} | cut -d ":" -f 2) + 150)' | awk '{print $1}' | string replace -r '.$' "")
+        if test -n "$fileline"
+        $EDITOR (string split ':' $fileline)[1] +(string split ':' $fileline)[2]
+        end
+      '';
 
-      # gd = ''
-      #   git diff --name-only --diff-filter=d $argv | xargs bat --diff
-      # '';
+      fl = ''
+        set commit (git log --oneline --color=always | fzf --ansi --preview="echo {} | cut -d ' ' -f 1 | xargs -I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1)
+        if test -n "$commit"
+        git log --pretty=short -n 1 $commit
+        end
+      '';
+
+      gd = ''
+        git diff --name-only --diff-filter=d $argv | xargs bat --diff
+      '';
 
       cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";
