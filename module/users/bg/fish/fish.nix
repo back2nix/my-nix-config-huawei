@@ -129,7 +129,7 @@
       #   end
       # '';
       # Аналог вашей функции cdroot
-      cdroot = ''
+      cdr = ''
         set -l git_root (git rev-parse --show-toplevel 2>/dev/null)
         if test -n "$git_root"
           cd "$git_root"
