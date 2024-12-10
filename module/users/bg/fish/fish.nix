@@ -51,6 +51,16 @@
       }
       # git blugin
       {
+        name = "plugin-extract";
+        src = pkgs.fetchFromGitHub {
+          owner = "oh-my-fish";
+          repo = "plugin-extract";
+          rev = "5d05f9f15d3be8437880078171d1e32025b9ad9f";
+          sha256 = "sha256-hFM8uDHDfKBVn4CgRdfRaD0SzmVzOPjfMxU9X6yATzE=";
+        };
+      }
+      # git plugin
+      {
         name = "plugin-git";
         src = pkgs.fishPlugins.plugin-git.src;
       }
