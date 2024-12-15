@@ -77,8 +77,18 @@ done
 should_exclude() {
     local file="$1"
     for pattern in "${exclude_patterns[@]}"; do
-        if [[ "$(basename "$file")" == ${pattern} ]]; then
-            return 0
+        # Если паттерн содержит путь
+        if [[ "$pattern" == *"/"* ]]; then
+            if [[ "$file" == $pattern ]]; then
+                return 0
+            fi
+        else
+            # Для паттернов без пути проверяем только имя файла
+            local basename_file
+            basename_file=$(basename "$file")
+            if [[ "$basename_file" == $pattern ]]; then
+                return 0
+            fi
         fi
     done
     return 1
@@ -96,56 +106,66 @@ has_valid_extension() {
 }
 
 matches_include_pattern() {
-    local file="$1"
-    local basename_file
-    basename_file=$(basename "$file")
-
+    local filepath="$1"
     for pattern in "${include_patterns[@]}"; do
-        if [[ "$basename_file" == ${pattern} ]]; then
-            return 0
+        # Если паттерн содержит путь, проверяем относительно корня поиска
+        if [[ "$pattern" == *"/"* ]]; then
+            # Для паттернов с путём, проверяем как точное совпадение, так и glob
+            if [[ "$filepath" == $pattern ]] || [[ "$filepath" == *"/$pattern" ]]; then
+                return 0
+            fi
+        else
+            # Для паттернов без пути проверяем только имя файла
+            local basename_file
+            basename_file=$(basename "$filepath")
+            if [[ "$basename_file" == $pattern ]]; then
+                return 0
+            fi
         fi
     done
     return 1
 }
 
 process_files() {
-    local dir="$1"
-    local find_args=()
+    # Определяем корневую директорию для поиска
+    local search_root
+    # Если в шаблонах есть путь, используем его как основу
+    for pattern in "${include_patterns[@]}"; do
+        if [[ "$pattern" == *"/"* ]]; then
+            search_root=$(dirname "$pattern")
+            break
+        fi
+    done
+    # Если путь не найден, используем текущую директорию
+    search_root=${search_root:-.}
 
+    local find_cmd="find"
     if [ "$recursive" = true ]; then
-        find_args+=("$dir")
+        find_cmd="find $search_root"
     else
-        find_args+=("$dir" -maxdepth 1)
+        find_cmd="find $search_root -maxdepth 1"
     fi
 
-    # Handle include patterns
-    if [ ${#include_patterns[@]} -gt 0 ]; then
-        find_args+=("(")
-        for pattern in "${include_patterns[@]}"; do
-            find_args+=(-name "$pattern" -o)
-        done
-        unset 'find_args[${#find_args[@]}-1]'
-        find_args+=(")")
-    fi
-
-    # Handle extensions
+    local ext_condition=""
     if [ ${#extensions[@]} -gt 0 ]; then
-        if [ ${#include_patterns[@]} -gt 0 ]; then
-            find_args+=(-o)
-        fi
-        find_args+=("(")
+        ext_condition="("
         for ext in "${extensions[@]}"; do
-            find_args+=(-name "*.$ext" -o)
+            ext_condition+=" -name '*.$ext' -o"
         done
-        unset 'find_args[${#find_args[@]}-1]'
-        find_args+=(")")
+        ext_condition=${ext_condition%-o}
+        ext_condition+=" )"
     fi
 
-    while IFS= read -r -d $'\0' file; do
-        if ! should_exclude "$file"; then
-            print_file_content "$file"
+    while IFS= read -r file; do
+        file="${file#./}"
+        if [ ${#include_patterns[@]} -eq 0 ] || matches_include_pattern "$file"; then
+            if ! should_exclude "$file"; then
+                if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$file"; then
+                    print_file_content "$file"
+                fi
+            fi
         fi
-    done < <(find "${find_args[@]}" -type f -print0 2>/dev/null)
+    done < <(eval "$find_cmd -type f $ext_condition")
 }
 
 # Main execution
