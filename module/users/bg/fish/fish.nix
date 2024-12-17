@@ -7,8 +7,8 @@
   lib,
   ...
 }: {
-  home.file.".config/fish/completions/_mfiles.fish".source = ./_mfiles;
-  home.file.".config/fish/completions/_ssh_port_completion.fish".source =
+  home.file.".config/fish/completions/mfiles.fish".source = ./mfiles.fish;
+  home.file.".config/fish/completions/r2l.fish".source =
     ./_ssh_port_completion;
 
     programs.fish = {

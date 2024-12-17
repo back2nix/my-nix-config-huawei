@@ -1,29 +1,19 @@
-#compdef r2l r2l-port l2r l2r-port
+# Общая функция для получения хостов из SSH конфига
+function __fish_get_ssh_hosts
+    if test -f $HOME/.ssh/config
+        command grep '^Host ' $HOME/.ssh/config | string replace -r '^Host +' '' | string split ' ' | string match -v '*[*?]*'
+    end
+end
 
-_ssh_port_completion() {
-    local state
+# Автодополнение для всех команд (r2l, r2l-port, l2r, l2r-port)
+# Первый аргумент - локальный порт
+complete -c r2l -c r2l-port -c l2r -c l2r-port -n '__fish_is_first_arg' -d 'Local port'
 
-    _arguments \
-        '1: :->port' \
-        '2: :->host' \
-        '3: :->remote_port'
+# Второй аргумент
+# Для r2l и l2r - это хост
+complete -c r2l -c l2r -n '__fish_is_nth_token 2' -a '(__fish_get_ssh_hosts)' -d 'SSH host'
+# Для r2l-port и l2r-port - это удаленный порт
+complete -c r2l-port -c l2r-port -n '__fish_is_nth_token 2' -d 'Remote port'
 
-    case $state in
-        port)
-            _message 'port number'
-            ;;
-        host)
-            if [[ -f $HOME/.ssh/config ]]; then
-                local -a hosts
-                hosts=(${${${(@M)${(f)"$(cat $HOME/.ssh/config)"}:#Host *}#Host }:#*[*?]*})
-                _describe -t hosts 'host' hosts
-            fi
-            _hosts
-            ;;
-        remote_port)
-            _message 'remote port number (for r2l-port and l2r-port only)'
-            ;;
-    esac
-}
-
-compdef _ssh_port_completion r2l r2l-port l2r l2r-port
+# Третий аргумент (только для r2l-port и l2r-port) - хост
+complete -c r2l-port -c l2r-port -n '__fish_is_nth_token 3' -a '(__fish_get_ssh_hosts)' -d 'SSH host'

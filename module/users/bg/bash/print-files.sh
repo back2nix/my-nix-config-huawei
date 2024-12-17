@@ -27,7 +27,7 @@ print_usage() {
     echo "Use -i to specify files/patterns to include"
     echo "Use -t to specify file extensions to include"
     echo "Use -e to specify patterns to exclude"
-    echo "Use --keep-comments to preserve comments in the output"
+    echo "Use -k to preserve comments in the output"
     echo "Use -r for recursive search"
     echo "Use -n to show line numbers"
     echo "Use -c 'command' to use output of command as source of files (e.g. -c \"rg -l 'pattern'\")"
@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
             exclude_patterns+=("$2")
             shift 2
             ;;
-        --keep-comments)
+        -k)
             keep_comments=true
             shift
             ;;
