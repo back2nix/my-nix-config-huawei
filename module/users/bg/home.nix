@@ -22,6 +22,7 @@ in {
     ./fish/fish.nix
     ./nixvim.nix
     ./nix-tools.nix
+    ./mimeapps.nix
   ];
 
   programs.chrome-with-ssl-keylog = {
@@ -401,14 +402,20 @@ in {
     ];
   };
 
-  xdg.mimeApps.defaultApplications = {
-    "text/palin" = ["nvim"];
-    "video/png" = ["mvp.desktop"];
-    "video/*" = ["mvp.desktop"];
-    "application/pdf" = ["evince"];
-    "application/x-bzpdf" = ["evince"];
-    "application/x-ext-pdf" = ["evince"];
-    "application/x-gzpdf" = ["evince"];
-    "application/x-xzpdf" = ["evince"];
-  };
+  # xdg.mimeApps = {
+  #   # enable = true;
+  #   defaultApplications = {
+  #     "image/*" = ["org.gnome.eog.desktop"];
+  #     "text/palin" = ["nvim"];
+  #     "video/*" = ["mvp.desktop"];
+  #     "application/pdf" = ["evince"];
+  #     "application/x-bzpdf" = ["evince"];
+  #     "application/x-ext-pdf" = ["evince"];
+  #     "application/x-gzpdf" = ["evince"];
+  #     "application/x-xzpdf" = ["evince"];
+  #   };
+  #   # associations.removed = {
+  #   #     "image/*" = ["gimp.desktop"];
+  #   # };
+  # };
 }
