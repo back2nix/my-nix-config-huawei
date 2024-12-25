@@ -176,6 +176,7 @@
       pkgs.docker-compose
       git
       lsof
+      pciutils
 
       # work
       # tpm2-tss

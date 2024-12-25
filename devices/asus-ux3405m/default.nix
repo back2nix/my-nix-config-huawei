@@ -10,9 +10,13 @@
   networking.hostName = "asus-ux3405m";
 
   boot = {
-    kernelParams = ["i915.force_probe=7d55"];
+    kernelParams = [
+      "i915.force_probe=7d55"
+      "snd_hda_intel.dmic_detect=0"
+    ];
     extraModprobeConfig = ''
-      options snd-hda-intel model=asus-zenbook
+      options snd-hda-intel model=meteor-lake power_save=0 power_save_controller=N
+      options snd-hda-intel probe_mask=1
     '';
     loader.grub.extraFiles = {"ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";};
     loader.grub.extraConfig = ''
@@ -29,9 +33,27 @@
       "uas"
       "sd_mod"
     ];
-    initrd.kernelModules = [];
+    initrd.kernelModules = [
+      "snd_hda_intel"
+      "snd_hda_codec"
+      "snd_hda_codec_generic"
+      "snd_hda_codec_hdmi"
+    ];
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
+  };
+
+  hardware.enableAllFirmware = true;
+
+  hardware.pulseaudio.enable = false;
+
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+    wireplumber.enable = true;
   };
 
   fileSystems."/" = {
