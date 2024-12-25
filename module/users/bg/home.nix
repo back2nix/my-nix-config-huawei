@@ -187,6 +187,7 @@ in {
       gimp
       rawtherapee
       # ffmpeg_5-full
+      ffmpeg-full
       genymotion
       qemu
       firefox
@@ -401,6 +402,7 @@ in {
       # "mnjggcdmjocbbbhaepdhchncahnbgone" # sponsorblock for yt/inv
     ];
   };
+
 
   # xdg.mimeApps = {
   #   # enable = true;
