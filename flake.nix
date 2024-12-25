@@ -1,7 +1,7 @@
 {
   description = "A multi-device NixOS flake";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs-23-11.url = "github:nixos/nixpkgs/nixos-23.11";
@@ -10,7 +10,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixvim = {
@@ -26,7 +26,7 @@
     };
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
-    openvpn3-pr.url = "github:JarvisCraft/nixpkgs/openvpn3-v22_dev";
+    # openvpn3-pr.url = "github:JarvisCraft/nixpkgs/openvpn3-v22_dev";
   };
   outputs = {
     self,
@@ -36,7 +36,7 @@
     nixpkgs-23-11,
     home-manager,
     sops-nix,
-    openvpn3-pr,
+    # openvpn3-pr,
     ...
   } @ inputs: {
     lsFiles = path:
@@ -78,7 +78,7 @@
               ({pkgs, ...}: {
                 nixpkgs.overlays = [
                   (final: prev: {
-                    openvpn3 = openvpn3-pr.legacyPackages.${system}.openvpn3;
+                    # openvpn3 = openvpn3-pr.legacyPackages.${system}.openvpn3;
                   })
                 ];
               })

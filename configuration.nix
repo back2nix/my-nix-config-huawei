@@ -16,11 +16,11 @@
 # in
 {
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixVersions.stable;  # This is the new version
     extraOptions =
-      lib.optionalString (config.nix.package == pkgs.nixFlakes)
+      lib.optionalString (config.nix.package == pkgs.nixVersions.stable)
       "experimental-features = nix-command flakes";
-  };
+      };
 
   nixpkgs.config.allowUnfree = true;
   # nixpkgs-unstable.config.allowUnfree = true;
@@ -90,12 +90,6 @@
   };
 
   hardware = {
-    opengl = {
-      enable = true;
-      driSupport = true;
-      driSupport32Bit = true;
-    };
-
     # pulseaudio = {
     #   enable = true;
     #   systemWide = true;
@@ -140,7 +134,7 @@
   };
 
   # Enable sound with pipewire.
-  sound.enable = true;
+  # sound.enable = true;
   # pavucontol for settings loop back "Monitor of Alder Lake PCH-P High Definition Audio Controller HDMI / DisplayPort 3 Output"
   security.rtkit.enable = true;
 
@@ -339,7 +333,7 @@
     # mkdir -p /etc/openvpn3/configs
     dbus.packages = [pkgs.dconf];
 
-    udev.packages = [pkgs.gnome3.gnome-settings-daemon];
+    udev.packages = [pkgs.gnome-settings-daemon];
 
     udev = {
       extraRules = ''

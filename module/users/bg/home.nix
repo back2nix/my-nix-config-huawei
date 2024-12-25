@@ -163,7 +163,7 @@ in {
       android-tools
       patchelf
       gtk3
-      gnome3.adwaita-icon-theme
+      adwaita-icon-theme
       devbox
       tig # diff and commit view
       file
@@ -172,7 +172,7 @@ in {
       duf # pretty monitoring memory device
       glow # terminal markdown viewer
       asciinema # record the terminal
-      drawio # diagram design
+      # drawio # diagram design
       xmind # draw
       insomnia # rest client with graphql support
       sqlite
@@ -181,12 +181,12 @@ in {
       rm-improved
       pcmanfm
       pkgs-master.google-chrome
-      gnome.eog # image viewer
+      eog # image viewer
       evince # pdf reader
       zoom-us
       gimp
       rawtherapee
-      ffmpeg_5-full
+      # ffmpeg_5-full
       genymotion
       qemu
       firefox
@@ -197,7 +197,7 @@ in {
       # zoxide
 
       # golang
-      go_1_21
+      go
       go-outline
       gopls
       gopkgs
