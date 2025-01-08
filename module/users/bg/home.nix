@@ -185,7 +185,7 @@ in {
       evince # pdf reader
       zoom-us
       gimp
-      rawtherapee
+      pkgs-master.rawtherapee
       # ffmpeg_5-full
       ffmpeg-full
       genymotion
