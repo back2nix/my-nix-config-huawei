@@ -45,16 +45,26 @@ command=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -i)
-            include_patterns+=("$2")
-            shift 2
+            shift
+            while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
+                include_patterns+=("$1")
+                shift
+            done
             ;;
         -t)
-            IFS=',' read -ra extensions <<<"$2"
-            shift 2
+            shift
+            while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
+                IFS=',' read -ra new_extensions <<<"$1"
+                extensions+=("${new_extensions[@]}")
+                shift
+            done
             ;;
         -e)
-            exclude_patterns+=("$2")
-            shift 2
+            shift
+            while [[ $# -gt 0 && ! "$1" =~ ^- ]]; do
+                exclude_patterns+=("$1")
+                shift
+            done
             ;;
         -k)
             keep_comments=true
@@ -70,8 +80,14 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -c)
-            command="$2"
-            shift 2
+            shift
+            if [[ $# -gt 0 ]]; then
+                command="$1"
+                shift
+            else
+                echo "Error: -c requires a command argument"
+                print_usage
+            fi
             ;;
         *)
             echo "Unknown option: $1"
