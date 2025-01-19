@@ -1,47 +1,27 @@
-{...}: let
+{ ... }: let
   mailApp = "thunderbird.desktop";
-  # browser = rec {
-  #   name = "firefox.desktop";
-  #   settings = {
-  #     "x-scheme-handler/http" = name;
-  #     "x-scheme-handler/https" = name;
-  #     "x-scheme-handler/chrome" = name;
-  #     "application/x-extension-htm" = name;
-  #     "application/x-extension-html" = name;
-  #     "application/x-extension-shtml" = name;
-  #     "application/xhtml+xml" = name;
-  #     "application/x-extension-xhtml" = name;
-  #     "application/x-extension-xht" = name;
-  #   };
-  # };
 in {
   xdg = {
     enable = true;
     mimeApps = {
       enable = true;
-      defaultApplications =
-        {
-          # "image/*" = [
-          #   "org.gnome.eog.desktop"
-          #   "feh.desktop"
-          # ];
-          "image/jpeg" = ["org.gnome.eog.desktop"];
-          "image/png" = ["org.gnome.eog.desktop"];
-          "image/gif" = ["org.gnome.eog.desktop"];
-          "text/*" = "nvim.desktop";
-          "video/*" = "vlc.desktop";
-          "x-scheme-handler/msteams" = "teams-for-linux.desktop";
-        };
-        # // browser.settings;
-
+      defaultApplications = {
+        "text/html" = "google-chrome.desktop";
+        "x-scheme-handler/http" = "google-chrome.desktop";
+        "x-scheme-handler/https" = "google-chrome.desktop";
+        "x-scheme-handler/about" = "google-chrome.desktop";
+        "x-scheme-handler/unknown" = "google-chrome.desktop";
+        "image/jpeg" = ["org.gnome.eog.desktop"];
+        "image/png" = ["org.gnome.eog.desktop"];
+        "image/gif" = ["org.gnome.eog.desktop"];
+        "text/*" = "nvim.desktop";
+        "video/*" = "vlc.desktop";
+        "x-scheme-handler/msteams" = "teams-for-linux.desktop";
+      };
       associations = {
         added = {
-          # "text/html" = "firefox.desktop";
-          # "text/xml" = "firefox.desktop";
           "application/zip" = "org.gnome.FileRoller.desktop";
           "x-scheme-handler/jetbrains" = "jetbrains-toolbox.desktop";
-
-          # ↓ Mails
           "application/x-extension-ics" = mailApp;
           "x-scheme-handler/mailto" = mailApp;
           "x-scheme-handler/mid" = mailApp;
@@ -49,7 +29,6 @@ in {
           "x-scheme-handler/webcals" = mailApp;
           "x-scheme-handler/msteams" = "teams-for-linux.desktop";
         };
-        # // browser.settings;
         removed = {
           "image/jpeg" = ["gimp.desktop"];
           "image/png" = ["gimp.desktop"];

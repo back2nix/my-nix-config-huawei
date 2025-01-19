@@ -10,6 +10,8 @@
   networking.hostName = "asus-ux3405m";
 
   boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+
     kernelParams = [
       "i915.force_probe=7d55"
       "snd_hda_intel.single_cmd=1"
@@ -17,7 +19,7 @@
       "snd_hda_intel.dmic_detect=0"
     ];
     extraModprobeConfig = ''
-      options snd-hda-intel model=alc294-asus-zenbook power_save=0 power_save_controller=N position_fix=1 enable_msi=1
+      options snd-hda-intel model=alc294-asus-zenbook power_save=0 position_fix=1 enable_msi=1
       options snd-intel-dspcfg dsp_driver=1
     '';
     loader.grub.extraFiles = {"ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";};
