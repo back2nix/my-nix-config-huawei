@@ -14,13 +14,20 @@
 
     kernelParams = [
       "i915.force_probe=7d55"
-      "snd_hda_intel.single_cmd=1"
-      "snd_hda_intel.probe_mask=1"
-      "snd_hda_intel.dmic_detect=0"
+      "snd-intel-dspcfg.dsp_driver=3"
+      # "snd_hda_intel.single_cmd=1"
+      # "snd_hda_intel.probe_mask=1"
+      # "snd_hda_intel.dmic_detect=0"
+
+      "systemd.unified_cgroup_hierarchy=1"
+      "cgroup_enable=cpuset"
+      "cgroup_enable=memory"
+      "cgroup_memory=1"
     ];
     extraModprobeConfig = ''
       options snd-hda-intel model=alc294-asus-zenbook power_save=0 position_fix=1 enable_msi=1
-      options snd-intel-dspcfg dsp_driver=1
+      options snd-hda-intel index=0 model=alc294-asus-zenbook
+      options snd-hda-intel index=1 model=auto
     '';
     loader.grub.extraFiles = {"ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";};
     loader.grub.extraConfig = ''
@@ -38,62 +45,62 @@
       "sd_mod"
     ];
     initrd.kernelModules = [
-      "snd_hda_intel"
-      "snd_hda_codec"
-      "snd_hda_codec_generic"
-      "snd_hda_codec_realtek"
-      "snd_hda_codec_hdmi"
-      ];
+      # "snd_hda_intel"
+      # "snd_hda_codec"
+      # "snd_hda_codec_generic"
+      # "snd_hda_codec_realtek"
+      # "snd_hda_codec_hdmi"
+    ];
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
   };
 
   hardware.enableAllFirmware = true;
 
-  hardware.pulseaudio.enable = false;
+  # hardware.pulseaudio.enable = false;
 
-  environment.etc."modprobe.d/alsa-base.conf".text = ''
-    options snd-hda-intel index=0 model=alc294-asus-zenbook
-    options snd-hda-intel position_fix=1 bdl_pos_adj=32
-  '';
+  # environment.etc."modprobe.d/alsa-base.conf".text = ''
+  #   options snd-hda-intel index=0 model=alc294-asus-zenbook
+  #   options snd-hda-intel position_fix=1 bdl_pos_adj=32
+  # '';
 
-  environment.etc."asound.conf".text = ''
-    defaults.pcm.!card PCH
-    defaults.pcm.!device 0
-    defaults.pcm.!ctl PCH
-  '';
+  # environment.etc."asound.conf".text = ''
+  #   defaults.pcm.!card PCH
+  #   defaults.pcm.!device 0
+  #   defaults.pcm.!ctl PCH
+  # '';
 
-  services.pipewire = {
-    enable = true;
-    alsa = {
-      enable = true;
-      support32Bit = true;
-    };
-    pulse.enable = true;
-    jack.enable = true;
-    wireplumber = {
-      enable = true;
-      configPackages = [
-        (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-alsa-custom.lua" ''
-          rule = {
-          matches = {
-            {
-              { "node.name", "matches", "alsa_output.pci-*" },
-            },
-          },
-          apply_properties = {
-            ["audio.format"] = "S32LE",
-            ["audio.rate"] = 48000,
-            ["api.alsa.period-size"] = 512,
-            ["api.alsa.periods"] = 4,
-            ["api.alsa.headroom"] = 1024,
-          },
-          }
-          table.insert(alsa_monitor.rules, rule)
-        '')
-      ];
-    };
-  };
+  # services.pipewire = {
+  #   enable = true;
+  #   alsa = {
+  #     enable = true;
+  #     support32Bit = true;
+  #   };
+  #   pulse.enable = true;
+  #   jack.enable = true;
+  #   wireplumber = {
+  #     enable = true;
+  #     configPackages = [
+  #       (pkgs.writeTextDir "share/wireplumber/main.lua.d/51-alsa-custom.lua" ''
+  #         rule = {
+  #         matches = {
+  #         {
+  #           { "node.name", "matches", "alsa_output.pci-*" },
+  #         },
+  #         },
+  #         apply_properties = {
+  #         ["audio.format"] = "S32LE",
+  #         ["audio.rate"] = 48000,
+  #         ["api.alsa.period-size"] = 512,
+  #         ["api.alsa.periods"] = 4,
+  #         ["api.alsa.headroom"] = 1024,
+  #         },
+  #         }
+  #         table.insert(alsa_monitor.rules, rule)
+  #       '')
+  #     ];
+  #   };
+  # };
 
   environment.systemPackages = with pkgs; [
     alsa-utils
@@ -103,13 +110,13 @@
     pulseaudio  # для некоторых утилит
   ];
 
-  services.udev.extraRules = ''
-  # Realtek ALC294
-    SUBSYSTEM=="sound", ACTION=="change", KERNEL=="card*", ATTRS{id}=="PCH", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
-    SUBSYSTEM=="sound", ACTION=="add", KERNEL=="controlC*", ATTRS{id}=="PCH", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
-  # CS35L41 amp
-    SUBSYSTEM=="sound", ACTION=="change", KERNEL=="card*", ATTRS{id}=="cs35l41*", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
-  '';
+  # services.udev.extraRules = ''
+  # # Realtek ALC294
+  #   SUBSYSTEM=="sound", ACTION=="change", KERNEL=="card*", ATTRS{id}=="PCH", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
+  #   SUBSYSTEM=="sound", ACTION=="add", KERNEL=="controlC*", ATTRS{id}=="PCH", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
+  # # CS35L41 amp
+  #   SUBSYSTEM=="sound", ACTION=="change", KERNEL=="card*", ATTRS{id}=="cs35l41*", RUN+="${pkgs.alsa-utils}/bin/alsactl restore"
+  # '';
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/de59dbfa-9be2-44cf-af53-777940bdd226";

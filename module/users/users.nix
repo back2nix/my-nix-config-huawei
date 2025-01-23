@@ -33,10 +33,13 @@ in {
       "audio"
       "${mainUser}-with-access-to-socket"
       "wireshark"
-      "podman"
       "kvm"
       "tss"
       "openvpn"
+      "libvirtd"
+      "kvm"
+      "podman"
+      "qemu-libvirtd"
     ];
     openssh = {
       authorizedKeys.keys = [

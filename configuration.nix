@@ -187,6 +187,21 @@
       # pkgs.arion
       # pkgs.podman-compose
       # pkgs.podman-tui
+
+      docker
+      docker-compose
+      minikube
+      kubectl
+      kubernetes-helm
+      k9s
+      buildah
+      skopeo
+
+      # Инструменты виртуализации
+      virt-manager
+      qemu
+      OVMF
+      swtpm
     ];
 
     etc."proxychains.conf".text = ''

@@ -60,42 +60,9 @@ if [ ! -d "$directory" ]; then
   exit 1
 fi
 
-check_file() {
-  local file="$1"
-  local filename=$(basename "$file")
-  local ext="${filename##*.}"
-
-  # Если список исключений не пуст и файл соответствует паттерну, исключаем файл
-  if [ -n "$exclude_patterns" ]; then
-    IFS=',' read -ra exclude_array <<<"$exclude_patterns"
-    for pattern in "${exclude_array[@]}"; do
-      if [[ "$filename" == $pattern || "$ext" == "$pattern" ]]; then
-        return 1
-      fi
-    done
-  fi
-
-  # Если список включений пуст, включаем все неисключенные файлы
-  if [ -z "$include_patterns" ]; then
-    return 0
-  fi
-
-  # Если список включений не пуст, проверяем соответствие файла паттерну
-  IFS=',' read -ra include_array <<<"$include_patterns"
-  for pattern in "${include_array[@]}"; do
-    if [[ "$filename" == $pattern || "$ext" == "$pattern" ]]; then
-      return 0
-    fi
-  done
-
-  return 1
-}
-
-# Функция для создания регулярного выражения с учётом целых слов
 create_sed_regex() {
   local old="$1"
   if $whole_word; then
-    # Используем регулярное выражение для поиска целых слов
     echo "s/(^|[^[:alnum:]])$(echo "$old" | sed 's/[\/&]/\\&/g')($|[^[:alnum:]])/\1$(echo "$new_word" | sed 's/[\/&]/\\&/g')\2/g"
   else
     echo "s/$(echo "$old" | sed 's/[\/&]/\\&/g')/$(echo "$new_word" | sed 's/[\/&]/\\&/g')/g"
@@ -107,50 +74,78 @@ sed_command=$(create_sed_regex "$old_word")
 total_changes=0
 total_files=0
 
-while IFS= read -r -d '' file; do
-  if [ ! -f "$file" ] || ! check_file "$file"; then
+rg_include_args=()
+rg_exclude_args=()
+
+# Формирование аргументов включения
+if [ -n "$include_patterns" ]; then
+  IFS=',' read -ra include_array <<< "$include_patterns"
+  for pattern in "${include_array[@]}"; do
+    if [[ "$pattern" == *.* ]]; then
+      rg_include_args+=(-g "**/$pattern")
+    else
+      rg_include_args+=(-g "**/*.$pattern")
+    fi
+  done
+fi
+
+# Формирование аргументов исключения
+if [ -n "$exclude_patterns" ]; then
+  IFS=',' read -ra exclude_array <<< "$exclude_patterns"
+  for pattern in "${exclude_array[@]}"; do
+    if [[ "$pattern" == *.* ]]; then
+      rg_exclude_args+=(-g "!**/$pattern")
+    else
+      rg_exclude_args+=(-g "!**/*.$pattern")
+    fi
+  done
+fi
+
+# Сборка команды ripgrep
+rg_command=(rg --files --hidden --follow)
+rg_command+=("${rg_include_args[@]}" "${rg_exclude_args[@]}" "$directory")
+
+while IFS= read -r file; do
+  # Пропускаем файлы без прав записи
+  if [ ! -w "$file" ]; then
+    echo "Skipping read-only file: $file"
     continue
   fi
 
-  # Выполняем замену и подсчитываем количество изменений
-  changes=$(sed -i.bak -E "$sed_command" "$file" && diff "$file.bak" "$file" | grep -c '^<')
+  # Создаем резервную копию и считаем изменения
+  changes=0
+  if sed -i.bak -E "$sed_command" "$file" 2>/dev/null; then
+    # Надежный подсчет измененных строк
+    changes=$(diff --unchanged-line-format= --old-line-format= --new-line-format='%' "$file.bak" "$file" | wc -c)
+    changes=$((changes))
+  fi
 
-  if [ "$changes" -gt 0 ]; then
+  # Удаляем резервную копию
+  rm -f "$file.bak" 2>/dev/null
+
+  if (( changes > 0 )); then
     echo "Made $changes replacement(s) in $file"
     total_changes=$((total_changes + changes))
     total_files=$((total_files + 1))
   fi
-
-  # Удаляем резервную копию файла
-  rm "$file.bak"
-done < <(find "$directory" -type f -print0)
+done < <( "${rg_command[@]}" 2>/dev/null )
 
 echo "Total: Made $total_changes replacement(s) in $total_files file(s)"
 
-# Переименование директории, если указан флаг -m
+# Обработка переименования директории
 if $move_directory; then
-  if [ "$directory" = "." ]; then
-    # Если директория не указана явно, используем текущую директорию
-    current_dir=$(pwd)
-    parent_dir=$(dirname "$current_dir")
-    dir_name=$(basename "$current_dir")
-  else
-    # Если директория указана явно, используем её
-    parent_dir=$(dirname "$directory")
-    dir_name=$(basename "$directory")
-  fi
-
+  dir_path=$(realpath "$directory")
+  parent_dir=$(dirname "$dir_path")
+  dir_name=$(basename "$dir_path")
   new_dir_name="${dir_name//$old_word/$new_word}"
 
   if [ "$dir_name" != "$new_dir_name" ]; then
     new_path="$parent_dir/$new_dir_name"
-    mv "$(realpath "$directory")" "$new_path"
-    echo "Renamed directory '$(realpath "$directory")' to '$new_path'"
-
-    # Если мы переименовали текущую директорию, переходим в неё
-    if [ "$directory" = "." ]; then
-      cd "$new_path"
-      echo "Moved to the renamed directory: $new_path"
+    if mv "$dir_path" "$new_path" 2>/dev/null; then
+      echo "Renamed directory '$dir_path' to '$new_path'"
+      [ "$directory" = "." ] && cd "$new_path" || true
+    else
+      echo "Error: Failed to rename directory (check permissions)"
     fi
   else
     echo "Directory name unchanged."
