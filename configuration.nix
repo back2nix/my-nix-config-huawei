@@ -52,7 +52,14 @@
     # ./module/wine.nix
     # ./hyperland.nix
     # ./module/wordpress.nix
+
+    ./module/surfshark.nix
   ];
+
+  surfshark.enable = true;
+  surfshark.alwaysOn = true;  # Optional: Keep VPN always connected
+  surfshark.iptables.enable = true;  # Optional: Enforce VPN usage via iptables
+  surfshark.iptables.enforceForUsers = [ "bg" ];  # Enforce for specific users
 
   services.spoofdpi.enable = true;
   services.spoofdpi_with_proxy.enable = true;
