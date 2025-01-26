@@ -63,14 +63,14 @@ let
     lib.concatStringsSep " " (lib.mapAttrsToList (name: _: "\"openvpn-${name}.service\"") config.services.openvpn.servers)
   })";
 
-  surfshark-start = pkgs.writeshellapplication {
-    name = "surfshark-stop";
+  surfshark-start = pkgs.writeShellApplication {
+    name = "surfshark-start";
     text = ''
       sudo systemctl start openvpn-us-nyc.service
     '';
   };
 
-  surfshark-stop = pkgs.writeshellapplication {
+  surfshark-stop = pkgs.writeShellApplication {
     name = "surfshark-stop";
     text = ''
       services=${services}
@@ -158,25 +158,25 @@ in
       };
     })
 
-    (mkIf cfg.hopWeekly {
-      systemd.timers."surfshark-hop-weekly" = {
-        wantedBy = [ "timers.target" ];
-        timerConfig = {
-          OnCalendar = "Sun 03:00";
-          Persistent = true;
-          Unit = "surfshark-hop-weekly.service";
-        };
-      };
-      systemd.services."surfshark-hop-weekly" = {
-        script = ''
-          systemctl reboot
-        '';
-        serviceConfig = {
-          Type = "oneshot";
-          User = "root";
-        };
-      };
-    })
+    # (mkIf cfg.hopWeekly {
+    #   systemd.timers."surfshark-hop-weekly" = {
+    #     wantedBy = [ "timers.target" ];
+    #     timerConfig = {
+    #       OnCalendar = "Sun 03:00";
+    #       Persistent = true;
+    #       Unit = "surfshark-hop-weekly.service";
+    #     };
+    #   };
+    #   systemd.services."surfshark-hop-weekly" = {
+    #     script = ''
+    #       systemctl reboot
+    #     '';
+    #     serviceConfig = {
+    #       Type = "oneshot";
+    #       User = "root";
+    #     };
+    #   };
+    # })
 
     (mkIf cfg.iptables.enable {
       networking.firewall.extraCommands =
