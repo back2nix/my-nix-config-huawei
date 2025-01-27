@@ -38,7 +38,7 @@
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
     # ./module/tor.nix
-    # ./module/xray/xray.nix
+    ./module/xray/xray.nix
 
     ./module/network-configuration.nix
     # ./module/podman.nix
