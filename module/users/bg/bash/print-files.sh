@@ -194,12 +194,10 @@ process_files() {
 
         local ext_condition=""
         if [ ${#extensions[@]} -gt 0 ]; then
-            ext_condition="("
             for ext in "${extensions[@]}"; do
                 ext_condition+=" -name '*.$ext' -o"
             done
             ext_condition=${ext_condition%-o}
-            ext_condition+=" )"
         fi
 
         while IFS= read -r file; do
