@@ -38,7 +38,7 @@
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
     # ./module/tor.nix
-    ./module/xray/xray.nix
+    # ./module/xray/xray.nix
 
     ./module/network-configuration.nix
     # ./module/podman.nix
@@ -53,13 +53,13 @@
     # ./hyperland.nix
     # ./module/wordpress.nix
 
-    ./module/surfshark.nix
+    # ./module/surfshark.nix
   ];
 
-  surfshark.enable = true;
-  surfshark.alwaysOn = true;  # Optional: Keep VPN always connected
-  surfshark.iptables.enable = true;  # Optional: Enforce VPN usage via iptables
-  surfshark.iptables.enforceForUsers = [ "bg" ];  # Enforce for specific users
+  # surfshark.enable = true;
+  # surfshark.alwaysOn = true;  # Optional: Keep VPN always connected
+  # surfshark.iptables.enable = true;  # Optional: Enforce VPN usage via iptables
+  # surfshark.iptables.enforceForUsers = [ "bg" ];  # Enforce for specific users
 
   services.spoofdpi.enable = true;
   services.spoofdpi_with_proxy.enable = true;
