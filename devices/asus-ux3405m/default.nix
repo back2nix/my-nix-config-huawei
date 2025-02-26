@@ -108,7 +108,14 @@
     alsa-ucm-conf
     pamixer
     pulseaudio  # для некоторых утилит
+    asusctl
   ];
+
+    # sudo tlp-stat -b
+  services.supergfxd.enable = true;
+  services.asusd.enable = true;
+
+  services.thermald.enable = true;
 
   # services.udev.extraRules = ''
   # # Realtek ALC294

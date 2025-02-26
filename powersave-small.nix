@@ -17,6 +17,7 @@
   services.power-profiles-daemon.enable = false;
   # Enable TLP (better than gnomes internal power manager)
 
+  # sudo tlp-stat -b
   services.tlp = {
     enable = true;
     settings = {
@@ -43,6 +44,10 @@
       # Дополнительные настройки энергосбережения
       RUNTIME_PM_ON_BAT = "auto";
       RUNTIME_PM_ON_AC = "auto";
+
+      NATACPI_ENABLE = 1;
+      TPACPI_ENABLE = 1;
+      TPSMAPI_ENABLE = 1;
     };
   };
 
