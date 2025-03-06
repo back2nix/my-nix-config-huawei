@@ -6,6 +6,7 @@ in {
     mimeApps = {
       enable = true;
       defaultApplications = {
+        "application/pdf" = ["org.gnome.Evince.desktop"];
         "text/html" = "google-chrome.desktop";
         "x-scheme-handler/http" = "google-chrome.desktop";
         "x-scheme-handler/https" = "google-chrome.desktop";
