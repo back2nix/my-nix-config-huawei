@@ -20,9 +20,9 @@
     extraOptions =
       lib.optionalString (config.nix.package == pkgs.nixVersions.stable)
       "experimental-features = nix-command flakes";
-      };
+    };
 
-  nixpkgs.config.allowUnfree = true;
+    nixpkgs.config.allowUnfree = true;
   # nixpkgs-unstable.config.allowUnfree = true;
 
   imports = [
@@ -96,29 +96,24 @@
     };
   };
 
-  hardware = {
-    # pulseaudio = {
-    #   enable = true;
-    #   systemWide = true;
-    #   support32Bit = true;
-    #   tcp = {
-    #     enable = true;
-    #     anonymousClients = {allowedIpRanges = ["127.0.0.1" "192.168.7.0/24"];};
-    #   };
-    # };
-    pulseaudio.enable = false;
-
-    bluetooth = {
-      enable = true;
-      powerOnBoot = true;
-      settings.General = {
+  # systemctl --user restart pipewire pipewire-pulse wireplumber
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Name = "Computer";
+        ControllerMode = "dual";
+        FastConnectable = "true";
+        Experimental = "true";
         Enable = "Source,Sink,Media,Socket";
-        Experimental = true;
         MultiProfile = "multiple";
-        FastConnectable = true;
       };
+      Policy = { AutoEnable = "true"; };
     };
   };
+
+
 
   # Set your time zone.
   time.timeZone = "Europe/Moscow";
@@ -161,14 +156,14 @@
       (let
         base = pkgs.appimageTools.defaultFhsEnvArgs;
       in
-        pkgs.buildFHSUserEnv (base
-          // {
-            name = "fhs";
-            targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
-            profile = "export FHS=1";
-            runScript = "fish";
-            extraOutputsToInstall = ["dev"];
-          }))
+      pkgs.buildFHSUserEnv (base
+      // {
+        name = "fhs";
+        targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
+        profile = "export FHS=1";
+        runScript = "fish";
+        extraOutputsToInstall = ["dev"];
+      }))
       lm_sensors
       # virtualbox
       direnv
@@ -209,6 +204,9 @@
       qemu
       OVMF
       swtpm
+
+      bluez
+      bluez-tools
     ];
 
     etc."proxychains.conf".text = ''
