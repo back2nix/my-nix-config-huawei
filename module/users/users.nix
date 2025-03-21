@@ -10,6 +10,8 @@
 in {
   users.users.root = {shell = pkgs.fish;};
 
+  home-manager.backupFileExtension = "homeManagerBackupFileExtension";
+
   home-manager.users.root = {...}: {
     imports = [./bg/zsh/zsh.nix ./bg/fish/fish.nix ./bg/nixvim.nix];
     # imports = [./bg/fish/fish.nix];

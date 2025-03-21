@@ -61,8 +61,8 @@
   # surfshark.iptables.enable = true;  # Optional: Enforce VPN usage via iptables
   # surfshark.iptables.enforceForUsers = [ "bg" ];  # Enforce for specific users
 
-  services.spoofdpi.enable = true;
-  services.spoofdpi_with_proxy.enable = true;
+  # services.spoofdpi.enable = true;
+  # services.spoofdpi_with_proxy.enable = true;
 
   boot = {
     # asus
