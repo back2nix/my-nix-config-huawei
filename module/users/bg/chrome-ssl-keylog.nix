@@ -36,24 +36,25 @@ in {
               --ssl-key-log-file="$SSLKEYLOGFILE" \
               "$@"
           '')
-          (pkgs-master.writeScriptBin "wireshark-with-keylog" ''
-            KEYLOG_FILE=''${KEYLOG_FILE:-${cfg.keylogFile}}
-            if [ ! -f "$KEYLOG_FILE" ]; then
-              echo "SSL keylog file not found: $KEYLOG_FILE"
-              exit 1
-            fi
-            exec ${pkgs-master.wireshark}/bin/wireshark \
-              -o ssl.keylog_file:"$KEYLOG_FILE" \
-              "$@"
-          '')
+          # [DEPRACTED] work only with sudo
+          # (pkgs-master.writeScriptBin "wireshark-with-keylog" ''
+          #   KEYLOG_FILE=''${KEYLOG_FILE:-${cfg.keylogFile}}
+          #   if [ ! -f "$KEYLOG_FILE" ]; then
+          #     echo "SSL keylog file not found: $KEYLOG_FILE"
+          #     exit 1
+          #   fi
+          #   exec ${pkgs-master.wireshark}/bin/wireshark \
+          #     -o ssl.keylog_file:"$KEYLOG_FILE" \
+          #     "$@"
+          # '')
         ];
         buildInputs = [pkgs-master.makeWrapper];
         postBuild = ''
           wrapProgram $out/bin/chrome-ssl-keylog \
             --prefix PATH : ${lib.makeBinPath [cfg.package]} \
             --set CHROME_WRAPPER "$out/bin/chrome-ssl-keylog"
-          wrapProgram $out/bin/wireshark-with-keylog \
-            --prefix PATH : ${lib.makeBinPath [pkgs-master.wireshark]}
+          # wrapProgram $out/bin/wireshark-with-keylog \
+          #   --prefix PATH : ${lib.makeBinPath [pkgs-master.wireshark]}
         '';
       })
     ];
@@ -68,16 +69,17 @@ in {
       MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
       StartupNotify=true
     '';
-    home.file.".local/share/applications/wireshark-with-keylog.desktop".text = ''
-      [Desktop Entry]
-      Name=Wireshark (with SSL Keylog)
-      Exec=wireshark-with-keylog %U
-      Terminal=false
-      Type=Application
-      Icon=wireshark
-      Categories=Network;PacketAnalyzer;
-      MimeType=application/vnd.tcpdump.pcap;application/x-pcapng;application/x-snoop;application/x-iptrace;application/x-lanalyzer;application/x-nettl;application/x-radcom;
-      StartupNotify=true
-    '';
+    # [DEPRACTED] work only with sudo
+    # home.file.".local/share/applications/wireshark-with-keylog.desktop".text = ''
+    #   [Desktop Entry]
+    #   Name=Wireshark (with SSL Keylog)
+    #   Exec=wireshark-with-keylog %U
+    #   Terminal=false
+    #   Type=Application
+    #   Icon=wireshark
+    #   Categories=Network;PacketAnalyzer;
+    #   MimeType=application/vnd.tcpdump.pcap;application/x-pcapng;application/x-snoop;application/x-iptrace;application/x-lanalyzer;application/x-nettl;application/x-radcom;
+    #   StartupNotify=true
+    # '';
   };
 }

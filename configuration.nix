@@ -47,6 +47,8 @@
     # ./module/virtualisation-configuration.nix
     # ./powersave.nix
     ./powersave-small.nix
+    ./module/wireshark.nix
+
 
     # ./module/arion.nix
     # ./module/wine.nix
@@ -230,6 +232,7 @@
     '';
   };
 
+
   programs = {
     openvpn3.enable = true;
     zsh.enable = true;
@@ -250,6 +253,7 @@
   # system.activationScripts.wireshark-capabilities = ''
   #   ${pkgs.libcap.out}/bin/setcap cap_net_raw,cap_net_admin+ep ${pkgs.wireshark}/bin/dumpcap
   # '';
+
 
   users.defaultUserShell = pkgs.fish;
 
@@ -359,6 +363,7 @@
     udev = {
       extraRules = ''
         SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="*", ATTRS{idProduct}=="*", MODE="0660", GROUP="wireshark"
       '';
     };
 

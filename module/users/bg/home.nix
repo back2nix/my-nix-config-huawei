@@ -243,7 +243,6 @@ in {
       # tmux-cssh # tmux-cssh user@host1 user@host2 user@host3
       # pkgs-master.youtube-dl
       # chromium
-      # wireshark-with-keylog
 
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace"

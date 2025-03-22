@@ -13,8 +13,11 @@ in {
   home-manager.backupFileExtension = "homeManagerBackupFileExtension";
 
   home-manager.users.root = {...}: {
-    imports = [./bg/zsh/zsh.nix ./bg/fish/fish.nix ./bg/nixvim.nix];
-    # imports = [./bg/fish/fish.nix];
+    imports = [
+      ./bg/zsh/zsh.nix
+      ./bg/fish/fish.nix
+      ./bg/nixvim.nix
+    ];
     home = {
       stateVersion = "23.11"; # используйте ту же версию, что и в вашем home.nix
       username = "root";
