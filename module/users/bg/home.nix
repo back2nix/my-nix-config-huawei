@@ -198,7 +198,7 @@ in {
       # zoxide
 
       # golang
-      go
+      pkgs-unstable.go
       go-outline
       gopls
       gopkgs
