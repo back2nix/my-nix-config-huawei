@@ -224,8 +224,8 @@ in {
       rnr # пакетное рекурсивное переименование
       difftastic # difft
       pkgs-master.serpl # replacy like a vscode
-      pkgs-master.golangci-lint
-      pkgs-master.golangci-lint-langserver
+      # pkgs-master.golangci-lint
+      # pkgs-master.golangci-lint-langserver
       kondo # delete depedenc
       hyperfine # замер времени запуска
       btop
@@ -243,6 +243,11 @@ in {
       # tmux-cssh # tmux-cssh user@host1 user@host2 user@host3
       # pkgs-master.youtube-dl
       # chromium
+
+      pkgs-unstable.code-cursor
+      pkgs-unstable.vscode
+      pkgs-unstable.windsurf
+
 
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace"
@@ -275,6 +280,7 @@ in {
       #   org.gradle.console=verbose
       #   org.gradle.daemon.idletimeout=3600000
       # '';
+
     };
     sessionVariables = {
       EDITOR = "nvim";
