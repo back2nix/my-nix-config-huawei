@@ -181,6 +181,7 @@
       git
       lsof
       pciutils
+      pkgs-master.transmission_4-qt
 
       # work
       # tpm2-tss
@@ -265,6 +266,7 @@
       NetworkManager-wait-online.enable = false;
     };
 
+
     # targets.sleep.enable = false;
     # targets.suspend.enable = false;
     # targets.hibernate.enable = false;
@@ -344,6 +346,14 @@
     #   driver = pkgs.libfprint-3-tod1-vfs0090;
     # };
     # }; # $ sudo fprintd-enroll --finger right-index-finger <user>
+    transmission = {
+      enable = true;
+      package = pkgs-master.transmission_4;
+      # settings = {
+      #   download-dir = "${config.services.transmission.home}/Downloads";
+      # };
+    };
+
 
     lorri = {
       enable = true;
