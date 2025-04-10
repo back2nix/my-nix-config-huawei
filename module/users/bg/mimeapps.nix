@@ -12,9 +12,9 @@ in {
         "x-scheme-handler/https" = "google-chrome.desktop";
         "x-scheme-handler/about" = "google-chrome.desktop";
         "x-scheme-handler/unknown" = "google-chrome.desktop";
-        "image/jpeg" = ["org.gnome.eog.desktop"];
-        "image/png" = ["org.gnome.eog.desktop"];
-        "image/gif" = ["org.gnome.eog.desktop"];
+        "image/jpeg" = ["org.gnome.Loupe.desktop"];
+        "image/png" = ["org.gnome.Loupe.desktop"];
+        "image/gif" = ["org.gnome.Loupe.desktop"];
         "text/*" = "nvim.desktop";
         "video/*" = "vlc.desktop";
         "x-scheme-handler/msteams" = "teams-for-linux.desktop";
@@ -31,9 +31,9 @@ in {
           "x-scheme-handler/msteams" = "teams-for-linux.desktop";
         };
         removed = {
-          "image/jpeg" = ["gimp.desktop"];
-          "image/png" = ["gimp.desktop"];
-          "image/gif" = ["gimp.desktop"];
+          "image/jpeg" = ["gimp.desktop" "org.gnome.eog.desktop"];
+          "image/png" = ["gimp.desktop" "org.gnome.eog.desktop"];
+          "image/gif" = ["gimp.desktop" "org.gnome.eog.desktop"];
         };
       };
     };
