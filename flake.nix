@@ -100,6 +100,7 @@
     in {
       asus = mkSystem "asus-ux3405m" [];
       huawei = mkSystem "huawei-rlef-x" [];
+      yoga14 = mkSystem "yoga14" [];
     };
   };
 }

@@ -210,6 +210,8 @@
 
       bluez
       bluez-tools
+
+      nixos-generators
     ];
 
     etc."proxychains.conf".text = ''
