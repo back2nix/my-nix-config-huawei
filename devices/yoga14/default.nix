@@ -5,7 +5,10 @@
   modulesPath,
   ...
 }: {
-  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
+  imports = [
+  (modulesPath + "/installer/scan/not-detected.nix")
+  ./hardware-configuration.nix
+  ];
 
   networking.hostName = "yoga14";
 
