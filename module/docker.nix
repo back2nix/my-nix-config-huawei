@@ -23,7 +23,7 @@
         daemon = {
           settings = {
             dns = ["9.9.9.9"];
-            insecure-registries = ["localhost:5000" "192.168.1.71:5000"];
+            insecure-registries = ["localhost:5000" "172.18.0.2:5000"];
           };
         };
       };
@@ -34,7 +34,7 @@
           # ip = "127.0.0.1";
           # dns = ["127.0.0.11" "8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
           dns = ["9.9.9.9"];
-          insecure-registries = ["localhost:5000" "192.168.1.71:5000"];
+          insecure-registries = ["localhost:5000" "172.18.0.2:5000"];
         };
       };
     };
