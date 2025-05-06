@@ -217,6 +217,8 @@
       usbutils # для lsusb
       pciutils # для lspci
       bluez-tools # дополнительные инструменты bluez
+
+      gnome.gnome-settings-daemon
     ];
 
     etc."proxychains.conf".text = ''
@@ -375,7 +377,9 @@
     # mkdir -p /etc/openvpn3/configs
     dbus.packages = [pkgs.dconf];
 
-    udev.packages = [pkgs.gnome-settings-daemon];
+    udev.packages = [
+      pkgs.gnome-settings-daemon
+    ];
 
     udev = {
       extraRules = ''
@@ -462,4 +466,5 @@
       lidSwitchExternalPower = "suspend"; # Или "ignore", если хотите, чтобы при подключенном питании не засыпал
     };
   };
+
 }

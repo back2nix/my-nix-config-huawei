@@ -61,10 +61,13 @@
     ACTION=="add|change", KERNEL=="event*", ATTRS{name}=="Wacom HID 53FD Finger", ENV{LIBINPUT_CALIBRATION_MATRIX}="1 0 0 0 1 0"
     ACTION=="add|change", KERNEL=="event*", ATTRS{name}=="Wacom HID 53FD Pen", ENV{LIBINPUT_CALIBRATION_MATRIX}="1 0 0 0 1 0"
 
+
+    SUBSYSTEM=="iio", ACTION=="add", ATTR{name}=="accel_3d", TAG+="systemd", ENV{SYSTEMD_WANTS}="iio-sensor-proxy.service"
     # Правила для Intel Bluetooth
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", TAG+="systemd", ENV{SYSTEMD_WANTS}="bluetooth.service"
     # Сброс Bluetooth адаптера при загрузке
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", RUN+="${pkgs.bluez}/bin/bluetoothctl power on"
+    ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
   '';
 
   # Явно настраиваем службу Bluetooth
@@ -177,6 +180,8 @@
     usbutils  # lsusb
     pciutils  # lspci
     lshw      # подробная информация об оборудовании
+
+    v4l-utils  # для настройки камеры
   ];
 
   networking.useDHCP = lib.mkDefault true;
@@ -271,17 +276,4 @@
     LIBVA_DRIVER_NAME = "iHD";
     MOZ_DISABLE_RDD_SANDBOX = "1"; # Может помочь с некоторыми проблемами рендеринга
   };
-
-  # services = {
-  #   fstrim.enable = true;
-  #   tlp = {
-  #     enable = true;
-  #     settings = {
-  #       CPU_SCALING_GOVERNOR_ON_AC = "powersave";
-  #       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-  #     };
-  #   };
-  #   hardware.bolt.enable = true;
-  #   thermald.enable = true;
-  # };
 }
