@@ -10,7 +10,7 @@
 in {
   users.users.root = {shell = pkgs.fish;};
 
-  home-manager.backupFileExtension = "homeManagerBackupFileExtension";
+  home-manager.backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
 
   home-manager.users.root = {...}: {
     imports = [

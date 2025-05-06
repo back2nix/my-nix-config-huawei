@@ -424,7 +424,6 @@
     #   listenPort = 8082;
     # };
 
-    physlock.enable = true;
     # power-profiles-daemon.enable = false;
 
     # tlp = {
@@ -450,5 +449,17 @@
     #     HibernateKeyIgnoreInhibited=yes
     #   '';
     # };
+  };
+
+
+  services = {
+    # Отключаем physlock - это именно тот сервис, который показывает консольный экран блокировки
+    physlock.enable = false;
+
+    # Настраиваем logind для правильной обработки пробуждения
+    logind = {
+      lidSwitch = "suspend";
+      lidSwitchExternalPower = "suspend"; # Или "ignore", если хотите, чтобы при подключенном питании не засыпал
+    };
   };
 }
