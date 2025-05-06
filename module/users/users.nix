@@ -30,6 +30,7 @@ in {
     isNormalUser = true;
     description = "${mainUser}";
     extraGroups = [
+      "lp"
       "networkmanager"
       "wheel"
       "docker"

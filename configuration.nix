@@ -46,7 +46,7 @@
     ./module/docker.nix
     # ./module/virtualisation-configuration.nix
     # ./powersave.nix
-    ./powersave-small.nix
+    # ./powersave-small.nix
     ./module/wireshark.nix
 
 
@@ -102,6 +102,7 @@
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
+    package = pkgs.bluez;
     settings = {
       General = {
         Name = "Computer";
@@ -212,6 +213,10 @@
       bluez-tools
 
       nixos-generators
+
+      usbutils # для lsusb
+      pciutils # для lspci
+      bluez-tools # дополнительные инструменты bluez
     ];
 
     etc."proxychains.conf".text = ''
