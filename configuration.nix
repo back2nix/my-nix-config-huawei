@@ -7,13 +7,16 @@
   lib,
   ...
 }:
-# let
+let
 # masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
 #   nixpkgs.config = {
 #     allowUnfree = true;
 #   };
 # };
-# in
+  my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
+    edition = "stable";
+  };
+in
 {
   nix = {
     package = pkgs.nixVersions.stable;  # This is the new version
@@ -219,6 +222,7 @@
       bluez-tools # дополнительные инструменты bluez
 
       gnome.gnome-settings-daemon
+      my-yandex-browser-stable
     ];
 
     etc."proxychains.conf".text = ''
@@ -467,4 +471,7 @@
     };
   };
 
+  nixpkgs.config.permittedInsecurePackages = [
+    "my-yandex-browser-stable-25.2.6.724-1"
+  ];
 }

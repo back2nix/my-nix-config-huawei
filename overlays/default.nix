@@ -6,6 +6,7 @@
   ...
 }: {
   nixpkgs.overlays = [
+    # (import ./yandex-browser-updates.nix) # Путь относительно configuration.nix
     # Overlay 1: Use `self` and `super` to express
     # the inheritance relationship
     (self: super: {
@@ -47,6 +48,13 @@
       #   vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
       #   proxyVendor = true;
       #   vendorSha256 = lib.fakeSha256;
+      # });
+      # yandex-browser-stable = prev.yandex-browser-stable.overrideAttrs (oldAttrs: {
+      #   version = "25.2.6.724-1";
+      #   src = prev.fetchurl {
+      #     url = "http://repo.yandex.ru/yandex-browser/deb/pool/main/y/yandex-browser-stable/yandex-browser-stable_25.2.6.724-1_amd64.deb";
+      #     hash = "";
+      #   };
       # });
     })
 
