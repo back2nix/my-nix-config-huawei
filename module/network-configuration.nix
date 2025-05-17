@@ -32,6 +32,8 @@ in {
     extraHosts = ''
       127.0.0.1 kafka
       127.0.0.1 localhost
+      # 127.0.0.1 miadoll.com
+      # 127.0.0.1 model.miadoll.com
       127.0.0.1 host.docker.internal
       # 127.0.0.1 ibigfish.ru
       # 127.0.0.1 model.ibigfish.ru

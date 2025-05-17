@@ -223,6 +223,7 @@ in
 
       gnome.gnome-settings-daemon
       my-yandex-browser-stable
+      age
     ];
 
     etc."proxychains.conf".text = ''
