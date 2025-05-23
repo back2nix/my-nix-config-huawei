@@ -27,6 +27,10 @@
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
     # openvpn3-pr.url = "github:JarvisCraft/nixpkgs/openvpn3-v22_dev";
+    replacer = {
+      url = "github:back2nix/replacer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = {
     self,
@@ -36,6 +40,7 @@
     nixpkgs-23-11,
     home-manager,
     sops-nix,
+    replacer,
     # openvpn3-pr,
     ...
   } @ inputs: {

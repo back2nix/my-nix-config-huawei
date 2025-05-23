@@ -186,6 +186,7 @@
     shellAliases = let
       normcap_lang = "-l eng rus";
     in {
+      rp = "replacer";
       wireshark-with-keylog = "wireshark -o ssl.keylog_file:/tmp/sslkeylog.txt";
       # Те же алиасы, что у вас в zsh
       ls = "eza";

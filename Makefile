@@ -49,6 +49,9 @@ run/nographic:
 update/nixvim:
 	nix flake lock --update-input nixvim
 
+update/replacer:
+	nix flake lock --update-input replacer
+
 update:
 	nix flake update
 
