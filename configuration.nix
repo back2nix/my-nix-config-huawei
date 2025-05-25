@@ -221,7 +221,7 @@ in
       pciutils # для lspci
       bluez-tools # дополнительные инструменты bluez
 
-      gnome.gnome-settings-daemon
+      gnome-settings-daemon
       my-yandex-browser-stable
       age
     ];
@@ -473,6 +473,6 @@ in
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.2.6.724-1"
+    "my-yandex-browser-stable-25.4.1.1062-1"
   ];
 }

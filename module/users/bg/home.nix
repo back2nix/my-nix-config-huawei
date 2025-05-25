@@ -108,9 +108,8 @@ in {
       # # overrides. You can do that directly here, just don't forget the
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
-      (pkgs.nerdfonts.override {
-        fonts = ["FiraCode" "DroidSansMono"];
-      }) # "FantasqueSansMono"
+      pkgs.nerd-fonts.fira-code
+      pkgs.nerd-fonts.droid-sans-mono
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
@@ -118,7 +117,6 @@ in {
       # (pkgs.writeShellScriptBin "my-hello" ''
       #   echo "Hello, ${config.home.username}!"
       # '')
-      nodejs_18
       gcc
       xclip
       gnumake
@@ -215,7 +213,6 @@ in {
       bashInteractive
       bashdbInteractive
       bash-completion
-      nodejs_18
       lunarvim
       yazi
       blender

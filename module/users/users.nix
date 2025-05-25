@@ -58,7 +58,7 @@ in {
       lazygit
       gdu
       bottom
-      nodejs_18
+      nodejs_20
 
       obfs4
       vim
