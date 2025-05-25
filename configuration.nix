@@ -224,6 +224,23 @@ in
       gnome-settings-daemon
       my-yandex-browser-stable
       age
+      # (pkgs.writeScriptBin "toggle-flip" (builtins.readFile ./toggle-flip.sh))
+      (pkgs.writeShellScriptBin "toggle-flip" ''
+        export PATH="${pkgs.lib.makeBinPath [
+          pkgs.xorg.xrandr
+          pkgs.xorg.xinput
+          pkgs.xorg.xkbcomp
+          pkgs.libnotify
+          pkgs.coreutils
+          pkgs.util-linux
+          pkgs.procps
+          pkgs.sudo
+          pkgs.binutils
+          pkgs.gawk
+        ]}:$PATH"
+
+        ${builtins.readFile ./toggle-flip.sh}
+      '')
     ];
 
     etc."proxychains.conf".text = ''
@@ -458,6 +475,12 @@ in
     #     HibernateKeyIgnoreInhibited=yes
     #   '';
     # };
+    logind = {
+      powerKey = "ignore";  # Добавь эту строку
+      extraConfig = ''
+        HandlePowerKey=ignore
+      '';
+    };
   };
 
 
@@ -475,4 +498,19 @@ in
   nixpkgs.config.permittedInsecurePackages = [
     "my-yandex-browser-stable-25.4.1.1062-1"
   ];
+
+  services.triggerhappy = {
+    enable = true;
+    user = "bg";
+    bindings = [
+      {
+        keys = [ "POWER" ];  # код клавиши вместо имени
+        event = "press";
+        cmd = "/run/current-system/sw/bin/toggle-flip";
+      }
+    ];
+  };
+
+  users.users.bg.extraGroups = [ "input" ];
+
 }

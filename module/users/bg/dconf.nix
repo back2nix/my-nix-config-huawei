@@ -1,35 +1,34 @@
 { pkgs, ... }:
-let
-in
 {
-  # https://github.com/Corona09/nix-config/blob/b73fa075e4e093025db1cd6628b3dfc84ba15ba0/modules/home/dconf/dconf.nix#L266
   dconf.settings = {
     "org/gnome/settings-daemon/plugins/media-keys" = {
       custom-keybindings = [
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
       ];
-      # help = [ ];
-      # www = [ "<Alt>c" ];
     };
+
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
       binding = "<Primary><Alt>T";
       command = "kitty";
       name = "Open Terminal";
     };
-    "org/gnome/desktop/wm/keybindings" = {
-      # minimize = [ "" ];
-      switch-input-source = [ "<Alt>Shift_L" ];
-      # switch-input-source-backward = [ "<Shift><Super>t" ];
-      # switch-to-workspace-left = [ "<Primary>Left" "<Super>h" ];
-      # switch-to-workspace-right = [ "<Primary>Right" "<Super>l" ];
+
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+      binding = "<Primary><Alt>R";
+      command = "toggle-flip";
+      name = "Toggle Screen Flip";
     };
+
     "org/gnome/desktop/peripherals/touchpad" = {
       natural-scroll = true;
       send-events = "enabled";
       tap-to-click = true;
       two-finger-scrolling-enabled = true;
     };
+
+    # Объединяем все настройки клавиатуры в одном разделе
     "org/gnome/desktop/wm/keybindings" = {
       close = [ "<Alt>q" ];
       cycle-group = [ ];
@@ -53,25 +52,8 @@ in
       switch-to-workspace-3 = [ "<Alt>3" ];
       switch-to-workspace-4 = [ "<Alt>4" ];
       switch-to-workspace-last = [ ];
+      # Переключение раскладки клавиатуры
+      switch-input-source = [ "<Alt>Shift_L" ];
     };
-
-    # "system/proxy" = {
-    #   mode = "manual";
-    # };
-    #
-    # "system/proxy/http" = {
-    #   host = "127.0.0.1";
-    #   port = 8080;
-    # };
-    #
-    # "system/proxy/https" = {
-    #   host = "127.0.0.1";
-    #   port = 8080;
-    # };
-    #
-    # "system/proxy/socks" = {
-    #   host = "127.0.0.1";
-    #   port = 8080;
-    # };
   };
 }
