@@ -237,6 +237,9 @@ in
           pkgs.sudo
           pkgs.binutils
           pkgs.gawk
+          pkgs.xorg.xset
+          pkgs.evtest
+          pkgs.xxd
         ]}:$PATH"
 
         ${builtins.readFile ./toggle-flip.sh}
@@ -271,6 +274,7 @@ in
       libdvdcss
       libdvdread
       libdvdnav
+
     ];
 
     etc."proxychains.conf".text = ''
