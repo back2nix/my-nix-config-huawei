@@ -36,7 +36,10 @@ in
     ./module/users/users.nix
     # ./module/miredo.nix
     ./sops/sops.nix
-    ./module/dns.nix
+
+    # ./module/dns-dot-tls.nix # более быстрый но некторые провайдеры могут блокировать
+    ./module/dns-doh-https.nix # чуть медленнее зато вообще не отличить от обычного трафика
+
     # ./module/security.nix
     # ./module/shadowsocks.nix
     # ./module/vpn/wireguard.nix
