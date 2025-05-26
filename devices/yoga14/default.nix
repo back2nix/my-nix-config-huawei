@@ -46,6 +46,8 @@
       "cgroup_enable=cpuset"
       "cgroup_enable=memory"
       "cgroup_memory=1"
+      "i915.force_probe=7d55"
+      "i915.enable_guc=2"  # для лучшей работы Intel GPU
     ];
 
     # Настройка модуля btusb для Intel Bluetooth
@@ -135,6 +137,19 @@
 
   # Включаем прошивки, включая Intel Bluetooth
   hardware.enableAllFirmware = true;
+
+  hardware.opengl = {
+    enable = true;
+    # driSupport = true;
+    driSupport32Bit = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      vaapiIntel
+      vaapiVdpau
+      libvdpau-va-gl
+      intel-compute-runtime  # OpenCL поддержка для Intel
+    ];
+  };
 
   # Настройка Bluetooth
   # hardware.bluetooth = {

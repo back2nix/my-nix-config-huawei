@@ -242,6 +242,35 @@ in
         ${builtins.readFile ./toggle-flip.sh}
       '')
       onboard
+
+      # Видео кодеки и поддержка мультимедиа
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-vaapi
+      gst_all_1.gst-libav
+      libva
+      libva-utils
+      intel-media-driver  # для Intel видеокарт
+      mesa
+      vlc
+      mpv
+
+      # Дополнительные кодеки
+      x264
+      x265
+      libvpx
+      libaom # AV1 кодек
+      dav1d  # быстрый AV1 декодер
+      rav1e  # AV1 энкодер
+      svt-av1  # быстрый AV1 энкодер от Intel
+
+      # Дополнительные мультимедиа библиотеки
+      libdvdcss
+      libdvdread
+      libdvdnav
     ];
 
     etc."proxychains.conf".text = ''
