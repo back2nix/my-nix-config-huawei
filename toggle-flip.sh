@@ -64,25 +64,27 @@ fi
 
 # Определяем следующее состояние по часовой стрелке
 case "$CURRENT_STATE" in
+  # "normal")
+  #   NEXT_STATE="right"
+  #   ROTATION="right"
+  #   MATRIX="0 1 0 -1 0 1 0 0 1"
+  #   MESSAGE="Экран повернут на 90° (вправо)"
+  #   ;;
+  # "right")
   "normal")
-    NEXT_STATE="right"
-    ROTATION="right"
-    MATRIX="0 1 0 -1 0 1 0 0 1"
-    MESSAGE="Экран повернут на 90° (вправо)"
-    ;;
-  "right")
     NEXT_STATE="inverted"
     ROTATION="inverted"
     MATRIX="-1 0 1 0 -1 1 0 0 1"
     MESSAGE="Экран повернут на 180°"
     ;;
+  # "inverted")
+  #   NEXT_STATE="left"
+  #   ROTATION="left"
+  #   MATRIX="0 -1 1 1 0 0 0 0 1"
+  #   MESSAGE="Экран повернут на 270° (влево)"
+  #   ;;
+  # "left")
   "inverted")
-    NEXT_STATE="left"
-    ROTATION="left"
-    MATRIX="0 -1 1 1 0 0 0 0 1"
-    MESSAGE="Экран повернут на 270° (влево)"
-    ;;
-  "left")
     NEXT_STATE="normal"
     ROTATION="normal"
     MATRIX="1 0 0 0 1 0 0 0 1"
@@ -102,8 +104,9 @@ echo "Поворачиваем дисплей: $DISPLAY_NAME ($CURRENT_STATE -> 
 # Сначала поворачиваем экран
 xrandr --output "$DISPLAY_NAME" --rotate "$ROTATION"
 
-# Ждем завершения поворота
-sleep 0.2
+while ! xrandr --query | grep -q "$DISPLAY_NAME.*$ROTATION"; do
+  sleep 0.05
+done
 
 # Затем применяем трансформацию для устройств ввода
 apply_input_transform "$MATRIX"
