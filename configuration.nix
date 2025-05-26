@@ -37,6 +37,8 @@ in
     # ./module/miredo.nix
     ./sops/sops.nix
 
+    # https://1.1.1.1/help/
+    # https://one.one.one.one/help/
     # ./module/dns-dot-tls.nix # более быстрый но некторые провайдеры могут блокировать
     ./module/dns-doh-https.nix # чуть медленнее зато вообще не отличить от обычного трафика
 
