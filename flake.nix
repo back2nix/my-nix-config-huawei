@@ -5,6 +5,7 @@
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs-23-11.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -74,6 +75,7 @@
             [
               # ./module/spoofdpi.nix
               # ./module/spoofdpi_with_proxy.nix
+              inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
               inputs.musnix.nixosModules.musnix
               sops-nix.nixosModules.sops
               ./configuration.nix

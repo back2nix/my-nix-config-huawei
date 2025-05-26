@@ -34,6 +34,11 @@ unblock_keyboard() {
   if [ -f /tmp/blocked_keyboard_id ]; then
     KB_ID=$(cat /tmp/blocked_keyboard_id)
     xinput enable "$KB_ID" 2>/dev/null
+
+    # Восстанавливаем автоповтор клавиш
+    xset r on 2>/dev/null || true
+    xinput set-prop "$KB_ID" "libinput Repeat" 1 2>/dev/null || true
+
     rm /tmp/blocked_keyboard_id
   fi
 }
@@ -41,7 +46,8 @@ unblock_keyboard() {
 # Применение матрицы трансформации для устройств ввода
 apply_input_transform() {
   local matrix="$1"
-  xinput list --short 2>/dev/null | grep -E "slave|floating" | while IFS= read -r line; do
+  # Применяем только к pointer устройствам
+  xinput list --short 2>/dev/null | grep -E "slave.*pointer|floating.*pointer" | while IFS= read -r line; do
     device_id=$(echo "$line" | grep -o 'id=[0-9]*' | cut -d= -f2)
     if [[ -n "$device_id" ]]; then
       xinput set-prop "$device_id" "Coordinate Transformation Matrix" $matrix 2>/dev/null || true
@@ -93,10 +99,13 @@ esac
 
 echo "Поворачиваем дисплей: $DISPLAY_NAME ($CURRENT_STATE -> $NEXT_STATE)"
 
-# Применяем поворот
+# Сначала поворачиваем экран
 xrandr --output "$DISPLAY_NAME" --rotate "$ROTATION"
 
-# Применяем трансформацию для устройств ввода
+# Ждем завершения поворота
+sleep 0.2
+
+# Затем применяем трансформацию для устройств ввода
 apply_input_transform "$MATRIX"
 
 # Управляем клавиатурой: разблокируем только в нормальном положении
@@ -110,6 +119,6 @@ fi
 
 # Сохраняем новое состояние
 echo "$NEXT_STATE" > "$STATE_FILE"
+# echo "$MESSAGE"
 
-echo "$MESSAGE"
-sudo -u bg DISPLAY=":1" XAUTHORITY="/run/user/1000/gdm/Xauthority" notify-send "Поворот экрана" "$MESSAGE" 2>/dev/null || true
+# sudo -u bg DISPLAY=":1" XAUTHORITY="/run/user/1000/gdm/Xauthority" notify-send "Поворот экрана" "$MESSAGE" 2>/dev/null || true

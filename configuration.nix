@@ -241,6 +241,7 @@ in
 
         ${builtins.readFile ./toggle-flip.sh}
       '')
+      onboard
     ];
 
     etc."proxychains.conf".text = ''

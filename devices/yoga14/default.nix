@@ -276,4 +276,8 @@
     LIBVA_DRIVER_NAME = "iHD";
     MOZ_DISABLE_RDD_SANDBOX = "1"; # Может помочь с некоторыми проблемами рендеринга
   };
+
+  services.xserver.displayManager.sessionCommands = ''
+    ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --scale 1.2x1.2
+  '';
 }
