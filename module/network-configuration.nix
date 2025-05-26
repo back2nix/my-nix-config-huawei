@@ -2,22 +2,15 @@
   lib,
   config,
   ...
-}: let
-  domainNameServers = ["127.0.0.53" "1.1.1.1" "1.0.0.1" "8.8.8.8" "8.8.4.4"];
-in {
+}: {
   systemd.network = {
     enable = true;
     wait-online.enable = lib.mkForce false; # handled by my custom service
   };
 
   environment.etc."resolv.conf".mode = "direct-symlink";
-  services.resolved = {
-    enable = true;
-    fallbackDns = domainNameServers;
-  };
 
   networking = {
-    nameservers = domainNameServers;
     networkmanager.enable = true;
     wireless.enable = lib.mkForce false; # this enabled 'wpa_supplicant', use networkmanager instead
 
@@ -40,6 +33,7 @@ in {
     '';
 
     nftables.enable = true;
+
     # Open ports in the firewall.
     firewall = {
       enable = false;

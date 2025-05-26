@@ -2,16 +2,9 @@
   services.resolved = {
     enable = true;
     dnssec = "true";
-    domains = ["~."]; # "use as default interface for all requests"
-    # (see man resolved.conf)
-    # let Avahi handle mDNS publication
-    # DNSOverTLS=opportunistic
-    extraConfig = ''
-      DNSOverTLS=opportunistic
-      MulticastDNS=resolve
-    '';
+    domains = ["~."];
     llmnr = "true";
-    dnsovertls = "true";
+    dnsovertls = "true";  # Принудительный DoT
     fallbackDns = [
       "1.1.1.1#cloudflare-dns.com"
       "8.8.8.8#dns.google"
@@ -22,7 +15,12 @@
       "2606:4700:4700::1001#cloudflare-dns.com"
       "2001:4860:4860::8844#dns.google"
     ];
+    extraConfig = ''
+      MulticastDNS=resolve
+    '';
   };
+
+  # Глобальные DNS серверы (только DoT)
   networking.nameservers = [
     "1.1.1.1#cloudflare-dns.com"
     "8.8.8.8#dns.google"
