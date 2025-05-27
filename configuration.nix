@@ -8,96 +8,55 @@
   ...
 }:
 let
-# masterPkg = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/master.tar.gz") {
-#   nixpkgs.config = {
-#     allowUnfree = true;
-#   };
-# };
   my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
     edition = "stable";
   };
 in
 {
   nix = {
-    package = pkgs.nixVersions.stable;  # This is the new version
+    package = pkgs.nixVersions.stable;
     extraOptions =
       lib.optionalString (config.nix.package == pkgs.nixVersions.stable)
       "experimental-features = nix-command flakes";
     };
 
     nixpkgs.config.allowUnfree = true;
-  # nixpkgs-unstable.config.allowUnfree = true;
 
   imports = [
-    # ./devices/asus-ux3405m/hardware-configuration.nix
-    # ./devices/huawei-rlef-x/hardware-configuration.nix
     ./cachix.nix
     ./module/change.mac.nix
     ./module/users/users.nix
-    # ./module/miredo.nix
     ./sops/sops.nix
 
-    # https://1.1.1.1/help/
-    # https://one.one.one.one/help/
-    # ./module/dns-dot-tls.nix # более быстрый но некторые провайдеры могут блокировать
-    ./module/dns-doh-https.nix # чуть медленнее зато вообще не отличить от обычного трафика
+    # DNS настройки
+    ./module/dns-doh-https.nix
 
-    # ./module/security.nix
-    # ./module/shadowsocks.nix
-    # ./module/vpn/wireguard.nix
-    # ./module/tor.nix
-    # ./module/xray/xray.nix
-
+    # Сеть и контейнеры
     ./module/network-configuration.nix
-    # ./module/podman.nix
-    # or
     ./module/docker.nix
-    # ./module/virtualisation-configuration.nix
-    # ./powersave.nix
-    # ./powersave-small.nix
     ./module/wireshark.nix
 
-
-    # ./module/arion.nix
-    # ./module/wine.nix
-    # ./hyperland.nix
-    # ./module/wordpress.nix
-
-    # ./module/surfshark.nix
+    # Выберите один из модулей дисплейного сервера:
+    # ./module/x11.nix        # Раскомментируйте для X11
+    ./module/wayland.nix   # Раскомментируйте для Wayland
   ];
 
-  # surfshark.enable = true;
-  # surfshark.alwaysOn = true;  # Optional: Keep VPN always connected
-  # surfshark.iptables.enable = true;  # Optional: Enforce VPN usage via iptables
-  # surfshark.iptables.enforceForUsers = [ "bg" ];  # Enforce for specific users
-
-  # services.spoofdpi.enable = true;
-  # services.spoofdpi_with_proxy.enable = true;
-
   boot = {
-    # asus
+    # asus специфичные настройки
     kernelParams = ["i915.force_probe=7d55"];
     extraModprobeConfig = ''
       options bluetooth disable_ertm=1
       options snd-hda-intel model=asus-zenbook
     '';
     loader.grub.extraFiles = {
-      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}"; # https://github.com/smallcms/asus_zenbook_ux3405ma
+      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
     };
     loader.grub.extraConfig = ''
       acpi /ssdt-csc3551.aml
     '';
-    # kernelPackages = pkgs.linuxPackages_testing;
-    # kernelPackages = pkgs-master.linuxPackages_testing;
-    # pkgs.linuxPackages_5_9
+
     loader.systemd-boot.enable = true;
-
     supportedFilesystems = ["ntfs"];
-
-    # tmp = {
-    #   useTmpfs = true;
-    #   tmpfsSize = "95%";
-    # };
 
     kernel.sysctl = {
       "net.ipv4.ip_forward" = "1";
@@ -106,7 +65,6 @@ in
     };
   };
 
-  # systemctl --user restart pipewire pipewire-pulse wireplumber
   hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
@@ -124,15 +82,10 @@ in
     };
   };
 
-
-
-  # Set your time zone.
   time.timeZone = "Europe/Moscow";
 
-  # Select internationalisation properties.
   i18n = {
     defaultLocale = "en_US.UTF-8";
-
     extraLocaleSettings = {
       LC_ADDRESS = "ru_RU.UTF-8";
       LC_IDENTIFICATION = "ru_RU.UTF-8";
@@ -146,163 +99,57 @@ in
     };
   };
 
-  # Enable sound with pipewire.
-  # sound.enable = true;
-  # pavucontol for settings loop back "Monitor of Alder Lake PCH-P High Definition Audio Controller HDMI / DisplayPort 3 Output"
   security.rtkit.enable = true;
 
   environment = {
-    # etc."modprobe.d/alsa-base.conf".text = ''
-    #   options snd-hda-intel position fix=1
-    #   options snd-hda-intel index=0 model=dell-headset-multi,dell-e7x
-    #   '';
-
     sessionVariables = rec {GTK_THEME = "Adwaita:dark";};
-
     shells = with pkgs; [fish];
 
-    # https://discourse.nixos.org/t/tips-tricks-for-nixos-desktop/28488/2
-    # чтобы запускать бинарники на nix
     systemPackages = with pkgs; [
-      (let
-        base = pkgs.appimageTools.defaultFhsEnvArgs;
-      in
-      pkgs.buildFHSUserEnv (base
-      // {
-        name = "fhs";
-        targetPkgs = pkgs: (base.targetPkgs pkgs) ++ [pkgs.pkg-config];
-        profile = "export FHS=1";
-        runScript = "fish";
-        extraOutputsToInstall = ["dev"];
-      }))
-      lm_sensors
-      # virtualbox
-      direnv
-      tcpdump
-      tshark
-      pavucontrol
-      xclip
-      pkgs-master.serpl
-      sops
-      sshs
-      pkgs.libcap
-      pkgs.docker-compose
-      git
-      lsof
-      pciutils
-      pkgs-master.transmission_4-qt
+      # Базовые системные утилиты
+      direnv tcpdump tshark pavucontrol xclip
+      sops sshs libcap docker-compose git lsof pciutils
 
-      # work
-      # tpm2-tss
+      # Пакеты из unstable/master
+      pkgs-master.serpl
+      pkgs-master.transmission_4-qt
       pkgs-master.openvpn3
 
-      # pkgs.arion
-      # pkgs.docker-client
-      # pkgs.arion
-      # pkgs.podman-compose
-      # pkgs.podman-tui
+      # Контейнеры и кластеры
+      docker docker-compose minikube kubectl kubernetes-helm k9s buildah skopeo
 
-      docker
-      docker-compose
-      minikube
-      kubectl
-      kubernetes-helm
-      k9s
-      buildah
-      skopeo
+      # Виртуализация
+      virt-manager qemu OVMF swtpm
 
-      # Инструменты виртуализации
-      virt-manager
-      qemu
-      OVMF
-      swtpm
+      # Bluetooth
+      bluez bluez-tools
 
-      bluez
-      bluez-tools
+      # Утилиты системы
+      nixos-generators usbutils pciutils bluez-tools
+      gnome-settings-daemon my-yandex-browser-stable age
 
-      nixos-generators
 
-      usbutils # для lsusb
-      pciutils # для lspci
-      bluez-tools # дополнительные инструменты bluez
+      # Мультимедиа
+      gst_all_1.gstreamer gst_all_1.gst-plugins-base gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad gst_all_1.gst-plugins-ugly gst_all_1.gst-vaapi
+      gst_all_1.gst-libav libva libva-utils intel-media-driver mesa vlc mpv
 
-      gnome-settings-daemon
-      my-yandex-browser-stable
-      age
-      # (pkgs.writeScriptBin "toggle-flip" (builtins.readFile ./toggle-flip.sh))
-      (pkgs.writeShellScriptBin "toggle-flip" ''
-        export PATH="${pkgs.lib.makeBinPath [
-          pkgs.xorg.xrandr
-          pkgs.xorg.xinput
-          pkgs.xorg.xkbcomp
-          pkgs.libnotify
-          pkgs.coreutils
-          pkgs.util-linux
-          pkgs.procps
-          pkgs.sudo
-          pkgs.binutils
-          pkgs.gawk
-          pkgs.xorg.xset
-          pkgs.evtest
-          pkgs.xxd
-        ]}:$PATH"
-
-        ${builtins.readFile ./toggle-flip.sh}
-      '')
-      onboard
-
-      # Видео кодеки и поддержка мультимедиа
-      gst_all_1.gstreamer
-      gst_all_1.gst-plugins-base
-      gst_all_1.gst-plugins-good
-      gst_all_1.gst-plugins-bad
-      gst_all_1.gst-plugins-ugly
-      gst_all_1.gst-vaapi
-      gst_all_1.gst-libav
-      libva
-      libva-utils
-      intel-media-driver  # для Intel видеокарт
-      mesa
-      vlc
-      mpv
-
-      # Дополнительные кодеки
-      x264
-      x265
-      libvpx
-      libaom # AV1 кодек
-      dav1d  # быстрый AV1 декодер
-      rav1e  # AV1 энкодер
-      svt-av1  # быстрый AV1 энкодер от Intel
-
-      # Дополнительные мультимедиа библиотеки
-      libdvdcss
-      libdvdread
-      libdvdnav
-
+      # Кодеки
+      x264 x265 libvpx libaom dav1d rav1e svt-av1 libdvdcss libdvdread libdvdnav
     ];
 
     etc."proxychains.conf".text = ''
       strict_chain
       proxy_dns
-
       remote_dns_subnet 224
-
       tcp_read_time_out 15000
       tcp_connect_time_out 8000
-
       localnet 127.0.0.0/255.0.0.0
 
       [ProxyList]
-        # ssh -L 0.0.0.0:1081:localhost:1080 bg@localhost -N
-        # socks5 192.168.0.5 18081
         socks5 127.0.0.1 1081
-        # socks5 192.168.100.3 1080
-        # socks5 127.0.0.1 8118
-        # socks5 127.0.0.1 9063
     '';
   };
-
 
   programs = {
     openvpn3.enable = true;
@@ -315,153 +162,52 @@ in
       libraries = with pkgs; [gcc icu libcxx stdenv.cc.cc.lib zlib];
     };
     dconf.enable = true;
-    # wireshark = {
-    #   enable = true;
-    #   package = pkgs-master.wireshark;
-    # };
   };
-
-  # system.activationScripts.wireshark-capabilities = ''
-  #   ${pkgs.libcap.out}/bin/setcap cap_net_raw,cap_net_admin+ep ${pkgs.wireshark}/bin/dumpcap
-  # '';
-
 
   users.defaultUserShell = pkgs.fish;
 
   systemd = {
-    # Workaround for GNOME autologin: https://github.com/NixOS/nixpkgs/issues/103746#issuecomment-945091229
     services = {
       "getty@tty1".enable = false;
       "autovt@tty1".enable = false;
       NetworkManager-wait-online.enable = false;
     };
 
-
-    # targets.sleep.enable = false;
-    # targets.suspend.enable = false;
-    # targets.hibernate.enable = false;
-    # targets.hybrid-sleep.enable = false;
-
     tmpfiles.rules = [
       "d /var/lib/bluetooth 700 root root - -"
-      # "d /var/lib/wordpress/localhost 0750 wordpress wwwrun - -"
-      # "d /var/lib/wordpress/localhost/wp-content 0750 wordpress wwwrun - -"
-      # "d /var/lib/wordpress/localhost/wp-content/plugins 0750 wordpress wwwrun - -"
-      # "d /var/lib/wordpress/localhost/wp-content/themes 0750 wordpress wwwrun - -"
-      # "d /var/lib/wordpress/localhost/wp-content/upgrade 0750 wordpress wwwrun - -"
     ];
     targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
     user.services.pipewire-pulse.path = [pkgs.pulseaudio];
   };
 
-  system.stateVersion = "23.11"; # Did you read the comment?
-
-  virtualisation = {
-    # waydroid.enable = true;
-    # docker = {
-    #   enable = false;
-    #   rootless = {
-    #     enable = true;
-    #     setSocketVariable = true;
-    #   };
-    #   daemon = {
-    #     settings = {
-    #       # registry-mirrors = [
-    #       #   "https://huecker.io"
-    #       # ];
-    #     };
-    #   };
-    # };
-
-    # virtualbox.host.enable = true;
-
-    #podman = {
-    #  enable = true;
-    #  #dockerCompat = true;
-    #  dockerSocket.enable = true;
-    #  # defaultNetwork.dnsname.enable = true;
-    #  defaultNetwork.settings = {
-    #    dns_enabled = true;
-    #  };
-    #};
-  };
-
-  swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 16 * 1024;
-    }
-  ];
-
-  # https://github.com/gvolpe/nix-config/blob/0ed3d66f228a6d54f1e9f6e1ef4bc8daec30c0af/system/configuration.nix#L161
-  fonts.packages = with pkgs; [times-newer-roman];
-
-  nix = {
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 30d";
-    };
-
-    settings.trusted-users = ["root" "bg"];
-  };
-
   services = {
-    # fprintd = {
-    # enable = true;
-    # package = pkgs.fprintd-tod;
-    # tod = {
-    #   enable = true;
-    #   # driver = pkgs.libfprint-2-tod1-goodix;
-    #   driver = pkgs.libfprint-3-tod1-vfs0090;
-    # };
-    # }; # $ sudo fprintd-enroll --finger right-index-finger <user>
     transmission = {
       enable = true;
       package = pkgs-master.transmission_4;
-      # settings = {
-      #   download-dir = "${config.services.transmission.home}/Downloads";
-      # };
     };
-
 
     lorri = {
       enable = true;
       package = pkgs-master.lorri;
     };
+
     change-mac = {
       enable = false;
       interface = "wlp0s20f3";
       macAddress = "00:11:22:33:44:55";
     };
 
-    # mkdir -p /etc/openvpn3/configs
     dbus.packages = [pkgs.dconf];
-
-    udev.packages = [
-      pkgs.gnome-settings-daemon
-    ];
+    udev.packages = [pkgs.gnome-settings-daemon];
 
     udev = {
       extraRules = ''
+        KERNEL=="event*", SUBSYSTEM=="input", MODE="0664", GROUP="input"
+        ACTION=="add|change", KERNEL=="event*", ATTRS{name}=="*keyboard*", GROUP="input", MODE="0664"
+
         SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
         SUBSYSTEM=="usb", ATTRS{idVendor}=="*", ATTRS{idProduct}=="*", MODE="0660", GROUP="wireshark"
       '';
-    };
-
-    libinput.enable = true;
-
-    xserver = {
-      enable = true;
-      videoDrivers = ["modesetting"];
-      xkb = {layout = "us,ru";};
-      displayManager = {
-        gdm = {
-          enable = true;
-          wayland = false;
-        };
-      };
-      desktopManager.gnome.enable = true;
     };
 
     printing.enable = true;
@@ -472,7 +218,6 @@ in
     };
 
     flatpak.enable = true;
-
     blueman.enable = true;
 
     pipewire = {
@@ -484,53 +229,27 @@ in
       jack.enable = true;
     };
 
-    # homepage-dashboard = {
-    #   enable = true;
-    #   listenPort = 8082;
-    # };
+    physlock.enable = false;
 
-    # power-profiles-daemon.enable = false;
-
-    # tlp = {
-    #   enable = true;
-    #   settings = {
-    #     # CPU_SCALING_GOVERNOR_ON_AC = "performance";
-    #     # only charge up to 80% of the battery capacity
-    #     # START_CHARGE_THRESH_BAT0 = "75";
-    #     # STOP_CHARGE_THRESH_BAT0 = "80";
-    #   };
-    # };
-    # logind = {
-    #   lidSwitch = "ignore";
-    #   lidSwitchDocked = "ignore";
-    #   lidSwitchExternalPower = "ignore";
-    #   extraConfig = ''
-    #     RuntimeDirectorySize=36G
-    #     HandlePowerKey=suspend
-    #     HandleSuspendKey=suspend
-    #     HandleHibernateKey=suspend
-    #     PowerKeyIgnoreInhibited=yes
-    #     SuspendKeyIgnoreInhibited=yes
-    #     HibernateKeyIgnoreInhibited=yes
-    #   '';
-    # };
     logind = {
-      powerKey = "ignore";  # Добавь эту строку
+      powerKey = "ignore";
+      lidSwitch = "suspend";
+      lidSwitchExternalPower = "suspend";
       extraConfig = ''
         HandlePowerKey=ignore
       '';
     };
-  };
 
-
-  services = {
-    # Отключаем physlock - это именно тот сервис, который показывает консольный экран блокировки
-    physlock.enable = false;
-
-    # Настраиваем logind для правильной обработки пробуждения
-    logind = {
-      lidSwitch = "suspend";
-      lidSwitchExternalPower = "suspend"; # Или "ignore", если хотите, чтобы при подключенном питании не засыпал
+    triggerhappy = {
+      enable = true;
+      user = "bg";
+      bindings = [
+        {
+          keys = [ "POWER" ];
+          event = "press";
+          cmd = "/run/current-system/sw/bin/toggle-flip";
+        }
+      ];
     };
   };
 
@@ -538,18 +257,25 @@ in
     "my-yandex-browser-stable-25.4.1.1062-1"
   ];
 
-  services.triggerhappy = {
-    enable = true;
-    user = "bg";
-    bindings = [
-      {
-        keys = [ "POWER" ];  # код клавиши вместо имени
-        event = "press";
-        cmd = "/run/current-system/sw/bin/toggle-flip";
-      }
-    ];
-  };
-
   users.users.bg.extraGroups = [ "input" ];
 
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16 * 1024;
+    }
+  ];
+
+  fonts.packages = with pkgs; [times-newer-roman];
+
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    settings.trusted-users = ["root" "bg"];
+  };
+
+  system.stateVersion = "23.11";
 }
