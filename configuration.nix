@@ -29,6 +29,8 @@ in
     ./sops/sops.nix
 
     # DNS настройки
+    # ./module/dns-dot-tls.nix
+    # ./module/dns-doh-https.nix
     ./module/dns-blocky.nix
 
     # Сеть и контейнеры
@@ -281,7 +283,7 @@ in
 
   services.dns-setup = {
     enable = true;
-    mode = "doh";  # Можно легко переключить на "doh" или "plain"
+    mode = "dot";  # Можно легко переключить на "doh" или "plain" "dot-doh"
     extendedFiltering = true;
     customWhitelist = ''
       github.com
