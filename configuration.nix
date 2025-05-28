@@ -285,6 +285,8 @@ in
     extendedFiltering = true;
     customWhitelist = ''
       github.com
+      mixpanel.com
+      cdn.mxpnl.com
     '';
   };
 
