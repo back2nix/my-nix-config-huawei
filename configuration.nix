@@ -29,7 +29,7 @@ in
     ./sops/sops.nix
 
     # DNS настройки
-    ./module/dns-doh-https.nix
+    ./module/dns-blocky.nix
 
     # Сеть и контейнеры
     ./module/network-configuration.nix
@@ -37,8 +37,8 @@ in
     ./module/wireshark.nix
 
     # Выберите один из модулей дисплейного сервера:
-    # ./module/x11.nix        # Раскомментируйте для X11
-    ./module/wayland.nix   # Раскомментируйте для Wayland
+    ./module/x11.nix        # Раскомментируйте для X11
+    # ./module/wayland.nix   # Раскомментируйте для Wayland
   ];
 
   boot = {
@@ -275,6 +275,15 @@ in
       options = "--delete-older-than 30d";
     };
     settings.trusted-users = ["root" "bg"];
+  };
+
+  services.dns-setup = {
+    enable = true;
+    mode = "doh";  # Можно легко переключить на "doh" или "plain"
+    extendedFiltering = true;
+    customWhitelist = ''
+      github.com
+    '';
   };
 
   system.stateVersion = "23.11";
