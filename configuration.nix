@@ -287,6 +287,7 @@ in
       github.com
       mixpanel.com
       cdn.mxpnl.com
+      api-js.mixpanel.com
     '';
   };
 
