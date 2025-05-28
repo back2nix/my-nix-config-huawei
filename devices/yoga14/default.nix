@@ -49,6 +49,7 @@
     extraModprobeConfig = ''
       options btusb reset=1 enable_autosuspend=0
       options bluetooth disable_ertm=1
+      options iwlwifi power_save=0
     '';
   };
 

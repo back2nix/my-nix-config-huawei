@@ -136,6 +136,8 @@ in
 
       # Кодеки
       x264 x265 libvpx libaom dav1d rav1e svt-av1 libdvdcss libdvdread libdvdnav
+
+      iw iptables nettools dnsutils
     ];
 
     etc."proxychains.conf".text = ''
