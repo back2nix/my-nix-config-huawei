@@ -47,14 +47,24 @@
     ];
 
     extraModprobeConfig = ''
+      # Bluetooth настройки
       options btusb reset=1 enable_autosuspend=0
       options bluetooth disable_ertm=1
-      options iwlwifi power_save=0
+
+      # ИСПРАВЛЕНИЯ ДЛЯ INTEL AX211 WIFI
+      options iwlwifi power_save=0 disable_11ax=0 disable_11ac=0 11n_disable=0
+      options iwlmvm power_scheme=1
+      options iwlwifi swcrypto=0 led_mode=1
     '';
   };
 
-  # Hardware-специфичные udev правила
   services.udev.extraRules = ''
+    # Предотвращение автосуспенда Intel AX211
+    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0033", ATTR{power/autosuspend}="-1"
+
+    # Отключение power management после подключения
+    ACTION=="add", SUBSYSTEM=="ieee80211", KERNEL=="phy*", RUN+="${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.iw}/bin/iw dev wlp0s20f3 set power_save off'"
+
     # Правила для Intel Bluetooth
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", TAG+="systemd", ENV{SYSTEMD_WANTS}="bluetooth.service"
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", RUN+="${pkgs.bluez}/bin/bluetoothctl power on"
@@ -62,6 +72,19 @@
     # Камера
     ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
   '';
+
+  systemd.services.iwlwifi-reload = {
+    description = "Reload iwlwifi module after suspend";
+    after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.kmod}/bin/rmmod iwlmvm iwlwifi || true'";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 3 && ${pkgs.kmod}/bin/modprobe iwlwifi'";
+      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.iw}/bin/iw dev wlp0s20f3 set power_save off || true'";
+      RemainAfterExit = true;
+    };
+  };
 
   # Bluetooth конфигурация для Yoga14
   systemd.services.bluetooth = {
@@ -105,6 +128,8 @@
     alsa-utils alsa-tools alsa-ucm-conf pamixer pulseaudio
     bluez bluez-tools blueman
     usbutils pciutils lshw v4l-utils
+    iwd # ВАЖНО: для лучшей работы с Intel AX211
+    # wireless-tools
   ];
 
   networking.useDHCP = lib.mkDefault true;

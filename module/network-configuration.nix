@@ -3,38 +3,48 @@
   config,
   ...
 }: {
-  systemd.network = {
-    enable = true;
-    wait-online.enable = lib.mkForce false; # handled by my custom service
-  };
+  # Отключаем systemd.network при использовании NetworkManager
+  systemd.network.enable = lib.mkForce false;
 
   environment.etc."resolv.conf".mode = "direct-symlink";
 
+  # Настройка NetworkManager для WiFi без power management
+  environment.etc."NetworkManager/conf.d/99-wifi-no-powersave.conf".text = ''
+    [connection]
+    wifi.powersave = 2
+    wifi.cloned-mac-address = preserve
+    ethernet.cloned-mac-address = preserve
+
+    [device]
+    wifi.backend = iwd
+    wifi.scan-rand-mac-address = false
+  '';
+
   networking = {
-    networkmanager.enable = true;
-    wireless.enable = lib.mkForce false; # this enabled 'wpa_supplicant', use networkmanager instead
+    # ПРАВИЛЬНЫЙ СИНТАКСИС для iwd в NixOS
+    wireless.iwd.enable = true;
+
+    networkmanager = {
+      enable = true;
+      wifi.backend = "iwd";
+    };
+
+    wireless.enable = lib.mkForce false;
 
     nat = {
       enable = true;
       internalInterfaces = ["ve-+"];
-      # externalInterface = "tornet";
-      # Lazy IPv6 connectivity for the container
       enableIPv6 = true;
     };
 
     extraHosts = ''
       127.0.0.1 kafka
       127.0.0.1 localhost
-      # 127.0.0.1 miadoll.com
-      # 127.0.0.1 model.miadoll.com
       127.0.0.1 host.docker.internal
-      # 127.0.0.1 ibigfish.ru
-      # 127.0.0.1 model.ibigfish.ru
     '';
 
     nftables.enable = true;
 
-    # Open ports in the firewall.
     firewall = {
       enable = false;
       allowedTCPPorts = [18082 18081];
