@@ -6,21 +6,19 @@
   pkgs-unstable,
   lib,
   ...
-}:
-let
+}: let
   my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
     edition = "stable";
   };
-in
-{
+in {
   nix = {
     package = pkgs.nixVersions.stable;
-    extraOptions =
-      lib.optionalString (config.nix.package == pkgs.nixVersions.stable)
-      "experimental-features = nix-command flakes";
-    };
+    extraOptions = lib.optionalString (
+      config.nix.package == pkgs.nixVersions.stable
+    ) "experimental-features = nix-command flakes";
+  };
 
-    nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowUnfree = true;
 
   imports = [
     ./cachix.nix
@@ -39,7 +37,7 @@ in
     ./module/wireshark.nix
 
     # Выберите один из модулей дисплейного сервера:
-    ./module/x11.nix        # Раскомментируйте для X11
+    ./module/x11.nix # Раскомментируйте для X11
     # ./module/wayland.nix   # Раскомментируйте для Wayland
   ];
 
@@ -80,7 +78,9 @@ in
         Enable = "Source,Sink,Media,Socket";
         MultiProfile = "multiple";
       };
-      Policy = { AutoEnable = "true"; };
+      Policy = {
+        AutoEnable = "true";
+      };
     };
   };
 
@@ -104,13 +104,25 @@ in
   security.rtkit.enable = true;
 
   environment = {
-    sessionVariables = rec {GTK_THEME = "Adwaita:dark";};
+    sessionVariables = rec {
+      GTK_THEME = "Adwaita:dark";
+    };
     shells = with pkgs; [fish];
 
     systemPackages = with pkgs; [
       # Базовые системные утилиты
-      direnv tcpdump tshark pavucontrol xclip
-      sops sshs libcap docker-compose git lsof pciutils
+      direnv
+      tcpdump
+      tshark
+      pavucontrol
+      xclip
+      sops
+      sshs
+      libcap
+      docker-compose
+      git
+      lsof
+      pciutils
 
       # Пакеты из unstable/master
       pkgs-master.serpl
@@ -118,28 +130,66 @@ in
       pkgs-master.openvpn3
 
       # Контейнеры и кластеры
-      docker docker-compose minikube kubectl kubernetes-helm k9s buildah skopeo
+      docker
+      docker-compose
+      minikube
+      kubectl
+      kubernetes-helm
+      k9s
+      buildah
+      skopeo
 
       # Виртуализация
-      virt-manager qemu OVMF swtpm
+      virt-manager
+      qemu
+      OVMF
+      swtpm
 
       # Bluetooth
-      bluez bluez-tools
+      bluez
+      bluez-tools
 
       # Утилиты системы
-      nixos-generators usbutils pciutils bluez-tools
-      gnome-settings-daemon my-yandex-browser-stable age
-
+      nixos-generators
+      usbutils
+      pciutils
+      bluez-tools
+      gnome-settings-daemon
+      my-yandex-browser-stable
+      age
 
       # Мультимедиа
-      gst_all_1.gstreamer gst_all_1.gst-plugins-base gst_all_1.gst-plugins-good
-      gst_all_1.gst-plugins-bad gst_all_1.gst-plugins-ugly gst_all_1.gst-vaapi
-      gst_all_1.gst-libav libva libva-utils intel-media-driver mesa vlc mpv
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-vaapi
+      gst_all_1.gst-libav
+      libva
+      libva-utils
+      intel-media-driver
+      mesa
+      vlc
+      mpv
 
       # Кодеки
-      x264 x265 libvpx libaom dav1d rav1e svt-av1 libdvdcss libdvdread libdvdnav
+      x264
+      x265
+      libvpx
+      libaom
+      dav1d
+      rav1e
+      svt-av1
+      libdvdcss
+      libdvdread
+      libdvdnav
 
-      iw iptables nettools dnsutils nmap
+      iw
+      iptables
+      nettools
+      dnsutils
+      nmap
     ];
 
     etc."proxychains.conf".text = ''
@@ -163,7 +213,13 @@ in
     nix-ld = {
       package = inputs.nix-ld-rs;
       enable = true;
-      libraries = with pkgs; [gcc icu libcxx stdenv.cc.cc.lib zlib];
+      libraries = with pkgs; [
+        gcc
+        icu
+        libcxx
+        stdenv.cc.cc.lib
+        zlib
+      ];
     };
     dconf.enable = true;
   };
@@ -249,7 +305,7 @@ in
       user = "bg";
       bindings = [
         {
-          keys = [ "POWER" ];
+          keys = ["POWER"];
           event = "press";
           cmd = "/run/current-system/sw/bin/toggle-flip";
         }
@@ -261,7 +317,7 @@ in
     "my-yandex-browser-stable-25.4.1.1062-1"
   ];
 
-  users.users.bg.extraGroups = [ "input" ];
+  users.users.bg.extraGroups = ["input"];
 
   swapDevices = [
     {
@@ -278,12 +334,15 @@ in
       dates = "weekly";
       options = "--delete-older-than 30d";
     };
-    settings.trusted-users = ["root" "bg"];
+    settings.trusted-users = [
+      "root"
+      "bg"
+    ];
   };
 
   services.dns-setup = {
     enable = true;
-    mode = "dot";  # Можно легко переключить на "doh" или "plain" "dot-doh"
+    mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
     extendedFiltering = true;
     customWhitelist = ''
       github.com

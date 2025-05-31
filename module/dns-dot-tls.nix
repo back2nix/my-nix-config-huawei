@@ -4,7 +4,7 @@
     dnssec = "true";
     domains = ["~."];
     llmnr = "true";
-    dnsovertls = "true";  # Принудительный DoT
+    dnsovertls = "true"; # Принудительный DoT
     fallbackDns = [
       "1.1.1.1#cloudflare-dns.com"
       "8.8.8.8#dns.google"

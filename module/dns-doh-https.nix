@@ -1,10 +1,18 @@
-{pkgs, config, lib, ...}: {
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}: {
   services.resolved.enable = false;
 
   systemd.services.cloudflared-doh = {
     enable = true;
     description = "DNS over HTTPS (DoH) proxy client";
-    wants = ["network-online.target" "nss-lookup.target"];
+    wants = [
+      "network-online.target"
+      "nss-lookup.target"
+    ];
     before = ["nss-lookup.target"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {

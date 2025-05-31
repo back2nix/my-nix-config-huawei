@@ -50,7 +50,10 @@
       require_dnssec = true;
       require_nolog = true;
 
-      listen_addresses = ["127.0.0.1:53" "[::1]:53"];
+      listen_addresses = [
+        "127.0.0.1:53"
+        "[::1]:53"
+      ];
 
       sources.public-resolvers = {
         urls = [

@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   services.xserver = {
     enable = true;
     videoDrivers = ["modesetting"];
@@ -13,7 +16,7 @@
     displayManager = {
       gdm = {
         enable = true;
-        wayland = false;  # Принудительно X11
+        wayland = false; # Принудительно X11
       };
     };
 
@@ -83,22 +86,32 @@
 
   # X11-специфичные пакеты
   environment.systemPackages = with pkgs; [
-    xf86_input_wacom           # Драйвер Wacom для X11
-    xorg.xinput                # Утилиты для настройки устройств ввода
-    xorg.xf86inputlibinput     # Драйвер libinput для X11
-    xorg.xrandr                # Управление разрешением и поворотом
-    iio-sensor-proxy           # Для автоповорота экрана
-    onboard                    # Виртуальная клавиатура для планшетного режима
-
+    xf86_input_wacom # Драйвер Wacom для X11
+    xorg.xinput # Утилиты для настройки устройств ввода
+    xorg.xf86inputlibinput # Драйвер libinput для X11
+    xorg.xrandr # Управление разрешением и поворотом
+    iio-sensor-proxy # Для автоповорота экрана
+    onboard # Виртуальная клавиатура для планшетного режима
 
     (pkgs.writeShellScriptBin "toggle-flip" ''
-    export PATH="${pkgs.lib.makeBinPath [
-      pkgs.xorg.xrandr pkgs.xorg.xinput pkgs.xorg.xkbcomp
-      pkgs.libnotify pkgs.coreutils pkgs.util-linux
-      pkgs.procps pkgs.sudo pkgs.binutils pkgs.gawk
-      pkgs.xorg.xset pkgs.evtest pkgs.xxd
-    ]}:$PATH"
-    ${builtins.readFile ./toggle-flip.sh}
+      export PATH="${
+        pkgs.lib.makeBinPath [
+          pkgs.xorg.xrandr
+          pkgs.xorg.xinput
+          pkgs.xorg.xkbcomp
+          pkgs.libnotify
+          pkgs.coreutils
+          pkgs.util-linux
+          pkgs.procps
+          pkgs.sudo
+          pkgs.binutils
+          pkgs.gawk
+          pkgs.xorg.xset
+          pkgs.evtest
+          pkgs.xxd
+        ]
+      }:$PATH"
+      ${builtins.readFile ./toggle-flip.sh}
     '')
   ];
 

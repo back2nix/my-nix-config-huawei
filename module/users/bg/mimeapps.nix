@@ -1,4 +1,4 @@
-{ ... }: let
+{...}: let
   mailApp = "thunderbird.desktop";
 in {
   xdg = {
@@ -31,9 +31,18 @@ in {
           "x-scheme-handler/msteams" = "teams-for-linux.desktop";
         };
         removed = {
-          "image/jpeg" = ["gimp.desktop" "org.gnome.eog.desktop"];
-          "image/png" = ["gimp.desktop" "org.gnome.eog.desktop"];
-          "image/gif" = ["gimp.desktop" "org.gnome.eog.desktop"];
+          "image/jpeg" = [
+            "gimp.desktop"
+            "org.gnome.eog.desktop"
+          ];
+          "image/png" = [
+            "gimp.desktop"
+            "org.gnome.eog.desktop"
+          ];
+          "image/gif" = [
+            "gimp.desktop"
+            "org.gnome.eog.desktop"
+          ];
         };
       };
     };

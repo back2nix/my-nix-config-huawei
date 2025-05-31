@@ -6,11 +6,11 @@
 
     secrets = {
       # Surfshark VPN credentials
-        "surfshark" = {
-          mode = "0440";
-          owner = config.users.users.nobody.name;
-          group = config.users.users.nobody.group;
-        };
+      "surfshark" = {
+        mode = "0440";
+        owner = config.users.users.nobody.name;
+        group = config.users.users.nobody.group;
+      };
 
       # Существующие секреты (оставить без изменений)
       example-key = {

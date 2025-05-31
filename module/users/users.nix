@@ -8,7 +8,9 @@
 }: let
   inherit (import ../../variables.nix) mainUser;
 in {
-  users.users.root = {shell = pkgs.fish;};
+  users.users.root = {
+    shell = pkgs.fish;
+  };
 
   home-manager.backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
 

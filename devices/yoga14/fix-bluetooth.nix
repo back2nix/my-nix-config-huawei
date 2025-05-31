@@ -1,6 +1,9 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   # Устанавливаем дополнительные пакеты для диагностики
   environment.systemPackages = with pkgs; [
     usbutils # для lsusb
@@ -49,10 +52,13 @@
   # Явно добавляем bluetooth в systemd сервисы
   systemd.services.bluetooth = {
     serviceConfig = {
-      ExecStart = ["" "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf"];
+      ExecStart = [
+        ""
+        "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf"
+      ];
       RestartSec = "5";
       Restart = "on-failure";
     };
-    wantedBy = [ "bluetooth.target" ];
+    wantedBy = ["bluetooth.target"];
   };
 }

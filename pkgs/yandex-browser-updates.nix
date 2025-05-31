@@ -51,16 +51,16 @@
   qt6,
   vivaldi-ffmpeg-codecs,
   edition ? "stable",
-}:
-
-let
+}: let
   version =
     {
       corporate = "";
       beta = "";
       stable = "25.4.1.1062-1";
     }
-    .${edition};
+    .${
+      edition
+    };
 
   hash =
     {
@@ -68,7 +68,9 @@ let
       beta = "";
       stable = "sha256-SW/JQ3ZTcXhgsu4+Rck3xtTwnX1xn2EuDfeXpjLHThg=";
     }
-    .${edition};
+    .${
+      edition
+    };
 
   app =
     {
@@ -76,114 +78,115 @@ let
       beta = "-beta";
       stable = "";
     }
-    .${edition};
-
+    .${
+      edition
+    };
 in
-stdenv.mkDerivation rec {
-  pname = "my-yandex-browser-${edition}";
-  inherit version;
+  stdenv.mkDerivation rec {
+    pname = "my-yandex-browser-${edition}";
+    inherit version;
 
-  src = fetchurl {
-    url = "http://repo.yandex.ru/yandex-browser/deb/pool/main/y/yandex-browser-${edition}/yandex-browser-${edition}_${version}_amd64.deb";
-    inherit hash;
-  };
+    src = fetchurl {
+      url = "http://repo.yandex.ru/yandex-browser/deb/pool/main/y/yandex-browser-${edition}/yandex-browser-${edition}_${version}_amd64.deb";
+      inherit hash;
+    };
 
-  nativeBuildInputs = [
-    autoPatchelfHook
-    qt6.wrapQtAppsHook
-    wrapGAppsHook3
-  ];
+    nativeBuildInputs = [
+      autoPatchelfHook
+      qt6.wrapQtAppsHook
+      wrapGAppsHook3
+    ];
 
-  buildInputs = [
-    flac
-    harfbuzzFull
-    nss
-    snappy
-    xdg-utils
-    xorg.libxkbfile
-    alsa-lib
-    at-spi2-atk
-    at-spi2-core
-    atk
-    cairo
-    cups
-    curl
-    dbus
-    expat
-    fontconfig.lib
-    freetype
-    gdk-pixbuf
-    glib
-    gnome2.GConf
-    gtk3
-    libX11
-    libXScrnSaver
-    libXcomposite
-    libXcursor
-    libXdamage
-    libXext
-    libXfixes
-    libXi
-    libXrandr
-    libXrender
-    libXtst
-    libdrm
-    libnotify
-    libopus
-    libuuid
-    libxcb
-    libxshmfence
-    mesa
-    nspr
-    nss
-    pango
-    (lib.getLib stdenv.cc.cc)
-    libqt5pas
-    qt6.qtbase
-  ];
-
-  unpackPhase = ''
-    mkdir $TMP/ya/ $out/bin/ -p
-    ar vx $src
-    tar --no-overwrite-dir -xvf data.tar.xz -C $TMP/ya/
-  '';
-
-  installPhase = ''
-    cp $TMP/ya/{usr/share,opt} $out/ -R
-    cp $out/share/applications/yandex-browser${app}.desktop $out/share/applications/${pname}.desktop || true
-    rm -f $out/share/applications/yandex-browser.desktop
-    substituteInPlace $out/share/applications/${pname}.desktop --replace /usr/ $out/
-    substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace /opt/ $out/opt/
-    substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace /opt/ $out/opt/
-    ln -sf ${vivaldi-ffmpeg-codecs}/lib/libffmpeg.so $out/opt/yandex/browser${app}/libffmpeg.so
-    ln -sf $out/opt/yandex/browser${app}/yandex-browser${app} $out/bin/${pname}
-  '';
-
-  runtimeDependencies =
-    map lib.getLib [
-      libpulseaudio
+    buildInputs = [
+      flac
+      harfbuzzFull
+      nss
+      snappy
+      xdg-utils
+      xorg.libxkbfile
+      alsa-lib
+      at-spi2-atk
+      at-spi2-core
+      atk
+      cairo
+      cups
       curl
-      systemd
-      vivaldi-ffmpeg-codecs
-    ]
-    ++ buildInputs;
-
-  meta = with lib; {
-    description = "Yandex Web Browser";
-    homepage = "https://browser.yandex.ru/";
-    license = licenses.unfree;
-    sourceProvenance = with sourceTypes; [ binaryNativeCode ];
-    maintainers = with maintainers; [
-      dan4ik605743
-      ionutnechita
+      dbus
+      expat
+      fontconfig.lib
+      freetype
+      gdk-pixbuf
+      glib
+      gnome2.GConf
+      gtk3
+      libX11
+      libXScrnSaver
+      libXcomposite
+      libXcursor
+      libXdamage
+      libXext
+      libXfixes
+      libXi
+      libXrandr
+      libXrender
+      libXtst
+      libdrm
+      libnotify
+      libopus
+      libuuid
+      libxcb
+      libxshmfence
+      mesa
+      nspr
+      nss
+      pango
+      (lib.getLib stdenv.cc.cc)
+      libqt5pas
+      qt6.qtbase
     ];
-    platforms = [ "x86_64-linux" ];
 
-    knownVulnerabilities = [
-      ''
-        Trusts a Russian government issued CA certificate for some websites.
-        See https://habr.com/en/company/yandex/blog/655185/ (Russian) for details.
-      ''
-    ];
-  };
-}
+    unpackPhase = ''
+      mkdir $TMP/ya/ $out/bin/ -p
+      ar vx $src
+      tar --no-overwrite-dir -xvf data.tar.xz -C $TMP/ya/
+    '';
+
+    installPhase = ''
+      cp $TMP/ya/{usr/share,opt} $out/ -R
+      cp $out/share/applications/yandex-browser${app}.desktop $out/share/applications/${pname}.desktop || true
+      rm -f $out/share/applications/yandex-browser.desktop
+      substituteInPlace $out/share/applications/${pname}.desktop --replace /usr/ $out/
+      substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace /opt/ $out/opt/
+      substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace /opt/ $out/opt/
+      ln -sf ${vivaldi-ffmpeg-codecs}/lib/libffmpeg.so $out/opt/yandex/browser${app}/libffmpeg.so
+      ln -sf $out/opt/yandex/browser${app}/yandex-browser${app} $out/bin/${pname}
+    '';
+
+    runtimeDependencies =
+      map lib.getLib [
+        libpulseaudio
+        curl
+        systemd
+        vivaldi-ffmpeg-codecs
+      ]
+      ++ buildInputs;
+
+    meta = with lib; {
+      description = "Yandex Web Browser";
+      homepage = "https://browser.yandex.ru/";
+      license = licenses.unfree;
+      sourceProvenance = with sourceTypes; [binaryNativeCode];
+      maintainers = with maintainers; [
+        dan4ik605743
+        ionutnechita
+      ];
+      platforms = ["x86_64-linux"];
+
+      knownVulnerabilities = [
+        ''
+          Trusts a Russian government issued CA certificate for some websites.
+          See https://habr.com/en/company/yandex/blog/655185/ (Russian) for details.
+        ''
+      ];
+    };
+  }

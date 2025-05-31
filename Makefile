@@ -57,3 +57,9 @@ update:
 
 switch/asus:
 	sudo nixos-rebuild switch --flake .#asus
+
+fmt/alejandra:
+	alejandra .
+
+fmt/check:
+	alejandra .

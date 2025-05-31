@@ -64,7 +64,10 @@ in {
             {
               publicKey = "7BAuUi2uyh7jpyeezvgsRo5Seh4GF8L5/QF8WqdPB24=";
               presharedKeyFile = "/home/${user}/.ssh/wireguard-keys/presharedKeyFile";
-              allowedIPs = ["0.0.0.0/0" "::/0"];
+              allowedIPs = [
+                "0.0.0.0/0"
+                "::/0"
+              ];
               endpoint = "208.115.223.40:51820";
               persistentKeepalive = 0;
             }
@@ -76,7 +79,13 @@ in {
 
       networking.firewall = {
         # enable = true;
-        allowedTCPPorts = [53 80 433 1080 51820];
+        allowedTCPPorts = [
+          53
+          80
+          433
+          1080
+          51820
+        ];
       };
       # environment.etc."resolv.conf".text = "nameserver 8.8.8.8";
     };

@@ -14,7 +14,9 @@ in {
     };
     path = [pkgs.nix];
     serviceConfig = {
-      ExecStart = "${pkgs.shadowsocks-libev}/bin/ss-local -v -c ${config.sops.templates."shadowsocks.json".path}";
+      ExecStart = "${pkgs.shadowsocks-libev}/bin/ss-local -v -c ${
+        config.sops.templates."shadowsocks.json".path
+      }";
     };
     wantedBy = ["multi-user.target"];
   };

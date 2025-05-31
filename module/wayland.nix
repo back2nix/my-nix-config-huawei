@@ -1,14 +1,17 @@
-{ config, lib, pkgs, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   services.xserver = {
-    enable = true;  # Нужен для совместимости
+    enable = true; # Нужен для совместимости
     videoDrivers = ["modesetting"];
 
     displayManager = {
       gdm = {
         enable = true;
-        wayland = true;  # Включаем Wayland
+        wayland = true; # Включаем Wayland
       };
     };
 
@@ -33,10 +36,10 @@
   # Wayland-специфичные пакеты
   environment.systemPackages = with pkgs; [
     # Wayland утилиты
-    wl-clipboard              # Clipboard для Wayland
-    wlr-randr                 # Управление мониторами в Wayland
-    libinput                  # Библиотека для обработки ввода
-    iio-sensor-proxy          # Для автоповорота экрана
+    wl-clipboard # Clipboard для Wayland
+    wlr-randr # Управление мониторами в Wayland
+    libinput # Библиотека для обработки ввода
+    iio-sensor-proxy # Для автоповорота экрана
 
     # Виртуальная клавиатура для Wayland
     squeekboard
@@ -44,15 +47,27 @@
     # Wacom поддержка для Wayland
     libwacom
 
-
     (pkgs.writeShellScriptBin "toggle-flip" ''
-    export PATH="${pkgs.lib.makeBinPath [
-      pkgs.xorg.xrandr pkgs.xorg.xinput pkgs.xorg.xkbcomp
-      pkgs.libnotify pkgs.coreutils pkgs.util-linux
-      pkgs.procps pkgs.sudo pkgs.binutils pkgs.gawk
-      pkgs.xorg.xset pkgs.evtest pkgs.xxd pkgs.gnome-randr pkgs.dconf
-    ]}:$PATH"
-    ${builtins.readFile ./toggle-flip-wayland.sh}
+      export PATH="${
+        pkgs.lib.makeBinPath [
+          pkgs.xorg.xrandr
+          pkgs.xorg.xinput
+          pkgs.xorg.xkbcomp
+          pkgs.libnotify
+          pkgs.coreutils
+          pkgs.util-linux
+          pkgs.procps
+          pkgs.sudo
+          pkgs.binutils
+          pkgs.gawk
+          pkgs.xorg.xset
+          pkgs.evtest
+          pkgs.xxd
+          pkgs.gnome-randr
+          pkgs.dconf
+        ]
+      }:$PATH"
+      ${builtins.readFile ./toggle-flip-wayland.sh}
     '')
   ];
 

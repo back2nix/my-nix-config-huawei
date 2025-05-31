@@ -1,11 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.services.change-mac;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.services.change-mac;
+in {
   options.services.change-mac = {
     enable = mkOption {
       type = types.bool;
@@ -32,38 +33,38 @@ in
     };
   };
 
-  config = mkMerge [ 
-  (mkIf cfg.enable {
-    # sudo systemctl restart change-mac
-    systemd.services.change-mac = {
-      description = "Change MAC Address Service";
-      after = [ "network-pre.target" ];
-      before = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
+  config = mkMerge [
+    (mkIf cfg.enable {
+      # sudo systemctl restart change-mac
+      systemd.services.change-mac = {
+        description = "Change MAC Address Service";
+        after = ["network-pre.target"];
+        before = ["network.target"];
+        wantedBy = ["multi-user.target"];
 
-      serviceConfig = {
-        Type = "oneshot";
-        Environment = "PATH=${pkgs.iproute2}/bin";
-        ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/module/change-mac.sh ${cfg.interface} ${cfg.macAddress}";
-        ExecStop = "${pkgs.bash}/bin/bash /etc/nixos/module/restore-mac.sh ${cfg.interface}";
-        RemainAfterExit = true;
+        serviceConfig = {
+          Type = "oneshot";
+          Environment = "PATH=${pkgs.iproute2}/bin";
+          ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/module/change-mac.sh ${cfg.interface} ${cfg.macAddress}";
+          ExecStop = "${pkgs.bash}/bin/bash /etc/nixos/module/restore-mac.sh ${cfg.interface}";
+          RemainAfterExit = true;
+        };
       };
-    };
-  })
-  (mkIf (!cfg.enable) { 
-    # sudo systemctl restart restore-mac 
-    systemd.services.restore-mac = {
-      description = "Restore MAC Address Service";
-      before = [ "shutdown.target" ];
-      wantedBy = [ "shutdown.target" ];
+    })
+    (mkIf (!cfg.enable) {
+      # sudo systemctl restart restore-mac
+      systemd.services.restore-mac = {
+        description = "Restore MAC Address Service";
+        before = ["shutdown.target"];
+        wantedBy = ["shutdown.target"];
 
-      serviceConfig = {
-        Type = "oneshot";
-        Environment = "PATH=${pkgs.iproute2}/bin:${pkgs.ethtool}/bin:${pkgs.gawk}/bin";
-        ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/module/restore-mac.sh ${cfg.interface}";
-        RemainAfterExit = true;
+        serviceConfig = {
+          Type = "oneshot";
+          Environment = "PATH=${pkgs.iproute2}/bin:${pkgs.ethtool}/bin:${pkgs.gawk}/bin";
+          ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/module/restore-mac.sh ${cfg.interface}";
+          RemainAfterExit = true;
+        };
       };
-    };
-  })
+    })
   ];
 }

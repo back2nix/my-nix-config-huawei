@@ -23,7 +23,10 @@
         daemon = {
           settings = {
             dns = ["9.9.9.9"];
-            insecure-registries = ["localhost:5000" "172.18.0.2:5000"];
+            insecure-registries = [
+              "localhost:5000"
+              "172.18.0.2:5000"
+            ];
           };
         };
       };
@@ -34,7 +37,10 @@
           # ip = "127.0.0.1";
           # dns = ["127.0.0.11" "8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
           dns = ["9.9.9.9"];
-          insecure-registries = ["localhost:5000" "172.18.0.2:5000"];
+          insecure-registries = [
+            "localhost:5000"
+            "172.18.0.2:5000"
+          ];
         };
       };
     };
@@ -47,10 +53,16 @@
     "net.ipv4.ip_unprivileged_port_start" = 0;
   };
 
-  virtualisation.multipass = {enable = true;};
+  virtualisation.multipass = {
+    enable = true;
+  };
 
   virtualisation.containers.registries.search = ["docker.io"];
-  virtualisation.containers.registries.insecure = ["localhost:5000" "localhost:29003" "dev.ilx.yjpark.org"];
+  virtualisation.containers.registries.insecure = [
+    "localhost:5000"
+    "localhost:29003"
+    "dev.ilx.yjpark.org"
+  ];
 
   environment.systemPackages = with pkgs; [
     pkgs-master.docker-client

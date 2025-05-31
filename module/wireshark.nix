@@ -1,8 +1,12 @@
-{ pkgs-master,cfg, lib, ... }:
 {
+  pkgs-master,
+  cfg,
+  lib,
+  ...
+}: {
   # Define the wireshark group and set dumpcap with it.  This allows us to capture as nonroot
   # The wireshark package won't do this for us
-  users.groups.wireshark = { };
+  users.groups.wireshark = {};
 
   # security.wrappers.dumpcap = {
   #   source = "${pkgs-master.wireshark}/bin/dumpcap";
@@ -22,7 +26,7 @@
   };
 
   # Add myself to this new group
-  users.users.bg.extraGroups = [ "wireshark" ];
+  users.users.bg.extraGroups = ["wireshark"];
 
   environment.systemPackages = [
     pkgs-master.wireshark

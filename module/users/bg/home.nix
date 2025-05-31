@@ -245,10 +245,8 @@ in {
       pkgs-unstable.vscode
       pkgs-unstable.windsurf
 
-
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
-      (pkgs.writeScriptBin "mreplace"
-        (builtins.readFile ./bash/smart-replace.sh))
+      (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
       inputs.replacer.packages.${pkgs.system}.default
     ];
 
@@ -278,7 +276,6 @@ in {
       #   org.gradle.console=verbose
       #   org.gradle.daemon.idletimeout=3600000
       # '';
-
     };
     sessionVariables = {
       EDITOR = "nvim";

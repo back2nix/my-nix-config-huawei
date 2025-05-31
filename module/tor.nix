@@ -136,7 +136,14 @@
       networking = {
         firewall = {
           enable = false;
-          allowedTCPPorts = [53 80 433 1080 9040 9053];
+          allowedTCPPorts = [
+            53
+            80
+            433
+            1080
+            9040
+            9053
+          ];
         };
         nat = {
           enable = true;

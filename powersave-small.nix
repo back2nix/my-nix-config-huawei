@@ -33,18 +33,45 @@ in {
     settings = {
       # AC power settings (for when plugged in)
       CPU_SCALING_GOVERNOR_ON_AC = "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_AC = if acEconomyMode then "balance-power" else "balance-performance";
-      PLATFORM_PROFILE_ON_AC = if acEconomyMode then "low-power" else "balanced";
-      CPU_MAX_PERF_ON_AC = if acEconomyMode then 60 else 100;
-      CPU_BOOST_ON_AC = if acEconomyMode then 0 else 1;
+      CPU_ENERGY_PERF_POLICY_ON_AC =
+        if acEconomyMode
+        then "balance-power"
+        else "balance-performance";
+      PLATFORM_PROFILE_ON_AC =
+        if acEconomyMode
+        then "low-power"
+        else "balanced";
+      CPU_MAX_PERF_ON_AC =
+        if acEconomyMode
+        then 60
+        else 100;
+      CPU_BOOST_ON_AC =
+        if acEconomyMode
+        then 0
+        else 1;
       INTEL_PSTATE_ON_AC = "powersave";
 
       # Battery power settings
-      CPU_SCALING_GOVERNOR_ON_BAT = if batteryEconomyMode then "powersave" else "powersave";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = if batteryEconomyMode then "power" else "balance-power";
-      PLATFORM_PROFILE_ON_BAT = if batteryEconomyMode then "low-power" else "balanced";
-      CPU_MAX_PERF_ON_BAT = if batteryEconomyMode then 40 else 80;
-      CPU_BOOST_ON_BAT = if batteryEconomyMode then 0 else 1;
+      CPU_SCALING_GOVERNOR_ON_BAT =
+        if batteryEconomyMode
+        then "powersave"
+        else "powersave";
+      CPU_ENERGY_PERF_POLICY_ON_BAT =
+        if batteryEconomyMode
+        then "power"
+        else "balance-power";
+      PLATFORM_PROFILE_ON_BAT =
+        if batteryEconomyMode
+        then "low-power"
+        else "balanced";
+      CPU_MAX_PERF_ON_BAT =
+        if batteryEconomyMode
+        then 40
+        else 80;
+      CPU_BOOST_ON_BAT =
+        if batteryEconomyMode
+        then 0
+        else 1;
       INTEL_PSTATE_ON_BAT = "powersave";
 
       # USB settings
@@ -89,15 +116,16 @@ in {
     '';
   };
 
-  boot.kernelParams = [
-    "intel_pstate=active"
-    "processor.max_cstate=5"
-    "intel_idle.max_cstate=5"
-    "workqueue.power_efficient=y"
-    "pcie_aspm=powersave"
-  ]
-  # Add conditional kernel parameters based on power modes
-  ++ lib.optional batteryEconomyMode "intel_pstate=no_hwp"
-  ++ lib.optional (!batteryEconomyMode) "intel_pstate=hwp_only"
-  ++ lib.optional acEconomyMode "intel_pstate=no_hwp";
+  boot.kernelParams =
+    [
+      "intel_pstate=active"
+      "processor.max_cstate=5"
+      "intel_idle.max_cstate=5"
+      "workqueue.power_efficient=y"
+      "pcie_aspm=powersave"
+    ]
+    # Add conditional kernel parameters based on power modes
+    ++ lib.optional batteryEconomyMode "intel_pstate=no_hwp"
+    ++ lib.optional (!batteryEconomyMode) "intel_pstate=hwp_only"
+    ++ lib.optional acEconomyMode "intel_pstate=no_hwp";
 }

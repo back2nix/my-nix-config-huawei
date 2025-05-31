@@ -13,7 +13,17 @@
   ];
 
   # boot.initrd.availableKernelModules = ["xhci_pci" "thunderbolt" "nvme" "usb_storage" "sd_mod"];
-  boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "thunderbolt" "vmd" "usb_storage" "nvme" "rtsx_usb_sdmmc" "uas" "sd_mod"];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "thunderbolt"
+    "vmd"
+    "usb_storage"
+    "nvme"
+    "rtsx_usb_sdmmc"
+    "uas"
+    "sd_mod"
+  ];
   boot.initrd.kernelModules = [];
   boot.kernelModules = ["kvm-intel"];
   boot.extraModulePackages = [];
@@ -26,7 +36,10 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/6B62-26C3";
     fsType = "vfat";
-    options = ["fmask=0077" "dmask=0077"];
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
   swapDevices = [

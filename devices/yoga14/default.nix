@@ -75,8 +75,16 @@
 
   systemd.services.iwlwifi-reload = {
     description = "Reload iwlwifi module after suspend";
-    after = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
-    wantedBy = [ "suspend.target" "hibernate.target" "hybrid-sleep.target" ];
+    after = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+    ];
+    wantedBy = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+    ];
     serviceConfig = {
       Type = "oneshot";
       ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.kmod}/bin/rmmod iwlmvm iwlwifi || true'";
@@ -89,12 +97,15 @@
   # Bluetooth конфигурация для Yoga14
   systemd.services.bluetooth = {
     serviceConfig = {
-      ExecStart = ["" "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf"];
+      ExecStart = [
+        ""
+        "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf"
+      ];
       ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.bluez}/bin/bluetoothctl power on'";
       RestartSec = "5";
       Restart = "on-failure";
     };
-    wantedBy = [ "bluetooth.target" ];
+    wantedBy = ["bluetooth.target"];
   };
 
   systemd.tmpfiles.rules = [
@@ -125,9 +136,18 @@
 
   # Диагностические пакеты для Yoga14
   environment.systemPackages = with pkgs; [
-    alsa-utils alsa-tools alsa-ucm-conf pamixer pulseaudio
-    bluez bluez-tools blueman
-    usbutils pciutils lshw v4l-utils
+    alsa-utils
+    alsa-tools
+    alsa-ucm-conf
+    pamixer
+    pulseaudio
+    bluez
+    bluez-tools
+    blueman
+    usbutils
+    pciutils
+    lshw
+    v4l-utils
     iwd # ВАЖНО: для лучшей работы с Intel AX211
     # wireless-tools
   ];
@@ -194,6 +214,5 @@
     }
   '';
 
-  hardware.cpu.intel.updateMicrocode =
-    lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

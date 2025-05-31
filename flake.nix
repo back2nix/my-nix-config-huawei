@@ -69,7 +69,13 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = {
-            inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
+            inherit
+              self
+              inputs
+              pkgs-master
+              pkgs-unstable
+              pkgs-23-11
+              ;
           };
           modules =
             [
@@ -82,18 +88,26 @@
               {
                 imports = self.lsFiles ./overlays;
               }
-              ({pkgs, ...}: {
-                nixpkgs.overlays = [
-                  (final: prev: {
-                    # openvpn3 = openvpn3-pr.legacyPackages.${system}.openvpn3;
-                  })
-                ];
-              })
+              (
+                {pkgs, ...}: {
+                  nixpkgs.overlays = [
+                    (final: prev: {
+                      # openvpn3 = openvpn3-pr.legacyPackages.${system}.openvpn3;
+                    })
+                  ];
+                }
+              )
               home-manager.nixosModules.home-manager
               {
                 home-manager = {
                   extraSpecialArgs = {
-                    inherit self inputs pkgs-master pkgs-unstable pkgs-23-11;
+                    inherit
+                      self
+                      inputs
+                      pkgs-master
+                      pkgs-unstable
+                      pkgs-23-11
+                      ;
                   };
                   useGlobalPkgs = true;
                   useUserPackages = true;

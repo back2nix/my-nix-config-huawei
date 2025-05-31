@@ -11,8 +11,18 @@ in {
   };
   users.groups."${user}" = {};
 
-  networking.firewall.allowedTCPPorts = [443 1081 3080 10809];
-  networking.firewall.allowedUDPPorts = [443 1081 3080 10809];
+  networking.firewall.allowedTCPPorts = [
+    443
+    1081
+    3080
+    10809
+  ];
+  networking.firewall.allowedUDPPorts = [
+    443
+    1081
+    3080
+    10809
+  ];
   sops = {
     templates."xray-server.json" = {
       owner = "${user}";

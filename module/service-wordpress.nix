@@ -35,9 +35,22 @@ with lib; let
         # Since hard linking directories is not allowed, copying is the next best thing.
 
         # copy additional plugin(s), theme(s) and language(s)
-        ${concatStringsSep "\n" (mapAttrsToList (name: theme: "cp -r ${theme} $out/share/wordpress/wp-content/themes/${name}") cfg.themes)}
-        ${concatStringsSep "\n" (mapAttrsToList (name: plugin: "cp -r ${plugin} $out/share/wordpress/wp-content/plugins/${name}") cfg.plugins)}
-        ${concatMapStringsSep "\n" (language: "cp -r ${language} $out/share/wordpress/wp-content/languages/") cfg.languages}
+        ${concatStringsSep "\n" (
+          mapAttrsToList (
+            name: theme: "cp -r ${theme} $out/share/wordpress/wp-content/themes/${name}"
+          )
+          cfg.themes
+        )}
+        ${concatStringsSep "\n" (
+          mapAttrsToList (
+            name: plugin: "cp -r ${plugin} $out/share/wordpress/wp-content/plugins/${name}"
+          )
+          cfg.plugins
+        )}
+        ${concatMapStringsSep "\n" (
+            language: "cp -r ${language} $out/share/wordpress/wp-content/languages/"
+          )
+          cfg.languages}
       '';
     };
 
@@ -104,7 +117,16 @@ with lib; let
     then v._raw
     else abort "The Wordpress config value ${lib.generators.toPretty {} v} can not be encoded.";
 
-  secretsVars = ["AUTH_KEY" "SECURE_AUTH_KEY" "LOGGED_IN_KEY" "NONCE_KEY" "AUTH_SALT" "SECURE_AUTH_SALT" "LOGGED_IN_SALT" "NONCE_SALT"];
+  secretsVars = [
+    "AUTH_KEY"
+    "SECURE_AUTH_KEY"
+    "LOGGED_IN_KEY"
+    "NONCE_KEY"
+    "AUTH_SALT"
+    "SECURE_AUTH_SALT"
+    "LOGGED_IN_SALT"
+    "NONCE_SALT"
+  ];
   secretsScript = hostStateDir: ''
     # The match in this line is not a typo, see https://github.com/NixOS/nixpkgs/pull/124839
     grep -q "LOOGGED_IN_KEY" "${hostStateDir}/secret-keys.php" && rm "${hostStateDir}/secret-keys.php"
@@ -149,13 +171,12 @@ with lib; let
 
       plugins = mkOption {
         type = with types;
-          coercedTo
-          (listOf path)
-          (l:
-            warn "setting this option with a list is deprecated"
-            listToAttrs
-            (map (p: nameValuePair (p.name or (throw "${p} does not have a name")) p) l))
-          (attrsOf path);
+          coercedTo (listOf path) (
+            l:
+              warn "setting this option with a list is deprecated" listToAttrs (
+                map (p: nameValuePair (p.name or (throw "${p} does not have a name")) p) l
+              )
+          ) (attrsOf path);
         default = {};
         description = lib.mdDoc ''
           Path(s) to respective plugin(s) which are copied from the 'plugins' directory.
@@ -173,13 +194,12 @@ with lib; let
 
       themes = mkOption {
         type = with types;
-          coercedTo
-          (listOf path)
-          (l:
-            warn "setting this option with a list is deprecated"
-            listToAttrs
-            (map (p: nameValuePair (p.name or (throw "${p} does not have a name")) p) l))
-          (attrsOf path);
+          coercedTo (listOf path) (
+            l:
+              warn "setting this option with a list is deprecated" listToAttrs (
+                map (p: nameValuePair (p.name or (throw "${p} does not have a name")) p) l
+              )
+          ) (attrsOf path);
         default = {inherit (pkgs.wordpressPackages.themes) twentytwentythree;};
         defaultText = literalExpression "{ inherit (pkgs.wordpressPackages.themes) twentytwentythree; }";
         description = lib.mdDoc ''
@@ -299,7 +319,12 @@ with lib; let
       };
 
       poolConfig = mkOption {
-        type = with types; attrsOf (oneOf [str int bool]);
+        type = with types;
+          attrsOf (oneOf [
+            str
+            int
+            bool
+          ]);
         default = {
           "pm" = "dynamic";
           "pm.max_children" = 32;
@@ -381,7 +406,11 @@ in {
       };
 
       webserver = mkOption {
-        type = types.enum ["httpd" "nginx" "caddy"];
+        type = types.enum [
+          "httpd"
+          "nginx"
+          "caddy"
+        ];
         default = "httpd";
         description = lib.mdDoc ''
           Whether to use apache2 or nginx for virtual host management.
@@ -400,14 +429,12 @@ in {
   config = mkIf (eachSite != {}) (mkMerge [
     {
       assertions =
-        (mapAttrsToList
-          (hostName: cfg: {
+        (mapAttrsToList (hostName: cfg: {
             assertion = cfg.database.createLocally -> cfg.database.user == user;
             message = ''services.wordpress.sites."${hostName}".database.user must be ${user} if the database is to be automatically provisioned'';
           })
           eachSite)
-        ++ (mapAttrsToList
-          (hostName: cfg: {
+        ++ (mapAttrsToList (hostName: cfg: {
             assertion = cfg.database.createLocally -> cfg.database.passwordFile == null;
             message = ''services.wordpress.sites."${hostName}".database.passwordFile cannot be specified if services.wordpress.sites."${hostName}".database.createLocally is set to true.'';
           })
@@ -418,20 +445,18 @@ in {
         package = mkDefault pkgs.mariadb;
         ensureDatabases = mapAttrsToList (hostName: cfg: cfg.database.name) eachSite;
         ensureUsers =
-          mapAttrsToList
-          (
-            hostName: cfg: {
-              name = cfg.database.user;
-              ensurePermissions = {"${cfg.database.name}.*" = "ALL PRIVILEGES";};
-            }
-          )
+          mapAttrsToList (hostName: cfg: {
+            name = cfg.database.user;
+            ensurePermissions = {
+              "${cfg.database.name}.*" = "ALL PRIVILEGES";
+            };
+          })
           eachSite;
       };
 
       services.phpfpm.pools =
-        mapAttrs'
-        (hostName: cfg: (
-          nameValuePair "wordpress-${hostName}" {
+        mapAttrs' (
+          hostName: cfg: (nameValuePair "wordpress-${hostName}" {
             inherit user;
             group = webserver.group;
             settings =
@@ -440,8 +465,8 @@ in {
                 "listen.group" = webserver.group;
               }
               // cfg.poolConfig;
-          }
-        ))
+          })
+        )
         eachSite;
     }
 
@@ -450,61 +475,64 @@ in {
         enable = true;
         extraModules = ["proxy_fcgi"];
         virtualHosts =
-          mapAttrs
-          (hostName: cfg:
-            mkMerge [
-              cfg.virtualHost
-              {
-                documentRoot = mkForce "${pkg hostName cfg}/share/wordpress";
-                extraConfig = ''
-                  <Directory "${pkg hostName cfg}/share/wordpress">
-                    <FilesMatch "\.php$">
-                      <If "-f %{REQUEST_FILENAME}">
-                        SetHandler "proxy:unix:${config.services.phpfpm.pools."wordpress-${hostName}".socket}|fcgi://localhost/"
-                      </If>
-                    </FilesMatch>
+          mapAttrs (
+            hostName: cfg:
+              mkMerge [
+                cfg.virtualHost
+                {
+                  documentRoot = mkForce "${pkg hostName cfg}/share/wordpress";
+                  extraConfig = ''
+                    <Directory "${pkg hostName cfg}/share/wordpress">
+                      <FilesMatch "\.php$">
+                        <If "-f %{REQUEST_FILENAME}">
+                          SetHandler "proxy:unix:${
+                      config.services.phpfpm.pools."wordpress-${hostName}".socket
+                    }|fcgi://localhost/"
+                        </If>
+                      </FilesMatch>
 
-                    # standard wordpress .htaccess contents
-                    <IfModule mod_rewrite.c>
-                      RewriteEngine On
-                      RewriteBase /
-                      RewriteRule ^index\.php$ - [L]
-                      RewriteCond %{REQUEST_FILENAME} !-f
-                      RewriteCond %{REQUEST_FILENAME} !-d
-                      RewriteRule . /index.php [L]
-                    </IfModule>
+                      # standard wordpress .htaccess contents
+                      <IfModule mod_rewrite.c>
+                        RewriteEngine On
+                        RewriteBase /
+                        RewriteRule ^index\.php$ - [L]
+                        RewriteCond %{REQUEST_FILENAME} !-f
+                        RewriteCond %{REQUEST_FILENAME} !-d
+                        RewriteRule . /index.php [L]
+                      </IfModule>
 
-                    DirectoryIndex index.php
-                    Require all granted
-                    Options +FollowSymLinks -Indexes
-                  </Directory>
+                      DirectoryIndex index.php
+                      Require all granted
+                      Options +FollowSymLinks -Indexes
+                    </Directory>
 
-                  # https://wordpress.org/support/article/hardening-wordpress/#securing-wp-config-php
-                  <Files wp-config.php>
-                    Require all denied
-                  </Files>
-                '';
-              }
-            ])
+                    # https://wordpress.org/support/article/hardening-wordpress/#securing-wp-config-php
+                    <Files wp-config.php>
+                      Require all denied
+                    </Files>
+                  '';
+                }
+              ]
+          )
           eachSite;
       };
     })
 
     {
-      systemd.tmpfiles.rules = flatten (mapAttrsToList
-        (hostName: cfg: [
+      systemd.tmpfiles.rules = flatten (
+        mapAttrsToList (hostName: cfg: [
           "d '${stateDir hostName}' 0750 ${user} ${webserver.group} - -"
           "d '${cfg.uploadsDir}' 0750 ${user} ${webserver.group} - -"
           "Z '${cfg.uploadsDir}' 0750 ${user} ${webserver.group} - -"
           "d '${cfg.fontsDir}' 0750 ${user} ${webserver.group} - -"
           "Z '${cfg.fontsDir}' 0750 ${user} ${webserver.group} - -"
         ])
-        eachSite);
+        eachSite
+      );
 
       systemd.services = mkMerge [
-        (mapAttrs'
-          (hostName: cfg: (
-            nameValuePair "wordpress-init-${hostName}" {
+        (mapAttrs' (
+            hostName: cfg: (nameValuePair "wordpress-init-${hostName}" {
               wantedBy = ["multi-user.target"];
               before = ["phpfpm-wordpress-${hostName}.service"];
               after = optional cfg.database.createLocally "mysql.service";
@@ -515,8 +543,8 @@ in {
                 User = user;
                 Group = webserver.group;
               };
-            }
-          ))
+            })
+          )
           eachSite)
 
         (optionalAttrs (any (v: v.database.createLocally) (attrValues eachSite)) {
@@ -534,8 +562,7 @@ in {
       services.nginx = {
         enable = true;
         virtualHosts =
-          mapAttrs
-          (hostName: cfg: {
+          mapAttrs (hostName: cfg: {
             serverName = mkDefault hostName;
             root = "${pkg hostName cfg}/share/wordpress";
             extraConfig = ''
@@ -592,9 +619,8 @@ in {
       services.caddy = {
         enable = true;
         virtualHosts =
-          mapAttrs'
-          (hostName: cfg: (
-            nameValuePair "http://${hostName}" {
+          mapAttrs' (
+            hostName: cfg: (nameValuePair "http://${hostName}" {
               extraConfig = ''
                 root    * /${pkg hostName cfg}/share/wordpress
                 file_server
@@ -611,8 +637,8 @@ in {
                 }
                 rewrite @wp-admin {path}/index.php?{query}
               '';
-            }
-          ))
+            })
+          )
           eachSite;
       };
     })

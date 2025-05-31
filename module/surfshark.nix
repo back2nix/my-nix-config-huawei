@@ -4,21 +4,18 @@
   pkgs,
   ...
 }:
-
 # systemctl list-unit-files | grep openvpn | grep us-
 # sudo systemctl start openvpn-us-nyc.service
 # sudo systemctl restart openvpn-us-nyc.service
 # sudo systemctl status openvpn-us-nyc.service
-
-with lib;
-let
+with lib; let
   configFiles = pkgs.stdenv.mkDerivation {
     name = "surfshark-config";
     src = pkgs.fetchurl {
       url = "https://github.com/charludo/surfshark-configs/raw/main/Surfshark_Config.zip";
       sha256 = "sha256-n2cPHCYxXGzTvPHwCjsHVIj3yM/bnCJw0hwwTNXlcQI";
     };
-    phases = [ "installPhase" ];
+    phases = ["installPhase"];
     buildInputs = [
       pkgs.unzip
       pkgs.rename
@@ -60,7 +57,9 @@ let
   openVPNConfigs = map getConfig (builtins.attrNames (builtins.readDir configFiles));
 
   services = "(${
-    lib.concatStringsSep " " (lib.mapAttrsToList (name: _: "\"openvpn-${name}.service\"") config.services.openvpn.servers)
+    lib.concatStringsSep " " (
+      lib.mapAttrsToList (name: _: "\"openvpn-${name}.service\"") config.services.openvpn.servers
+    )
   })";
 
   surfshark-start = pkgs.writeShellApplication {
@@ -81,7 +80,7 @@ let
   };
   surfshark-random = pkgs.writeShellApplication {
     name = "surfshark-random";
-    runtimeInputs = [ surfshark-stop ];
+    runtimeInputs = [surfshark-stop];
     text = ''
       systemctl daemon-reload
       ${surfshark-stop}/bin/surfshark-stop
@@ -92,8 +91,7 @@ let
   };
 
   cfg = config.surfshark;
-in
-{
+in {
   options.surfshark = {
     enable = lib.mkEnableOption (lib.mdDoc "enable surfshark VPN");
 
@@ -117,25 +115,25 @@ in
 
     iptables.enforceForUsers = mkOption {
       type = types.listOf (types.str);
-      default = [ ];
+      default = [];
       description = "which users to enforce the surfshark iptables rules for";
     };
   };
 
   config = mkIf cfg.enable (mkMerge [
-    ({
-      networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
+    {
+      networking.networkmanager.plugins = [pkgs.networkmanager-openvpn];
 
       services.openvpn.servers = builtins.listToAttrs openVPNConfigs;
       environment.systemPackages = [
         surfshark-random
         surfshark-stop
       ];
-    })
+    }
 
     (mkIf cfg.alwaysOn {
       systemd.timers."surfshark-ensure-minutely" = {
-        wantedBy = [ "timers.target" ];
+        wantedBy = ["timers.target"];
         timerConfig = {
           OnCalendar = "minutely";
           Persistent = true;
@@ -202,21 +200,24 @@ in
             iptables -A OUTPUT -m owner --gid-owner ${
               builtins.toString config.users.groups."${user}".gid
             } -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
-          '') cfg.iptables.enforceForUsers
+          '')
+          cfg.iptables.enforceForUsers
         )
         + lib.concatStringsSep "" (
           map (user: ''
             iptables -A OUTPUT -m owner --gid-owner ${
               builtins.toString config.users.groups."${user}".gid
             } -d 127.0.0.1 ! -o tun0 -j ACCEPT
-          '') cfg.iptables.enforceForUsers
+          '')
+          cfg.iptables.enforceForUsers
         )
         + lib.concatStringsSep "" (
           map (user: ''
             iptables -A OUTPUT -m owner --gid-owner ${
               builtins.toString config.users.groups."${user}".gid
             } ! -o tun0 -j REJECT
-          '') cfg.iptables.enforceForUsers
+          '')
+          cfg.iptables.enforceForUsers
         )
         + ''
 

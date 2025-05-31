@@ -12,8 +12,7 @@ in {
   imports = [];
 
   home.file.".config/nixpkgs/zsh-completions/_mfiles".source = ./_mfiles;
-  home.file.".config/nixpkgs/zsh-completions/_ssh_port_completion".source =
-    ./_ssh_port_completion;
+  home.file.".config/nixpkgs/zsh-completions/_ssh_port_completion".source = ./_ssh_port_completion;
 
   programs.zsh = {
     enable = true;
@@ -136,8 +135,7 @@ in {
       # s2tf = "${pkgs-master.gnome-frog}/bin/frog";
       en = "${pkgs-master.normcap}/bin/normcap -l eng";
       ru = "${pkgs-master.normcap}/bin/normcap -l rus";
-      diff = ''
-        ${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
+      diff = ''${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
       ls = "eza ";
       ll = "eza -l --color=always";
       la = "eza -a --color=always";
@@ -222,8 +220,7 @@ in {
         $EDITOR ''${fileline%%:*} +''${fileline##*:}
         fi
       '';
-      fl = ''
-        git log --oneline --color=always | fzf --ansi --preview=" echo { } | cut - d ' ' - f 1 | xargs - I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1 | xargs git log --pretty=short -n 1'';
+      fl = ''git log --oneline --color=always | fzf --ansi --preview=" echo { } | cut - d ' ' - f 1 | xargs - I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1 | xargs git log --pretty=short -n 1'';
       # gd = "git diff --name-only --diff-filter=d $@ | xargs bat --diff";
       cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-*";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";

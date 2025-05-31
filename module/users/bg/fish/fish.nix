@@ -8,11 +8,10 @@
   ...
 }: {
   home.file.".config/fish/completions/mfiles.fish".source = ./mfiles.fish;
-  home.file.".config/fish/completions/r2l.fish".source =
-    ./_ssh_port_completion;
+  home.file.".config/fish/completions/r2l.fish".source = ./_ssh_port_completion;
 
-    programs.fish = {
-      enable = true;
+  programs.fish = {
+    enable = true;
 
     # Включаем интерактивные функции
     interactiveShellInit = ''
@@ -217,8 +216,7 @@
       en = "${pkgs-master.normcap}/bin/normcap -l eng";
       ru = "${pkgs-master.normcap}/bin/normcap -l rus";
 
-      diff = ''
-        ${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
+      diff = ''${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
 
       st = "stat --format '%a'";
       fe = ''
@@ -251,7 +249,7 @@
       clip = "head -c -1|xclip -i -selection clipboard";
       rd = "readlink -f";
       sudo = "sudo ";
-      };
+    };
 
     shellInit = ''
       # if command -q nix-your-shell

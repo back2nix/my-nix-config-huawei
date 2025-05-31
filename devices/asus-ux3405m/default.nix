@@ -29,7 +29,9 @@
       options snd-hda-intel index=0 model=alc294-asus-zenbook
       options snd-hda-intel index=1 model=auto
     '';
-    loader.grub.extraFiles = {"ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";};
+    loader.grub.extraFiles = {
+      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
+    };
     loader.grub.extraConfig = ''
       acpi /ssdt-csc3551.aml
     '';
@@ -62,66 +64,70 @@
     alsa-tools
     alsa-ucm-conf
     pamixer
-    pulseaudio  # для некоторых утилит
+    pulseaudio # для некоторых утилит
     asusctl
   ];
 
-    # sudo tlp-stat -b
-    services.supergfxd.enable = true;
-    services.asusd.enable = true;
+  # sudo tlp-stat -b
+  services.supergfxd.enable = true;
+  services.asusd.enable = true;
 
-    services.thermald.enable = true;
+  services.thermald.enable = true;
 
-    fileSystems."/" = {
-      device = "/dev/disk/by-uuid/de59dbfa-9be2-44cf-af53-777940bdd226";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/de59dbfa-9be2-44cf-af53-777940bdd226";
+    fsType = "ext4";
+  };
 
-    fileSystems."/boot" = {
-      device = "/dev/disk/by-uuid/6B62-26C3";
-      fsType = "vfat";
-      options = ["fmask=0077" "dmask=0077"];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/6B62-26C3";
+    fsType = "vfat";
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
+  };
 
-    swapDevices = [{device = "/dev/disk/by-uuid/e2c52285-0430-4b2d-9a09-ce90c536311f";}];
+  swapDevices = [{device = "/dev/disk/by-uuid/e2c52285-0430-4b2d-9a09-ce90c536311f";}];
 
-    networking.useDHCP = lib.mkDefault true;
-    networking.nat.externalInterface = "wlo1";
+  networking.useDHCP = lib.mkDefault true;
+  networking.nat.externalInterface = "wlo1";
 
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-    hardware.pulseaudio.enable = false;
-    security.rtkit.enable = true;
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true;
 
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
 
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      jack.enable = true;
-
-  # Добавление специальной конфигурации Bluetooth для Wireplumber
-  wireplumber.extraConfig."10-bluez" = {
-    "monitor.bluez.properties" = {
-      "bluez5.enable-sbc-xq" = true;
-      "bluez5.enable-msbc" = true;
-      "bluez5.enable-hw-volume" = true;
-      "bluez5.headset-roles" = [
-        "hsp_hs"
-        "hsp_ag"
-        "hfp_hf"
-        "hfp_ag"
-      ];
-      "bluez5.codecs" = ["sbc_xq" "aac" "ldac"];
+    # Добавление специальной конфигурации Bluetooth для Wireplumber
+    wireplumber.extraConfig."10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.enable-sbc-xq" = true;
+        "bluez5.enable-msbc" = true;
+        "bluez5.enable-hw-volume" = true;
+        "bluez5.headset-roles" = [
+          "hsp_hs"
+          "hsp_ag"
+          "hfp_hf"
+          "hfp_ag"
+        ];
+        "bluez5.codecs" = [
+          "sbc_xq"
+          "aac"
+          "ldac"
+        ];
+      };
     };
   };
-};
 
-
-hardware = {
-  cpu.intel.updateMicrocode =
-    lib.mkDefault config.hardware.enableRedistributableFirmware;
+  hardware = {
+    cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     graphics = {
       enable = true;
       # driSupport = true;
