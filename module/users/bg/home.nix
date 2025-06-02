@@ -248,6 +248,9 @@ in {
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
       inputs.replacer.packages.${pkgs.system}.default
+
+      s3cmd
+      minio-client
     ];
 
     file = {

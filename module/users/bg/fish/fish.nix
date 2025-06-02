@@ -15,6 +15,13 @@
 
     # Включаем интерактивные функции
     interactiveShellInit = ''
+      set -g fish_history_size 10000
+      set -g fish_history_file ~/.local/share/fish/fish_history
+
+      function save_history --on-event fish_preexec
+        history save
+      end
+
       # Настройка окружения
       set -gx LANG en_US.UTF-8
       set -gx PATH $PATH $HOME/.cargo/bin
@@ -111,6 +118,16 @@
           repo = "colored_man_pages.fish";
           rev = "f885c2507128b70d6c41b043070a8f399988bc7a";
           sha256 = "sha256-ii9gdBPlC1/P1N9xJzqomrkyDqIdTg+iCg0mwNVq2EU=";
+        };
+      }
+      # Плагин для улучшенной истории
+      {
+        name = "fzf-fish";
+        src = pkgs.fetchFromGitHub {
+          owner = "PatrickF1";
+          repo = "fzf.fish";
+          rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
+          sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
         };
       }
     ];

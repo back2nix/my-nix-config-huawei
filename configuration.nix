@@ -190,6 +190,7 @@ in {
       nettools
       dnsutils
       nmap
+      colmena
     ];
 
     etc."proxychains.conf".text = ''
