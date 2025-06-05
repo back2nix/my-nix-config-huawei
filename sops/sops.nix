@@ -30,6 +30,24 @@
     templates."sing-box-config.json" = {
       content = builtins.toJSON {
         log.level = "info";
+
+        dns = {
+          servers = [
+            {
+              tag = "local";
+              address = "127.0.0.1";
+              address_resolver = "local";
+            }
+          ];
+          rules = [
+            {
+              outbound = "any";
+              server = "local";
+            }
+          ];
+          strategy = "prefer_ipv4";
+        };
+
         inbounds = [
           {
             type = "http";
