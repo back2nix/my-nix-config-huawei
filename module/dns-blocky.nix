@@ -8,14 +8,14 @@
 
   my-blocky-v0262 = pkgs.callPackage ../pkgs/blocky-v0.26.2.nix {};
 
-  # Конфигурация upstream серверов
+  # Твои upstreamServers
   upstreamServers = {
-    doh = ["127.0.0.1:5335"]; # cloudflared
+    doh = ["127.0.0.1:5335"];
     dot = [
-      "tcp-tls:1.1.1.1:853" # Cloudflare DoT
-      "tcp-tls:8.8.8.8:853" # Google DoT
-      "tcp-tls:1.0.0.1:853" # Cloudflare DoT
-      "tcp-tls:8.8.4.4:853" # Google DoT
+      "tcp-tls:1.1.1.1:853"
+      "tcp-tls:8.8.8.8:853"
+      "tcp-tls:1.0.0.1:853"
+      "tcp-tls:8.8.4.4:853"
     ];
     plain = [
       "1.1.1.1:53"
@@ -23,18 +23,16 @@
     ];
     dot-doh = [
       "127.0.0.1:5335"
-      # DoH серверы
-      # "https://1.1.1.1/dns-query"           # Cloudflare DoH
-      "https://8.8.8.8/dns-query" # Google DoH
-      "https://dns.quad9.net/dns-query" # Quad9 DoH
-      # DoT серверы
-      "tcp-tls:1.1.1.1:853" # Cloudflare DoT
-      "tcp-tls:8.8.8.8:853" # Google DoT
-      "tcp-tls:9.9.9.9:853" # Quad9 DoT
+      "https://8.8.8.8/dns-query"
+      "https://dns.quad9.net/dns-query"
+      "tcp-tls:1.1.1.1:853"
+      "tcp-tls:8.8.8.8:853"
+      "tcp-tls:9.9.9.9:853"
     ];
   };
 
   commonBlacklists = [
+    # Твой список остается тем же
     "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt"
     "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts"
     "https://v.firebog.net/hosts/static/w3kbl.txt"
@@ -70,20 +68,13 @@
     "https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser"
   ];
 
-  # Расширенные блэклисты (опционально)
-  extendedBlacklists = [
-  ];
+  extendedBlacklists = [];
 in {
   options.services.dns-setup = {
     enable = lib.mkEnableOption "DNS filtering setup with blocky";
 
     mode = lib.mkOption {
-      type = lib.types.enum [
-        "doh"
-        "dot"
-        "plain"
-        "dot-doh"
-      ];
+      type = lib.types.enum ["doh" "dot" "plain" "dot-doh"];
       description = "DNS upstream mode: DoH, DoT, or plain DNS";
     };
 
@@ -107,7 +98,50 @@ in {
     # Отключаем systemd-resolved
     services.resolved.enable = false;
 
-    # CloudFlared только для DoH режима
+    # НАСТРОЙКА POSTGRESQL
+    services.postgresql = {
+      enable = true;
+      ensureDatabases = [ "blocky" ];
+      ensureUsers = [
+        {
+          name = "blocky";
+          ensureDBOwnership = true;
+        }
+        {
+          name = "grafana";
+        }
+      ];
+
+  # Добавляем настройки для TCP подключений
+  settings = {
+    listen_addresses = "localhost";
+    port = 5432;
+  };
+
+  # Настройка аутентификации для локальных TCP подключений
+  authentication = lib.mkOverride 10 ''
+    local all all trust
+    host all all 127.0.0.1/32 trust
+    host all all ::1/128 trust
+  '';
+};
+
+    # Настраиваем права для grafana на чтение данных
+    systemd.services.postgresql.postStart = lib.mkAfter ''
+      $PSQL -tAc 'GRANT CONNECT ON DATABASE blocky TO grafana'
+      $PSQL -d blocky -tAc 'GRANT USAGE ON SCHEMA public TO grafana'
+      $PSQL -d blocky -tAc 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana'
+      $PSQL -d blocky -tAc 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO grafana'
+    '';
+
+    # СОЗДАЕМ ПОЛЬЗОВАТЕЛЯ BLOCKY
+    users.users.blocky = {
+      group = "blocky";
+      isSystemUser = true;
+    };
+    users.groups.blocky = {};
+
+    # CloudFlared для DoH режима
     systemd.services.cloudflared-doh = lib.mkIf (cfg.mode == "doh" || cfg.mode == "dot-doh") {
       enable = true;
       description = "DNS over HTTPS (DoH) proxy client";
@@ -122,15 +156,14 @@ in {
       };
     };
 
-    # Основная конфигурация blocky
+    # ОСНОВНАЯ КОНФИГУРАЦИЯ BLOCKY С POSTGRESQL
     services.blocky = {
       enable = true;
       package = my-blocky-v0262;
       settings = {
         upstreams = {
-          groups.default = upstreamServers.${cfg.mode}; # Использует "dot", если cfg.mode = "dot"
-          init.strategy = "blocking"; # ИСПРАВЛЕНО
-          # strategy = "random_healthy"; # Можно добавить: выбирать случайный работающий сервер
+          groups.default = upstreamServers.${cfg.mode};
+          init.strategy = "blocking";
         };
 
         blocking = {
@@ -145,34 +178,51 @@ in {
           maxTime = "30m";
           maxItemsCount = 0;
           prefetching = true;
-          # minTime = "1m";
-          # prefetchExpires = "2h";
-          # prefetchThreshold = 5;
         };
 
         ports = {
           dns = "127.0.0.1:53";
-          http = "127.0.0.1:4000";
+          http = "0.0.0.0:4000";
         };
 
-        # bootstrapDns = [ "tcp:1.1.1.1" "udp:8.8.8.8" ];
-        # bootstrapDns = "tcp+udp:1.1.1.1";
+        # ВКЛЮЧАЕМ PROMETHEUS МЕТРИКИ
+        prometheus = {
+          enable = true;
+          path = "/metrics";
+        };
+
+        # НАСТРАИВАЕМ POSTGRESQL ЛОГИРОВАНИЕ
+        queryLog = {
+          type = "postgresql";
+          target = "postgres://blocky@localhost/blocky";  # Заменили на TCP
+          logRetentionDays = 90;
+        };
+
         bootstrapDns = [
           "tcp+udp:1.1.1.1"
           "https://1.1.1.1/dns-query"
           "tcp+udp:8.8.8.8"
         ];
 
-        queryLog = {
-          type = "console";
-        };
-
         ede.enable = true;
-
-        # Если проблемы с DNS, раскомментируйте для более подробных логов:
-        # logLevel = "debug";
       };
     };
+
+    # НАСТРОЙКА СЕРВИСА BLOCKY
+    systemd.services.blocky = {
+      after = [ "postgresql.service" ];
+      requires = [ "postgresql.service" ];
+      serviceConfig = {
+        DynamicUser = lib.mkForce false;
+        User = "blocky";
+        Group = "blocky";
+        Restart = "on-failure";
+        RestartSec = "1";
+      };
+    };
+
+    # Открываем порты
+    networking.firewall.allowedTCPPorts = [ 4000 ];
 
     # Сетевые настройки
     networking = {

@@ -50,7 +50,7 @@ with lib;
       ];
     };
 
-    # Prometheus - УПРОЩЕННАЯ КОНФИГУРАЦИЯ
+    # Prometheus с метриками Blocky
     services.prometheus = {
       enable = true;
       port = config.services.monitoring-stack.prometheus.port;
@@ -68,10 +68,18 @@ with lib;
             targets = [ "localhost:${toString config.services.monitoring-stack.prometheus.port}" ];
           }];
         }
+        # ДОБАВЛЯЕМ BLOCKY МЕТРИКИ
+        {
+          job_name = "blocky";
+          scrape_interval = "15s";
+          static_configs = [{
+            targets = [ "localhost:4000" ];
+          }];
+        }
       ];
     };
 
-    # Grafana
+    # Grafana с PostgreSQL источником данных
     services.grafana = {
       enable = true;
       settings = {
@@ -83,19 +91,42 @@ with lib;
           admin_user = "admin";
           admin_password = "admin";
         };
+        # Разрешаем небезопасный HTML для piechart панелей
+        panels.disable_sanitize_html = true;
       };
+
+      # Устанавливаем плагин piechart
+      declarativePlugins = with pkgs.grafanaPlugins; [
+        grafana-piechart-panel
+      ];
 
       provision = {
         enable = true;
-        datasources.settings.datasources = [
-          {
-            name = "Prometheus";
-            type = "prometheus";
-            access = "proxy";
-            url = "http://localhost:${toString config.services.monitoring-stack.prometheus.port}";
-            isDefault = true;
-          }
-        ];
+        datasources.settings = {
+          apiVersion = 1;
+          datasources = [
+            {
+              name = "Prometheus";
+              type = "prometheus";
+              access = "proxy";
+              url = "http://localhost:${toString config.services.monitoring-stack.prometheus.port}";
+              isDefault = true;
+            }
+            # ДОБАВЛЯЕМ POSTGRESQL ИСТОЧНИК ДЛЯ BLOCKY ЛОГОВ
+            {
+              name = "Blocky Query Log";
+              type = "postgres";
+              url = "localhost:5432";
+              database = "blocky";
+              user = "grafana";
+              jsonData = {
+                sslmode = "disable";
+                database = "blocky";
+              };
+              orgId = 1;
+            }
+          ];
+        };
       };
     };
 
