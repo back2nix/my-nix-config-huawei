@@ -40,6 +40,7 @@ in {
     ./module/x11.nix # Раскомментируйте для X11
     # ./module/wayland.nix   # Раскомментируйте для Wayland
     ./module/monitoring.nix
+    ./module/sign-box.nix
   ];
 
   services.monitoring-stack.enable = true;
