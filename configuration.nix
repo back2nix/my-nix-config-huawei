@@ -39,7 +39,10 @@ in {
     # Выберите один из модулей дисплейного сервера:
     ./module/x11.nix # Раскомментируйте для X11
     # ./module/wayland.nix   # Раскомментируйте для Wayland
+    ./module/monitoring.nix
   ];
+
+  services.monitoring-stack.enable = true;
 
   boot = {
     # asus специфичные настройки
@@ -102,6 +105,10 @@ in {
   };
 
   security.rtkit.enable = true;
+
+  security.sudo.extraConfig = ''
+    bg ALL=(ALL) NOPASSWD: ${pkgs.colmena}/bin/colmena
+  '';
 
   environment = {
     sessionVariables = rec {
