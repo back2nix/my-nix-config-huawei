@@ -101,7 +101,7 @@ in {
     # НАСТРОЙКА POSTGRESQL
     services.postgresql = {
       enable = true;
-      ensureDatabases = [ "blocky" ];
+      ensureDatabases = ["blocky"];
       ensureUsers = [
         {
           name = "blocky";
@@ -112,19 +112,19 @@ in {
         }
       ];
 
-  # Добавляем настройки для TCP подключений
-  settings = {
-    listen_addresses = "localhost";
-    port = 5432;
-  };
+      # Добавляем настройки для TCP подключений
+      settings = {
+        listen_addresses = "localhost";
+        port = 5432;
+      };
 
-  # Настройка аутентификации для локальных TCP подключений
-  authentication = lib.mkOverride 10 ''
-    local all all trust
-    host all all 127.0.0.1/32 trust
-    host all all ::1/128 trust
-  '';
-};
+      # Настройка аутентификации для локальных TCP подключений
+      authentication = lib.mkOverride 10 ''
+        local all all trust
+        host all all 127.0.0.1/32 trust
+        host all all ::1/128 trust
+      '';
+    };
 
     # Настраиваем права для grafana на чтение данных
     systemd.services.postgresql.postStart = lib.mkAfter ''
@@ -194,7 +194,7 @@ in {
         # НАСТРАИВАЕМ POSTGRESQL ЛОГИРОВАНИЕ
         queryLog = {
           type = "postgresql";
-          target = "postgres://blocky@localhost/blocky";  # Заменили на TCP
+          target = "postgres://blocky@localhost/blocky"; # Заменили на TCP
           logRetentionDays = 90;
         };
 
@@ -210,8 +210,8 @@ in {
 
     # НАСТРОЙКА СЕРВИСА BLOCKY
     systemd.services.blocky = {
-      after = [ "postgresql.service" ];
-      requires = [ "postgresql.service" ];
+      after = ["postgresql.service"];
+      requires = ["postgresql.service"];
       serviceConfig = {
         DynamicUser = lib.mkForce false;
         User = "blocky";
@@ -222,7 +222,7 @@ in {
     };
 
     # Открываем порты
-    networking.firewall.allowedTCPPorts = [ 4000 ];
+    networking.firewall.allowedTCPPorts = [4000];
 
     # Сетевые настройки
     networking = {

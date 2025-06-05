@@ -1,8 +1,10 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; {
   options = {
     services.monitoring-stack = {
       enable = mkEnableOption "Enable full monitoring stack (Prometheus + Grafana + Node Exporter)";
@@ -58,23 +60,29 @@ with lib;
       scrapeConfigs = [
         {
           job_name = "node-exporter";
-          static_configs = [{
-            targets = [ "localhost:${toString config.services.monitoring-stack.node-exporter.port}" ];
-          }];
+          static_configs = [
+            {
+              targets = ["localhost:${toString config.services.monitoring-stack.node-exporter.port}"];
+            }
+          ];
         }
         {
           job_name = "prometheus";
-          static_configs = [{
-            targets = [ "localhost:${toString config.services.monitoring-stack.prometheus.port}" ];
-          }];
+          static_configs = [
+            {
+              targets = ["localhost:${toString config.services.monitoring-stack.prometheus.port}"];
+            }
+          ];
         }
         # ДОБАВЛЯЕМ BLOCKY МЕТРИКИ
         {
           job_name = "blocky";
           scrape_interval = "15s";
-          static_configs = [{
-            targets = [ "localhost:4000" ];
-          }];
+          static_configs = [
+            {
+              targets = ["localhost:4000"];
+            }
+          ];
         }
       ];
     };
