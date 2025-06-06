@@ -27,6 +27,9 @@
       set -gx PATH $PATH $HOME/.cargo/bin
       set -g fish_complete_path_as_name true
       direnv hook fish | source
+
+      just --completions fish | source  # <-- добавить эту строку
+
       set -gx IP_COLOR true
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
 
@@ -204,6 +207,10 @@
     in {
       rp = "replacer";
       wireshark-with-keylog = "wireshark -o ssl.keylog_file:/tmp/sslkeylog.txt";
+      j = "just";
+      jl = "just --list";
+      js = "just --summary";
+      jc = "just --choose";
       # Те же алиасы, что у вас в zsh
       ls = "eza";
       ll = "eza -l --color=always";
@@ -294,5 +301,6 @@
     nix-your-shell
     fishPlugins.grc
     grc
+    just
   ];
 }
