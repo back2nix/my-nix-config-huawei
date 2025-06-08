@@ -27,6 +27,12 @@ with lib; {
         description = "Port for Node Exporter";
       };
 
+      app.port = mkOption {
+        type = types.port;
+        default = 7777;
+        description = "Port for application metrics";
+      };
+
       openFirewall = mkOption {
         type = types.bool;
         default = true;
@@ -52,7 +58,7 @@ with lib; {
       ];
     };
 
-    # Prometheus с метриками Blocky
+    # Prometheus с метриками Blocky и приложения app
     services.prometheus = {
       enable = true;
       port = config.services.monitoring-stack.prometheus.port;
@@ -83,6 +89,21 @@ with lib; {
               targets = ["localhost:4000"];
             }
           ];
+        }
+        # ДОБАВЛЯЕМ МЕТРИКИ ПРИЛОЖЕНИЯ APP с HTTPS
+        {
+          job_name = "app";
+          scrape_interval = "15s";
+          static_configs = [
+            {
+              targets = ["localhost:${toString config.services.monitoring-stack.app.port}"];
+            }
+          ];
+          scheme = "https";
+          tls_config = {
+            insecure_skip_verify = true;
+          };
+          metrics_path = "/metrics";
         }
       ];
     };
