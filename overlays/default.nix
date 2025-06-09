@@ -1,6 +1,7 @@
 # ./overlays/default.nix
 {
   config,
+  inputs,
   pkgs,
   lib,
   ...
@@ -19,6 +20,21 @@
     # Overlay 2: Use `final` and `prev` to express
     # the relationship between the new and the old
     (final: prev: {
+       # Claude Desktop с поддержкой прокси
+      claude-desktop-proxy = prev.writeShellScriptBin "claude-desktop" ''
+        export HTTP_PROXY="http://127.0.0.1:1083"
+        export HTTPS_PROXY="http://127.0.0.1:1083"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${prev.electron}/bin/electron \
+          ${inputs.claude-desktop.packages.${prev.system}.claude-desktop}/lib/claude-desktop/app.asar \
+          --proxy-server=http://127.0.0.1:1083 \
+          --proxy-bypass-list="localhost;127.0.0.1;::1" \
+          --disable-web-security \
+          --ignore-certificate-errors \
+          "''${NIXOS_OZONE_WL:+''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \
+          "$@"
+      '';
       # steam = prev.steam.override {
       #   extraPkgs = pkgs: with pkgs; [
       #     keyutils

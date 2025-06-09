@@ -201,6 +201,16 @@ in {
       nmap
       colmena
       vault
+
+      # (pkgs.writeShellScriptBin "claude-desktop-proxy" ''
+      # export HTTP_PROXY="http://127.0.0.1:1083"
+      # export HTTPS_PROXY="http://127.0.0.1:1083"
+      # export NO_PROXY="localhost,127.0.0.1,::1"
+      # exec ${inputs.claude-desktop.packages.${system}.claude-desktop}/bin/claude-desktop "$@"
+      # '')
+
+      # inputs.claude-desktop.packages.${system}.claude-desktop
+      claude-desktop-proxy
     ];
 
     etc."proxychains.conf".text = ''
@@ -212,7 +222,7 @@ in {
       localnet 127.0.0.0/255.0.0.0
 
       [ProxyList]
-        socks5 127.0.0.1 1081
+        socks5 127.0.0.1 1082
     '';
   };
 
