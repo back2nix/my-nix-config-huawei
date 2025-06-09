@@ -12,7 +12,7 @@
       "vault/root_token" = {
         # Эта опция заставит sops-nix расшифровать секрет
         # во время сборки в /nix/store.
-        neededForUsers = true;
+        # neededForUsers = true;
       };
       # "vault/unseal_Key" = {};
 

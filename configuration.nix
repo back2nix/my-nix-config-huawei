@@ -365,23 +365,23 @@ in {
 
   system.stateVersion = "23.11";
 
-  services.vault-secrets = {
-    enable = true;
-    address = "http://127.0.0.1:8200";
+  # services.vault-secrets = {
+  #   enable = true;
+  #   address = "http://127.0.0.1:8200";
 
-    # Используем правильное имя секрета, которое соответствует пути в YAML
-    tokenPath = config.sops.secrets."vault/root_token".path;
+  #   # Используем правильное имя секрета, которое соответствует пути в YAML
+  #   tokenPath = config.sops.secrets."vault/root_token".path;
 
-    secrets = {
-      "/run/secrets/my-api-key" = {
-        path = "secret/apps/my-app";
-        key = "api-key";
-        owner = "bg";
-        group = "users";
-        mode = "0400";
-      };
-    };
-  };
+  #   secrets = {
+  #     "/run/secrets/my-api-key" = {
+  #       path = "secret/data/apps/my-app";
+  #       key = "api-key";
+  #       owner = "bg";
+  #       group = "users";
+  #       mode = "0400";
+  #     };
+  #   };
+  # };
 
   services.vault = {
     enable = true;
