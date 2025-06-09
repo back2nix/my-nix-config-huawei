@@ -41,6 +41,7 @@ in {
     # ./module/wayland.nix   # Раскомментируйте для Wayland
     ./module/monitoring.nix
     ./module/sign-box.nix
+    ./module/vault.nix
   ];
 
   services.monitoring-stack.enable = true;
@@ -199,6 +200,7 @@ in {
       dnsutils
       nmap
       colmena
+      vault
     ];
 
     etc."proxychains.conf".text = ''
@@ -362,4 +364,44 @@ in {
   };
 
   system.stateVersion = "23.11";
+
+  services.vault-secrets = {
+    enable = true;
+    address = "http://127.0.0.1:8200";
+
+    # Используем правильное имя секрета, которое соответствует пути в YAML
+    tokenPath = config.sops.secrets."vault/root_token".path;
+
+    secrets = {
+      "/run/secrets/my-api-key" = {
+        path = "secret/apps/my-app";
+        key = "api-key";
+        owner = "bg";
+        group = "users";
+        mode = "0400";
+      };
+    };
+  };
+
+  services.vault = {
+    enable = true;
+    package = pkgs.vault;
+    address = "127.0.0.1:8200";
+    dev = false;
+    # devRootTokenID = config.sops.placeholder."vault/root_token";
+
+    extraConfig = ''
+    api_addr = "http://127.0.0.1:8200"
+
+    storage "file" {
+      path = "/var/lib/vault/data"
+    }
+
+    listener "tcp" {
+      address = "127.0.0.1:8200"
+      tls_disable = true
+    }
+
+    '';
+  };
 }

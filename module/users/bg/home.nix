@@ -165,8 +165,9 @@ in {
       devbox
       tig # diff and commit view
       file
-      python313
-      python313Packages.pygments
+      python3
+      # python313
+      # python313Packages.pygments
       duf # pretty monitoring memory device
       glow # terminal markdown viewer
       asciinema # record the terminal

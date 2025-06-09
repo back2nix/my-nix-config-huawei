@@ -9,6 +9,15 @@
       "vpn/user" = {};
       "vpn/private_key_path" = {};
 
+      "vault/root_token" = {
+        # Эта опция заставит sops-nix расшифровать секрет
+        # во время сборки в /nix/store.
+        neededForUsers = true;
+      };
+      # "vault/unseal_Key" = {};
+
+       # "vault_root_token" = {};
+
       # Остальные секреты...
       "surfshark" = {
         mode = "0440";
