@@ -56,7 +56,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "25.4.1.1062-1";
+      stable = "25.4.1.1132-1";
     }
     .${
       edition
@@ -66,7 +66,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "sha256-SW/JQ3ZTcXhgsu4+Rck3xtTwnX1xn2EuDfeXpjLHThg=";
+      stable = "sha256-bnpg2VQNoWPXg1voea9VLw5HjrK9ShWXTiXDEYEQ1T8=";
     }
     .${
       edition

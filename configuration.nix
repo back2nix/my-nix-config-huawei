@@ -323,7 +323,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.4.1.1062-1"
+    "my-yandex-browser-stable-25.4.1.1132-1"
   ];
 
   users.users.bg.extraGroups = ["input"];
