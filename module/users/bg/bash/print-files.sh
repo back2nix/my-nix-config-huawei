@@ -22,7 +22,7 @@ print_file_content() {
 }
 
 print_usage() {
-    echo "Usage: $0 [-i pattern ...] [-t ext1,ext2,...] [-e pattern ...] [--keep-comments] [-r] [-n] [-c command]"
+    echo "Usage: $0 [-i pattern ...] [-t ext1,ext2,...] [-e pattern ...] [--keep-comments] [-r] [-n] [-c command] [-g] [-G] [-s]"
     echo "Example: $0 -i '*.go' -i '*_test.go' -t nix,txt,md -e '*_name.go' -e '.log' -r -n"
     echo "Use -i to specify files/patterns to include"
     echo "Use -t to specify file extensions to include"
@@ -31,6 +31,10 @@ print_usage() {
     echo "Use -r for recursive search"
     echo "Use -n to show line numbers"
     echo "Use -c 'command' to use output of command as source of files (e.g. -c \"rg -l 'pattern'\")"
+    echo "Use -g to include git modified files (working directory changes)"
+    echo "Use -G to include all git changes from HEAD (staged + modified)"
+    echo "Use -s to include git staged files only"
+    echo "Git options filter to current directory and subdirectories only"
     exit 1
 }
 
@@ -41,6 +45,9 @@ keep_comments=false
 recursive=false
 line_numbers=false
 command=""
+git_modified=false
+git_all_changes=false
+git_staged=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -88,6 +95,18 @@ while [[ $# -gt 0 ]]; do
                 echo "Error: -c requires a command argument"
                 print_usage
             fi
+            ;;
+        -g)
+            git_modified=true
+            shift
+            ;;
+        -G)
+            git_all_changes=true
+            shift
+            ;;
+        -s)
+            git_staged=true
+            shift
             ;;
         *)
             echo "Unknown option: $1"
@@ -155,6 +174,77 @@ matches_include_pattern() {
     return 1
 }
 
+process_git_files() {
+    local git_cmd=""
+
+    if [ "$git_staged" = true ]; then
+        git_cmd="git diff --cached --name-only"
+    elif [ "$git_all_changes" = true ]; then
+        git_cmd="git diff --name-only HEAD"
+    elif [ "$git_modified" = true ]; then
+        git_cmd="git diff --name-only"
+    else
+        return 1
+    fi
+
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        echo "Error: Not in a git repository"
+        exit 1
+    fi
+
+    # Получаем git root и текущую директорию
+    local git_root
+    git_root="$(git rev-parse --show-toplevel)"
+    local current_dir="$(pwd)"
+
+    # Вычисляем относительный путь от git root до текущей директории
+    local current_rel_path=""
+    if [[ "$current_dir" != "$git_root" ]]; then
+        current_rel_path="${current_dir#$git_root/}"
+    fi
+
+    while IFS= read -r git_file; do
+        if [[ -z "$git_file" ]]; then
+            continue
+        fi
+
+        # Если мы не в корне git репозитория, фильтруем файлы по текущей поддиректории
+        if [[ -n "$current_rel_path" ]]; then
+            # Проверяем, что файл находится в нашей поддиректории
+            if [[ "$git_file" != "$current_rel_path"* ]]; then
+                continue
+            fi
+        fi
+
+        # Полный путь к файлу
+        local full_file_path="$git_root/$git_file"
+
+        # Проверяем существование файла
+        if [[ ! -f "$full_file_path" ]]; then
+            continue
+        fi
+
+        # Вычисляем относительный путь от текущей директории
+        local relative_file
+        if [[ -n "$current_rel_path" ]]; then
+            # Убираем префикс текущей директории из пути файла
+            relative_file="${git_file#$current_rel_path/}"
+        else
+            relative_file="$git_file"
+        fi
+
+        # Применяем фильтры
+        if ! should_exclude "$relative_file"; then
+            if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$relative_file"; then
+                if [ ${#include_patterns[@]} -eq 0 ] || matches_include_pattern "$relative_file"; then
+                    # Используем относительный путь для вывода, но полный для чтения
+                    print_file_content "$full_file_path"
+                fi
+            fi
+        fi
+    done < <(eval "$git_cmd" 2>/dev/null)
+}
+
 process_command_output() {
     local cmd="$1"
     while IFS= read -r file; do
@@ -213,7 +303,10 @@ process_files() {
     done
 }
 
-if [ -n "$command" ]; then
+# Основная логика выполнения
+if [ "$git_modified" = true ] || [ "$git_all_changes" = true ] || [ "$git_staged" = true ]; then
+    process_git_files
+elif [ -n "$command" ]; then
     process_command_output "$command"
 elif [ ${#include_patterns[@]} -gt 0 ] || [ ${#extensions[@]} -gt 0 ]; then
     process_files "."
