@@ -21,8 +21,13 @@ print_file_content() {
     echo
 }
 
+print_file_name() {
+    local file="$1"
+    echo "$file"
+}
+
 print_usage() {
-    echo "Usage: $0 [-i pattern ...] [-t ext1,ext2,...] [-e pattern ...] [--keep-comments] [-r] [-n] [-c command] [-g] [-G] [-s]"
+    echo "Usage: $0 [-i pattern ...] [-t ext1,ext2,...] [-e pattern ...] [--keep-comments] [-r] [-n] [-c command] [-g] [-G] [-s] [-l]"
     echo "Example: $0 -i '*.go' -i '*_test.go' -t nix,txt,md -e '*_name.go' -e '.log' -r -n"
     echo "Use -i to specify files/patterns to include"
     echo "Use -t to specify file extensions to include"
@@ -31,10 +36,10 @@ print_usage() {
     echo "Use -r for recursive search"
     echo "Use -n to show line numbers"
     echo "Use -c 'command' to use output of command as source of files (e.g. -c \"rg -l 'pattern'\")"
-    echo "Use -g to include git modified files (working directory changes)"
-    echo "Use -G to include all git changes from HEAD (staged + modified)"
-    echo "Use -s to include git staged files only"
-    echo "Git options filter to current directory and subdirectories only"
+    echo "Use -g to include git modified files (working directory changes from current dir)"
+    echo "Use -G to include git modified files (working directory changes from all dirs)"
+    echo "Use -s to include git staged files only (can be combined with -g or -G)"
+    echo "Use -l to list filenames only (without content)"
     exit 1
 }
 
@@ -48,6 +53,7 @@ command=""
 git_modified=false
 git_all_changes=false
 git_staged=false
+list_only=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -106,6 +112,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -s)
             git_staged=true
+            shift
+            ;;
+        -l)
+            list_only=true
             shift
             ;;
         *)
@@ -177,11 +187,12 @@ matches_include_pattern() {
 process_git_files() {
     local git_cmd=""
 
+    # Определяем git команду на основе флагов
     if [ "$git_staged" = true ]; then
+        # Если указан -s, всегда показываем staged файлы независимо от -g или -G
         git_cmd="git diff --cached --name-only"
-    elif [ "$git_all_changes" = true ]; then
-        git_cmd="git diff --name-only HEAD"
-    elif [ "$git_modified" = true ]; then
+    elif [ "$git_modified" = true ] || [ "$git_all_changes" = true ]; then
+        # И -g и -G по умолчанию показывают modified файлы
         git_cmd="git diff --name-only"
     else
         return 1
@@ -203,13 +214,20 @@ process_git_files() {
         current_rel_path="${current_dir#$git_root/}"
     fi
 
+    # Определяем, нужно ли фильтровать по текущей директории
+    local filter_by_current_dir=false
+    if [ "$git_modified" = true ] && [ "$git_all_changes" = false ]; then
+        # Только -g (без -G) фильтрует по текущей директории
+        filter_by_current_dir=true
+    fi
+
     while IFS= read -r git_file; do
         if [[ -z "$git_file" ]]; then
             continue
         fi
 
-        # Если мы не в корне git репозитория, фильтруем файлы по текущей поддиректории
-        if [[ -n "$current_rel_path" ]]; then
+        # Если нужно фильтровать по текущей директории и мы не в корне git репозитория
+        if [ "$filter_by_current_dir" = true ] && [[ -n "$current_rel_path" ]]; then
             # Проверяем, что файл находится в нашей поддиректории
             if [[ "$git_file" != "$current_rel_path"* ]]; then
                 continue
@@ -224,21 +242,25 @@ process_git_files() {
             continue
         fi
 
-        # Вычисляем относительный путь от текущей директории
-        local relative_file
-        if [[ -n "$current_rel_path" ]]; then
-            # Убираем префикс текущей директории из пути файла
-            relative_file="${git_file#$current_rel_path/}"
+        # Для отображения используем правильный путь
+        local display_file
+        if [ "$filter_by_current_dir" = true ] && [[ -n "$current_rel_path" ]]; then
+            # Вычисляем относительный путь от текущей директории
+            display_file="${git_file#$current_rel_path/}"
         else
-            relative_file="$git_file"
+            # Используем путь от git root
+            display_file="$git_file"
         fi
 
         # Применяем фильтры
-        if ! should_exclude "$relative_file"; then
-            if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$relative_file"; then
-                if [ ${#include_patterns[@]} -eq 0 ] || matches_include_pattern "$relative_file"; then
-                    # Используем относительный путь для вывода, но полный для чтения
-                    print_file_content "$full_file_path"
+        if ! should_exclude "$display_file"; then
+            if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$display_file"; then
+                if [ ${#include_patterns[@]} -eq 0 ] || matches_include_pattern "$display_file"; then
+                    if [ "$list_only" = true ]; then
+                        print_file_name "$display_file"
+                    else
+                        print_file_content "$full_file_path"
+                    fi
                 fi
             fi
         fi
@@ -250,7 +272,11 @@ process_command_output() {
     while IFS= read -r file; do
         if ! should_exclude "$file"; then
             if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$file"; then
-                print_file_content "$file"
+                if [ "$list_only" = true ]; then
+                    print_file_name "$file"
+                else
+                    print_file_content "$file"
+                fi
             fi
         fi
     done < <(eval "$cmd")
@@ -295,7 +321,11 @@ process_files() {
             if [ ${#include_patterns[@]} -eq 0 ] || matches_include_pattern "$file"; then
                 if ! should_exclude "$file"; then
                     if [ ${#extensions[@]} -eq 0 ] || has_valid_extension "$file"; then
-                        print_file_content "$file"
+                        if [ "$list_only" = true ]; then
+                            print_file_name "$file"
+                        else
+                            print_file_content "$file"
+                        fi
                     fi
                 fi
             fi
