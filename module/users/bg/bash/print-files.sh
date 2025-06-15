@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 
 print_file_content() {
-    local file="$1"
-    echo "File: $file"
+    local display_path="$1"
+    local read_path="${2:-$1}" # read_path по умолчанию равен display_path, если не указан
+    echo "File: $display_path"
     echo '```'
     if [ "$keep_comments" = true ]; then
         if [ "$line_numbers" = true ]; then
-            nl -ba "$file"
+            nl -ba "$read_path"
         else
-            cat "$file"
+            cat "$read_path"
         fi
     else
         if [ "$line_numbers" = true ]; then
-            sed -e 's/^\s*\/\/.*$//' -e 's/^\s*#.*$//' -e '/^\s*$/d' "$file" | nl -ba
+            sed -e 's/^\s*\/\/.*$//' -e 's/^\s*#.*$//' -e '/^\s*$/d' "$read_path" | nl -ba
         else
-            sed -e 's/^\s*\/\/.*$//' -e 's/^\s*#.*$//' -e '/^\s*$/d' "$file"
+            sed -e 's/^\s*\/\/.*$//' -e 's/^\s*#.*$//' -e '/^\s*$/d' "$read_path"
         fi
     fi
     echo '```'
@@ -259,7 +260,7 @@ process_git_files() {
                     if [ "$list_only" = true ]; then
                         print_file_name "$display_file"
                     else
-                        print_file_content "$full_file_path"
+                        print_file_content "$display_file" "$full_file_path"
                     fi
                 fi
             fi
