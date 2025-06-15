@@ -393,25 +393,25 @@ in {
   #   };
   # };
 
-  services.vault = {
-    enable = true;
-    package = pkgs.vault;
-    address = "127.0.0.1:8200";
-    dev = false;
-    # devRootTokenID = config.sops.placeholder."vault/root_token";
+  # services.vault = {
+  #   enable = true;
+  #   package = pkgs.vault;
+  #   address = "127.0.0.1:8200";
+  #   dev = false;
+  #   # devRootTokenID = config.sops.placeholder."vault/root_token";
 
-    extraConfig = ''
-    api_addr = "http://127.0.0.1:8200"
+  #   extraConfig = ''
+  #   api_addr = "http://127.0.0.1:8200"
 
-    storage "file" {
-      path = "/var/lib/vault/data"
-    }
+  #   storage "file" {
+  #     path = "/var/lib/vault/data"
+  #   }
 
-    listener "tcp" {
-      address = "127.0.0.1:8200"
-      tls_disable = true
-    }
+  #   listener "tcp" {
+  #     address = "127.0.0.1:8200"
+  #     tls_disable = true
+  #   }
 
-    '';
-  };
+  #   '';
+  # };
 }
