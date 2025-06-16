@@ -51,6 +51,11 @@
 
 ### Развертывание на существующей машине
 
+File: .env
+```env
+DEVICE=yoga14
+```
+
 1.  Клонируйте репозиторий:
     ```bash
     git clone https://github.com/back2nix/my-nix-config-huawei
