@@ -1,12 +1,16 @@
+# Загружаем переменные из .env
+include .env
+export
+
 REPO_URL := https://github.com/back2nix/my-astronvim-config
 REPO_DIR := my-astronvim-config
 
 ### flake
 switch:
-	sudo nixos-rebuild switch --flake .#nixos
+	sudo nixos-rebuild switch --flake .#$(DEVICE)
 
 nix:
-	sudo nixos-rebuild switch
+	sudo nixos-rebuild switch --flake .#$(DEVICE)
 
 # home:
 # 	home-manager switch
@@ -19,6 +23,7 @@ sync:
 		--exclude='private' \
 		--exclude='presharedKeyFile' \
 		--exclude='Makefile' \
+		--exclude='.env' \
 		/etc/nixos/* .
 	cd $(REPO_DIR) && make sync
 # --exclude='hardware-configuration.nix' \
@@ -41,7 +46,7 @@ setup: pull
 
 ### testing on vm
 build:
-	nix build .#nixosConfigurations.nixos.config.system.build.vm
+	nix build .#nixosConfigurations.$(DEVICE).config.system.build.vm
 
 run/nographic:
 	QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic; reset
@@ -55,11 +60,17 @@ update/replacer:
 update:
 	nix flake update
 
-switch/asus:
-	sudo nixos-rebuild switch --flake .#asus
+# Переключение на конкретное устройство (переопределяет .env)
+switch/device:
+	@read -p "Введите имя устройства (asus/huawei/yoga14): " device; \
+	sudo nixos-rebuild switch --flake .#$$device
 
 fmt/alejandra:
 	alejandra .
 
 fmt/check:
 	alejandra .
+
+# Показать текущее устройство
+show/device:
+	@echo "Текущее устройство: $(DEVICE)"
