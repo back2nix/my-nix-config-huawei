@@ -252,6 +252,7 @@ in {
 
       s3cmd
       minio-client
+      audio-recorder
     ];
 
     file = {
