@@ -408,55 +408,19 @@ in {
     ];
   };
 
-  # programs.google-chrome = {
-  #   enable = true;
-  #   # Если вы используете unstable, убедитесь, что пакет указан правильно
-  #   # package = pkgs-master.google-chrome;
-
-  #   # Это самая важная часть. Добавляем флаги для Chrome.
-  #   commandLineArgs = [
-  #     "--ignore-gpu-blocklist" # Игнорировать черный список GPU
-  #     "--enable-gpu-rasterization" # Включить GPU-растеризацию
-  #     "--enable-zero-copy" # Включить zero-copy для улучшения производительности видео
-
-  #     # Принудительно включаем функции, которые Chrome отключил
-  #     "--enable-features=VaapiVideoDecoder,Vulkan,RawDraw"
-
-  #     # Можно попробовать один из этих флагов для рендеринга.
-  #     # Vulkan обычно предпочтительнее.
-  #     # Если с Vulkan возникнут проблемы, закомментируйте эту строку.
-  #     "--use-gl=desktop" # или "--use-gl=egl" для Wayland/X11
-  #   ];
-  # };
-
   programs.google-chrome = {
     enable = true;
     package = pkgs-unstable.google-chrome; # Если используете unstable
 
     commandLineArgs = [
-      # # --- Основные флаги для принудительного включения GPU ---
-      # "--ignore-gpu-blocklist"
-      # "--enable-gpu-rasterization"
-      # "--enable-zero-copy" # Улучшает производительность видео на Linux
-
-      # # --- Использование нативного GL-бэкенда вместо EGL ---
-      # # Флаг --use-gl=egl часто вызывает проблемы на NixOS с X11.
-      # # Попробуем `desktop` (нативный OpenGL) или можно вовсе убрать этот флаг,
-      # # позволив Ozone выбрать самостоятельно. Начнем с 'desktop'.
-      # "--use-gl=desktop" # ИЛИ закомментируйте эту строку
-
-      # # --- Явное указание платформы ---
-      # # `auto` - хороший выбор, но для X11 можно указать явно, чтобы избежать неоднозначности.
-      # "--ozone-platform-hint=auto"
-
-      # # --- Объединенный список функций ---
-      # # Включаем всё необходимое в одном флаге
-      # "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,Vulkan,RawDraw"
-
-      # # --- (Опционально) Включить WebGPU ---
-      # # Лог показывает, что WebGPU доступен на вашей карте, но отключен для CPU-рендерера.
-      # # Этот флаг может его включить.
-      # "--enable-unsafe-webgpu"
+      "--flag-switches-begin"
+      "--enable-gpu-rasterization"
+      "--enable-unsafe-webgpu"
+      "--enable-webgpu-developer-features"
+      "--enable-zero-copy"
+      "--ignore-gpu-blocklist"
+      "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor"
+      "--flag-switches-end"
     ];
   };
 
