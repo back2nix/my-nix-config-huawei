@@ -410,7 +410,7 @@ in {
 
   programs.google-chrome = {
     enable = true;
-    package = pkgs-unstable.google-chrome; # Если используете unstable
+    package = pkgs-master.google-chrome; # Если используете unstable
 
     commandLineArgs = [
       "--flag-switches-begin"
