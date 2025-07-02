@@ -289,7 +289,7 @@ in {
   };
 
   nixpkgs.config = {
-    permittedInsecurePackages = ["curl-impersonate-chrome-0.5.4"];
+    # permittedInsecurePackages = ["curl-impersonate-chrome-0.5.4"];
 
     allowUnfree = true;
 
@@ -431,32 +431,32 @@ in {
 
   programs.google-chrome = {
     enable = true;
-    # Если вы используете unstable, убедитесь, что пакет указан правильно
-    # package = pkgs-unstable.google-chrome-stable; # или pkgs-master...
+    package = pkgs-unstable.google-chrome; # Если используете unstable
 
     commandLineArgs = [
-      # --- Общие флаги для принудительного включения GPU ---
-      "--ignore-gpu-blocklist"      # Игнорировать внутренний черный список GPU от Chrome. Важно для нового железа.
-      "--enable-gpu-rasterization"  # Всегда использовать GPU для растеризации контента.
+      # # --- Основные флаги для принудительного включения GPU ---
+      # "--ignore-gpu-blocklist"
+      # "--enable-gpu-rasterization"
+      # "--enable-zero-copy" # Улучшает производительность видео на Linux
 
-      # --- Ускорение рендеринга через Vulkan ---
-      "--enable-features=Vulkan"    # Явно включаем фичу Vulkan.
-      # Этот флаг можно раскомментировать, если Vulkan не подхватывается по умолчанию
-      # "--use-vulkan=native"
+      # # --- Использование нативного GL-бэкенда вместо EGL ---
+      # # Флаг --use-gl=egl часто вызывает проблемы на NixOS с X11.
+      # # Попробуем `desktop` (нативный OpenGL) или можно вовсе убрать этот флаг,
+      # # позволив Ozone выбрать самостоятельно. Начнем с 'desktop'.
+      # "--use-gl=desktop" # ИЛИ закомментируйте эту строку
 
-      # --- Ускорение видео через VA-API ---
-      "--enable-features=VaapiVideoDecoder" # Главный флаг для включения аппаратного декодирования видео.
-      "--enable-zero-copy"                  # Улучшает производительность видео на Linux, избегая лишних копирований данных.
-
-      # --- Настройка бэкенда OpenGL (как запасной вариант) ---
-      # Для X11 и Wayland 'egl' обычно является более современным и производительным выбором, чем 'desktop' (GLX).
-      # Но так как мы делаем упор на Vulkan, этот флаг может и не понадобиться. Оставляем как хороший fallback.
-      "--use-gl=egl"
-
-      # --- (Опционально) Флаги для Wayland ---
-      # Если вы решите переключиться на Wayland (раскомментировав wayland.nix),
-      # эти флаги заставят Chrome работать в нативном режиме Wayland, что улучшит производительность и масштабирование.
+      # # --- Явное указание платформы ---
+      # # `auto` - хороший выбор, но для X11 можно указать явно, чтобы избежать неоднозначности.
       # "--ozone-platform-hint=auto"
+
+      # # --- Объединенный список функций ---
+      # # Включаем всё необходимое в одном флаге
+      # "--enable-features=VaapiVideoDecoder,VaapiVideoEncoder,Vulkan,RawDraw"
+
+      # # --- (Опционально) Включить WebGPU ---
+      # # Лог показывает, что WebGPU доступен на вашей карте, но отключен для CPU-рендерера.
+      # # Этот флаг может его включить.
+      # "--enable-unsafe-webgpu"
     ];
   };
 

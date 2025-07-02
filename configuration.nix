@@ -48,17 +48,16 @@ in {
 
   boot = {
     # asus специфичные настройки
-    kernelParams = ["i915.force_probe=7d55"];
-    extraModprobeConfig = ''
-      options bluetooth disable_ertm=1
-      options snd-hda-intel model=asus-zenbook
-    '';
-    loader.grub.extraFiles = {
-      "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
-    };
-    loader.grub.extraConfig = ''
-      acpi /ssdt-csc3551.aml
-    '';
+    # extraModprobeConfig = ''
+    #   options bluetooth disable_ertm=1
+    #   options snd-hda-intel model=asus-zenbook
+    # '';
+    # loader.grub.extraFiles = {
+    #   "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
+    # };
+    # loader.grub.extraConfig = ''
+    #   acpi /ssdt-csc3551.aml
+    # '';
 
     loader.systemd-boot.enable = true;
     supportedFilesystems = ["ntfs"];

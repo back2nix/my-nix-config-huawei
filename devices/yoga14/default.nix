@@ -120,11 +120,12 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-media-driver
+      mesa.drivers # <--- Очень важный пакет, включающий драйверы Intel
+      intel-media-driver # VA-API драйвер для видео
       vaapiIntel
       vaapiVdpau
       libvdpau-va-gl
-      intel-compute-runtime
+      intel-compute-runtime # OpenCL драйвер
     ];
   };
 
@@ -156,7 +157,7 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Audio конфигурация
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
 
   services.pipewire = {
