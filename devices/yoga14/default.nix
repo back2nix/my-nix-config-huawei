@@ -42,8 +42,7 @@
       "cgroup_enable=cpuset"
       "cgroup_enable=memory"
       "cgroup_memory=1"
-      "i915.force_probe=7d55"
-      "i915.enable_guc=2"
+      "xe.enable_guc=3"
     ];
 
     extraModprobeConfig = ''

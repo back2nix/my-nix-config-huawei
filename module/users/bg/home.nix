@@ -408,24 +408,55 @@ in {
     ];
   };
 
+  # programs.google-chrome = {
+  #   enable = true;
+  #   # Если вы используете unstable, убедитесь, что пакет указан правильно
+  #   # package = pkgs-master.google-chrome;
+
+  #   # Это самая важная часть. Добавляем флаги для Chrome.
+  #   commandLineArgs = [
+  #     "--ignore-gpu-blocklist" # Игнорировать черный список GPU
+  #     "--enable-gpu-rasterization" # Включить GPU-растеризацию
+  #     "--enable-zero-copy" # Включить zero-copy для улучшения производительности видео
+
+  #     # Принудительно включаем функции, которые Chrome отключил
+  #     "--enable-features=VaapiVideoDecoder,Vulkan,RawDraw"
+
+  #     # Можно попробовать один из этих флагов для рендеринга.
+  #     # Vulkan обычно предпочтительнее.
+  #     # Если с Vulkan возникнут проблемы, закомментируйте эту строку.
+  #     "--use-gl=desktop" # или "--use-gl=egl" для Wayland/X11
+  #   ];
+  # };
+
   programs.google-chrome = {
     enable = true;
     # Если вы используете unstable, убедитесь, что пакет указан правильно
-    # package = pkgs-master.google-chrome;
+    # package = pkgs-unstable.google-chrome-stable; # или pkgs-master...
 
-    # Это самая важная часть. Добавляем флаги для Chrome.
     commandLineArgs = [
-      "--ignore-gpu-blocklist" # Игнорировать черный список GPU
-      "--enable-gpu-rasterization" # Включить GPU-растеризацию
-      "--enable-zero-copy" # Включить zero-copy для улучшения производительности видео
+      # --- Общие флаги для принудительного включения GPU ---
+      "--ignore-gpu-blocklist"      # Игнорировать внутренний черный список GPU от Chrome. Важно для нового железа.
+      "--enable-gpu-rasterization"  # Всегда использовать GPU для растеризации контента.
 
-      # Принудительно включаем функции, которые Chrome отключил
-      "--enable-features=VaapiVideoDecoder,Vulkan,RawDraw"
+      # --- Ускорение рендеринга через Vulkan ---
+      "--enable-features=Vulkan"    # Явно включаем фичу Vulkan.
+      # Этот флаг можно раскомментировать, если Vulkan не подхватывается по умолчанию
+      # "--use-vulkan=native"
 
-      # Можно попробовать один из этих флагов для рендеринга.
-      # Vulkan обычно предпочтительнее.
-      # Если с Vulkan возникнут проблемы, закомментируйте эту строку.
-      "--use-gl=desktop" # или "--use-gl=egl" для Wayland/X11
+      # --- Ускорение видео через VA-API ---
+      "--enable-features=VaapiVideoDecoder" # Главный флаг для включения аппаратного декодирования видео.
+      "--enable-zero-copy"                  # Улучшает производительность видео на Linux, избегая лишних копирований данных.
+
+      # --- Настройка бэкенда OpenGL (как запасной вариант) ---
+      # Для X11 и Wayland 'egl' обычно является более современным и производительным выбором, чем 'desktop' (GLX).
+      # Но так как мы делаем упор на Vulkan, этот флаг может и не понадобиться. Оставляем как хороший fallback.
+      "--use-gl=egl"
+
+      # --- (Опционально) Флаги для Wayland ---
+      # Если вы решите переключиться на Wayland (раскомментировав wayland.nix),
+      # эти флаги заставят Chrome работать в нативном режиме Wayland, что улучшит производительность и масштабирование.
+      # "--ozone-platform-hint=auto"
     ];
   };
 
