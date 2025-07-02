@@ -179,7 +179,7 @@ in {
       hub # create pull request
       rm-improved
       pcmanfm
-      pkgs-master.google-chrome
+      # pkgs-master.google-chrome
       eog # image viewer
       evince # pdf reader
       zoom-us
@@ -407,6 +407,28 @@ in {
       # "mnjggcdmjocbbbhaepdhchncahnbgone" # sponsorblock for yt/inv
     ];
   };
+
+  programs.google-chrome = {
+    enable = true;
+    # Если вы используете unstable, убедитесь, что пакет указан правильно
+    # package = pkgs-master.google-chrome;
+
+    # Это самая важная часть. Добавляем флаги для Chrome.
+    commandLineArgs = [
+      "--ignore-gpu-blocklist" # Игнорировать черный список GPU
+      "--enable-gpu-rasterization" # Включить GPU-растеризацию
+      "--enable-zero-copy" # Включить zero-copy для улучшения производительности видео
+
+      # Принудительно включаем функции, которые Chrome отключил
+      "--enable-features=VaapiVideoDecoder,Vulkan,RawDraw"
+
+      # Можно попробовать один из этих флагов для рендеринга.
+      # Vulkan обычно предпочтительнее.
+      # Если с Vulkan возникнут проблемы, закомментируйте эту строку.
+      "--use-gl=desktop" # или "--use-gl=egl" для Wayland/X11
+    ];
+  };
+
 
   # xdg.mimeApps = {
   #   # enable = true;
