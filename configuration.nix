@@ -136,6 +136,7 @@ in {
       pkgs-master.serpl
       pkgs-master.transmission_4-qt
       pkgs-master.openvpn3
+      pkgs-master.gemini-cli
 
       # Контейнеры и кластеры
       docker
