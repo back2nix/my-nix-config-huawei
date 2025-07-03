@@ -31,10 +31,27 @@
           --proxy-server=http://127.0.0.1:1083 \
           --proxy-bypass-list="localhost;127.0.0.1;::1" \
           --disable-web-security \
+          --flag-switches-begin \
+          --enable-gpu-rasterization \
+          --enable-unsafe-webgpu \
+          --enable-webgpu-developer-features \
+          --enable-zero-copy \
+          --ignore-gpu-blocklist \
+          --enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor \
+          --flag-switches-end \
           --ignore-certificate-errors \
           "''${NIXOS_OZONE_WL:+''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \
           "$@"
       '';
+
+        gemini-proxy = prev.writeShellScriptBin "gemini" ''
+        export HTTP_PROXY="http://127.0.0.1:1083"
+        export HTTPS_PROXY="http://127.0.0.1:1083"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${prev.gemini-cli}/bin/gemini "$@"
+        '';
+
       # steam = prev.steam.override {
       #   extraPkgs = pkgs: with pkgs; [
       #     keyutils

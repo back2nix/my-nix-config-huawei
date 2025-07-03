@@ -211,6 +211,7 @@ in {
 
       # inputs.claude-desktop.packages.${system}.claude-desktop
       claude-desktop-proxy
+      gemini-proxy
     ];
 
     etc."proxychains.conf".text = ''
