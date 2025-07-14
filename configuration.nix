@@ -24,6 +24,7 @@ in {
     ./cachix.nix
     ./module/change.mac.nix
     ./module/users/users.nix
+    ./module/autossh.nix
     ./sops/sops.nix
 
     # DNS настройки
@@ -212,6 +213,7 @@ in {
       # inputs.claude-desktop.packages.${system}.claude-desktop
       claude-desktop-proxy
       gemini-proxy
+      android-udev-rules
     ];
 
     etc."proxychains.conf".text = ''
@@ -289,6 +291,9 @@ in {
 
         SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
         SUBSYSTEM=="usb", ATTRS{idVendor}=="*", ATTRS{idProduct}=="*", MODE="0660", GROUP="wireshark"
+
+        SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0666", GROUP="adbusers"
+        SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="adbusers"
       '';
     };
 

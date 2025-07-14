@@ -227,7 +227,6 @@ in {
       kondo # delete depedenc
       hyperfine # замер времени запуска
       btop
-      inkscape-with-extensions
       pkgs-master.devenv
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
@@ -253,6 +252,12 @@ in {
       s3cmd
       minio-client
       audio-recorder
+
+      (pkgs-master.inkscape-with-extensions.override {
+        inkscapeExtensions = with pkgs-master.inkscape-extensions; [
+          inkstitch
+        ];
+      })
     ];
 
     file = {

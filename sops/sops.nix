@@ -9,12 +9,9 @@
       "vpn/user" = {};
       "vpn/private_key_path" = {};
 
-      "vault/root_token" = {
-        # Эта опция заставит sops-nix расшифровать секрет
-        # во время сборки в /nix/store.
-        # neededForUsers = true;
-      };
+      "vault/root_token" = { };
       # "vault/unseal_Key" = {};
+      "autossh/ip" = {};
 
        # "vault_root_token" = {};
 
@@ -36,7 +33,13 @@
       "xray/uuid" = {};
     };
 
+    # templates."autossh_ip" = {
+    #   # Плейсхолдер будет заменен на содержимое секрета "autossh/ip"
+    #   content = "${config.sops.placeholder."autossh/ip"}";
+    # };
+
     templates."sing-box-config.json" = {
+
       content = builtins.toJSON {
         log.level = "info";
 
