@@ -203,6 +203,8 @@ in {
       colmena
       vault
 
+      gnirehtet
+
       # (pkgs.writeShellScriptBin "claude-desktop-proxy" ''
       # export HTTP_PROXY="http://127.0.0.1:1083"
       # export HTTPS_PROXY="http://127.0.0.1:1083"
