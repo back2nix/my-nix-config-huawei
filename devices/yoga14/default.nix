@@ -8,6 +8,7 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./hardware-configuration.nix
+    ./lunar-lake-fix.nix
   ];
 
   networking.hostName = "yoga14";
@@ -42,7 +43,6 @@
       "cgroup_enable=cpuset"
       "cgroup_enable=memory"
       "cgroup_memory=1"
-      "xe.enable_guc=3"
     ];
 
     extraModprobeConfig = ''
@@ -120,7 +120,6 @@
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      mesa.drivers # <--- Очень важный пакет, включающий драйверы Intel
       intel-media-driver # VA-API драйвер для видео
       vaapiIntel
       vaapiVdpau
@@ -130,7 +129,6 @@
   };
 
   environment.variables = {
-    LIBVA_DRIVER_NAME = "iHD";
     MOZ_DISABLE_RDD_SANDBOX = "1";
   };
 
