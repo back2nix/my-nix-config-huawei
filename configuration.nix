@@ -216,6 +216,7 @@ in {
       claude-desktop-proxy
       gemini-proxy
       android-udev-rules
+      appimage-run
     ];
 
     etc."proxychains.conf".text = ''
