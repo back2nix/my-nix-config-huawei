@@ -33,7 +33,6 @@
           --disable-web-security \
           --flag-switches-begin \
           --enable-gpu-rasterization \
-          --enable-unsafe-webgpu \
           --enable-webgpu-developer-features \
           --enable-zero-copy \
           --ignore-gpu-blocklist \
