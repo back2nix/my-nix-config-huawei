@@ -70,6 +70,8 @@
 
     # Камера
     ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
+
+    ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}="73"
   '';
 
   systemd.services.iwlwifi-reload = {
