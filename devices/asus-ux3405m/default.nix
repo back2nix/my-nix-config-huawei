@@ -149,13 +149,13 @@
 
   services = {
     fstrim.enable = true;
-    tlp = {
-      enable = true;
-      settings = {
-        CPU_SCALING_GOVERNOR_ON_AC = "powersave";
-        CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      };
-    };
+    # tlp = {
+    #   enable = true;
+    #   settings = {
+    #     CPU_SCALING_GOVERNOR_ON_AC = "powersave";
+    #     CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+    #   };
+    # };
     hardware.bolt.enable = true;
   };
 

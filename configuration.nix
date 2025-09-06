@@ -213,7 +213,7 @@ in {
       # '')
 
       # inputs.claude-desktop.packages.${system}.claude-desktop
-      claude-desktop-proxy
+      # claude-desktop-proxy
       gemini-proxy
       android-udev-rules
       appimage-run
@@ -344,7 +344,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.6.1.1039-1"
+    "my-yandex-browser-stable-25.8.1.844-1"
   ];
 
   users.users.bg.extraGroups = ["input"];

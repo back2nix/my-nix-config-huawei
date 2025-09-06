@@ -25,7 +25,7 @@ config,
           -o "ExitOnForwardFailure=yes" \
           -i /home/bg/.ssh/id_rsa \
           -R 2222:localhost:22 \
-          root@31.129.103.41
+          root@35.193.76.228
       '';
 
       Restart = "always";

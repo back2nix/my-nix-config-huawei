@@ -21,27 +21,27 @@
     # the relationship between the new and the old
     (final: prev: {
        # Claude Desktop с поддержкой прокси
-      claude-desktop-proxy = prev.writeShellScriptBin "claude-desktop" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
+      # claude-desktop-proxy = prev.writeShellScriptBin "claude-desktop" ''
+      #   export HTTP_PROXY="http://127.0.0.1:1083"
+      #   export HTTPS_PROXY="http://127.0.0.1:1083"
+      #   export NO_PROXY="localhost,127.0.0.1,::1"
 
-        exec ${prev.electron}/bin/electron \
-          ${inputs.claude-desktop.packages.${prev.system}.claude-desktop}/lib/claude-desktop/app.asar \
-          --proxy-server=http://127.0.0.1:1083 \
-          --proxy-bypass-list="localhost;127.0.0.1;::1" \
-          --disable-web-security \
-          --flag-switches-begin \
-          --enable-gpu-rasterization \
-          --enable-webgpu-developer-features \
-          --enable-zero-copy \
-          --ignore-gpu-blocklist \
-          --enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor \
-          --flag-switches-end \
-          --ignore-certificate-errors \
-          "''${NIXOS_OZONE_WL:+''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \
-          "$@"
-      '';
+      #   exec ${prev.electron}/bin/electron \
+      #     ${inputs.claude-desktop.packages.${prev.system}.claude-desktop}/lib/claude-desktop/app.asar \
+      #     --proxy-server=http://127.0.0.1:1083 \
+      #     --proxy-bypass-list="localhost;127.0.0.1;::1" \
+      #     --disable-web-security \
+      #     --flag-switches-begin \
+      #     --enable-gpu-rasterization \
+      #     --enable-webgpu-developer-features \
+      #     --enable-zero-copy \
+      #     --ignore-gpu-blocklist \
+      #     --enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor \
+      #     --flag-switches-end \
+      #     --ignore-certificate-errors \
+      #     "''${NIXOS_OZONE_WL:+''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \
+      #     "$@"
+      # '';
 
         gemini-proxy = prev.writeShellScriptBin "gemini" ''
         export HTTP_PROXY="http://127.0.0.1:1083"
