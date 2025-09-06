@@ -24,7 +24,7 @@ in {
     ./cachix.nix
     ./module/change.mac.nix
     ./module/users/users.nix
-    ./module/autossh.nix
+    # ./module/autossh.nix
     ./sops/sops.nix
 
     # DNS настройки
