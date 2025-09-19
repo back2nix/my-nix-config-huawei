@@ -1,14 +1,16 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   modulesPath,
   ...
 }: {
   imports = [
+    inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+
     (modulesPath + "/installer/scan/not-detected.nix")
     ./hardware-configuration.nix
-    ./lunar-lake-fix.nix
   ];
 
   networking.hostName = "yoga14";
@@ -38,11 +40,16 @@
 
     extraModulePackages = [];
 
+    # ПРАВИЛЬНЫЕ параметры ядра для Lunar Lake
     kernelParams = [
       "systemd.unified_cgroup_hierarchy=1"
       "cgroup_enable=cpuset"
       "cgroup_enable=memory"
       "cgroup_memory=1"
+      # Lunar Lake специфичные параметры
+      "intel_pstate=active"
+      "intel_iommu=on"
+      "iommu=pt"
     ];
 
     extraModprobeConfig = ''
@@ -55,6 +62,34 @@
       options iwlmvm power_scheme=1
       options iwlwifi swcrypto=0 led_mode=1
     '';
+  };
+
+  # ПРАВИЛЬНАЯ настройка Intel GPU для Lunar Lake
+  hardware.intelgpu = {
+    driver = "xe"; # Используем xe драйвер для Lunar Lake
+    vaapiDriver = "intel-media-driver";
+  };
+
+  # Включаем графику
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver # VA-API драйвер для видео
+      vaapiIntel
+      vaapiVdpau
+      libvdpau-va-gl
+      intel-compute-runtime # OpenCL драйвер
+      mesa
+      libva
+      libva-utils
+    ];
+  };
+
+  # Переменные среды для стабильной работы графики
+  environment.variables = {
+    LIBVA_DRIVER_NAME = "iHD";
+    MOZ_DISABLE_RDD_SANDBOX = "1";
+    MOZ_X11_EGL = "1";
   };
 
   services.udev.extraRules = ''
@@ -118,22 +153,6 @@
   services.autorandr.enable = true;
   hardware.enableAllFirmware = true;
 
-  # Graphics настройки для Intel
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      intel-media-driver # VA-API драйвер для видео
-      vaapiIntel
-      vaapiVdpau
-      libvdpau-va-gl
-      intel-compute-runtime # OpenCL драйвер
-    ];
-  };
-
-  environment.variables = {
-    MOZ_DISABLE_RDD_SANDBOX = "1";
-  };
-
   # Диагностические пакеты для Yoga14
   environment.systemPackages = with pkgs; [
     alsa-utils
@@ -149,7 +168,10 @@
     lshw
     v4l-utils
     iwd # ВАЖНО: для лучшей работы с Intel AX211
-    # wireless-tools
+    nvtopPackages.intel
+    mesa-demos
+    vulkan-tools
+    intel-gpu-tools
   ];
 
   networking.useDHCP = lib.mkDefault true;

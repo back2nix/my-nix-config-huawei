@@ -209,7 +209,7 @@ in {
       gh
       # neovim
       # inputs.nixpkgs-unstable.neovim
-      python311Packages.jupytext
+      # python311Packages.jupytext
       eza
       bashInteractive
       bashdbInteractive

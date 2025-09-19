@@ -42,7 +42,7 @@ in {
     # ./module/wayland.nix   # Раскомментируйте для Wayland
     ./module/monitoring.nix
     ./module/sign-box.nix
-    ./module/vault.nix
+    # ./module/vault.nix
   ];
 
   services.monitoring-stack.enable = true;
@@ -201,7 +201,7 @@ in {
       dnsutils
       nmap
       colmena
-      vault
+      # vault
 
       gnirehtet
 
