@@ -22,8 +22,8 @@
     "rtsx_pci_sdmmc"
   ];
   boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-intel"];
-  boot.extraModulePackages = [ pkgs.linuxPackages_latest.v4l2loopback ];
+  boot.kernelModules = ["kvm-intel" "v4l2loopback"];
+  boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/356953f7-8013-45c0-860b-718afd45bba6";
