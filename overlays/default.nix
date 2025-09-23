@@ -20,7 +20,7 @@
     # Overlay 2: Use `final` and `prev` to express
     # the relationship between the new and the old
     (final: prev: {
-       # Claude Desktop с поддержкой прокси
+      # Claude Desktop с поддержкой прокси
       # claude-desktop-proxy = prev.writeShellScriptBin "claude-desktop" ''
       #   export HTTP_PROXY="http://127.0.0.1:1083"
       #   export HTTPS_PROXY="http://127.0.0.1:1083"
@@ -43,13 +43,13 @@
       #     "$@"
       # '';
 
-        gemini-proxy = prev.writeShellScriptBin "gemini" ''
+      gemini-proxy = prev.writeShellScriptBin "gemini" ''
         export HTTP_PROXY="http://127.0.0.1:1083"
         export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
         exec ${prev.gemini-cli}/bin/gemini "$@"
-        '';
+      '';
 
       # steam = prev.steam.override {
       #   extraPkgs = pkgs: with pkgs; [

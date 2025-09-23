@@ -80,48 +80,48 @@ in {
     environment.systemPackages = [cfg.package];
 
     systemd.services = lib.mapAttrs' (name: secret:
-    lib.nameValuePair "vault-fetch-${lib.strings.sanitizeDerivationName name}" {
-      description = "Fetch secret from Vault to ${name}";
-      wantedBy = ["multi-user.target"];
-      after = ["network-online.target" "vault.service"];  # Добавлена зависимость на vault.service
-      wants = ["network-online.target"];
-      requires = ["vault.service"];  # Добавьте эту строку - требует запуска Vault
+      lib.nameValuePair "vault-fetch-${lib.strings.sanitizeDerivationName name}" {
+        description = "Fetch secret from Vault to ${name}";
+        wantedBy = ["multi-user.target"];
+        after = ["network-online.target" "vault.service"]; # Добавлена зависимость на vault.service
+        wants = ["network-online.target"];
+        requires = ["vault.service"]; # Добавьте эту строку - требует запуска Vault
 
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        RemainAfterExit = true;
-      # Добавьте Restart для повторных попыток в случае неудачи
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
+          RemainAfterExit = true;
+          # Добавьте Restart для повторных попыток в случае неудачи
+          Restart = "on-failure";
+          RestartSec = "5s";
+        };
 
-    script = ''
-      # Ждём пока Vault будет готов
-      echo "Waiting for Vault to be ready..."
-      while ! ${pkgs.curl}/bin/curl -s "${cfg.address}/v1/sys/health" > /dev/null 2>&1; do
-      echo "Vault not ready, waiting..."
-      sleep 2
-      done
+        script = ''
+          # Ждём пока Vault будет готов
+          echo "Waiting for Vault to be ready..."
+          while ! ${pkgs.curl}/bin/curl -s "${cfg.address}/v1/sys/health" > /dev/null 2>&1; do
+          echo "Vault not ready, waiting..."
+          sleep 2
+          done
 
-      # Устанавливаем переменные окружения для Vault
-      export VAULT_ADDR="${cfg.address}"
-      export VAULT_TOKEN=$(cat "${cfg.tokenPath}")
+          # Устанавливаем переменные окружения для Vault
+          export VAULT_ADDR="${cfg.address}"
+          export VAULT_TOKEN=$(cat "${cfg.tokenPath}")
 
-      # Извлекаем данные ключа из секрета и создаем файл
-      secret_value=$(${cfg.package}/bin/vault kv get -field=${secret.key} ${secret.path})
-      if [ $? -ne 0 ]; then
-      echo "Failed to fetch secret ${secret.path} with key ${secret.key}" >&2
-      exit 1
-      fi
+          # Извлекаем данные ключа из секрета и создаем файл
+          secret_value=$(${cfg.package}/bin/vault kv get -field=${secret.key} ${secret.path})
+          if [ $? -ne 0 ]; then
+          echo "Failed to fetch secret ${secret.path} with key ${secret.key}" >&2
+          exit 1
+          fi
 
-      # Создаем файл секрета с нужными правами
-      mkdir -p "$(dirname ${name})"
-      echo -n "$secret_value" > "${name}"
-      chown ${secret.owner}:${secret.group} "${name}"
-      chmod ${secret.mode} "${name}"
-      '';
-    })
+          # Создаем файл секрета с нужными правами
+          mkdir -p "$(dirname ${name})"
+          echo -n "$secret_value" > "${name}"
+          chown ${secret.owner}:${secret.group} "${name}"
+          chmod ${secret.mode} "${name}"
+        '';
+      })
     cfg.secrets;
   };
 }

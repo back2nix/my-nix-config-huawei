@@ -424,7 +424,6 @@ in {
   #   '';
   # };
 
-
   programs.obs-studio = {
     enable = true;
 
@@ -436,9 +435,8 @@ in {
       obs-vkcapture
 
       # Для эффектов плохой картинки:
-      obs-shaderfilter  # Кастомные шейдеры и эффекты
+      obs-shaderfilter # Кастомные шейдеры и эффекты
       obs-composite-blur # Дополнительные эффекты размытия
     ];
   };
-
 }

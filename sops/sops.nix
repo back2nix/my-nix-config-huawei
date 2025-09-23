@@ -9,11 +9,11 @@
       "vpn/user" = {};
       "vpn/private_key_path" = {};
 
-      "vault/root_token" = { };
+      "vault/root_token" = {};
       # "vault/unseal_Key" = {};
       "autossh/ip" = {};
 
-       # "vault_root_token" = {};
+      # "vault_root_token" = {};
 
       # Остальные секреты...
       "surfshark" = {
@@ -39,7 +39,6 @@
     # };
 
     templates."sing-box-config.json" = {
-
       content = builtins.toJSON {
         log.level = "info";
 

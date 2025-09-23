@@ -428,7 +428,6 @@ in {
     ];
   };
 
-
   # xdg.mimeApps = {
   #   # enable = true;
   #   defaultApplications = {

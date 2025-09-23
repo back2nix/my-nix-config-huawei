@@ -9,7 +9,7 @@
     };
 
     "org/gnome/settings-daemon/plugins/power" = {
-    ambient-enabled = false;
+      ambient-enabled = false;
     };
 
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
