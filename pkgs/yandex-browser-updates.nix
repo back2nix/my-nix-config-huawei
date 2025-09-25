@@ -4,6 +4,7 @@
   fetchurl,
   autoPatchelfHook,
   wrapGAppsHook3,
+  makeWrapper, # Добавлено для создания обертки
   flac,
   gnome2,
   harfbuzzFull,
@@ -95,6 +96,7 @@ in
       autoPatchelfHook
       qt6.wrapQtAppsHook
       wrapGAppsHook3
+      makeWrapper # Добавлено в зависимости сборки
     ];
 
     buildInputs = [
@@ -159,7 +161,16 @@ in
       substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace /opt/ $out/opt/
       substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace /opt/ $out/opt/
       ln -sf ${vivaldi-ffmpeg-codecs}/lib/libffmpeg.so $out/opt/yandex/browser${app}/libffmpeg.so
-      ln -sf $out/opt/yandex/browser${app}/yandex-browser${app} $out/bin/${pname}
+
+      # Создаем обертку с GPU флагами вместо символической ссылки
+      makeWrapper $out/opt/yandex/browser${app}/yandex-browser${app} $out/bin/${pname} \
+        --add-flags "--flag-switches-begin" \
+        --add-flags "--enable-gpu-rasterization" \
+        --add-flags "--enable-webgpu-developer-features" \
+        --add-flags "--enable-zero-copy" \
+        --add-flags "--ignore-gpu-blocklist" \
+        --add-flags "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor" \
+        --add-flags "--flag-switches-end"
     '';
 
     runtimeDependencies =
