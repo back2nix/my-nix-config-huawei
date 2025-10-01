@@ -425,6 +425,8 @@ in {
       "--ignore-gpu-blocklist"
       "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor"
       "--flag-switches-end"
+      "--force-webrtc-ip-handling-policy=default_public_interface_only"
+      "--enforce-webrtc-ip-permission-check"
     ];
   };
 

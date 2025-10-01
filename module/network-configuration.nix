@@ -43,7 +43,37 @@
       127.0.0.1 host.docker.internal
     '';
 
-    nftables.enable = true;
+    nftables = {
+      enable = true;
+      ruleset = ''
+      table inet filter {
+        chain output {
+          type filter hook output priority 0; policy accept;
+
+          # Блокируем исходящий UDP на высокие порты
+          udp dport 1024-65535 drop
+        }
+      }
+
+      table ip nat {
+        chain prerouting {
+          type nat hook prerouting priority 0; policy accept;
+
+          iifname "wlp0s20f3" tcp dport 80 redirect to :1081
+          iifname "wlp0s20f3" tcp dport 443 redirect to :1081
+        }
+      }
+
+      table ip6 nat {
+        chain prerouting {
+          type nat hook prerouting priority 0; policy accept;
+
+          iifname "wlp0s20f3" tcp dport 80 redirect to :1081
+          iifname "wlp0s20f3" tcp dport 443 redirect to :1081
+        }
+      }
+      '';
+    };
 
     firewall = {
       enable = false;
@@ -60,6 +90,7 @@
         iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
         ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
         ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
+        iptables -A OUTPUT -p udp --dport 1024:65535 -j DROP
       '';
     };
   };
