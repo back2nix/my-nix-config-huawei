@@ -126,6 +126,7 @@
       asus = mkSystem "asus-ux3405m" [];
       huawei = mkSystem "huawei-rlef-x" [];
       yoga14 = mkSystem "yoga14" []; # lenovo yoga14 ILL10
+      desktop = mkSystem "desktop" [];
     };
   };
 }
