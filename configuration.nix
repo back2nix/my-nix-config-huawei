@@ -217,6 +217,7 @@ in {
       gemini-proxy
       android-udev-rules
       appimage-run
+      virtualbox
     ];
 
     etc."proxychains.conf".text = ''

@@ -43,37 +43,50 @@
       127.0.0.1 host.docker.internal
     '';
 
-    nftables = {
-      enable = true;
-      ruleset = ''
-      table inet filter {
-        chain output {
-          type filter hook output priority 0; policy accept;
+    # nftables = {
+    #   enable = true;
+    #   ruleset = ''
+    #   table inet filter {
+    #     chain output {
+    #       type filter hook output priority 0; policy accept;
+    #       # Блокируем исходящий UDP на высокие порты
+    #       udp dport 1024-65535 drop
+    #       # udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
+    #       udp dport 443 drop
+    #     }
+    #   }
+    #   '';
+    # };
 
-          # Блокируем исходящий UDP на высокие порты
-          udp dport 1024-65535 drop
-        }
-      }
+    # nftables = {
+    #   enable = true;
+    #   ruleset = ''
+    #     table inet filter {
+    #       set allowed_udp {
+    #         type inet_service
+    #         flags interval
+    #         elements = { 53, 67-68, 123, 500, }  # DNS, DHCP, NTP, VPN, mDNS
+    #       }
 
-      table ip nat {
-        chain prerouting {
-          type nat hook prerouting priority 0; policy accept;
+    #       chain input {
+    #         type filter hook input priority 0; policy accept;
+    #         # Блокируем весь входящий UDP
+    #         # udp dport 1024-65535 drop
+    #       }
 
-          iifname "wlp0s20f3" tcp dport 80 redirect to :1081
-          iifname "wlp0s20f3" tcp dport 443 redirect to :1081
-        }
-      }
+    #       chain output {
+    #         type filter hook output priority 0; policy accept;
 
-      table ip6 nat {
-        chain prerouting {
-          type nat hook prerouting priority 0; policy accept;
+    #         # Разрешаем стандартные UDP сервисы
+    #         # udp dport @allowed_udp accept
 
-          iifname "wlp0s20f3" tcp dport 80 redirect to :1081
-          iifname "wlp0s20f3" tcp dport 443 redirect to :1081
-        }
-      }
-      '';
-    };
+    #         # Блокируем всё остальное UDP выше 1024
+    #         # udp dport 1024-65535 drop
+    #         # udp dport 443 drop
+    #       }
+    #     }
+    #   '';
+    # };
 
     firewall = {
       enable = false;

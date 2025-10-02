@@ -59,7 +59,7 @@
 
     # Команды для сессии X11
     displayManager.sessionCommands = ''
-      ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --scale 1.2x1.2
+      ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --scale 1.0x1.0
       # Настройка автоповорота для X11
       ${pkgs.iio-sensor-proxy}/bin/monitor-sensor | while read line; do
         case "$line" in
