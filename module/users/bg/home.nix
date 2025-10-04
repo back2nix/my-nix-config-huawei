@@ -420,7 +420,7 @@ in {
     commandLineArgs = [
       "--flag-switches-begin"
       "--enable-gpu-rasterization"
-      "--enable-webgpu-developer-features"
+      # "--enable-webgpu-developer-features"
       "--enable-zero-copy"
       "--ignore-gpu-blocklist"
       "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor"

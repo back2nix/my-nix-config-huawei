@@ -43,20 +43,20 @@
       127.0.0.1 host.docker.internal
     '';
 
-    # nftables = {
-    #   enable = true;
-    #   ruleset = ''
-    #   table inet filter {
-    #     chain output {
-    #       type filter hook output priority 0; policy accept;
-    #       # Блокируем исходящий UDP на высокие порты
-    #       udp dport 1024-65535 drop
-    #       # udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
-    #       udp dport 443 drop
-    #     }
-    #   }
-    #   '';
-    # };
+    nftables = {
+      enable = true;
+      ruleset = ''
+      table inet filter {
+        chain output {
+          type filter hook output priority 0; policy accept;
+          # Блокируем исходящий UDP на высокие порты
+          # udp dport 1024-65535 drop
+          # udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
+          # udp dport 443 drop
+        }
+      }
+      '';
+    };
 
     # nftables = {
     #   enable = true;
