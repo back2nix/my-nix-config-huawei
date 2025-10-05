@@ -20,6 +20,8 @@
       CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
       DynamicUser = "yes";
       ExecStart = "${pkgs.cloudflared}/bin/cloudflared proxy-dns";
+      # ExecStart = "${pkgs.cloudflared}/bin/cloudflared proxy-dns --upstream https://1.1.1.1/dns-query --upstream https://1.0.0.1/dns-query";
+      # Environment = "GODEBUG=http2client=1";
     };
   };
 
