@@ -51,11 +51,11 @@
           type filter hook output priority 0; policy accept;
           # Блокируем исходящий UDP на высокие порты
           # udp dport 1024-65535 drop
-          udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
+          # udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
 
-          udp dport 443 ip daddr { 1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4 } accept
-          udp dport 443 ip6 daddr { 2606:4700:4700::1111, 2606:4700:4700::1001 } accept
-          udp dport 443 drop
+          # udp dport 443 ip daddr { 1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4 } accept
+          # udp dport 443 ip6 daddr { 2606:4700:4700::1111, 2606:4700:4700::1001 } accept
+          # udp dport 443 drop
         }
       }
       '';
