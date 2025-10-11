@@ -218,6 +218,7 @@ in {
       android-udev-rules
       appimage-run
       virtualbox
+      dbeaver-bin
     ];
 
     etc."proxychains.conf".text = ''
