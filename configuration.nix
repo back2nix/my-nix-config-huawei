@@ -219,6 +219,8 @@ in {
       appimage-run
       virtualbox
       dbeaver-bin
+      claude-code-proxy
+      # claude-code
     ];
 
     etc."proxychains.conf".text = ''
@@ -347,6 +349,7 @@ in {
 
   nixpkgs.config.permittedInsecurePackages = [
     "my-yandex-browser-stable-25.8.1.890-1"
+    "claude-code"
   ];
 
   users.users.bg.extraGroups = ["input"];
