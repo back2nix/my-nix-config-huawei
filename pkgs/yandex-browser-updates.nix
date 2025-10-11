@@ -50,6 +50,8 @@
   at-spi2-core,
   libqt5pas,
   qt6,
+  ffmpeg-full,
+  libGL,
   vivaldi-ffmpeg-codecs,
   edition ? "stable",
 }: let
@@ -57,7 +59,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "25.8.1.844-1";
+      stable = "25.8.1.890-1";
     }
     .${
       edition
@@ -67,7 +69,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "sha256-VQdu4+nbfUM+3ID54+5M1GALRIDqc6b7ZUEsmaVVhi4=";
+      stable = "sha256-o2OqEb39udavZOLrju/SMehN3rzeQVkd750GZHWyXlQ=";
     }
     .${
       edition
@@ -145,6 +147,7 @@ in
       (lib.getLib stdenv.cc.cc)
       libqt5pas
       qt6.qtbase
+      libGL
     ];
 
     unpackPhase = ''
@@ -160,17 +163,34 @@ in
       substituteInPlace $out/share/applications/${pname}.desktop --replace /usr/ $out/
       substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace /opt/ $out/opt/
       substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace /opt/ $out/opt/
+
       ln -sf ${vivaldi-ffmpeg-codecs}/lib/libffmpeg.so $out/opt/yandex/browser${app}/libffmpeg.so
 
-      # Создаем обертку с GPU флагами вместо символической ссылки
-      makeWrapper $out/opt/yandex/browser${app}/yandex-browser${app} $out/bin/${pname} \
-        --add-flags "--flag-switches-begin" \
-        --add-flags "--enable-gpu-rasterization" \
-        --add-flags "--enable-webgpu-developer-features" \
-        --add-flags "--enable-zero-copy" \
-        --add-flags "--ignore-gpu-blocklist" \
-        --add-flags "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor" \
-        --add-flags "--flag-switches-end"
+      cat > $out/bin/${pname} <<EOF
+      #!/usr/bin/env bash
+      export LD_LIBRARY_PATH="${lib.getLib libGL}/lib:/run/opengl-driver/lib:\$LD_LIBRARY_PATH"
+      exec $out/opt/yandex/browser${app}/yandex-browser${app} \\
+        --disable-gpu-sandbox \\
+        --flag-switches-begin \\
+        --enable-gpu-rasterization \\
+        --enable-zero-copy \\
+        --ignore-gpu-blocklist \\
+        --use-gl=angle \\
+        --use-angle=gl \\
+        --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoEncoder,Vulkan \\
+        --enable-hardware-overlays \\
+        --disable-software-rasterizer \\
+        --flag-switches-end \\
+        "\$@"
+      EOF
+
+      chmod +x $out/bin/${pname}
+
+      for lib in $out/opt/yandex/browser${app}/lib*GL* $out/opt/yandex/browser${app}/lib*EGL*; do
+        if [ -f "$lib" ]; then
+          patchelf --set-rpath ${lib.makeLibraryPath runtimeDependencies} "$lib" || true
+        fi
+      done
     '';
 
     runtimeDependencies =
@@ -179,6 +199,8 @@ in
         curl
         systemd
         vivaldi-ffmpeg-codecs
+        ffmpeg-full
+        libGL
       ]
       ++ buildInputs;
 
