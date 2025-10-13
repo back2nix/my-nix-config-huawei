@@ -4,6 +4,12 @@
   ...
 }: {
   virtualisation = {
+
+    virtualbox.host = {
+      enable = true;
+      enableExtensionPack = true;
+    };
+
     oci-containers.backend = "podman";
 
     libvirtd = {

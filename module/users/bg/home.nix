@@ -427,6 +427,7 @@ in {
       "--flag-switches-end"
       "--force-webrtc-ip-handling-policy=default_public_interface_only"
       "--enforce-webrtc-ip-permission-check"
+      "--remote-debugging-port=9222"
     ];
   };
 

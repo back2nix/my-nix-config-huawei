@@ -27,6 +27,8 @@ in {
     # ./module/autossh.nix
     ./sops/sops.nix
 
+    ./module/virtualbox.nix
+
     # DNS настройки
     # ./module/dns-dot-tls.nix
     # ./module/dns-doh-https.nix
@@ -217,7 +219,6 @@ in {
       gemini-proxy
       android-udev-rules
       appimage-run
-      virtualbox
       dbeaver-bin
       claude-code-proxy
       # claude-code
@@ -444,4 +445,5 @@ in {
       obs-composite-blur # Дополнительные эффекты размытия
     ];
   };
+
 }

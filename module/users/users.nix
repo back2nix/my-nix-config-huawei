@@ -49,6 +49,7 @@ in {
       "podman"
       "qemu-libvirtd"
       "adbusers"
+      "vboxusers"
     ];
     openssh = {
       authorizedKeys.keys = [
