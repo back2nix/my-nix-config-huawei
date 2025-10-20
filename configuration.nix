@@ -27,7 +27,7 @@ in {
     # ./module/autossh.nix
     ./sops/sops.nix
 
-    ./module/virtualbox.nix
+    # ./module/virtualbox.nix
 
     # DNS настройки
     # ./module/dns-dot-tls.nix

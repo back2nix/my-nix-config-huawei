@@ -46,18 +46,66 @@
     nftables = {
       enable = true;
       ruleset = ''
-      table inet filter {
-        chain output {
-          type filter hook output priority 0; policy accept;
-          # Блокируем исходящий UDP на высокие порты
-          # udp dport 1024-65535 drop
-          # udp dport { 3478, 19302-19309, 6384-32768, 49152-65535} drop
+        table inet filter {
+          # Разрешённые UDP порты для системных сервисов
+          set system_udp {
+            type inet_service
+            flags interval
+            elements = {
+              53,      # DNS
+              67-68,   # DHCP
+              123,     # NTP
+              500,     # IPsec/VPN
+              4500,    # IPsec NAT-T
+              5353,    # mDNS
+              51820    # WireGuard (если используешь)
+            }
+          }
 
-          # udp dport 443 ip daddr { 1.1.1.1, 1.0.0.1, 8.8.8.8, 8.8.4.4 } accept
-          # udp dport 443 ip6 daddr { 2606:4700:4700::1111, 2606:4700:4700::1001 } accept
-          # udp dport 443 drop
+          # Известные STUN/TURN серверы Google (IP адреса)
+          set google_stun_ipv4 {
+            type ipv4_addr
+            flags interval
+            elements = {
+              142.250.0.0/15,    # Основной диапазон Google
+              172.217.0.0/16,    # Google services
+              216.58.192.0/19,   # YouTube/Meet
+              74.125.0.0/16      # Google infrastructure
+            }
+          }
+
+          set google_stun_ipv6 {
+            type ipv6_addr
+            flags interval
+            elements = {
+              2607:f8b0::/32,    # Google IPv6
+              2800:3f0::/32,     # Google IPv6 alt
+              2a00:1450::/32,    # Google IPv6 EU
+              2404:6800::/32     # Google IPv6 APAC
+            }
+          }
+
+          chain output {
+            type filter hook output priority 0; policy accept;
+
+            # Разрешаем системные UDP сервисы
+            udp dport @system_udp accept
+
+            # Блокируем WebRTC STUN/TURN трафик Google по IP
+            ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
+            ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
+
+            # Блокируем стандартный STUN порт для Google
+            ip daddr @google_stun_ipv4 udp dport 3478 drop
+            ip6 daddr @google_stun_ipv6 udp dport 3478 drop
+
+            # Блокируем высокие порты для Google (используются для media)
+            ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
+            ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
+
+            # Всё остальное UDP разрешаем (для других сервисов)
+          }
         }
-      }
       '';
     };
 
