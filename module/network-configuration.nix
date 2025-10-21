@@ -70,7 +70,8 @@
               142.250.0.0/15,    # Основной диапазон Google
               172.217.0.0/16,    # Google services
               216.58.192.0/19,   # YouTube/Meet
-              74.125.0.0/16      # Google infrastructure
+              74.125.0.0/16,      # Google infrastructure
+              # 213.180.204.242/16    # Yandex STUN
             }
           }
 
