@@ -7,31 +7,25 @@
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
       ];
     };
-
     "org/gnome/settings-daemon/plugins/power" = {
       ambient-enabled = false;
     };
-
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
       binding = "<Primary><Alt>T";
       command = "kitty";
       name = "Open Terminal";
     };
-
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
       binding = "<Primary><Alt>R";
       command = "toggle-flip";
       name = "Toggle Screen Flip";
     };
-
     "org/gnome/desktop/peripherals/touchpad" = {
       natural-scroll = true;
       send-events = "enabled";
       tap-to-click = true;
       two-finger-scrolling-enabled = true;
     };
-
-    # Объединяем все настройки клавиатуры в одном разделе
     "org/gnome/desktop/wm/keybindings" = {
       close = ["<Alt>q"];
       cycle-group = [];
@@ -55,8 +49,16 @@
       switch-to-workspace-3 = ["<Alt>3"];
       switch-to-workspace-4 = ["<Alt>4"];
       switch-to-workspace-last = [];
-      # Переключение раскладки клавиатуры
       switch-input-source = ["<Alt>Shift_L"];
     };
+
+    # Настройки масштабирования (если нужны)
+    # Раскомментируй и настрой под свои нужды:
+    # "org/gnome/desktop/interface" = {
+    #   text-scaling-factor = 1.0;  # 1.0, 1.25, 1.5
+    # };
+    # "org/gnome/mutter" = {
+    #   experimental-features = ["scale-monitor-framebuffer"];  # для fractional scaling
+    # };
   };
 }
