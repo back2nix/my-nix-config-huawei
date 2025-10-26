@@ -16,7 +16,8 @@
   networking.hostName = "yoga14";
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
+    # kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_latest;
 
     kernelModules = [
       "kvm-intel"

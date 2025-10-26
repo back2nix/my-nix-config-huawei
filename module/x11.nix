@@ -16,11 +16,17 @@
     displayManager = {
       gdm = {
         enable = true;
-        wayland = false;
+        # wayland = false;
       };
     };
 
-    desktopManager.gnome.enable = true;
+    desktopManager.gnome = {
+      enable = true;
+      # --- НАЧАЛО ИЗМЕНЕНИЯ ---
+      # Явно заменяем mutter на нашу исправленную версию из оверлея
+      # mutter = pkgs.mutter;
+      # --- КОНЕЦ ИЗМЕНЕНИЯ ---
+    };
 
     wacom.enable = true;
 

@@ -166,7 +166,7 @@ in {
       usbutils
       pciutils
       bluez-tools
-      gnome-settings-daemon
+      # gnome-settings-daemon
       my-yandex-browser-stable
       age
 
@@ -222,6 +222,9 @@ in {
       dbeaver-bin
       claude-code-proxy
       # claude-code
+      xdotool
+      xorg.xwininfo
+      wl-clipboard
     ];
 
     etc."proxychains.conf".text = ''

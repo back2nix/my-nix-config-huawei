@@ -60,6 +60,9 @@ update/replacer:
 update:
 	nix flake update
 
+update/mutter:
+	nix flake lock --update-input mutter-src
+
 # Переключение на конкретное устройство (переопределяет .env)
 switch/device:
 	@read -p "Введите имя устройства (asus/huawei/yoga14): " device; \

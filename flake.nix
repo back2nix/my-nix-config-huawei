@@ -49,6 +49,15 @@
       url = "github:k3d3/claude-desktop-linux-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    mutter-src = {
+      # url = "path:./mutter";
+      type = "git";
+      url = "https://github.com/back2nix/mutter.git";
+      ref = "zero";
+      rev = "46293a8f0c7a51f433ca46da18ea189eed267843";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {flake-parts, ...}:
@@ -128,16 +137,10 @@
                 inputs.musnix.nixosModules.musnix
                 inputs.sops-nix.nixosModules.sops
                 ./configuration.nix
+                # --- НАЧАЛО ИЗМЕНЕНИЯ ---
+                # Применяем наш оверлей с исправленным mutter
                 ./overlays/default.nix
-
-                # Импорт оверлеев
-                {
-                  nixpkgs.overlays = [
-                    (final: prev: {
-                      # Здесь можно добавить оверлеи
-                    })
-                  ];
-                }
+                # --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
                 # Home Manager
                 inputs.home-manager.nixosModules.home-manager

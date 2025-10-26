@@ -7,3 +7,4 @@ shadowsocks*.json
 # hardware-configuration.nix
 *.qcow2
 .null-ls*
+.git*
