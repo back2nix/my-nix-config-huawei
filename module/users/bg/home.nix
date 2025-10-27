@@ -413,30 +413,43 @@ in {
     ];
   };
 
+  # gpu wayland
+  # google-chrome --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --use-angle=vulkan --disable-gpu-video-decode
   programs.google-chrome = {
     enable = true;
     package = pkgs-master.google-chrome;
 
     commandLineArgs = [
-      # Wayland platform
-      "--ozone-platform=x11"
-      "--enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
-      "--enable-wayland-ime"
-
-      # ИСПРАВЛЕНО: GPU через ANGLE с бэкендом OpenGL
-      "--use-gl=angle"
-      "--use-angle=gl" # <--- ИЗМЕНЕНО
+      "--ozone-platform=wayland"
+      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE"
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
-
-      # ИСПРАВЛЕНО: Убран флаг Vulkan
-      "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" # <--- ИЗМЕНЕНО
-
-      # Ваши настройки
-      "--force-webrtc-ip-handling-policy=default_public_interface_only"
-      "--enforce-webrtc-ip-permission-check"
-      "--remote-debugging-port=9222"
+      "--ignore-gpu-blocklist"
+      "--use-angle=vulkan"
+      "--disable-gpu-video-decode"
     ];
+
+    # Не выделяюется мышкой текст в gemini
+    # commandLineArgs = [
+    #   # Wayland platform
+    #   "--ozone-platform=x11"
+    #   "--enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
+    #   "--enable-wayland-ime"
+
+    #   # ИСПРАВЛЕНО: GPU через ANGLE с бэкендом OpenGL
+    #   "--use-gl=angle"
+    #   "--use-angle=gl" # <--- ИЗМЕНЕНО
+    #   "--enable-gpu-rasterization"
+    #   "--enable-zero-copy"
+
+    #   # ИСПРАВЛЕНО: Убран флаг Vulkan
+    #   "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" # <--- ИЗМЕНЕНО
+
+    #   # Ваши настройки
+    #   "--force-webrtc-ip-handling-policy=default_public_interface_only"
+    #   "--enforce-webrtc-ip-permission-check"
+    #   "--remote-debugging-port=9222"
+    # ];
   };
 
   # xdg.mimeApps = {
