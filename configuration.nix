@@ -226,6 +226,10 @@ in {
       xorg.xwininfo
       wl-clipboard
       gnome-screenshot
+
+      gnome-shell
+      gnome-shell-extensions
+      gnomeExtensions.always-indicator
     ];
 
     etc."proxychains.conf".text = ''
@@ -458,5 +462,4 @@ in {
     ];
     config.common.default = [ "gnome" "gtk" ];
   };
-
 }

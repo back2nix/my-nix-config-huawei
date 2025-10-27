@@ -74,7 +74,6 @@ in {
       tmux
       wget
       kitty
-      gnome-shell
       shadowsocks-libev
     ];
   };
