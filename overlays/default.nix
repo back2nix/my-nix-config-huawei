@@ -21,6 +21,12 @@
     # Overlay 2: Use `final` and `prev` to express
     # the relationship between the new and the old
     (final: prev: {
+      # --- НАЧАЛО: Патч для gnome-screenshot ---
+      gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
+        patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
+      });
+      # --- КОНЕЦ: Патч для gnome-screenshot ---
+
       mutter = prev.mutter.overrideAttrs (oldAttrs: {
         # Указываем на исправленные исходники
         # version = "48.3.1-my";
@@ -107,7 +113,7 @@
       #   };
       #   vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
       #   proxyVendor = true;
-      #   vendorSha256 = lib.fakeSha256;
+      #   vendorSha26 = lib.fakeSha256;
       # });
       # yandex-browser-stable = prev.yandex-browser-stable.overrideAttrs (oldAttrs: {
       #   version = "25.2.6.724-1";

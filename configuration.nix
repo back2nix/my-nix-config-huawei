@@ -225,6 +225,7 @@ in {
       xdotool
       xorg.xwininfo
       wl-clipboard
+      gnome-screenshot
     ];
 
     etc."proxychains.conf".text = ''
