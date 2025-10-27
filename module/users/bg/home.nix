@@ -415,19 +415,24 @@ in {
 
   programs.google-chrome = {
     enable = true;
-    package = pkgs-master.google-chrome; # Если используете unstable
+    package = pkgs-master.google-chrome;
 
     commandLineArgs = [
-      "--flag-switches-begin"
+      # Wayland platform
+      "--ozone-platform=x11"
+      "--enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
+      "--enable-wayland-ime"
+
+      # ИСПРАВЛЕНО: GPU через ANGLE с бэкендом OpenGL
+      "--use-gl=angle"
+      "--use-angle=gl" # <--- ИЗМЕНЕНО
       "--enable-gpu-rasterization"
-      # "--enable-webgpu-developer-features"
-      "--ozone-platform-hint=auto"
-      "--disable-vulkan"
-      "--use-gl=egl"
       "--enable-zero-copy"
-      "--ignore-gpu-blocklist"
-      "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,SkiaGraphite,SyncPointGraphValidation,Vulkan,WebMachineLearningNeuralNetwork,ZeroCopyRBPPartialRasterWithGpuCompositor"
-      "--flag-switches-end"
+
+      # ИСПРАВЛЕНО: Убран флаг Vulkan
+      "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" # <--- ИЗМЕНЕНО
+
+      # Ваши настройки
       "--force-webrtc-ip-handling-policy=default_public_interface_only"
       "--enforce-webrtc-ip-permission-check"
       "--remote-debugging-port=9222"

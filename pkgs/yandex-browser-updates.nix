@@ -59,7 +59,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "25.8.1.890-1";
+      stable = "25.8.5.854-1";
     }
     .${
       edition
@@ -69,7 +69,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "sha256-o2OqEb39udavZOLrju/SMehN3rzeQVkd750GZHWyXlQ=";
+      stable = "sha256-9bKuOYMTl3E/qeHDxCPN3udQBtr9A8TysNlqi+Frayc=";
     }
     .${
       edition
@@ -170,17 +170,28 @@ in
       #!/usr/bin/env bash
       export LD_LIBRARY_PATH="${lib.getLib libGL}/lib:/run/opengl-driver/lib:\$LD_LIBRARY_PATH"
       exec $out/opt/yandex/browser${app}/yandex-browser${app} \\
-        --disable-gpu-sandbox \\
-        --flag-switches-begin \\
-        --enable-gpu-rasterization \\
-        --enable-zero-copy \\
-        --ignore-gpu-blocklist \\
+        # --disable-gpu-sandbox \\
+        # --flag-switches-begin \\
+        # --enable-gpu-rasterization \\
+        # --enable-zero-copy \\
+        # --ignore-gpu-blocklist \\
+        # --use-gl=angle \\
+        # --use-angle=gl \\
+        # --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoEncoder,Vulkan \\
+        # --enable-hardware-overlays \\
+        # --disable-software-rasterizer \\
+        # --flag-switches-end \\
+        --ozone-platform=x11 \\
+        --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer \\
+        --enable-wayland-ime \\
         --use-gl=angle \\
         --use-angle=gl \\
-        --enable-features=VaapiVideoDecodeLinuxGL,VaapiVideoEncoder,Vulkan \\
-        --enable-hardware-overlays \\
-        --disable-software-rasterizer \\
-        --flag-switches-end \\
+        --enable-gpu-rasterization \\
+        --enable-zero-copy \\
+        --enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" \\
+        --force-webrtc-ip-handling-policy=default_public_interface_only \\
+        --enforce-webrtc-ip-permission-check \\
+        --remote-debugging-port=9222 \\
         "\$@"
       EOF
 

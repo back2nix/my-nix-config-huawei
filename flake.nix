@@ -55,7 +55,7 @@
       type = "git";
       url = "https://github.com/back2nix/mutter.git";
       ref = "zero";
-      rev = "46293a8f0c7a51f433ca46da18ea189eed267843";
+      rev = "260e7dbda16d063865921d0e9851428dfc040bfa";
       flake = false;
     };
   };

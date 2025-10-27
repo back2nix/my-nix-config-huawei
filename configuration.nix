@@ -352,7 +352,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.8.1.890-1"
+    "my-yandex-browser-stable-25.8.5.854-1"
     "claude-code"
   ];
 
@@ -447,6 +447,15 @@ in {
       obs-shaderfilter # Кастомные шейдеры и эффекты
       obs-composite-blur # Дополнительные эффекты размытия
     ];
+  };
+
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-gnome
+      xdg-desktop-portal-gtk
+    ];
+    config.common.default = [ "gnome" "gtk" ];
   };
 
 }
