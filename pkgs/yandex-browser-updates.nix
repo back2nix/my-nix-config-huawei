@@ -181,17 +181,25 @@ in
         # --enable-hardware-overlays \\
         # --disable-software-rasterizer \\
         # --flag-switches-end \\
-        --ozone-platform=x11 \\
-        --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer \\
-        --enable-wayland-ime \\
-        --use-gl=angle \\
-        --use-angle=gl \\
+      # 2222222222222222222
+        # --ozone-platform=x11 \\
+        # --enable-features=UseOzonePlatform,WebRTCPipeWireCapturer \\
+        # --enable-wayland-ime \\
+        # --use-gl=angle \\
+        # --use-angle=gl \\
+        # --enable-gpu-rasterization \\
+        # --enable-zero-copy \\
+        # --enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" \\
+        # --force-webrtc-ip-handling-policy=default_public_interface_only \\
+        # --enforce-webrtc-ip-permission-check \\
+        # --remote-debugging-port=9222 \\
+        --ozone-platform=wayland \\
+        --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE \\
         --enable-gpu-rasterization \\
         --enable-zero-copy \\
-        --enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" \\
-        --force-webrtc-ip-handling-policy=default_public_interface_only \\
-        --enforce-webrtc-ip-permission-check \\
-        --remote-debugging-port=9222 \\
+        --ignore-gpu-blocklist \\
+        --use-angle=vulkan \\
+        --disable-gpu-video-decode \\
         "\$@"
       EOF
 
