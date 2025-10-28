@@ -427,6 +427,7 @@ in {
       "--ignore-gpu-blocklist"
       "--use-angle=vulkan"
       "--disable-gpu-video-decode"
+      "--disable-features=GlobalMediaControls"
     ];
 
     # Не выделяюется мышкой текст в gemini
