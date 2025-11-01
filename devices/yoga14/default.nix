@@ -29,6 +29,8 @@
       "bluetooth"
       "btusb"
       "btintel"
+      "tun"
+      "tap"
     ];
 
     initrd.kernelModules = [
@@ -108,6 +110,8 @@
     ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
 
     ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}="73"
+
+    SUBSYSTEM=="net", KERNEL=="tun", GROUP="kvm", MODE="0660"
   '';
 
   systemd.services.iwlwifi-reload = {

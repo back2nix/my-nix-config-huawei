@@ -19,15 +19,23 @@
 # sudo modprobe vboxnetadp
 
   # Отключаем KVM для работы VirtualBox
-  boot.blacklistedKernelModules = [ "kvm" "kvm_intel" "kvm_amd" ];
+  # boot.blacklistedKernelModules = [ "kvm" "kvm_intel" "kvm_amd" ];
 
   # Отключаем libvirtd (конфликтует с VirtualBox)
-  virtualisation.libvirtd.enable = lib.mkForce false;
+  # virtualisation.libvirtd.enable = lib.mkForce false;
 
   # Включаем VirtualBox
-  virtualisation.virtualbox.host = {
-    enable = true;
-    enableExtensionPack = true;
+  virtualisation.virtualbox = {
+    host = {
+      enable = true;
+      enableExtensionPack = true;
+      enableKvm = true;
+      addNetworkInterface = false;
+    };
+
+    guest = {
+      enable = true;
+    };
   };
 
   # Убедимся что пользователь в группе vboxusers
