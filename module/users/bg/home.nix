@@ -258,6 +258,10 @@ in {
           inkstitch
         ];
       })
+
+      (pkgs.writeShellScriptBin "jasonbourne" ''
+        exec ${pkgs.kitty}/bin/kitty --class jasonbourne --title jasonbourne "$@"
+      '')
     ];
 
     file = {

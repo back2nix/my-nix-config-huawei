@@ -15,6 +15,11 @@
 
       # "vault_root_token" = {};
 
+      "mutter/hide_keywords_list" = {
+        owner = config.users.users.bg.name;
+        mode = "0400";
+      };
+
       # Остальные секреты...
       "surfshark" = {
         mode = "0440";

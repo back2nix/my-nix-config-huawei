@@ -117,6 +117,7 @@ in {
   environment = {
     sessionVariables = rec {
       GTK_THEME = "Adwaita:dark";
+      MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
     };
     shells = with pkgs; [fish];
 
@@ -198,7 +199,7 @@ in {
       libdvdnav
 
       iw
-      iptables
+      # iptables
       nettools
       dnsutils
       nmap
@@ -230,6 +231,11 @@ in {
       gnome-shell
       gnome-shell-extensions
       gnomeExtensions.always-indicator
+
+      iotop
+      sysstat
+      iftop
+      mtr
     ];
 
     etc."proxychains.conf".text = ''
