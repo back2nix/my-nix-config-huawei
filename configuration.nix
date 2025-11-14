@@ -12,6 +12,19 @@
   };
 in {
   nix = {
+    # nixPath = [ "nixpkgs=flake:nixpkgs" ];
+    # registry.nixpkgs = {
+    #   from = {
+    #     id = "nixpkgs";
+    #     type = "indirect";
+    #   };
+    #   to = {
+    #     type = "github";
+    #     owner = "NixOS";
+    #     repo = "nixpkgs";
+    #     ref = "nixos-25.05";
+    #   };
+    # };
     package = pkgs.nixVersions.stable;
     extraOptions = lib.optionalString (
       config.nix.package == pkgs.nixVersions.stable
@@ -371,6 +384,7 @@ in {
   nixpkgs.config.permittedInsecurePackages = [
     "my-yandex-browser-stable-25.8.5.854-1"
     "claude-code"
+    "mbedtls-2.28.10"
   ];
 
   users.users.bg.extraGroups = ["input"];

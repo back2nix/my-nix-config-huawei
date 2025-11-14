@@ -10,10 +10,10 @@
   ];
 
   nix.settings = {
-    substituters = lib.mkBefore [
+    substituters = lib.mkAfter [
       "https://cuda-maintainers.cachix.org"
     ];
-    trusted-public-keys = lib.mkBefore [
+    trusted-public-keys = lib.mkAfter [
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
