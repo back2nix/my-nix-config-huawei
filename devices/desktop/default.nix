@@ -20,7 +20,8 @@
 
   networking.hostName = "desktop";
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages;
 
   # --- CUDA and NVIDIA Configuration ---
   # Опции `opengl` были переименованы в `graphics`
@@ -35,9 +36,11 @@
     modesetting.enable = true;
     powerManagement.enable = false;
     powerManagement.finegrained = false;
+    # open = false;
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    # package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
   boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
