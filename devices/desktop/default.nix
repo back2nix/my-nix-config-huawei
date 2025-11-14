@@ -6,15 +6,15 @@
 }: {
   imports = [
     ./hardware-configuration.nix
-    ./powersave.nix
+    # ./powersave.nix
   ];
 
   nix.settings = {
     substituters = lib.mkAfter [
-      "https://cuda-maintainers.cachix.org"
+      # "https://cuda-maintainers.cachix.org"
     ];
     trusted-public-keys = lib.mkAfter [
-      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      # "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
     ];
   };
 
