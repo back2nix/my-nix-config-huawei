@@ -16,6 +16,9 @@ in {
       "https://cache.nixos.org/"
       "https://robotnix.cachix.org"
       "https://nix-community.cachix.org"
+
+      "https://nixpkgs-wayland.cachix.org"
+      "https://nixpkgs-unfree.cachix.org"
     ];
 
     trusted-substituters = [
@@ -24,10 +27,10 @@ in {
     ];
 
     trusted-public-keys = [
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
     ];
   };
 }

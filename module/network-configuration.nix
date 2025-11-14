@@ -43,11 +43,22 @@
       127.0.0.1 host.docker.internal
     '';
 
+
+    # module/network-configuration.nix
     nftables = {
       enable = true;
       ruleset = ''
         table inet filter {
-          # Разрешённые UDP порты для системных сервисов
+          set allowed_tcp {
+            type inet_service
+            flags interval
+            elements = {
+              22,      # SSH
+              5555,    # Camera streaming
+              8080     # Web services
+            }
+          }
+
           set system_udp {
             type inet_service
             flags interval
@@ -58,20 +69,18 @@
               500,     # IPsec/VPN
               4500,    # IPsec NAT-T
               5353,    # mDNS
-              51820    # WireGuard (если используешь)
+              51820    # WireGuard
             }
           }
 
-          # Известные STUN/TURN серверы Google (IP адреса)
           set google_stun_ipv4 {
             type ipv4_addr
             flags interval
             elements = {
-              142.250.0.0/15,    # Основной диапазон Google
-              172.217.0.0/16,    # Google services
-              216.58.192.0/19,   # YouTube/Meet
-              74.125.0.0/16,      # Google infrastructure
-              # 213.180.204.242/16    # Yandex STUN
+              142.250.0.0/15,
+              172.217.0.0/16,
+              216.58.192.0/19,
+              74.125.0.0/16
             }
           }
 
@@ -79,37 +88,44 @@
             type ipv6_addr
             flags interval
             elements = {
-              2607:f8b0::/32,    # Google IPv6
-              2800:3f0::/32,     # Google IPv6 alt
-              2a00:1450::/32,    # Google IPv6 EU
-              2404:6800::/32     # Google IPv6 APAC
+              2607:f8b0::/32,
+              2800:3f0::/32,
+              2a00:1450::/32,
+              2404:6800::/32
             }
           }
 
-          chain output {
-            type filter hook output priority 0; policy accept;
+          chain input {
+            type filter hook input priority filter; policy drop;
 
-            # Разрешаем системные UDP сервисы
+            iif lo accept comment "Allow loopback"
+            ct state vmap { invalid : drop, established : accept, related : accept }
+
+            ip protocol icmp accept comment "Allow ICMP"
+            ip6 nexthdr ipv6-icmp accept comment "Allow ICMPv6"
+
+            tcp dport @allowed_tcp accept comment "Allow specified TCP ports"
+          }
+
+          chain output {
+            type filter hook output priority filter; policy accept;
+
             udp dport @system_udp accept
 
-            # Блокируем WebRTC STUN/TURN трафик Google по IP
             ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
             ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
 
-            # Блокируем стандартный STUN порт для Google
             ip daddr @google_stun_ipv4 udp dport 3478 drop
             ip6 daddr @google_stun_ipv6 udp dport 3478 drop
 
-            # Блокируем высокие порты для Google (используются для media)
             ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
             ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
-
-            # Всё остальное UDP разрешаем (для других сервисов)
           }
         }
       '';
     };
 
+    # module/network-configuration.nix
     # nftables = {
     #   enable = true;
     #   ruleset = ''
@@ -140,6 +156,7 @@
     #   '';
     # };
 
+    firewall.enable = false;
     # firewall = {
     #   enable = false;
     #   allowedTCPPorts = [

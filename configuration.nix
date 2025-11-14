@@ -236,6 +236,12 @@ in {
       sysstat
       iftop
       mtr
+
+      stdenv.cc.cc.lib
+      zlib
+      gcc
+
+      uv
     ];
 
     etc."proxychains.conf".text = ''

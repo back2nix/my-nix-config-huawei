@@ -6,11 +6,16 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ./powersave.nix
   ];
 
   nix.settings = {
-    substituters = lib.mkBefore [ "https://cuda-maintainers.cachix.org" ];
-    trusted-public-keys = lib.mkBefore [ "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=" ];
+    substituters = lib.mkBefore [
+      "https://cuda-maintainers.cachix.org"
+    ];
+    trusted-public-keys = lib.mkBefore [
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+    ];
   };
 
   networking.hostName = "desktop";
@@ -35,7 +40,8 @@
     package = config.boot.kernelPackages.nvidiaPackages.production;
   };
 
-  boot.kernelModules = ["nvidia-uvm"];
+  boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
+  boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
 
   # --- Virtualisation with NVIDIA support (Manual Configuration) ---
   # Мы настраиваем это вручную, чтобы обойти ошибку в nixos-25.05,
