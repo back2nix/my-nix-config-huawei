@@ -387,7 +387,7 @@ in {
     "mbedtls-2.28.10"
   ];
 
-  users.users.bg.extraGroups = ["input"];
+  users.users.bg.extraGroups = ["input" "docker"];
 
   swapDevices = [
     {

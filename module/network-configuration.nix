@@ -44,7 +44,6 @@
     '';
 
 
-    # module/network-configuration.nix
     nftables = {
       enable = true;
       ruleset = ''
@@ -55,7 +54,10 @@
             elements = {
               22,      # SSH
               5555,    # Camera streaming
-              8080     # Web services
+              8080,    # Gateway
+              8081,    # Greeter
+              9002,    # Shell
+              9901     # Envoy metrics
             }
           }
 
@@ -63,13 +65,7 @@
             type inet_service
             flags interval
             elements = {
-              53,      # DNS
-              67-68,   # DHCP
-              123,     # NTP
-              500,     # IPsec/VPN
-              4500,    # IPsec NAT-T
-              5353,    # mDNS
-              51820    # WireGuard
+              53, 67-68, 123, 500, 4500, 5353, 51820
             }
           }
 
@@ -98,12 +94,26 @@
           chain input {
             type filter hook input priority filter; policy drop;
 
-            iif lo accept comment "Allow loopback"
-            ct state vmap { invalid : drop, established : accept, related : accept }
+            # Loopback - всегда разрешаем
+            iif "lo" accept comment "Allow loopback"
 
+            # КРИТИЧНО: Разрешаем трафик от Docker
+            ip saddr 172.16.0.0/12 accept comment "Allow Docker subnets"
+            ip saddr 172.17.0.0/16 accept comment "Allow docker0 bridge"
+            ip saddr 172.27.0.0/16 accept comment "Allow docker-compose network"
+
+            # Connection tracking
+            ct state vmap {
+              invalid : drop,
+              established : accept,
+              related : accept
+            }
+
+            # ICMP
             ip protocol icmp accept comment "Allow ICMP"
             ip6 nexthdr ipv6-icmp accept comment "Allow ICMPv6"
 
+            # TCP порты
             tcp dport @allowed_tcp accept comment "Allow specified TCP ports"
           }
 
@@ -112,12 +122,11 @@
 
             udp dport @system_udp accept
 
+            # Блокируем Google STUN
             ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
             ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
-
             ip daddr @google_stun_ipv4 udp dport 3478 drop
             ip6 daddr @google_stun_ipv6 udp dport 3478 drop
-
             ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
             ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
           }

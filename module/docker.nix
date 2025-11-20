@@ -18,7 +18,7 @@
         then "btrfs"
         else "overlay2";
       rootless = {
-        enable = true;
+        enable = false;
         setSocketVariable = true;
         daemon = {
           settings = {
