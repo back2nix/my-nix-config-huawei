@@ -75,7 +75,7 @@
               --object-path /org/gnome/Mutter/DisplayConfig \
               --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
               $SERIAL 1 \
-              "[(0, 0, 1.0, uint32 1, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+              "[(0, 0, 1.25, uint32 1, true, [('eDP-1', '2880x1800@60.000', {})])]" \
               "{}"
             ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
             ;;
@@ -85,7 +85,7 @@
               --object-path /org/gnome/Mutter/DisplayConfig \
               --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
               $SERIAL 1 \
-              "[(0, 0, 1.0, uint32 3, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+              "[(0, 0, 1.25, uint32 3, true, [('eDP-1', '2880x1800@60.000', {})])]" \
               "{}"
             ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
             ;;
@@ -95,7 +95,7 @@
               --object-path /org/gnome/Mutter/DisplayConfig \
               --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
               $SERIAL 1 \
-              "[(0, 0, 1.0, uint32 0, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+              "[(0, 0, 1.25, uint32 0, true, [('eDP-1', '2880x1800@60.000', {})])]" \
               "{}"
             ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
             ;;
@@ -105,7 +105,7 @@
               --object-path /org/gnome/Mutter/DisplayConfig \
               --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
               $SERIAL 1 \
-              "[(0, 0, 1.0, uint32 2, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+              "[(0, 0, 1.25, uint32 2, true, [('eDP-1', '2880x1800@60.000', {})])]" \
               "{}"
             ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
             ;;

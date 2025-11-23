@@ -57,7 +57,8 @@
               8080,    # Gateway
               8081,    # Greeter
               9002,    # Shell
-              9901     # Envoy metrics
+              9901,     # Envoy metrics
+              6443     # K3S API Server
             }
           }
 
@@ -65,7 +66,8 @@
             type inet_service
             flags interval
             elements = {
-              53, 67-68, 123, 500, 4500, 5353, 51820
+              53, 67-68, 123, 500, 4500, 5353, 51820,
+              8472     # K3S Flannel VXLAN
             }
           }
 
@@ -101,6 +103,11 @@
             ip saddr 172.16.0.0/12 accept comment "Allow Docker subnets"
             ip saddr 172.17.0.0/16 accept comment "Allow docker0 bridge"
             ip saddr 172.27.0.0/16 accept comment "Allow docker-compose network"
+
+            # --- ДОБАВЛЕНО ДЛЯ K3S ---
+            ip saddr 10.42.0.0/16 accept comment "Allow K3s Pods"
+            ip saddr 10.43.0.0/16 accept comment "Allow K3s Services"
+            # -------------------------
 
             # Connection tracking
             ct state vmap {

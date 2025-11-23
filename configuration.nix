@@ -41,6 +41,7 @@ in {
     ./sops/sops.nix
 
     # ./module/virtualbox.nix
+    ./module/k3s.nix
 
     # DNS настройки
     # ./module/dns-dot-tls.nix
