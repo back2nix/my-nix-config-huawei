@@ -54,11 +54,13 @@
             elements = {
               22,      # SSH
               5555,    # Camera streaming
+              6443,    # K3S API Server
               8080,    # Gateway
-              8081,    # Greeter
+              8081,    # Landing (добавлено)
+              8082,    # Chat (добавлено)
+              8085,    # Notification (добавлено)
               9002,    # Shell
-              9901,     # Envoy metrics
-              6443     # K3S API Server
+              9901     # Envoy metrics
             }
           }
 
@@ -96,31 +98,29 @@
           chain input {
             type filter hook input priority filter; policy drop;
 
-            # Loopback - всегда разрешаем
             iif "lo" accept comment "Allow loopback"
 
-            # КРИТИЧНО: Разрешаем трафик от Docker
+            # Docker
             ip saddr 172.16.0.0/12 accept comment "Allow Docker subnets"
             ip saddr 172.17.0.0/16 accept comment "Allow docker0 bridge"
             ip saddr 172.27.0.0/16 accept comment "Allow docker-compose network"
 
-            # --- ДОБАВЛЕНО ДЛЯ K3S ---
+            # K3s
             ip saddr 10.42.0.0/16 accept comment "Allow K3s Pods"
             ip saddr 10.43.0.0/16 accept comment "Allow K3s Services"
-            # -------------------------
 
-            # Connection tracking
+            # ВАЖНО: Разрешаем localhost доступ к портам сервисов
+            ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept comment "Allow localhost to services"
+
             ct state vmap {
               invalid : drop,
               established : accept,
               related : accept
             }
 
-            # ICMP
             ip protocol icmp accept comment "Allow ICMP"
             ip6 nexthdr ipv6-icmp accept comment "Allow ICMPv6"
 
-            # TCP порты
             tcp dport @allowed_tcp accept comment "Allow specified TCP ports"
           }
 
