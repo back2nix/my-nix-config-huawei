@@ -16,7 +16,7 @@
     shell = "${pkgs.fish}/bin/fish";
     terminal = "screen-256color";
     plugins = with pkgs; [
-      tmuxPlugins.copycat
+      # tmuxPlugins.copycat
       tmuxPlugins.sensible
       tmuxPlugins.yank
       tmuxPlugins.vim-tmux-navigator
@@ -116,6 +116,10 @@
       bind -n M-О resize-pane -D 5
       bind -n M-Л resize-pane -U 5
       bind -n M-Д resize-pane -R 5
+
+    # Отключаем tmux-copycat Ctrl+R и используем Fish fzf
+      unbind -n C-r
+      bind -n C-r send-keys C-r
     '';
   };
 }

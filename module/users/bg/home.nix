@@ -326,7 +326,8 @@ in {
 
     fzf = {
       enable = true;
-      enableZshIntegration = true;
+      enableZshIntegration = false;
+      enableFishIntegration = true;
       tmux.enableShellIntegration = true;
     };
 

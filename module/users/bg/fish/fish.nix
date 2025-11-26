@@ -15,11 +15,14 @@
 
     # Включаем интерактивные функции
     interactiveShellInit = ''
-      set -g fish_history_size 10000
-      set -g fish_history_file ~/.local/share/fish/fish_history
+      # === История команд ===
+      set -gx fish_history fish
+      set -g fish_history_size 100000
 
-      function save_history --on-event fish_preexec
+      # КРИТИЧНО: Форсируем сохранение и синхронизацию истории в tmux
+      function __save_and_merge_history --on-event fish_postexec
         history save
+        history merge
       end
 
       # Настройка окружения
@@ -28,7 +31,7 @@
       set -g fish_complete_path_as_name true
       direnv hook fish | source
 
-      just --completions fish | source  # <-- добавить эту строку
+      just --completions fish | source
 
       set -gx IP_COLOR true
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
@@ -50,6 +53,8 @@
       set -g color_status_superuser_bg black
       set -g color_status_superuser_str yellow
       set -g VIRTUAL_ENV_DISABLE_PROMPT 1
+
+      bind \cr history-pager
     '';
 
     plugins = [
@@ -124,15 +129,15 @@
         };
       }
       # Плагин для улучшенной истории
-      {
-        name = "fzf-fish";
-        src = pkgs.fetchFromGitHub {
-          owner = "PatrickF1";
-          repo = "fzf.fish";
-          rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
-          sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
-        };
-      }
+      # {
+      #   name = "fzf-fish";
+      #   src = pkgs.fetchFromGitHub {
+      #     owner = "PatrickF1";
+      #     repo = "fzf.fish";
+      #     rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
+      #     sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
+      #   };
+      # }
     ];
 
     functions = {
@@ -200,6 +205,19 @@
       '';
 
       # Аналогичные функции для r2l-port, l2r, l2r-port можно добавить по такому же принципу
+
+      # fzf-history-widget = ''
+      #   history merge  # Синхронизируем историю
+      #   history -z | fzf --read0 --print0 \
+      #     --tiebreak=index \
+      #     --query=(commandline) \
+      #     --bind=ctrl-r:toggle-sort \
+      #     $FZF_DEFAULT_OPTS \
+      #     --preview='echo {}' \
+      #     --preview-window=down:3:wrap | read -lz result
+      #   and commandline -- $result
+      #   commandline -f repaint
+      # '';
     };
 
     shellAliases = let
