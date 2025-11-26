@@ -43,7 +43,6 @@
       127.0.0.1 host.docker.internal
     '';
 
-
     nftables = {
       enable = true;
       ruleset = ''
@@ -56,11 +55,14 @@
               5555,    # Camera streaming
               6443,    # K3S API Server
               8080,    # Gateway
-              8081,    # Landing (добавлено)
-              8082,    # Chat (добавлено)
-              8085,    # Notification (добавлено)
+              8081,    # Landing
+              8082,    # Chat
+              8085,    # Notification
               9002,    # Shell
-              9901     # Envoy metrics
+              9901,    # Envoy metrics
+              4240,    # Cilium Health
+              4244,    # Cilium Hubble Server
+              4245     # Cilium Hubble Relay
             }
           }
 
@@ -69,7 +71,7 @@
             flags interval
             elements = {
               53, 67-68, 123, 500, 4500, 5353, 51820,
-              8472     # K3S Flannel VXLAN
+              8472     # K3S Flannel VXLAN (оставляем на случай если нужно)
             }
           }
 
@@ -109,6 +111,13 @@
             ip saddr 10.42.0.0/16 accept comment "Allow K3s Pods"
             ip saddr 10.43.0.0/16 accept comment "Allow K3s Services"
 
+            # Cilium - разрешаем inter-node communication
+            # Cilium использует VXLAN (по умолчанию порт 8472) для overlay network
+            udp dport 8472 accept comment "Allow Cilium VXLAN"
+
+            # Cilium Health checks между нодами
+            tcp dport 4240 accept comment "Allow Cilium Health checks"
+
             # ВАЖНО: Разрешаем localhost доступ к портам сервисов
             ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept comment "Allow localhost to services"
 
@@ -137,59 +146,18 @@
             ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
             ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
           }
+
+          chain forward {
+            type filter hook forward priority filter; policy accept;
+
+            # Разрешаем forward для Cilium overlay network
+            ip saddr 10.42.0.0/16 accept comment "Allow K3s Pod forwarding"
+            ip daddr 10.42.0.0/16 accept comment "Allow K3s Pod forwarding"
+          }
         }
       '';
     };
 
-    # module/network-configuration.nix
-    # nftables = {
-    #   enable = true;
-    #   ruleset = ''
-    #     table inet filter {
-    #       set allowed_udp {
-    #         type inet_service
-    #         flags interval
-    #         elements = { 53, 67-68, 123, 500, }  # DNS, DHCP, NTP, VPN, mDNS
-    #       }
-
-    #       chain input {
-    #         type filter hook input priority 0; policy accept;
-    #         # Блокируем весь входящий UDP
-    #         # udp dport 1024-65535 drop
-    #       }
-
-    #       chain output {
-    #         type filter hook output priority 0; policy accept;
-
-    #         # Разрешаем стандартные UDP сервисы
-    #         # udp dport @allowed_udp accept
-
-    #         # Блокируем всё остальное UDP выше 1024
-    #         # udp dport 1024-65535 drop
-    #         # udp dport 443 drop
-    #       }
-    #     }
-    #   '';
-    # };
-
     firewall.enable = false;
-    # firewall = {
-    #   enable = false;
-    #   allowedTCPPorts = [
-    #     18082
-    #     18081
-    #   ];
-    #   allowedUDPPorts = [
-    #     18082
-    #     18081
-    #   ];
-    #   extraCommands = ''
-    #     iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-    #     iptables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-    #     ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 80 -j REDIRECT --to-port 1081
-    #     ip6tables -t nat -A PREROUTING -i wlp0s20f3 -p tcp --dport 443 -j REDIRECT --to-port 1081
-    #     iptables -A OUTPUT -p udp --dport 1024:65535 -j DROP
-    #   '';
-    # };
   };
 }
