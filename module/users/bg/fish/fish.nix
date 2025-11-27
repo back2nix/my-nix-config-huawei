@@ -31,8 +31,6 @@
       set -g fish_complete_path_as_name true
       direnv hook fish | source
 
-      just --completions fish | source
-
       set -gx IP_COLOR true
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
 
