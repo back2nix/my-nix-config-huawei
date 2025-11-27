@@ -72,7 +72,7 @@ apply_rotation() {
     --object-path /org/gnome/Mutter/DisplayConfig \
     --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
     $serial 1 \
-    "[(0, 0, 1.0, uint32 $rotation, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+    "[(0, 0, 1.25, uint32 $rotation, true, [('eDP-1', '2880x1800@60.000', {})])]" \
     "{}"
 
   local result=$?
