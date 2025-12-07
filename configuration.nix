@@ -56,12 +56,13 @@ in {
     # Выберите один из модулей дисплейного сервера:
     ./module/x11.nix # Раскомментируйте для X11
     # ./module/wayland.nix   # Раскомментируйте для Wayland
-    ./module/monitoring.nix
+    # ./module/monitoring.nix
     ./module/sign-box.nix
     # ./module/vault.nix
+    # ./module/tor.nix
   ];
 
-  services.monitoring-stack.enable = true;
+  # services.monitoring-stack.enable = true;
 
   boot = {
     # asus специфичные настройки

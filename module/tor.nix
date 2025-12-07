@@ -115,45 +115,45 @@
   # nix-channel --update
   # nixos-rebuild switch
 
-  containers.anonim = {
-    autoStart = false;
-    privateNetwork = true;
-    # hostBridge = "wlp0s20f3";
-    hostAddress = "192.168.7.10";
-    localAddress = "192.168.7.11";
-    config = {
-      config,
-      pkgs,
-      ...
-    }: {
-      users.extraUsers.anonim = {
-        isNormalUser = true;
-        home = "/home/anonim";
-      };
+  # containers.anonim = {
+  #   autoStart = false;
+  #   privateNetwork = true;
+  #   # hostBridge = "wlp0s20f3";
+  #   hostAddress = "192.168.7.10";
+  #   localAddress = "192.168.7.11";
+  #   config = {
+  #     config,
+  #     pkgs,
+  #     ...
+  #   }: {
+  #     users.extraUsers.anonim = {
+  #       isNormalUser = true;
+  #       home = "/home/anonim";
+  #     };
 
-      system.stateVersion = "24.05";
+  #     system.stateVersion = "24.05";
 
-      networking = {
-        firewall = {
-          enable = false;
-          allowedTCPPorts = [
-            53
-            80
-            433
-            1080
-            9040
-            9053
-          ];
-        };
-        nat = {
-          enable = true;
-          internalInterfaces = ["ve-anonim"];
-          externalInterface = "wlp0s20f3";
-          # externalInterface = "tornet";
-        };
-        # useHostResolvConf = lib.mkForce false;
-      };
-      # services.resolved.enable = true;
-    };
-  };
+  #     networking = {
+  #       firewall = {
+  #         enable = false;
+  #         allowedTCPPorts = [
+  #           53
+  #           80
+  #           433
+  #           1080
+  #           9040
+  #           9053
+  #         ];
+  #       };
+  #       nat = {
+  #         enable = true;
+  #         internalInterfaces = ["ve-anonim"];
+  #         externalInterface = "wlp0s20f3";
+  #         # externalInterface = "tornet";
+  #       };
+  #       # useHostResolvConf = lib.mkForce false;
+  #     };
+  #     # services.resolved.enable = true;
+  #   };
+  # };
 }
