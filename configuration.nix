@@ -397,7 +397,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.8.5.854-1"
+    "my-yandex-browser-stable-25.10.1.1173-1"
     "claude-code"
     "mbedtls-2.28.10"
   ];

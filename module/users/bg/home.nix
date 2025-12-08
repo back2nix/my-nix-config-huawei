@@ -189,7 +189,6 @@ in {
       ffmpeg-full
       genymotion
       qemu
-      firefox
       anydesk
       audacity
       # yandex-browser
