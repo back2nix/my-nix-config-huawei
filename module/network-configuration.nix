@@ -41,7 +41,7 @@
       127.0.0.1 kafka
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
-      127.0.0.1 app.local grafana.local pyroscope.local prometheus.local
+      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local
     '';
 
     nftables = {
