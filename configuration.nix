@@ -32,7 +32,7 @@ in {
   };
 
   nixpkgs.config.allowUnfree = true;
-    nixpkgs.config.cudaSupport = true;
+  # nixpkgs.config.cudaSupport = true;
   nixpkgs.config.allowUnfreePredicate =
     p:
     builtins.all (
