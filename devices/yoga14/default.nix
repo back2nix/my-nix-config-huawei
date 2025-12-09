@@ -20,7 +20,7 @@
     kernelPackages = pkgs.linuxPackages_latest;
 
     kernelModules = [
-      "kvm-intel"
+      # "kvm-intel"
       "hid_multitouch"
       "wacom"
       "i2c_hid"

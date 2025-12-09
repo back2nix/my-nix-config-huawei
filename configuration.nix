@@ -53,7 +53,7 @@ in {
     # ./module/autossh.nix
     ./sops/sops.nix
 
-    # ./module/virtualbox.nix
+    ./module/virtualbox.nix
     ./module/k3s.nix
 
     # DNS настройки

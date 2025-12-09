@@ -25,12 +25,15 @@
   # virtualisation.libvirtd.enable = lib.mkForce false;
 
   # Включаем VirtualBox
+  boot.blacklistedKernelModules = [ "kvm" "kvm_intel" ];
+  nixpkgs.config.virtualbox.enableExtensionPack = true;
+
   virtualisation.virtualbox = {
     host = {
       enable = true;
       enableExtensionPack = true;
-      enableKvm = true;
-      addNetworkInterface = false;
+      enableKvm = false;
+      addNetworkInterface = true;
     };
 
     guest = {
