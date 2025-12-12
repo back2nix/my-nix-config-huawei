@@ -41,7 +41,7 @@
       127.0.0.1 kafka
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
-      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local
+      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local
     '';
 
     nftables = {
@@ -63,7 +63,7 @@
               9901,    # Envoy metrics
               4240,    # Cilium Health
               4244,    # Cilium Hubble Server
-              4245     # Cilium Hubble Relay
+              4245    # Cilium Hubble Relay
             }
           }
 
