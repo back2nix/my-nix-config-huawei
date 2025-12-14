@@ -41,7 +41,7 @@
       127.0.0.1 kafka
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
-      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local
+      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local
     '';
 
     nftables = {
@@ -53,8 +53,11 @@
             flags interval
             elements = {
               22,      # SSH
+              80,
+              443,
               5555,    # Camera streaming
               6443,    # K3S API Server
+              6379,    # redis
               8080,    # Gateway
               8081,    # Landing
               8082,    # Chat
@@ -63,7 +66,9 @@
               9901,    # Envoy metrics
               4240,    # Cilium Health
               4244,    # Cilium Hubble Server
-              4245    # Cilium Hubble Relay
+              4245,    # Cilium Hubble Relay
+              5432,    # postgres
+              50051    # auth
             }
           }
 
