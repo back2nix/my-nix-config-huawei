@@ -41,7 +41,8 @@
       127.0.0.1 kafka
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
-      192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local
+      # 192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local
+      192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local
     '';
 
     nftables = {
