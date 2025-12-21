@@ -26,7 +26,6 @@
 
   # Включаем VirtualBox
   boot.blacklistedKernelModules = [ "kvm" "kvm_intel" ];
-  nixpkgs.config.virtualbox.enableExtensionPack = true;
 
   virtualisation.virtualbox = {
     host = {

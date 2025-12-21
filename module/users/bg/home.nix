@@ -30,18 +30,6 @@ in {
     keylogFile = "/tmp/sslkeylog.txt";
   };
 
-  # inputs.nixpkgs.overlays = [
-  #   # (import (builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/master.tar.gz))
-  #   (self: super: {
-  #     # yandex-browser = self.callPackage ./overlays/yandex-browser.nix {};
-  #     # genymotion = self.callPackage ./overlays/genymotion.nix {};
-  #     bashdbInteractive = self.bashdb.overrideAttrs {
-  #       buildInputs = (super.buildInputs or []) ++ [self.bashInteractive];
-  #     };
-  #     # neovim = masterPkg.neovim;
-  #   })
-  # ];
-
   xdg.configFile = {
     "kitty/kitty.conf".source = ./kitty.conf;
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
@@ -120,7 +108,7 @@ in {
       gcc
       xclip
       gnumake
-      multipass
+      # multipass
       pkgs-master.telegram-desktop
       # telegram-desktop
       keepassxc
@@ -128,7 +116,7 @@ in {
       # arion
       deadnix
       # rnix-lsp
-      # inputs.xremap-flake.packages.${system}.default
+      # inputs.xremap-flake.packages.${stdenv.hostPlatform.system}.default
       # libnotify
       # git diff
       # diff-so-fancy
@@ -187,7 +175,7 @@ in {
       pkgs-master.rawtherapee
       # ffmpeg_5-full
       ffmpeg-full
-      genymotion
+      # genymotion
       qemu
       firefox
       anydesk
@@ -241,13 +229,13 @@ in {
       # pkgs-master.youtube-dl
       # chromium
 
-      pkgs-unstable.code-cursor
-      pkgs-unstable.vscode
-      pkgs-unstable.windsurf
+      # pkgs-unstable.code-cursor
+      # pkgs-unstable.vscode
+      # pkgs-unstable.windsurf
 
       (pkgs.writeScriptBin "mfiles" (builtins.readFile ./bash/print-files.sh))
       (pkgs.writeScriptBin "mreplace" (builtins.readFile ./bash/smart-replace.sh))
-      inputs.replacer.packages.${pkgs.system}.default
+      inputs.replacer.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       s3cmd
       minio-client
@@ -332,7 +320,7 @@ in {
     };
 
     lazygit.enable = config.programs.git.enable;
-    thefuck.enable = true;
+    # thefuck.enable = true;
     # bash.enable = true;
     # bash.package = pkgs.bashInteractive;
 
@@ -364,14 +352,18 @@ in {
     git = {
       enable = true;
       lfs.enable = true;
-      userName = "back2nix";
-      userEmail = "back2nix@list.ru";
-      aliases = {
-        pu = "push";
-        co = "checkout";
-        cm = "commit";
-        # dt = "diff";
-        lg = "log --stat";
+      settings = {
+        user = {
+          name = "back2nix";
+          email = "back2nix@list.ru";
+        };
+        alias = {
+          pu = "push";
+          co = "checkout";
+          cm = "commit";
+          # dt = "diff";
+          lg = "log --stat";
+        };
       };
       # difftastic.enable = true; # git diff
       # delta.enable = true; # git diff

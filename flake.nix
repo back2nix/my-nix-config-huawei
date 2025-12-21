@@ -2,7 +2,7 @@
   description = "A multi-device NixOS flake with flake-parts";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs-23-11.url = "github:nixos/nixpkgs/nixos-23.11";
@@ -17,7 +17,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager"; # Switched to main branch to match nixos-25.11
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -50,14 +50,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mutter-src = {
-      # url = "path:./mutter";
-      type = "git";
-      url = "https://github.com/back2nix/mutter.git";
-      ref = "zero2";
-      rev = "af6a292f7c394b6e27f607df1ed568da9639eec9";
-      flake = false;
-    };
+    # mutter-src = {
+    #   # url = "path:./mutter";
+    #   type = "git";
+    #   url = "https://github.com/back2nix/mutter.git";
+    #   ref = "zero2";
+    #   rev = "af6a292f7c394b6e27f607df1ed568da9639eec9";
+    #   flake = false;
+    # };
   };
 
   outputs = inputs @ {flake-parts, ...}:

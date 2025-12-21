@@ -232,9 +232,9 @@ in {
       dhcpcd.extraConfig = "nohook resolv.conf";
     };
 
-    environment.etc."resolv.conf".text = lib.mkForce ''
-      nameserver 127.0.0.1
-      options edns0 trust-ad
-    '';
+    #environment.etc."resolv.conf".text = lib.mkForce ''
+    #nameserver 127.0.0.1
+    #options edns0 trust-ad
+    #'';
   };
 }

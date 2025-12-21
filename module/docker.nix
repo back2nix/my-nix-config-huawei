@@ -53,9 +53,9 @@
     "net.ipv4.ip_unprivileged_port_start" = 0;
   };
 
-  virtualisation.multipass = {
-    enable = true;
-  };
+  # virtualisation.multipass = {
+  #   enable = true;
+  # };
 
   virtualisation.containers.registries.search = ["docker.io"];
   virtualisation.containers.registries.insecure = [

@@ -14,32 +14,63 @@
     };
 
     displayManager = {
-      gdm = {
-        enable = true;
-        # wayland = false;
-      };
-    };
+      # sessionCommands остается здесь, так как это относится к X-серверу
+      sessionCommands = ''
+        # Настройка автоповорота для X11 через GNOME DisplayConfig API
+        ${pkgs.iio-sensor-proxy}/bin/monitor-sensor | while read line; do
+          SERIAL=$(${pkgs.glib}/bin/gdbus call --session \
+            --dest org.gnome.Mutter.DisplayConfig \
+            --object-path /org/gnome/Mutter/DisplayConfig \
+            --method org.gnome.Mutter.DisplayConfig.GetCurrentState | \
+            ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.coreutils}/bin/tr -d ',')
 
-    desktopManager.gnome = {
-      enable = true;
-      # --- НАЧАЛО ИЗМЕНЕНИЯ ---
-      # Явно заменяем mutter на нашу исправленную версию из оверлея
-      # mutter = pkgs.mutter;
-      # --- КОНЕЦ ИЗМЕНЕНИЯ ---
+          case "$line" in
+            *"orientation changed"*"left"*)
+              ${pkgs.glib}/bin/gdbus call --session \
+                --dest org.gnome.Mutter.DisplayConfig \
+                --object-path /org/gnome/Mutter/DisplayConfig \
+                --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
+                $SERIAL 1 \
+                "[(0, 0, 1.25, uint32 1, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+                "{}"
+              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
+              ;;
+            *"orientation changed"*"right"*)
+              ${pkgs.glib}/bin/gdbus call --session \
+                --dest org.gnome.Mutter.DisplayConfig \
+                --object-path /org/gnome/Mutter/DisplayConfig \
+                --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
+                $SERIAL 1 \
+                "[(0, 0, 1.25, uint32 3, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+                "{}"
+              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
+              ;;
+            *"orientation changed"*"normal"*)
+              ${pkgs.glib}/bin/gdbus call --session \
+                --dest org.gnome.Mutter.DisplayConfig \
+                --object-path /org/gnome/Mutter/DisplayConfig \
+                --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
+                $SERIAL 1 \
+                "[(0, 0, 1.25, uint32 0, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+                "{}"
+              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
+              ;;
+            *"orientation changed"*"inverted"*)
+              ${pkgs.glib}/bin/gdbus call --session \
+                --dest org.gnome.Mutter.DisplayConfig \
+                --object-path /org/gnome/Mutter/DisplayConfig \
+                --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
+                $SERIAL 1 \
+                "[(0, 0, 1.25, uint32 2, true, [('eDP-1', '2880x1800@60.000', {})])]" \
+                "{}"
+              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
+              ;;
+          esac
+        done &
+      '';
     };
 
     wacom.enable = true;
-
-    libinput = {
-      enable = true;
-      touchpad = {
-        naturalScrolling = true;
-        tapping = true;
-        tappingDragLock = false;
-        middleEmulation = true;
-        disableWhileTyping = true;
-      };
-    };
 
     inputClassSections = [
       ''
@@ -57,61 +88,21 @@
         Driver "wacom"
       ''
     ];
+  };
 
-    # Автоповорот через gdbus вместо xrandr
-    displayManager.sessionCommands = ''
-      # Настройка автоповорота для X11 через GNOME DisplayConfig API
-      ${pkgs.iio-sensor-proxy}/bin/monitor-sensor | while read line; do
-        SERIAL=$(${pkgs.glib}/bin/gdbus call --session \
-          --dest org.gnome.Mutter.DisplayConfig \
-          --object-path /org/gnome/Mutter/DisplayConfig \
-          --method org.gnome.Mutter.DisplayConfig.GetCurrentState | \
-          ${pkgs.gawk}/bin/awk '{print $2}' | ${pkgs.coreutils}/bin/tr -d ',')
+  # Эти опции действительно переехали в корень services
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
-        case "$line" in
-          *"orientation changed"*"left"*)
-            ${pkgs.glib}/bin/gdbus call --session \
-              --dest org.gnome.Mutter.DisplayConfig \
-              --object-path /org/gnome/Mutter/DisplayConfig \
-              --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
-              $SERIAL 1 \
-              "[(0, 0, 1.25, uint32 1, true, [('eDP-1', '2880x1800@60.000', {})])]" \
-              "{}"
-            ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
-            ;;
-          *"orientation changed"*"right"*)
-            ${pkgs.glib}/bin/gdbus call --session \
-              --dest org.gnome.Mutter.DisplayConfig \
-              --object-path /org/gnome/Mutter/DisplayConfig \
-              --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
-              $SERIAL 1 \
-              "[(0, 0, 1.25, uint32 3, true, [('eDP-1', '2880x1800@60.000', {})])]" \
-              "{}"
-            ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
-            ;;
-          *"orientation changed"*"normal"*)
-            ${pkgs.glib}/bin/gdbus call --session \
-              --dest org.gnome.Mutter.DisplayConfig \
-              --object-path /org/gnome/Mutter/DisplayConfig \
-              --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
-              $SERIAL 1 \
-              "[(0, 0, 1.25, uint32 0, true, [('eDP-1', '2880x1800@60.000', {})])]" \
-              "{}"
-            ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
-            ;;
-          *"orientation changed"*"inverted"*)
-            ${pkgs.glib}/bin/gdbus call --session \
-              --dest org.gnome.Mutter.DisplayConfig \
-              --object-path /org/gnome/Mutter/DisplayConfig \
-              --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
-              $SERIAL 1 \
-              "[(0, 0, 1.25, uint32 2, true, [('eDP-1', '2880x1800@60.000', {})])]" \
-              "{}"
-            ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
-            ;;
-        esac
-      done &
-    '';
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      naturalScrolling = true;
+      tapping = true;
+      tappingDragLock = false;
+      middleEmulation = true;
+      disableWhileTyping = true;
+    };
   };
 
   environment.systemPackages = with pkgs; [

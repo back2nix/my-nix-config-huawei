@@ -59,7 +59,7 @@ in {
     # DNS настройки
     # ./module/dns-dot-tls.nix
     # ./module/dns-doh-https.nix
-    ./module/dns-blocky.nix
+    # ./module/dns-blocky.nix
 
     # Сеть и контейнеры
     ./module/network-configuration.nix
@@ -246,7 +246,6 @@ in {
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
       gemini-proxy
-      android-udev-rules
       appimage-run
       dbeaver-bin
       claude-code-proxy
@@ -375,12 +374,12 @@ in {
     physlock.enable = false;
 
     logind = {
-      powerKey = "ignore";
-      lidSwitch = "suspend";
-      lidSwitchExternalPower = "suspend";
-      extraConfig = ''
-        HandlePowerKey=ignore
-      '';
+      # Custom config moved to settings.Login to avoid deprecation warnings
+      settings.Login = {
+        HandlePowerKey = "ignore";
+        HandleLidSwitch = "suspend";
+        HandleLidSwitchExternalPower = "suspend";
+      };
     };
 
     triggerhappy = {
@@ -425,17 +424,17 @@ in {
     ];
   };
 
-  services.dns-setup = {
-    enable = true;
-    mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
-    extendedFiltering = true;
-    customWhitelist = ''
-      github.com
-      mixpanel.com
-      cdn.mxpnl.com
-      api-js.mixpanel.com
-    '';
-  };
+  # services.dns-setup = {
+  #   enable = true;
+  #   mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
+  #   extendedFiltering = true;
+  #   customWhitelist = ''
+  #     github.com
+  #     mixpanel.com
+  #     cdn.mxpnl.com
+  #     api-js.mixpanel.com
+  #   '';
+  # };
 
   system.stateVersion = "23.11";
 

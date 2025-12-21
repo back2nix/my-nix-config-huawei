@@ -48,7 +48,7 @@
   systemd,
   at-spi2-atk,
   at-spi2-core,
-  libqt5pas,
+  libsForQt5,
   qt6,
   ffmpeg-full,
   libGL,
@@ -145,7 +145,7 @@ in
       nss
       pango
       (lib.getLib stdenv.cc.cc)
-      libqt5pas
+      libsForQt5.libqtpas
       qt6.qtbase
       libGL
     ];

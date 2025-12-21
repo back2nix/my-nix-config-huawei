@@ -23,7 +23,7 @@ in {
 
     autocd = true;
 
-    initExtra = ''
+    initContent = ''
       fpath=(${config.home.homeDirectory}/.config/nixpkgs/zsh-completions $fpath)
       autoload -U compinit && compinit
 

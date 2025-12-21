@@ -78,8 +78,8 @@
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver # VA-API драйвер для видео
-      vaapiIntel
-      vaapiVdpau
+      intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
       intel-compute-runtime # OpenCL драйвер
       mesa

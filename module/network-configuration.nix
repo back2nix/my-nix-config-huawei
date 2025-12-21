@@ -6,30 +6,42 @@
   # Отключаем systemd.network при использовании NetworkManager
   systemd.network.enable = lib.mkForce false;
 
-  environment.etc."resolv.conf".mode = "direct-symlink";
+  # environment.etc."resolv.conf".mode = "direct-symlink";
+  # environment.etc."resolv.conf".text = lib.mkForce ''
+      # nameserver 127.0.0.1
+      # options edns0 trust-ad
+    # '';
+  environment.etc."resolv.conf".text = ''
+    nameserver 8.8.8.8
+    nameserver 1.1.1.1
+    nameserver 127.0.0.1
+    options edns0 trust-ad
+  '';
+
 
   # Настройка NetworkManager для WiFi без power management
-  environment.etc."NetworkManager/conf.d/99-wifi-no-powersave.conf".text = ''
-    [connection]
-    wifi.powersave = 2
-    wifi.cloned-mac-address = preserve
-    ethernet.cloned-mac-address = preserve
+  # environment.etc."NetworkManager/conf.d/99-wifi-no-powersave.conf".text = ''
+  #   [connection]
+  #   wifi.powersave = 2
+  #   wifi.cloned-mac-address = preserve
+  #   ethernet.cloned-mac-address = preserve
 
-    [device]
-    wifi.backend = iwd
-    wifi.scan-rand-mac-address = false
-  '';
+  #   [device]
+  #   wifi.backend = iwd
+  #   wifi.scan-rand-mac-address = false
+  # '';
 
   networking = {
     # ПРАВИЛЬНЫЙ СИНТАКСИС для iwd в NixOS
-    wireless.iwd.enable = true;
+    # wireless.iwd.enable = true;
 
     networkmanager = {
       enable = true;
-      wifi.backend = "iwd";
+      # wifi.backend = "iwd";
+      wifi.backend = "wpa_supplicant";
     };
 
-    wireless.enable = lib.mkForce false;
+    # wireless.enable = lib.mkForce false;
 
     nat = {
       enable = true;
