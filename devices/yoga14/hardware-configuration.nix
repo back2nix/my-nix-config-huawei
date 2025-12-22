@@ -22,7 +22,9 @@
     "rtsx_pci_sdmmc"
   ];
   boot.initrd.kernelModules = [];
-  boot.kernelModules = ["kvm-intel" "v4l2loopback"];
+  boot.kernelModules = [
+    "v4l2loopback"
+  ];
   boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
 
   fileSystems."/" = {

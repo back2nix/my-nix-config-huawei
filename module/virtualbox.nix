@@ -25,18 +25,19 @@
   # virtualisation.libvirtd.enable = lib.mkForce false;
 
   # Включаем VirtualBox
-  boot.blacklistedKernelModules = [ "kvm" "kvm_intel" ];
+  # boot.blacklistedKernelModules = [ "kvm" "kvm_intel" ];
+  # boot.blacklistedKernelModules = [ "kvm" "kvm_intel" ];
 
   virtualisation.virtualbox = {
     host = {
       enable = true;
       enableExtensionPack = true;
-      enableKvm = false;
+      # enableKvm = true;
       addNetworkInterface = true;
     };
 
     guest = {
-      enable = true;
+      enable = false;
     };
   };
 

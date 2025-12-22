@@ -53,6 +53,7 @@ in {
     # ./module/autossh.nix
     ./sops/sops.nix
 
+    # ./module/kvm.nix
     ./module/virtualbox.nix
     ./module/k3s.nix
 
@@ -269,6 +270,21 @@ in {
       gcc
 
       uv
+
+      (writeShellScriptBin "virt-switch" ''
+        # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ
+        export PATH="${lib.makeBinPath [
+          kmod          # modprobe, lsmod, rmmod
+          procps        # pkill
+          gnugrep       # grep
+          systemd       # systemctl
+          coreutils     # echo, sleep и т.д.
+          util-linux    # на всякий случай
+        ]}:$PATH"
+
+        # Теперь вставляем код из файла
+        ${builtins.readFile ./scripts/virt-switch.sh}
+      '')
     ];
 
     etc."proxychains.conf".text = ''
