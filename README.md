@@ -1,110 +1,61 @@
-# Моя конфигурация NixOS
+# Mutter
 
-![NixOS Logo](https://raw.githubusercontent.com/NixOS/nixos-artwork/master/logo/nixos-logo-only-hires.png)
+Mutter is a Wayland display server and X11 window manager and compositor library.
 
-Это мой персональный репозиторий с конфигурацией NixOS, управляемый с помощью [Nix Flakes](https://nixos.wiki/wiki/Flakes). Он спроектирован для декларативного управления несколькими машинами с общей базой и специфичными для каждого устройства настройками.
+When used as a Wayland display server, it runs on top of KMS and libinput. It
+implements the compositor side of the Wayland core protocol as well as various
+protocol extensions. It also has functionality related to running X11
+applications using Xwayland.
 
-## Философия и ключевые особенности
+When used on top of Xorg it acts as a X11 window manager and compositing manager.
 
-Цель этой конфигурации — создать воспроизводимую, гибкую и легко управляемую среду на всех моих устройствах.
+It contains functionality related to, among other things, window management,
+window compositing, focus tracking, workspace management, keybindings and
+monitor configuration.
 
-*   **Мульти-девайс:** Единая кодовая база для управления несколькими компьютерами (`asus`, `huawei`, `yoga14`). Новые устройства добавляются с минимальными усилиями.
-*   **Декларативность до мелочей:**
-    *   **Система:** `NixOS` для полной конфигурации ОС.
-    *   **Пользовательская среда:** [Home Manager](https://github.com/nix-community/home-manager) для управления dotfiles, пакетами и сервисами на уровне пользователя.
-    *   **Редактор:** [NixVim](https://github.com/nix-community/nixvim) для декларативной настройки Neovim.
-*   **Управление секретами:** Интеграция с [sops-nix](https.github.com/Mic92/sops-nix) для безопасного и версионируемого хранения секретов прямо в Git.
-*   **Гибкость версий пакетов:** Используются несколько каналов `nixpkgs` (`stable`, `unstable`, `master`) для возможности устанавливать свежие версии пакетов там, где это необходимо, сохраняя стабильность основной системы.
-*   **Специализированные модули:**
-    *   **Аудио:** Интегрирован [Musnix](https://github.com/musnix/musnix) для настройки системы под задачи аудио-производства (real-time ядро, JACK и т.д.).
-    *   **Сетевая безопасность и приватность:** Обширная коллекция модулей для управления VPN (WireGuard), прокси (Shadowsocks, Xray), DNS (DoH, DoT, blocky) и обхода блокировок (SpoofDPI).
-    *   **Специфичное оборудование:** Используется [nixos-hardware](https://github.com/NixOS/nixos-hardware) для готовых конфигураций под конкретные модели ноутбуков.
+Internally it uses a fork of Cogl, a hardware acceleration abstraction library
+used to simplify usage of OpenGL pipelines, as well as a fork of Clutter, a
+scene graph and user interface toolkit.
 
-## Структура проекта
+Mutter is used by, for example, GNOME Shell, the GNOME core user interface, and
+by  Gala, elementary OS's window manager. It can also be run standalone, using
+the  command "mutter", but just running plain mutter is only intended for
+debugging purposes.
 
-Проект организован следующим образом для максимальной переиспользуемости и понятности:
+## Contributing
 
-*   `flake.nix`: Центральный файл. Определяет зависимости (inputs), структуру (outputs) и собирает конфигурации для всех хостов.
-*   `configuration.nix`: Общая базовая конфигурация, которая применяется ко всем системам. Включает в себя фундаментальные настройки (локаль, ядро, базовые пакеты).
-*   `/devices`: Директория с конфигурациями для каждого конкретного устройства.
-    *   `devices/<hostname>/default.nix`: Специфичные настройки для хоста (например, драйверы, настройки дисплея).
-    *   `devices/<hostname>/hardware-configuration.nix`: Автоматически сгенерированная конфигурация оборудования (диски, файловые системы).
-*   `/module`: Коллекция переиспользуемых модулей NixOS, которые можно подключать по необходимости.
-    *   `users/bg/`: Конфигурация Home Manager для моего пользователя `bg`. Здесь живут настройки shell (zsh, fish), терминала (kitty), редактора (nixvim) и других пользовательских программ.
-    *   `vpn/`, `security.nix`, `dns-*.nix`: Модули, отвечающие за сетевые настройки и безопасность.
-*   `/overlays`: Пользовательские оверлеи для модификации или добавления пакетов, которых нет в `nixpkgs`.
-*   `/sops`: Модули и конфигурация для `sops-nix`. Файл с зашифрованными секретами находится в `secrets/secrets.yaml`.
+To contribute, open merge requests at https://gitlab.gnome.org/GNOME/mutter.
 
-## Как это использовать
+It can be useful to first look at the
+[GNOME Handbook](https://handbook.gnome.org/development.html) and the
+documentation and API references below first.
 
-### Требования
+## Documentation
 
-*   Установленная NixOS с включенной поддержкой Flakes.
-*   Git.
+- [Coding style and conventions](doc/coding-style.md)
+- [Git conventions](doc/git-conventions.md)
+- [Code overview](doc/code-overview.md)
+- [Building and Running](doc/building-and-running.md)
+- [Debugging](doc/debugging.md)
+- [Monitor configuration](doc/monitor-configuration.md)
+- [Multi-GPU](doc/multi-gpu.md)
 
-### Развертывание на существующей машине
+## API Reference
 
-File: .env
-```env
-DEVICE=yoga14
-```
+- Meta: <https://mutter.gnome.org/meta/>
+- Clutter: <https://mutter.gnome.org/clutter/>
+- Cogl: <https://mutter.gnome.org/cogl/>
+- Mtk: <https://mutter.gnome.org/mtk/>
 
-1.  Клонируйте репозиторий:
-    ```bash
-    git clone https://github.com/back2nix/my-nix-config-huawei
-    ln -s /home/$USER/Documents/code/github.com/back2nix/nix/my-nix-config-huawei /etc/nixos
-    # recover secrets
-    cp -r /backup/.config/sops /home/$USER/.config/sops
+## Meetings
 
-    ```
-2.  Запустите сборку и применение конфигурации. Замените `<hostname>` на имя вашего компьютера, которое должно совпадать с одним из `nixosConfigurations` в `flake.nix` (`asus`, `huawei`, `yoga14`).
+There are [recurring meetings](https://hedgedoc.gnome.org/s/ymP_L5MUs) to
+discuss development of GNOME Shell, mutter and related components.
 
-    ```bash
-    # Собрать, протестировать и переключиться на новую конфигурацию
-    sudo nixos-rebuild switch --flake /etc/nixos#<hostname>
+## License
 
-    # Если вы просто хотите протестировать сборку без применения
-    nixos-rebuild build --flake .#<hostname>
-    ```
+Mutter is distributed under the terms of the GNU General Public License,
+version 2 or later. See the [COPYING][license] file for detalis.
 
-### update nixvim only
-
-```bash
-make update/nixvim
-```
-
-### Добавление нового устройства
-
-1.  Установите базовую NixOS на новое устройство.
-2.  На новом устройстве сгенерируйте начальную конфигурацию оборудования:
-    ```bash
-    sudo nixos-generate-config --no-filesystems --root /mnt
-    # Скопируйте /mnt/etc/nixos/hardware-configuration.nix
-    ```
-3.  В этом репозитории создайте новую директорию `devices/<new_hostname>`.
-4.  Поместите `hardware-configuration.nix` в эту новую директорию.
-5.  Создайте в ней `default.nix` для специфичных настроек нового устройства.
-6.  Добавьте новую машину в `nixosConfigurations` в файле `flake.nix` по аналогии с существующими:
-    ```nix
-    # flake.nix
-    # ...
-    in {
-      asus = mkSystem "asus-ux3405m" [];
-      huawei = mkSystem "huawei-rlef-x" [];
-      yoga14 = mkSystem "yoga14" [];
-      new-machine = mkSystem "new_hostname" []; # Ваша новая машина
-    };
-    ```
-7.  Закоммитьте изменения и выполните развертывание на новой машине.
-
-### Управление секретами
-
-Секреты управляются с помощью `sops-nix`.
-
-*   Основной файл с зашифрованными данными: `secrets/secrets.yaml`.
-*   Для редактирования секретов используйте команду `sops secrets/secrets.yaml`. Для этого у вас должен быть доступ к одному из GPG/age ключей, указанных в файле `.sops.yaml` (этот файл обычно не коммитится и содержит публичные ключи).
-*   Во время сборки системы `sops-nix` автоматически расшифрует секреты и поместит их в указанные в конфигурации пути с нужными правами.
-
----
-
-Этот проект является постоянным экспериментом. Я всегда рад предложениям и замечаниям
+[bug-tracker]: https://gitlab.gnome.org/GNOME/mutter/issues
+[license]: COPYING

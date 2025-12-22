@@ -50,14 +50,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # mutter-src = {
-    #   # url = "path:./mutter";
-    #   type = "git";
-    #   url = "https://github.com/back2nix/mutter.git";
-    #   ref = "zero2";
-    #   rev = "af6a292f7c394b6e27f607df1ed568da9639eec9";
-    #   flake = false;
-    # };
+    mutter-src = {
+      # url = "path:./mutter-49.2";
+      type = "git";
+      url = "https://github.com/back2nix/mutter.git";
+      ref = "49.2";
+      rev = "7298e5305a3ed62f0adfb85bda2d5f322811f096";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {flake-parts, ...}:

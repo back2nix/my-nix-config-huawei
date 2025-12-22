@@ -237,6 +237,24 @@
         "type": "github"
       }
     },
+    "mutter-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766366482,
+        "narHash": "sha256-5wFcxRaVdbf9m6vLyUTs6IUf0I2WbBtIiKRRSoKf/NQ=",
+        "ref": "49.2",
+        "rev": "7298e5305a3ed62f0adfb85bda2d5f322811f096",
+        "revCount": 33679,
+        "type": "git",
+        "url": "https://github.com/back2nix/mutter.git"
+      },
+      "original": {
+        "ref": "49.2",
+        "rev": "7298e5305a3ed62f0adfb85bda2d5f322811f096",
+        "type": "git",
+        "url": "https://github.com/back2nix/mutter.git"
+      }
+    },
     "nix-index-database": {
       "inputs": {
         "nixpkgs": [
@@ -581,6 +599,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "musnix": "musnix",
+        "mutter-src": "mutter-src",
         "nix-index-database": "nix-index-database",
         "nix-ld-rs": "nix-ld-rs",
         "nixos-hardware": "nixos-hardware",

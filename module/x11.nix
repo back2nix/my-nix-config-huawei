@@ -8,6 +8,8 @@
     enable = true;
     videoDrivers = ["modesetting"];
 
+
+
     xkb = {
       layout = "us,ru";
       options = "grp:caps_toggle,grp_led:caps,compose:ralt";
@@ -92,6 +94,7 @@
 
   # Эти опции действительно переехали в корень services
   services.displayManager.gdm.enable = true;
+  services.displayManager.gdm.wayland = true;
   services.desktopManager.gnome.enable = true;
 
   services.libinput = {
