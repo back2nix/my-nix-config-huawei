@@ -66,8 +66,8 @@
             flags interval
             elements = {
               22,      # SSH
-              80,
-              443,
+              80,      # HTTP
+              443,     # HTTPS/gRPC-TLS  <-- ДОБАВЬ ЭТО
               5555,    # Camera streaming
               6443,    # K3S API Server
               6379,    # redis
