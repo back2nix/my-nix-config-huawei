@@ -25,6 +25,10 @@
       gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
       });
+
+      gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
+        patches = (oldAttrs.patches or []) ++ [ ./gnome-shell.patch ];
+      });
       # --- КОНЕЦ: Патч для gnome-screenshot ---
 
       mutter = prev.mutter.overrideAttrs (oldAttrs: {

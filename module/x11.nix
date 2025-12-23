@@ -4,6 +4,11 @@
   pkgs,
   ...
 }: {
+  programs.xwayland.enable = true;
+  environment.sessionVariables = {
+    GDK_BACKEND = "wayland,x11";  # Fallback на x11
+    NIXOS_OZONE_WL = "1";
+  };
   services.xserver = {
     enable = true;
     videoDrivers = ["modesetting"];
