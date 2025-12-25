@@ -6,46 +6,23 @@
   # Отключаем systemd.network при использовании NetworkManager
   systemd.network.enable = lib.mkForce false;
 
-  # environment.etc."resolv.conf".mode = "direct-symlink";
-  # environment.etc."resolv.conf".text = lib.mkForce ''
-      # nameserver 127.0.0.1
-      # options edns0 trust-ad
-    # '';
   environment.etc."resolv.conf".text = ''
+    nameserver 127.0.0.1
     nameserver 8.8.8.8
     nameserver 1.1.1.1
-    nameserver 127.0.0.1
-    options edns0 trust-ad
+    options edns0 trust-ad timeout:1 attempts:1
   '';
 
-
-  # Настройка NetworkManager для WiFi без power management
-  # environment.etc."NetworkManager/conf.d/99-wifi-no-powersave.conf".text = ''
-  #   [connection]
-  #   wifi.powersave = 2
-  #   wifi.cloned-mac-address = preserve
-  #   ethernet.cloned-mac-address = preserve
-
-  #   [device]
-  #   wifi.backend = iwd
-  #   wifi.scan-rand-mac-address = false
-  # '';
-
   networking = {
-    # ПРАВИЛЬНЫЙ СИНТАКСИС для iwd в NixOS
-    # wireless.iwd.enable = true;
-
     networkmanager = {
       enable = true;
-      # wifi.backend = "iwd";
       wifi.backend = "wpa_supplicant";
     };
 
-    # wireless.enable = lib.mkForce false;
-
     nat = {
       enable = true;
-      internalInterfaces = ["ve-+"];
+      # Добавляем интерфейсы cilium и lxc в доверенные для NAT
+      internalInterfaces = ["ve-+" "cilium_+" "lxc+"];
       enableIPv6 = true;
     };
 
@@ -53,7 +30,7 @@
       127.0.0.1 kafka
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
-      # 192.168.3.78 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local
+      # Убедитесь, что IP актуален
       192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
     '';
 
@@ -67,7 +44,8 @@
             elements = {
               22,      # SSH
               80,      # HTTP
-              443,     # HTTPS/gRPC-TLS  <-- ДОБАВЬ ЭТО
+              853,     # DNS over TLS
+              443,     # HTTPS/gRPC-TLS
               5555,    # Camera streaming
               6443,    # K3S API Server
               6379,    # redis
@@ -90,30 +68,21 @@
             flags interval
             elements = {
               53, 67-68, 123, 500, 4500, 5353, 51820,
-              8472     # K3S Flannel VXLAN (оставляем на случай если нужно)
+              8472,    # Cilium VXLAN
+              51871    # Cilium Wireguard
             }
           }
 
           set google_stun_ipv4 {
             type ipv4_addr
             flags interval
-            elements = {
-              142.250.0.0/15,
-              172.217.0.0/16,
-              216.58.192.0/19,
-              74.125.0.0/16
-            }
+            elements = { 142.250.0.0/15, 172.217.0.0/16, 216.58.192.0/19, 74.125.0.0/16 }
           }
 
           set google_stun_ipv6 {
             type ipv6_addr
             flags interval
-            elements = {
-              2607:f8b0::/32,
-              2800:3f0::/32,
-              2a00:1450::/32,
-              2404:6800::/32
-            }
+            elements = { 2607:f8b0::/32, 2800:3f0::/32, 2a00:1450::/32, 2404:6800::/32 }
           }
 
           chain input {
@@ -121,24 +90,26 @@
 
             iif "lo" accept comment "Allow loopback"
 
-            # Docker
-            ip saddr 172.16.0.0/12 accept comment "Allow Docker subnets"
-            ip saddr 172.17.0.0/16 accept comment "Allow docker0 bridge"
-            ip saddr 172.27.0.0/16 accept comment "Allow docker-compose network"
+            # ВАЖНО: Разрешаем трафик от интерфейсов контейнеров
+            iifname "cilium_*" accept comment "Allow Cilium interfaces"
+            iifname "lxc*" accept comment "Allow LXC interfaces"
+            iifname "docker0" accept comment "Allow Docker bridge"
+            iifname "virbr*" accept comment "Allow Libvirt"
 
-            # K3s
-            ip saddr 10.42.0.0/16 accept comment "Allow K3s Pods"
-            ip saddr 10.43.0.0/16 accept comment "Allow K3s Services"
+            # Docker подсети
+            ip saddr 172.16.0.0/12 accept
+            ip saddr 172.17.0.0/16 accept
+            ip saddr 172.27.0.0/16 accept
 
-            # Cilium - разрешаем inter-node communication
-            # Cilium использует VXLAN (по умолчанию порт 8472) для overlay network
+            # K3s/Cilium подсети
+            ip saddr 10.42.0.0/16 accept
+            ip saddr 10.43.0.0/16 accept
+
             udp dport 8472 accept comment "Allow Cilium VXLAN"
+            tcp dport 4240 accept comment "Allow Cilium Health"
 
-            # Cilium Health checks между нодами
-            tcp dport 4240 accept comment "Allow Cilium Health checks"
-
-            # ВАЖНО: Разрешаем localhost доступ к портам сервисов
-            ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept comment "Allow localhost to services"
+            # Разрешаем доступ к сервисам с localhost
+            ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept
 
             ct state vmap {
               invalid : drop,
@@ -146,18 +117,17 @@
               related : accept
             }
 
-            ip protocol icmp accept comment "Allow ICMP"
-            ip6 nexthdr ipv6-icmp accept comment "Allow ICMPv6"
+            ip protocol icmp accept
+            ip6 nexthdr ipv6-icmp accept
 
-            tcp dport @allowed_tcp accept comment "Allow specified TCP ports"
+            tcp dport @allowed_tcp accept
           }
 
           chain output {
             type filter hook output priority filter; policy accept;
-
             udp dport @system_udp accept
 
-            # Блокируем Google STUN
+            # Google STUN Block
             ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
             ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
             ip daddr @google_stun_ipv4 udp dport 3478 drop
@@ -169,9 +139,16 @@
           chain forward {
             type filter hook forward priority filter; policy accept;
 
-            # Разрешаем forward для Cilium overlay network
-            ip saddr 10.42.0.0/16 accept comment "Allow K3s Pod forwarding"
-            ip daddr 10.42.0.0/16 accept comment "Allow K3s Pod forwarding"
+            # Разрешаем форвардинг для контейнеров
+            iifname "cilium_*" accept
+            oifname "cilium_*" accept
+            iifname "lxc*" accept
+            oifname "lxc*" accept
+            iifname "docker0" accept
+            oifname "docker0" accept
+
+            ip saddr 10.42.0.0/16 accept
+            ip daddr 10.42.0.0/16 accept
           }
         }
       '';

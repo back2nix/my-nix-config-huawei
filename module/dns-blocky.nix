@@ -128,10 +128,14 @@ in {
 
     # Настраиваем права для grafana на чтение данных
     systemd.services.postgresql.postStart = lib.mkAfter ''
-      $PSQL -tAc 'GRANT CONNECT ON DATABASE blocky TO grafana'
-      $PSQL -d blocky -tAc 'GRANT USAGE ON SCHEMA public TO grafana'
-      $PSQL -d blocky -tAc 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana'
-      $PSQL -d blocky -tAc 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO grafana'
+      # Явно задаем путь к psql, чтобы избежать ошибки 127
+      PSQL="${config.services.postgresql.package}/bin/psql --port=${toString config.services.postgresql.settings.port}"
+
+      # Выполняем команды с || true, чтобы ошибка прав не роняла сервис
+      $PSQL -tAc 'GRANT CONNECT ON DATABASE blocky TO grafana' || true
+      $PSQL -d blocky -tAc 'GRANT USAGE ON SCHEMA public TO grafana' || true
+      $PSQL -d blocky -tAc 'GRANT SELECT ON ALL TABLES IN SCHEMA public TO grafana' || true
+      $PSQL -d blocky -tAc 'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO grafana' || true
     '';
 
     # СОЗДАЕМ ПОЛЬЗОВАТЕЛЯ BLOCKY
