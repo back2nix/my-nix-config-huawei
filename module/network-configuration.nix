@@ -7,10 +7,10 @@
   systemd.network.enable = lib.mkForce false;
 
   environment.etc."resolv.conf".text = ''
-    nameserver 127.0.0.1
+    # nameserver 127.0.0.1
     nameserver 8.8.8.8
     nameserver 1.1.1.1
-    options edns0 trust-ad timeout:1 attempts:1
+    # options edns0 trust-ad timeout:1 attempts:1
   '';
 
   networking = {
@@ -31,8 +31,8 @@
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
       # Убедитесь, что IP актуален
-      # 192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
-      109.69.21.245 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
+      192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
+      109.69.21.245 app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
     '';
 
     nftables = {

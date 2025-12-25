@@ -441,7 +441,7 @@ in {
   };
 
   services.dns-setup = {
-    enable = true;
+    enable = false;
     mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
     extendedFiltering = true;
     customWhitelist = ''
