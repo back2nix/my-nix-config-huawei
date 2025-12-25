@@ -31,7 +31,8 @@
       127.0.0.1 localhost
       127.0.0.1 host.docker.internal
       # Убедитесь, что IP актуален
-      192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
+      # 192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
+      109.69.21.245 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
     '';
 
     nftables = {
@@ -125,6 +126,10 @@
 
           chain output {
             type filter hook output priority filter; policy accept;
+
+            tcp dport 853 accept comment "Allow DNS over TLS"
+            udp dport 853 accept comment "Allow DNS over TLS (UDP)"
+
             udp dport @system_udp accept
 
             # Google STUN Block

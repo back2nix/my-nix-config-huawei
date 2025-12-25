@@ -32,40 +32,39 @@
   };
 
   commonBlacklists = [
-    # Твой список остается тем же
     "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt"
     "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts"
-    "https://v.firebog.net/hosts/static/w3kbl.txt"
-    "https://adaway.org/hosts.txt"
-    "https://v.firebog.net/hosts/AdguardDNS.txt"
-    "https://v.firebog.net/hosts/Admiral.txt"
     "https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt"
-    "https://v.firebog.net/hosts/Easylist.txt"
-    "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
     "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts"
     "https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts"
-    "https://v.firebog.net/hosts/Easyprivacy.txt"
-    "https://v.firebog.net/hosts/Prigent-Ads.txt"
     "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.2o7Net/hosts"
     "https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt"
-    "https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt"
-    "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt"
-    "https://v.firebog.net/hosts/Prigent-Crypto.txt"
     "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Risk/hosts"
     "https://bitbucket.org/ethanr/dns-blacklists/raw/8575c9f96e5b4a1308f2f12394abd86d0927a4a0/bad_lists/Mandiant_APT1_Report_Appendix_D.txt"
-    "https://phishing.army/download/phishing_army_blocklist_extended.txt"
     "https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt"
-    "https://v.firebog.net/hosts/RPiList-Malware.txt"
-    "https://v.firebog.net/hosts/RPiList-Phishing.txt"
     "https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt"
     "https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts"
-    "https://urlhaus.abuse.ch/downloads/hostfile/"
     "https://lists.cyberhost.uk/malware.txt"
-    "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
-    "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt"
-    "https://osint.digitalside.it/Threat-Intel/lists/latestdomains.txt"
-    "https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt"
-    "https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser"
+    # "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt"
+    # "https://urlhaus.abuse.ch/downloads/hostfile/"
+    # "https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt"
+    # "https://adaway.org/hosts.txt"
+    # "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt"
+    # "https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt"
+    # "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
+    # "https://osint.digitalside.it/Threat-Intel/lists/latestdomains.txt"
+    # "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
+    # "https://phishing.army/download/phishing_army_blocklist_extended.txt"
+    # "https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser"
+    # "https://v.firebog.net/hosts/Easyprivacy.txt"
+    # "https://v.firebog.net/hosts/Prigent-Ads.txt"
+    # "https://v.firebog.net/hosts/Easylist.txt"
+    # "https://v.firebog.net/hosts/static/w3kbl.txt"
+    # "https://v.firebog.net/hosts/AdguardDNS.txt"
+    # "https://v.firebog.net/hosts/Admiral.txt"
+    # "https://v.firebog.net/hosts/Prigent-Crypto.txt"
+    # "https://v.firebog.net/hosts/RPiList-Malware.txt"
+    # "https://v.firebog.net/hosts/RPiList-Phishing.txt"
   ];
 
   extendedBlacklists = [];
@@ -167,7 +166,8 @@ in {
       settings = {
         upstreams = {
           groups.default = upstreamServers.${cfg.mode};
-          init.strategy = "blocking";
+          init.strategy = "failOnError";  # Важно!
+          timeout = "2s";  # Добавь таймаут
         };
 
         blocking = {
@@ -181,11 +181,14 @@ in {
         caching = {
           maxTime = "30m";
           maxItemsCount = 0;
-          prefetching = true;
+          prefetching = false;  # Выключи это
+          prefetchExpires = "2h";
+          prefetchThreshold = 5;
+          prefetchMaxItemsCount = 0;
         };
 
         ports = {
-          dns = "127.0.0.1:53";
+          dns = 53;  # Слушать на всех интерфейсах
           http = "0.0.0.0:4000";
         };
 
@@ -197,16 +200,20 @@ in {
 
         # НАСТРАИВАЕМ POSTGRESQL ЛОГИРОВАНИЕ
         queryLog = {
-          type = "postgresql";
-          target = "postgres://blocky@localhost/blocky"; # Заменили на TCP
-          logRetentionDays = 90;
+          type = "console";
+          # type = "postgresql";
+          # target = "postgres://blocky@localhost/blocky"; # Заменили на TCP
+          # logRetentionDays = 90;
         };
+
 
         bootstrapDns = [
           "tcp+udp:1.1.1.1"
-          "https://1.1.1.1/dns-query"
           "tcp+udp:8.8.8.8"
         ];
+
+        # Добавь эти настройки:
+        connectIPVersion = "v4";  # Только IPv4 для упрощения
 
         ede.enable = true;
       };
@@ -216,12 +223,18 @@ in {
     systemd.services.blocky = {
       after = ["postgresql.service"];
       requires = ["postgresql.service"];
+      wants = ["network-online.target"];
       serviceConfig = {
-        DynamicUser = lib.mkForce false;
+        # Разрешаем биндить порты < 1024 (53) без прав root
+        AmbientCapabilities = "CAP_NET_BIND_SERVICE";
+        CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
+
+        DynamicUser = lib.mkForce false; # Вы уже создали юзера blocky выше, это правильно
         User = "blocky";
         Group = "blocky";
         Restart = "on-failure";
-        RestartSec = "1";
+        RestartSec = "5"; # Чуть больше времени на рестарт
+        TimeoutStartSec = "60s"; # Даем время на скачивание списков
       };
     };
 
