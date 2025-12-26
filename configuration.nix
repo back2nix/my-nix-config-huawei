@@ -60,7 +60,8 @@ in {
     # DNS настройки
     # ./module/dns-dot-tls.nix
     # ./module/dns-doh-https.nix
-    ./module/dns-blocky.nix
+    # ./module/dns-blocky.nix
+    ./module/blocky/default.nix
 
     # Сеть и контейнеры
     ./module/network-configuration.nix
@@ -79,6 +80,7 @@ in {
   # services.monitoring-stack.enable = true;
 
   boot = {
+    binfmt.emulatedSystems = [ "aarch64-linux" ];
     # asus специфичные настройки
     # extraModprobeConfig = ''
     #   options bluetooth disable_ertm=1
@@ -440,17 +442,24 @@ in {
     ];
   };
 
-  services.dns-setup = {
-    enable = false;
-    mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
-    extendedFiltering = true;
-    customWhitelist = ''
-      github.com
-      mixpanel.com
-      cdn.mxpnl.com
-      api-js.mixpanel.com
-    '';
-  };
+  # blocky = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   enableMonitoring = false;
+  # # serviceDomain = "stop-pub.${config.homelab.domain}";
+  # };
+
+  # services.dns-setup = {
+  #   enable = false;
+  #   mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
+  #   extendedFiltering = true;
+  #   customWhitelist = ''
+  #     github.com
+  #     mixpanel.com
+  #     cdn.mxpnl.com
+  #     api-js.mixpanel.com
+  #   '';
+  # };
 
   system.stateVersion = "23.11";
 

@@ -7,10 +7,10 @@
   systemd.network.enable = lib.mkForce false;
 
   environment.etc."resolv.conf".text = ''
-    # nameserver 127.0.0.1
+    nameserver 127.0.0.1
     nameserver 8.8.8.8
     nameserver 1.1.1.1
-    # options edns0 trust-ad timeout:1 attempts:1
+    options edns0 trust-ad timeout:1 attempts:1
   '';
 
   networking = {
