@@ -17,7 +17,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager"; # Switched to main branch to match nixos-25.11
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
