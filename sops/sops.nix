@@ -36,6 +36,9 @@
       "xray/privateKey" = {};
       "xray/publicKey" = {};
       "xray/uuid" = {};
+      "attic/env" = {
+        restartUnits = [ "atticd.service" ];
+      };
     };
 
     # templates."autossh_ip" = {
