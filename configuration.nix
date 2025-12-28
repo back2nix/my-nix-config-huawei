@@ -339,10 +339,10 @@ in {
   };
 
   services = {
-    transmission = {
-      enable = true;
-      package = pkgs-master.transmission_4;
-    };
+    # transmission = {
+    #   enable = true;
+    #   package = pkgs-master.transmission_4;
+    # };
 
     lorri = {
       enable = true;
