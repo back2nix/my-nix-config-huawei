@@ -8,16 +8,13 @@ let
   cfg = config.services.attic;
   atticd = lib.getExe cfg.package;
   settingsFormat = pkgs.formats.toml { };
-
-  # Генерируем конфиг из settings
   generatedConfigFile = settingsFormat.generate "attic.toml" cfg.settings;
 in
 {
   options.services.attic = {
+    # ... твои опции без изменений ...
     enable = lib.mkEnableOption "attic";
-
     package = lib.mkPackageOption pkgs "attic-server" { };
-
     settings = lib.mkOption {
       type = lib.types.submodule {
         freeformType = settingsFormat.type;
@@ -33,19 +30,14 @@ in
       default = {};
       description = "Configuration for attic.toml";
     };
-
     credentialsFile = lib.mkOption {
-      description = ''
-        Path to a file containing the server's secret token.
-        Can be generated via `openssl rand 64 | base64 -w0`.
-      '';
+      description = "Path to token file";
       type = lib.types.str;
       default = "";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    # Создаем пользователя и группу
     users.groups.atticd = {};
     users.users.atticd = {
       isSystemUser = true;
@@ -55,7 +47,15 @@ in
       createHome = true;
     };
 
-    # Systemd сервис (аналог init.services из чужого конфига)
+    # === ДОБАВЬ ВОТ ЭТОТ БЛОК ===
+    # d = создать директорию, если нет
+    # Z = рекурсивно исправить права (владельца), если они неправильные
+    systemd.tmpfiles.rules = [
+      "d /var/lib/atticd 0700 atticd atticd - -"
+      "Z /var/lib/atticd 0700 atticd atticd - -"
+    ];
+    # ============================
+
     systemd.services.atticd = {
       description = "Attic Binary Cache Server";
       wantedBy = [ "multi-user.target" ];
@@ -64,17 +64,15 @@ in
       serviceConfig = {
         User = "atticd";
         Group = "atticd";
-        # Создаем директорию, если хранилище локальное
+        # StateDirectory создаст папку, но tmpfiles надежнее для исправления прав
         StateDirectory = "atticd";
 
-        # Скрипт запуска, который подтягивает секреты, как в оригинале
+        # Скрипт запуска
         ExecStart = pkgs.writeShellScript "attic-run" ''
           if [ -n "${cfg.credentialsFile}" ] && [ -f "${cfg.credentialsFile}" ]; then
             export ATTIC_SERVER_TOKEN_HS256_SECRET_BASE64="$(<"${cfg.credentialsFile}")"
           fi
 
-          # Если директория хранения локальная и совпадает с путем StateDirectory, systemd её уже создал.
-          # Если путь другой, обеспечим права (только если это локальный путь)
           if [ "${cfg.settings.storage.type}" = "local" ]; then
              mkdir -p "${cfg.settings.storage.path}"
           fi
