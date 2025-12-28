@@ -172,6 +172,7 @@ in {
       pkgs-master.transmission_4-qt
       pkgs-master.openvpn3
       pkgs-master.gemini-cli
+      mktorrent
 
       # Контейнеры и кластеры
       docker

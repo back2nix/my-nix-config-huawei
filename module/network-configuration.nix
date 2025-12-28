@@ -60,7 +60,8 @@
               4244,    # Cilium Hubble Server
               4245,    # Cilium Hubble Relay
               5432,    # postgres
-              50051    # auth
+              50051,    # auth
+              51413    # Torrent TCP
             }
           }
 
@@ -111,6 +112,8 @@
 
             # Разрешаем доступ к сервисам с localhost
             ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept
+
+            udp dport 51413 accept comment "Torrent DHT/uTP"
 
             ct state vmap {
               invalid : drop,
