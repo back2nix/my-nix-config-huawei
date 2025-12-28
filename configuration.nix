@@ -306,6 +306,8 @@ in {
       gcc
 
       uv
+      attic-client
+
 
       (writeShellScriptBin "virt-switch" ''
         # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ

@@ -54,7 +54,12 @@ exit
 ```
 
 
+
+
 ```bash
+nix-shell -p sqlite --run "sudo -u atticd sqlite3 /var/lib/atticd/server.db \"UPDATE cache SET is_public=1 WHERE name='system';\""
+sudo systemctl restart atticd
+
 # 2. Логинимся клиентом (используем токен из файла)
 attic login local http://127.0.0.1:8080 $(sudo cat /tmp/token.txt)
 
@@ -63,4 +68,32 @@ attic cache create system
 
 # 4. Узнаем Публичный Ключ
 attic cache info system
+```
+
+# push
+```bash
+attic push system ./result
+
+# Пуш текущей системы
+attic push system /run/current-system
+
+# Пуш конкретного пути из /nix/store
+attic push system /nix/store/siy2bb26nzxd9wf0b9g0wmjfih6yl573-attic.toml
+
+# Автоматический пуш во время сборки (watch-exec)
+attic watch-exec system -- nix build nixpkgs#k9s
+# Или для пересборки системы:
+attic watch-exec system -- sudo nixos-rebuild switch --flake .#
+```
+
+# Очистка
+```bash
+# 1. Очистка по времени (Retention Period)
+attic cache gc system --retention-period 2w
+# 2. "Сухой прогон" (Dry Run)
+attic cache gc system --retention-period 1m --dry-run
+# 3. Очистка несвязанных данных (Dangling)
+attic cache gc system
+# 4. Полное удаление кэша (Радикальный метод)
+attic cache destroy system
 ```
