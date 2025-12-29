@@ -27,6 +27,9 @@ update-nixvim:
 update-replacer:
     nix flake lock --update-input replacer
 
+update-muuter:
+  nix flake update --update-input mutter-src
+
 # Полное обновление flake
 update:
     nix flake update
