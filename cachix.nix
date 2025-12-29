@@ -48,6 +48,7 @@ in {
       "http_proxy=http://127.0.0.1:1083"
       "https_proxy=http://127.0.0.1:1083"
       "ALL_PROXY=http://127.0.0.1:1083"
+      "no_proxy=localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8"
     ];
   };
 }
