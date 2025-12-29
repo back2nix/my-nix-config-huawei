@@ -289,7 +289,6 @@ in {
       # claude-code
       xdotool
       xorg.xwininfo
-      wl-clipboard
       gnome-screenshot
 
       gnome-shell
