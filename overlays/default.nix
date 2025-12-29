@@ -22,9 +22,9 @@
     # the relationship between the new and the old
     (final: prev: {
       # --- НАЧАЛО: Патч для gnome-screenshot ---
-      gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
-        patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
-      });
+      # gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
+      #   patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
+      # });
 
       gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
         patches = (oldAttrs.patches or []) ++ [ ./gnome-shell.patch ];

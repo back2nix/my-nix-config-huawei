@@ -51,7 +51,7 @@
     };
 
     mutter-src = {
-      # url = "path:./mutter-49.2";
+      # url = "path:./mutter-48.3";
       type = "git";
       url = "https://github.com/back2nix/mutter.git";
       ref = "49.2";

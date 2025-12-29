@@ -557,10 +557,23 @@ in {
 
   xdg.portal = {
     enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gnome
-      xdg-desktop-portal-gtk
-    ];
-    config.common.default = [ "gnome" "gtk" ];
+
+    # ВАЖНО: Убираем extraPortals.
+    # NixOS модуль `desktopManager.gnome` САМ добавит xdg-desktop-portal-gnome.
+    # Добавление сюда gtk портала ломает логику выбора.
+    # extraPortals = [ ];
+
+    # Жестко задаем конфигурацию (генерирует portals.conf)
+    config = {
+      common = {
+        # Говорим системе: "Что бы ни случилось, используй GNOME-портал"
+        default = [ "gnome" ];
+        # Для секретов (связка ключей) тоже явно укажем
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+      };
+    };
+
+    # Это помогает открывать ссылки правильно
+    xdgOpenUsePortal = true;
   };
 }
