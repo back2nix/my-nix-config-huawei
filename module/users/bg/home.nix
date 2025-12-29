@@ -424,7 +424,10 @@ in {
       "--ignore-gpu-blocklist"
       "--use-angle=vulkan"
       "--disable-gpu-video-decode"
-      "--disable-features=GlobalMediaControls,SkiaGraphite"
+      "--disable-features=GlobalMediaControls"
+      ## добавил
+      "--enable-features=SkiaGraphite"
+      "--enable-unsafe-webgpu"
     ];
 
     # Не выделяюется мышкой текст в gemini
