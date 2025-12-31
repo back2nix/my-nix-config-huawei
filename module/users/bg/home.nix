@@ -429,28 +429,6 @@ in {
       "--enable-features=SkiaGraphite"
       "--enable-unsafe-webgpu"
     ];
-
-    # Не выделяюется мышкой текст в gemini
-    # commandLineArgs = [
-    #   # Wayland platform
-    #   "--ozone-platform=x11"
-    #   "--enable-features=UseOzonePlatform,WebRTCPipeWireCapturer"
-    #   "--enable-wayland-ime"
-
-    #   # ИСПРАВЛЕНО: GPU через ANGLE с бэкендом OpenGL
-    #   "--use-gl=angle"
-    #   "--use-angle=gl" # <--- ИЗМЕНЕНО
-    #   "--enable-gpu-rasterization"
-    #   "--enable-zero-copy"
-
-    #   # ИСПРАВЛЕНО: Убран флаг Vulkan
-    #   "--enable-features=ExperimentalWebMachineLearningNeuralNetwork,WebMachineLearningNeuralNetwork,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder" # <--- ИЗМЕНЕНО
-
-    #   # Ваши настройки
-    #   "--force-webrtc-ip-handling-policy=default_public_interface_only"
-    #   "--enforce-webrtc-ip-permission-check"
-    #   "--remote-debugging-port=9222"
-    # ];
   };
 
   # xdg.mimeApps = {
