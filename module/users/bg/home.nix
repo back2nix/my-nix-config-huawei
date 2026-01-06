@@ -427,7 +427,6 @@ in {
       "--disable-features=GlobalMediaControls"
       ## добавил
       "--enable-features=SkiaGraphite"
-      "--enable-unsafe-webgpu"
     ];
   };
 
