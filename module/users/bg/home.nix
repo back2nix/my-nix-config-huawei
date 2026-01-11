@@ -250,6 +250,8 @@ in {
       (pkgs.writeShellScriptBin "jasonbourne" ''
         exec ${pkgs.kitty}/bin/kitty --class jasonbourne --title jasonbourne "$@"
       '')
+
+      gnomeExtensions.window-calls
     ];
 
     file = {

@@ -51,7 +51,12 @@
       switch-to-workspace-last = [];
       switch-input-source = ["<Alt>Shift_L"];
     };
-
+    "org/gnome/shell" = {
+      disable-user-extensions = false;
+      enabled-extensions = [
+        "window-calls@domandoman.xyz"
+      ];
+    };
     # Настройки масштабирования (если нужны)
     # Раскомментируй и настрой под свои нужды:
     # "org/gnome/desktop/interface" = {
