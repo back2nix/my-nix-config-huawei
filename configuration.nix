@@ -307,6 +307,7 @@ in {
       uv
       attic-client
       gpu-screen-recorder
+      openssl
 
 
       (writeShellScriptBin "virt-switch" ''

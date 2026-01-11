@@ -33,10 +33,12 @@ set -a
 source /run/secrets/attic/env
 set +a
 
+
+atticadm make-token --sub "admin" --validity "10y" --create-cache "*" --delete-cache "*" --public-cache "*" --pull "*" --push "*"
 # 3. Генерируем токен.
 # ОБЯЗАТЕЛЬНО добавляем флаг --config с путем, который был в systemctl status
 atticadm make-token \
-  --config "/nix/store/siy2bb26nzxd9wf0b9g0wmjfih6yl573-attic.toml" \
+  --config "/nix/store/9bbbxqxsq1lpsqmfkhwbq29s2v3g7p9n-attic.toml" \
   --sub "admin" \
   --validity "10y" \
   --pull "*" \
