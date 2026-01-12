@@ -22,22 +22,26 @@ in {
       "https://nixpkgs-unfree.cachix.org"
       "https://cache.nixos-cuda.org"
       "http://127.0.0.1:8080/system"
+      "http://devready.work:8080/system"
     ];
 
     trusted-substituters = [
       "cache.nixos.org"
       "nix-community.cachix.org"
       "http://127.0.0.1:8080/system"
+      "http://devready.work:8080/system"
     ];
 
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nj6rs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       # "flox-cache-public-1:7F4OyH7ZCnFhcze3fJdfyXYLQw/aV7GEed86nQ7IsOs="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       "system:Pq0rLW2CHR7DK6bnqoNlpfbjVf6AA1rCbBgf3zaPiCE="
+      "system:R0BqH3u7f2NsG4ySt87TfzMecyeh1daZWDjk/8h1z8g="
     ];
   };
 
