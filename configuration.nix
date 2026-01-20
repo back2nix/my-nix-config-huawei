@@ -324,6 +324,8 @@ in {
         # Теперь вставляем код из файла
         ${builtins.readFile ./scripts/virt-switch.sh}
       '')
+
+      virtualbox
     ];
 
     etc."proxychains.conf".text = ''
