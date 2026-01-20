@@ -29,6 +29,7 @@
     extraHosts = ''
       127.0.0.1 kafka
       127.0.0.1 localhost
+      # 127.0.0.1 livekit.devready.work
       127.0.0.1 host.docker.internal
       # Убедитесь, что IP актуален
       192.168.3.18 app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local redis.local livekit.local
