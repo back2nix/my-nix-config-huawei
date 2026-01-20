@@ -11,6 +11,9 @@
 
     (modulesPath + "/installer/scan/not-detected.nix")
     ./hardware-configuration.nix
+
+    # Подключаем наш новый модуль аудио-моста
+    ./module/ai-audio.nix
   ];
 
   networking.hostName = "yoga14";
