@@ -34,6 +34,7 @@
       "btintel"
       "tun"
       "tap"
+      "akvcam"
     ];
 
     initrd.kernelModules = [
@@ -44,7 +45,7 @@
       "hid_sensor_hub"
     ];
 
-    extraModulePackages = [];
+    extraModulePackages = [ config.boot.kernelPackages.akvcam ];
 
     # ПРАВИЛЬНЫЕ параметры ядра для Lunar Lake
     kernelParams = [
@@ -115,6 +116,8 @@
     ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}="73"
 
     SUBSYSTEM=="net", KERNEL=="tun", GROUP="kvm", MODE="0660"
+
+    KERNEL=="video[0-9]*", TAG+="uaccess"
   '';
 
   systemd.services.iwlwifi-reload = {
