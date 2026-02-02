@@ -6,6 +6,10 @@
   pkgs-23-11,
   ...
 }: {
+  services.dockerRegistry = {
+    enableGarbageCollect = true;
+    enable = true;
+  };
   # sudo systemctl daemon-reload
   # sudo systemctl restart docker
   # systemctl --user restart docker
