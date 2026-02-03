@@ -7,8 +7,8 @@
       "--write-kubeconfig-mode 644"
       "--kubelet-arg=fail-swap-on=false"
       # Отключаем встроенный CNI (Flannel) и network policy для Cilium
-      "--flannel-backend=none"
-      "--disable-network-policy"
+      # "--flannel-backend=none"
+      # "--disable-network-policy"
       # ВАЖНО: Отключаем Traefik, чтобы освободить порты 80/443 для Ingress-Nginx
       "--disable=traefik"
     ];

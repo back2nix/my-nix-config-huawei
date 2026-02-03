@@ -21,14 +21,14 @@ in {
       "https://nixpkgs-wayland.cachix.org"
       "https://nixpkgs-unfree.cachix.org"
       "https://cache.nixos-cuda.org"
-      "http://127.0.0.1:8080/system"
+      # "http://127.0.0.1:8080/system"
       "http://devready.work:8080/system"
     ];
 
     trusted-substituters = [
       "cache.nixos.org"
       "nix-community.cachix.org"
-      "http://127.0.0.1:8080/system"
+      # "http://127.0.0.1:8080/system"
       "http://devready.work:8080/system"
     ];
 
