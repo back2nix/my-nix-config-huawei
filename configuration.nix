@@ -82,29 +82,29 @@ in {
   # ==========================================
   # Настройки Attic (взято из examples/attic)
   # ==========================================
-  services.attic = {
-    enable = true;
+  # services.attic = {
+  #   enable = true;
 
-    settings = {
-      listen = "[::]:8080";
-      database.url = "sqlite:///var/lib/atticd/server.db?mode=rwc";
+  #   settings = {
+  #     listen = "[::]:8080";
+  #     database.url = "sqlite:///var/lib/atticd/server.db?mode=rwc";
 
-      # УДАЛЯЕМ блок jwt.signing отсюда.
-      # Он будет подтянут автоматически из переменной окружения.
+  #     # УДАЛЯЕМ блок jwt.signing отсюда.
+  #     # Он будет подтянут автоматически из переменной окружения.
 
-      storage = {
-        type = "local";
-        path = "/var/lib/atticd/storage";
-      };
+  #     storage = {
+  #       type = "local";
+  #       path = "/var/lib/atticd/storage";
+  #     };
 
-      chunking = {
-        nar-size-threshold = 64 * 1024;
-        min-size = 16 * 1024;
-        avg-size = 64 * 1024;
-        max-size = 256 * 1024;
-      };
-    };
-  };
+  #     chunking = {
+  #       nar-size-threshold = 64 * 1024;
+  #       min-size = 16 * 1024;
+  #       avg-size = 64 * 1024;
+  #       max-size = 256 * 1024;
+  #     };
+  #   };
+  # };
 
   # Подключаем файл с секретами к сервису atticd
   # Сервис в systemd называется "atticd", даже если модуль называется "services.attic"
