@@ -5,6 +5,7 @@
   libadwaita,
   pkgs,
   lib,
+  pkgs-unstable,
   ...
 }: {
   nixpkgs.overlays = [
@@ -86,7 +87,7 @@
         export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
-        exec ${prev.gemini-cli}/bin/gemini "$@"
+        exec ${pkgs-unstable.gemini-cli}/bin/gemini "$@"
       '';
 
       # steam = prev.steam.override {

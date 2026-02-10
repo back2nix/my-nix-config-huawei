@@ -309,6 +309,8 @@ in {
       gpu-screen-recorder
       openssl
 
+      obsidian
+
 
       (writeShellScriptBin "virt-switch" ''
         # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ
