@@ -43,6 +43,10 @@
       "i2c_hid"
       "i2c_hid_acpi"
       "hid_sensor_hub"
+
+      # DPKK
+      "vfio-pci"
+      "uio_pci_generic"
     ];
 
     extraModulePackages = [ config.boot.kernelPackages.akvcam ];
@@ -57,6 +61,11 @@
       "intel_pstate=active"
       "intel_iommu=on"
       "iommu=pt"
+
+      # DPDK
+      "default_hugepagesz=2M"
+      "hugepagesz=2M"
+      "hugepages=1024"
     ];
 
     extraModprobeConfig = ''
@@ -183,6 +192,8 @@
     mesa-demos
     vulkan-tools
     intel-gpu-tools
+
+    dpdk
   ];
 
   networking.useDHCP = lib.mkDefault true;
