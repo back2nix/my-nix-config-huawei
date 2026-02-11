@@ -9,6 +9,14 @@
   ...
 }: {
   nixpkgs.overlays = [
+
+    (final: prev: {
+      unstable = import inputs.nixpkgs-unstable {
+        inherit (prev) system;
+        config.allowUnfree = true;
+      };
+    })
+
     # (import ./yandex-browser-updates.nix) # Путь относительно configuration.nix
     # Overlay 1: Use `self` and `super` to express
     # the inheritance relationship
@@ -87,7 +95,7 @@
         export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
-        exec ${pkgs-unstable.gemini-cli}/bin/gemini "$@"
+        exec ${final.unstable.gemini-cli}/bin/gemini "$@"
       '';
 
       # steam = prev.steam.override {

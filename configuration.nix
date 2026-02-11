@@ -204,7 +204,7 @@ in {
       pkgs-master.serpl
       pkgs-master.transmission_4-qt
       pkgs-master.openvpn3
-      pkgs-master.gemini-cli
+      # pkgs-master.gemini-cli
       mktorrent
 
       # Контейнеры и кластеры
