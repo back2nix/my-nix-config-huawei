@@ -107,6 +107,15 @@
         exec ${final.unstable.claude-code}/bin/claude "$@"
       '';
 
+
+      # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
+      #   export HTTP_PROXY="http://127.0.0.1:1083"
+      #   export HTTPS_PROXY="http://127.0.0.1:1083"
+      #   export NO_PROXY="localhost,127.0.0.1,::1"
+
+      #   exec ${final.unstable.kilocode-cli}/bin/claude "$@"
+      # '';
+
       # steam = prev.steam.override {
       #   extraPkgs = pkgs: with pkgs; [
       #     keyutils
