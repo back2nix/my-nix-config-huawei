@@ -328,6 +328,8 @@ in {
       '')
 
       virtualbox
+
+      pkgs-unstable.antigravity
     ];
 
     etc."proxychains.conf".text = ''
@@ -589,4 +591,19 @@ in {
     source = "${pkgs.gpu-screen-recorder}/bin/gsr-kms-server";
   };
 
+
+  # security.pam.loginLimits = [
+  #   {
+  #     domain = "*";
+  #     type = "soft";
+  #     item = "nofile";
+  #     value = "unlimited";
+  #   }
+  #   {
+  #     domain = "*";
+  #     type = "hard";
+  #     item = "nofile";
+  #     value = "unlimited";
+  #   }
+# ];
 }
