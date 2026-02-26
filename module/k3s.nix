@@ -1,17 +1,29 @@
-{ pkgs, ... }: {
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: let
+  cfg = config.services.k3s;
+  isServer = cfg.role == "server";
+  isAgent = cfg.role == "agent";
+in {
   services.k3s = {
-    enable = true;
-    role = "server";
+    enable = lib.mkDefault true;
+    role = lib.mkDefault "server";
     package = pkgs.k3s;
-    extraFlags = toString [
-      "--write-kubeconfig-mode 644"
+    
+    # Эти опции стандартные для модуля k3s в NixOS
+    # serverAddr = ...;
+    # token = ...;
+    # Но мы будем использовать их через передачу в устройствах
+
+    extraFlags = toString ([
       "--kubelet-arg=fail-swap-on=false"
-      # Отключаем встроенный CNI (Flannel) и network policy для Cilium
-      # "--flannel-backend=none"
-      # "--disable-network-policy"
-      # ВАЖНО: Отключаем Traefik, чтобы освободить порты 80/443 для Ingress-Nginx
+    ] ++ (lib.optionals isServer [
+      "--write-kubeconfig-mode 644"
       "--disable=traefik"
-    ];
+    ]));
   };
 
   # Создаем группу k3s
@@ -29,6 +41,6 @@
   ];
 
   environment.variables = {
-    KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
+    KUBECONFIG = if isServer then "/etc/rancher/k3s/k3s.yaml" else null;
   };
 }

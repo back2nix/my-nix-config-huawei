@@ -18,30 +18,14 @@
     ];
   };
 
-  # config.cudaSupport = true;
-  # config.allowUnfreePredicate =
-  #   p:
-  #   builtins.all (
-  #     license:
-  #     license.free
-  #     || builtins.elem license.shortName [
-  #       "CUDA EULA"
-  #       "cuDNN EULA"
-  #       "cuTENSOR EULA"
-  #       "NVidia OptiX EULA"
-  #     ]
-  #   ) (if builtins.isList p.meta.license then p.meta.license else [ p.meta.license ]);
-
   networking.hostName = "desktop";
 
   # boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPackages = pkgs.linuxPackages;
 
   # --- CUDA and NVIDIA Configuration ---
-  # Опции `opengl` были переименованы в `graphics`
   hardware.graphics = {
     enable = true;
-    # Явно добавляем 32-битные библиотеки NVIDIA для совместимости
   };
 
   services.xserver.videoDrivers = ["nvidia"];
@@ -50,35 +34,33 @@
     modesetting.enable = true;
     powerManagement.enable = false;
     powerManagement.finegrained = false;
-    # open = false;
     open = false;
     nvidiaSettings = true;
-    # package = config.boot.kernelPackages.nvidiaPackages.production;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
   boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
   boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
 
-  # --- Virtualisation with NVIDIA support (Manual Configuration) ---
-  # Мы настраиваем это вручную, чтобы обойти ошибку в nixos-25.05,
-  # где `enableNvidia` содержит сломанную проверку.
+  # --- Virtualisation with NVIDIA support ---
   hardware.nvidia-container-toolkit.enable = true;
 
-  # Для Docker: вручную определяем рантайм NVIDIA
   virtualisation.docker.daemon.settings.runtimes = {
     nvidia = {
       path = "${config.hardware.nvidia-container-toolkit.package}/bin/nvidia-container-runtime";
     };
   };
 
-  # Примечание: опции `virtualisation.docker.enableNvidia` и `virtualisation.podman.enableNvidia`
-  # были удалены, чтобы избежать сломанной проверки.
-  # Для Podman достаточно включения `nvidia-container-toolkit`.
-
   # --- Desktop-specific packages ---
   environment.systemPackages = with pkgs; [
     cudaPackages.cudatoolkit
-    #nvtop # Исправлено имя пакета
   ];
+
+  # --- K3s Agent Configuration (Slave) ---
+  services.k3s = {
+    enable = true;
+    role = "agent";
+    serverAddr = "https://192.168.3.18:6443";
+    token = "K104caae4ecc48a34d39454d4c8b3e4e27577b2a31eb1a5ce0cb15250eb2f7d5dfc::server:3cabe09aba6d084178da21b8b6b8cce6";
+  };
 }

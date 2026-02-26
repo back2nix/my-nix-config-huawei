@@ -50,6 +50,7 @@
               443,     # HTTPS/gRPC-TLS
               5555,    # Camera streaming
               6443,    # K3S API Server
+              10250,   # K3S Kubelet
               6379,    # redis
               8080,    # Gateway
               8081,    # Landing
@@ -61,6 +62,7 @@
               4244,    # Cilium Hubble Server
               4245,    # Cilium Hubble Relay
               5432,    # postgres
+              6443,    # k3s
               50051,    # auth
               51413    # Torrent TCP
             }
@@ -126,6 +128,7 @@
             ip6 nexthdr ipv6-icmp accept
 
             tcp dport @allowed_tcp accept
+            udp dport @system_udp accept
           }
 
           chain output {
