@@ -20,6 +20,16 @@
     initrd.kernelModules = [];
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
+    # Fix for system freezes during high network load (SSH sync) and audio latency
+    kernelParams = [
+      "intel_pstate=active"
+      "processor.max_cstate=3"
+      "intel_idle.max_cstate=3"
+    ];
+    extraModprobeConfig = ''
+      options iwlwifi power_save=0
+      options iwlmvm power_scheme=1
+    '';
   };
 
   fileSystems."/" = {
@@ -59,6 +69,12 @@
       settings = {
         CPU_SCALING_GOVERNOR_ON_AC = "powersave";
         CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+        # Disable WiFi power saving to prevent freezes
+        WIFI_PWR_ON_AC = "off";
+        WIFI_PWR_ON_BAT = "off";
+        # Runtime PM can cause issues with some devices
+        RUNTIME_PM_ON_AC = "on";
+        RUNTIME_PM_ON_BAT = "auto";
       };
     };
   };

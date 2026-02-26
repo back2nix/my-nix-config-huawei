@@ -133,7 +133,6 @@
             };
             modules =
               [
-                inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
                 inputs.musnix.nixosModules.musnix
                 inputs.sops-nix.nixosModules.sops
                 ./configuration.nix
@@ -169,9 +168,13 @@
       in {
         # NixOS конфигурации
         nixosConfigurations = {
-          asus = mkSystem "asus-ux3405m" [];
+          asus = mkSystem "asus-ux3405m" [
+             inputs.nixos-hardware.nixosModules.asus-zenbook-ux3405ma
+          ];
           huawei = mkSystem "huawei-rlef-x" [];
-          yoga14 = mkSystem "yoga14" [];
+          yoga14 = mkSystem "yoga14" [
+             inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+          ];
           desktop = mkSystem "desktop" [];
         };
 
