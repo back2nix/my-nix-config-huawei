@@ -90,12 +90,57 @@
       #     "$@"
       # '';
 
+# --- НАЧАЛО: Обновление gemini-cli до 0.30.0 ---
+      gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
+        version = "0.30.0-nightly.20260226.f9f916e1d";
+
+        src = prev.fetchFromGitHub {
+          owner = "google-gemini";
+          repo = "gemini-cli";
+          tag = "v${version}";
+          hash = "sha256-ZtQGrE8HelZiN9Wm3eaFLn327ysvp6cT6X6AUnA2H0g=";
+        };
+
+        npmDeps = prev.fetchNpmDeps {
+          inherit (oldAttrs) pname;
+          inherit version src;
+          hash = "sha256-GMKU5o4BBE93y3XvM3mZQQhv69p1KbJ0DzBhZ+Gxc9s=";
+        };
+
+        # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
+        # чтобы старые правила из nixpkgs не отключали сборку devtools!
+        postPatch = ''
+          find . -name "package.json" -not -path "*/node_modules/*" | while read -r pkg; do
+            pkg_name=$(${prev.jq}/bin/jq -r '.name // empty' "$pkg")
+            if [[ "$pkg_name" == *"vscode-ide-companion"* ]] || [[ "$pkg_name" == *"test-utils"* ]]; then
+              echo "Disabling build for $pkg_name..."
+              ${prev.jq}/bin/jq '.scripts.build = "echo skip"' "$pkg" > "$pkg.tmp" && mv "$pkg.tmp" "$pkg"
+            fi
+          done
+
+          # Патчим корневой build.js — заменяем параллельный --workspaces на последовательную сборку
+          sed -i 's|execSync.*npm run build --workspaces.*|execSync("npm run build --workspace=packages/sdk --workspace=packages/devtools --workspace=packages/core --workspace=packages/cli", { stdio: "inherit", cwd: root });|' scripts/build.js
+        '';
+
+        postInstall = (oldAttrs.postInstall or "") + ''
+          # Копируем новые пакеты, появившиеся в версии 0.30.0, чтобы не было битых симлинков
+          rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
+          cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
+
+          rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
+          cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
+        '';
+      });
+      # --- КОНЕЦ: Обновление gemini-cli ---
+
       gemini-proxy = prev.writeShellScriptBin "gemini" ''
         export HTTP_PROXY="http://127.0.0.1:1083"
         export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
-        exec ${final.unstable.gemini-cli}/bin/gemini "$@"
+        # Изменено: используем наш переопределенный final.gemini-cli
+        # вместо final.unstable.gemini-cli
+        exec ${final.gemini-cli}/bin/gemini "$@"
       '';
 
 
