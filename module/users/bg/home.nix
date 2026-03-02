@@ -16,6 +16,7 @@ in {
     # ./overlays.nix
     # inputs.nixvim.homeManagerModules.nixvim
     ./chrome-ssl-keylog.nix
+    ./chrome-mcp.nix
     ./dconf.nix
     ./tmux/tmux.nix
     # ./zsh/zsh.nix
@@ -28,6 +29,10 @@ in {
   programs.chrome-with-ssl-keylog = {
     enable = true;
     keylogFile = "/tmp/sslkeylog.txt";
+  };
+
+  programs.chrome-mcp = {
+    enable = true;
   };
 
   xdg.configFile = {
