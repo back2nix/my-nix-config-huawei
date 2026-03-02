@@ -90,6 +90,17 @@
       #     "$@"
       # '';
 
+# --- НАЧАЛО: Обновление claude-code до 2.1.63 ---
+      claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
+        version = "2.1.63";
+        src = final.fetchzip {
+          url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
+          hash = "sha256-tVk1GXqh9Ice8ZbbLnmN4sSlIY41KsrqWi2eDo47/zI=";
+        };
+        npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      });
+# --- КОНЕЦ: Обновление claude-code ---
+
 # --- НАЧАЛО: Обновление gemini-cli до 0.30.0 ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
         version = "0.33.0-nightly.20260228.1ca5c05d0";
@@ -149,7 +160,7 @@
         export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
-        exec ${final.unstable.claude-code}/bin/claude "$@"
+        exec ${final.claude-code}/bin/claude "$@"
       '';
 
 
