@@ -18,6 +18,11 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-iO78HENuBjb6u+GaMsab/Hs+ypm8lCSxwpny9ak1djY=";
 
+  postPatch = ''
+    substituteInPlace hooks/rtk-rewrite.sh \
+      --replace-fail "#!/bin/bash" "#!/usr/bin/env bash"
+  '';
+
   doCheck = false;
 
   buildInputs = lib.optionals stdenv.isDarwin [
