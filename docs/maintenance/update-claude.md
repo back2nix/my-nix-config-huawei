@@ -17,11 +17,12 @@
 
 4. **Запустите сборку для получения хэша зависимостей:**
    ```bash
-   nix build .#claude-code
+   # Т.к. пакет в оверлее, путь к нему через nixosConfigurations:
+   nix build .#nixosConfigurations.huawei.pkgs.claude-code
    ```
    Nix выдаст ошибку `hash mismatch`. Скопируйте хэш из строки `got:` и вставьте его в `npmDepsHash`.
 
 5. **Проверьте финальную сборку:**
    ```bash
-   nix build .#claude-code
+   nix build .#nixosConfigurations.huawei.pkgs.claude-code
    ```

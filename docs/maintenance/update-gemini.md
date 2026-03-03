@@ -19,23 +19,24 @@
    npmDeps = prev.fetchNpmDeps {
      inherit (oldAttrs) pname;
      inherit version src;
-     hash = ""; # Очистите это поле
+     hash = ""; # Очистите это поле (или используйте lib.fakeHash)
    };
    ```
-   И запустить сборку:
+   И запустить сборку через NixOS конфигурацию (т.к. пакет в оверлее):
    ```bash
-   nix build .#gemini-cli
+   # Например, для хоста huawei:
+   nix build .#nixosConfigurations.huawei.pkgs.gemini-cli
    ```
-   Nix выдаст `hash mismatch`. Скопируйте правильный хэш и вставьте его в `npmDeps.hash`.
+   Nix выдаст `hash mismatch`. Скопируйте правильный хэш из поля `got:` и вставьте его в `npmDeps.hash`.
 
    **Если установлена утилита `prefetch-npm-deps`**, можно попробовать так (без скачивания всего репозитория вручную):
    ```bash
    # Нужно иметь исходники локально, чтобы запустить это
    nix-shell -p prefetch-npm-deps --run "prefetch-npm-deps package-lock.json"
    ```
-   Но способ с `hash = "";` в конфиге — самый надежный.
+   Но способ с `hash = "";` в конфиге через `nix build` — самый надежный.
 
 5. **Проверьте сборку:**
    ```bash
-   nix build .#gemini-cli
+   nix build .#nixosConfigurations.huawei.pkgs.gemini-cli
    ```

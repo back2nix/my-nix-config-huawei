@@ -101,7 +101,7 @@
       });
 # --- КОНЕЦ: Обновление claude-code ---
 
-# --- НАЧАЛО: Обновление gemini-cli до 0.30.0 ---
+# --- НАЧАЛО: Обновление gemini-cli до 0.33.0 ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
         version = "0.33.0-nightly.20260228.1ca5c05d0";
 
