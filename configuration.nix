@@ -283,9 +283,11 @@ in {
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
       gemini-proxy
+      gemini-vp2
       appimage-run
       dbeaver-bin
       claude-code-proxy
+      claude-code-vpn2
       # claude-code
       xdotool
       xorg.xwininfo

@@ -154,10 +154,25 @@
         exec ${final.gemini-cli}/bin/gemini "$@"
       '';
 
+      gemini-vp2 = prev.writeShellScriptBin "gemini-vp2" ''
+        export HTTP_PROXY="socks5://127.0.0.1:1084"
+        export HTTPS_PROXY="socks5://127.0.0.1:1084"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${final.gemini-cli}/bin/gemini "$@"
+      '';
 
       claude-code-proxy = prev.writeShellScriptBin "claude-code" ''
         export HTTP_PROXY="http://127.0.0.1:1083"
         export HTTPS_PROXY="http://127.0.0.1:1083"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${final.claude-code}/bin/claude "$@"
+      '';
+
+      claude-code-vpn2 = prev.writeShellScriptBin "claude-code-vpn2" ''
+        export HTTP_PROXY="socks5://127.0.0.1:1084"
+        export HTTPS_PROXY="socks5://127.0.0.1:1084"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
         exec ${final.claude-code}/bin/claude "$@"
