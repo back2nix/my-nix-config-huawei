@@ -9,6 +9,10 @@
       "vpn/user" = {};
       "vpn/private_key_path" = {};
 
+      "vpn2/ip" = {};
+      "vpn2/user" = {};
+      "vpn2/private_key_path" = {};
+
       "vault/root_token" = {};
       # "vault/unseal_Key" = {};
       "autossh/ip" = {};
@@ -78,6 +82,43 @@
           {
             inbound = ["http-proxy" "socks-proxy"];
             outbound = "ssh-out";
+          }
+        ];
+      };
+    };
+
+    templates."sing-box-config2.json" = {
+      content = builtins.toJSON {
+        log.level = "info";
+
+        inbounds = [
+          {
+            type = "http";
+            tag = "http-proxy2";
+            listen = "127.0.0.1";
+            listen_port = 1085;
+          }
+          {
+            type = "socks";
+            tag = "socks-proxy2";
+            listen = "127.0.0.1";
+            listen_port = 1084;
+          }
+        ];
+        outbounds = [
+          {
+            type = "ssh";
+            tag = "ssh-out2";
+            server = "${config.sops.placeholder."vpn2/ip"}";
+            server_port = 22;
+            user = "${config.sops.placeholder."vpn2/user"}";
+            private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
+          }
+        ];
+        route.rules = [
+          {
+            inbound = ["http-proxy2" "socks-proxy2"];
+            outbound = "ssh-out2";
           }
         ];
       };
