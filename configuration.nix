@@ -330,6 +330,7 @@ in {
       virtualbox
 
       pkgs-unstable.antigravity
+      rtk
     ];
 
     etc."proxychains.conf".text = ''

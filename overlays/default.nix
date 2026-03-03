@@ -163,6 +163,8 @@
         exec ${final.claude-code}/bin/claude "$@"
       '';
 
+      rtk = final.callPackage ../pkgs/rtk.nix { };
+
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
       #   export HTTP_PROXY="http://127.0.0.1:1083"
