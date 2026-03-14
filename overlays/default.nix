@@ -92,12 +92,17 @@
 
 # --- НАЧАЛО: Обновление claude-code до 2.1.63 ---
       claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.70";
+        version = "2.1.76";
         src = final.fetchzip {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-mxZVgsaRGVd/3VNWJqVMfRyrDid0MOuzrGIcInQHIEk=";
+          hash = "sha256-kjzPTG32f35eN6S85gGLUCmsNwH70Sq5rruEs/0hioM=";
         };
-        npmDepsHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+        npmDeps = prev.fetchNpmDeps {
+          name = "claude-code-${version}-npm-deps";
+          inherit src;
+          postPatch = oldAttrs.postPatch;
+          hash = "sha256-K+8xoBc3apvxQ9hCpYywqgBcfLxMWSxacgJcMH8mK7E=";
+        };
       });
 # --- КОНЕЦ: Обновление claude-code ---
 
