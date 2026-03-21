@@ -8,6 +8,18 @@
   isServer = cfg.role == "server";
   isAgent = cfg.role == "agent";
 in {
+  systemd.services.k3s-lo-ip = {
+    description = "Add 10.0.0.1/32 to loopback for k3s node IP";
+    before = [ "k3s.service" ];
+    wantedBy = [ "k3s.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.iproute2}/bin/ip addr add 10.0.0.1/32 dev lo || true";
+      ExecStop = "${pkgs.iproute2}/bin/ip addr del 10.0.0.1/32 dev lo || true";
+    };
+  };
+
   services.k3s = {
     enable = lib.mkDefault true;
     role = lib.mkDefault "server";
@@ -20,6 +32,10 @@ in {
 
     extraFlags = toString ([
       "--kubelet-arg=fail-swap-on=false"
+      "--node-ip 10.0.0.1"
+      "--node-external-ip 10.0.0.1"
+      "--advertise-address 10.0.0.1"
+      "--flannel-iface lo"
     ] ++ (lib.optionals isServer [
       "--write-kubeconfig-mode 644"
       "--disable=traefik"

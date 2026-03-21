@@ -32,7 +32,7 @@
       # 127.0.0.1 livekit.devready.work
       127.0.0.1 host.docker.internal
       # Убедитесь, что IP актуален
-      127.0.0.1 casino.local app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local
+      10.0.0.1 casino.local app.local grafana.local pyroscope.local prometheus.local postgres.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local
       109.69.21.245 app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
     '';
 
