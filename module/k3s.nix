@@ -15,8 +15,8 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.iproute2}/bin/ip addr add 10.0.0.1/32 dev lo || true";
-      ExecStop = "${pkgs.iproute2}/bin/ip addr del 10.0.0.1/32 dev lo || true";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr add 10.0.0.1/32 dev lo || true'";
+      ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr del 10.0.0.1/32 dev lo || true'";
     };
   };
 
