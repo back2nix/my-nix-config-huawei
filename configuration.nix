@@ -333,7 +333,7 @@ in {
 
       virtualbox
 
-      pkgs-unstable.antigravity
+      # pkgs-unstable.antigravity
       rtk
     ];
 

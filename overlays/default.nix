@@ -101,7 +101,7 @@
           name = "claude-code-${version}-npm-deps";
           inherit src;
           postPatch = oldAttrs.postPatch;
-          hash = "sha256-K+8xoBc3apvxQ9hCpYywqgBcfLxMWSxacgJcMH8mK7E=";
+          hash = "sha256-x8Y1vODjATE6F6r0GhK427J0h2Et7bsqKoDcWaNO+IM=";
         };
       });
 # --- КОНЕЦ: Обновление claude-code ---
