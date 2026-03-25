@@ -92,10 +92,10 @@
 
 # --- НАЧАЛО: Обновление claude-code до 2.1.63 ---
       claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.76";
+        version = "2.1.83";
         src = final.fetchzip {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-kjzPTG32f35eN6S85gGLUCmsNwH70Sq5rruEs/0hioM=";
+          hash = "sha256-tRrJ1UuolwI9d7ZOvBml0xJ9yZ3u57vGBfvF69artI8=";
         };
         npmDeps = prev.fetchNpmDeps {
           name = "claude-code-${version}-npm-deps";
@@ -108,19 +108,19 @@
 
 # --- НАЧАЛО: Обновление gemini-cli до 0.33.0 ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.34.0";
+        version = "0.35.0";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-/HmcLnScZ2pmzGnRLsNHoqrakyt++1fCv/P2IeE8pGo=";
+          hash = "sha256-FW6THqTbMUw6VctsJkI6TSbMGUZl3cIV3iL+rlwGa9E=";
         };
 
         npmDeps = prev.fetchNpmDeps {
           inherit (oldAttrs) pname;
           inherit version src;
-          hash = "sha256-3Y9QJC4dqvnCH3qFSsvFMK+XtHnZyYPBP1voLpHpHA4=";
+          hash = "sha256-sXr2ZUfhnEO2Ozicx4t9pZgL/5JyJncBc4KppahAgRE=";
         };
 
         # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
