@@ -332,6 +332,7 @@ in {
       '')
 
       virtualbox
+      pkgs-unstable.openclaw
 
       # pkgs-unstable.antigravity
       rtk
@@ -465,6 +466,7 @@ in {
     "my-yandex-browser-stable-25.10.1.1173-1"
     "claude-code"
     "mbedtls-2.28.10"
+    "openclaw-2026.3.12"
   ];
 
   users.users.bg.extraGroups = ["input" "docker" "k3s"];

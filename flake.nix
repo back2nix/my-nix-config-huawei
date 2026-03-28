@@ -111,7 +111,12 @@
         mkPkgs = nixpkgs: system:
           import nixpkgs {
             inherit system;
-            config.allowUnfree = true;
+            config = {
+              allowUnfree = true;
+              permittedInsecurePackages = [
+                "openclaw-2026.3.12"
+              ];
+            };
           };
 
         pkgs-master = mkPkgs inputs.nixpkgs-master system;
