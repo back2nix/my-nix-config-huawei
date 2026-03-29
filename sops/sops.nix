@@ -62,13 +62,13 @@
           {
             type = "http";
             tag = "http-proxy";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1083;
           }
           {
             type = "socks";
             tag = "socks-proxy";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1082;
           }
         ];
@@ -99,13 +99,13 @@
           {
             type = "http";
             tag = "http-proxy2";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1085;
           }
           {
             type = "socks";
             tag = "socks-proxy2";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1084;
           }
         ];
@@ -136,13 +136,13 @@
           {
             type = "http";
             tag = "http-proxy3";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1087;
           }
           {
             type = "socks";
             tag = "socks-proxy3";
-            listen = "127.0.0.1";
+            listen = "0.0.0.0";
             listen_port = 1086;
           }
         ];

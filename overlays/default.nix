@@ -108,19 +108,19 @@
 
 # --- НАЧАЛО: Обновление gemini-cli до 0.33.0 ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.35.0";
+        version = "0.35.3";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-FW6THqTbMUw6VctsJkI6TSbMGUZl3cIV3iL+rlwGa9E=";
+          hash = "sha256-tAv34dHEf9uK6A/d+zkYYB7FVPviRnjYrP5E23b9OXw=";
         };
 
         npmDeps = prev.fetchNpmDeps {
           inherit (oldAttrs) pname;
           inherit version src;
-          hash = "sha256-sXr2ZUfhnEO2Ozicx4t9pZgL/5JyJncBc4KppahAgRE=";
+          hash = "sha256-gJJ2UD6m5vwUwYoYU8L4bjefrTX9CMWRYz4YTHi6Q/M=";
         };
 
         # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
