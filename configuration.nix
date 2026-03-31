@@ -315,6 +315,11 @@ in {
 
       obsidian
 
+      google-cloud-sdk
+      gcloud-proxy
+      gcloud-vpn2
+      gcloud-vpn3
+
 
       (writeShellScriptBin "virt-switch" ''
         # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ

@@ -199,6 +199,30 @@
         exec ${final.claude-code}/bin/claude "$@"
       '';
 
+      gcloud-proxy = prev.writeShellScriptBin "gcloud" ''
+        export HTTP_PROXY="http://127.0.0.1:1083"
+        export HTTPS_PROXY="http://127.0.0.1:1083"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
+      '';
+
+      gcloud-vpn2 = prev.writeShellScriptBin "gcloud-vpn2" ''
+        export HTTP_PROXY="http://127.0.0.1:1085"
+        export HTTPS_PROXY="http://127.0.0.1:1085"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
+      '';
+
+      gcloud-vpn3 = prev.writeShellScriptBin "gcloud-vpn3" ''
+        export HTTP_PROXY="http://127.0.0.1:1087"
+        export HTTPS_PROXY="http://127.0.0.1:1087"
+        export NO_PROXY="localhost,127.0.0.1,::1"
+
+        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
+      '';
+
       rtk = final.callPackage ../pkgs/rtk.nix { };
 
 
