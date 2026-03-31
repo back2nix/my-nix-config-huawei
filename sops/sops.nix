@@ -21,6 +21,10 @@
       # "vault/unseal_Key" = {};
       "autossh/ip" = {};
 
+      "vpn-2222/ip" = {};
+      "vpn-2222/user" = {};
+      "vpn-2222/private_key_path" = {};
+
       # "vault_root_token" = {};
 
       "mutter/hide_keywords_list" = {
@@ -160,6 +164,42 @@
           {
             inbound = ["http-proxy3" "socks-proxy3"];
             outbound = "ssh-out3";
+          }
+        ];
+      };
+    };
+    templates."sing-box-config4.json" = {
+      content = builtins.toJSON {
+        log.level = "info";
+
+        inbounds = [
+          {
+            type = "http";
+            tag = "http-proxy4";
+            listen = "0.0.0.0";
+            listen_port = 1089;
+          }
+          {
+            type = "socks";
+            tag = "socks-proxy4";
+            listen = "0.0.0.0";
+            listen_port = 1088;
+          }
+        ];
+        outbounds = [
+          {
+            type = "ssh";
+            tag = "ssh-out4";
+            server = "${config.sops.placeholder."vpn-2222/ip"}";
+            server_port = 2222;
+            user = "${config.sops.placeholder."vpn-2222/user"}";
+            private_key_path = "${config.sops.placeholder."vpn-2222/private_key_path"}";
+          }
+        ];
+        route.rules = [
+          {
+            inbound = ["http-proxy4" "socks-proxy4"];
+            outbound = "ssh-out4";
           }
         ];
       };
