@@ -38,35 +38,35 @@
     after = ["network-online.target"];
   };
 
-  systemd.services."sing-box3" = {
-    enable = true;
-    description = "sing-box proxy vpn3";
-    unitConfig = {
-      Type = "simple";
-    };
-    serviceConfig = {
-      ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config3.json".path}";
-      Restart = "always";
-      RestartSec = "5s";
-    };
-    wantedBy = ["multi-user.target"];
-    wants = ["network-online.target"];
-    after = ["network-online.target"];
-  };
+  # systemd.services."sing-box3" = {
+  #   enable = true;
+  #   description = "sing-box proxy vpn3";
+  #   unitConfig = {
+  #     Type = "simple";
+  #   };
+  #   serviceConfig = {
+  #     ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config3.json".path}";
+  #     Restart = "always";
+  #     RestartSec = "5s";
+  #   };
+  #   wantedBy = ["multi-user.target"];
+  #   wants = ["network-online.target"];
+  #   after = ["network-online.target"];
+  # };
 
-  systemd.services."sing-box4" = {
-    enable = true;
-    description = "sing-box proxy vpn4";
-    unitConfig = {
-      Type = "simple";
-    };
-    serviceConfig = {
-      ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config4.json".path}";
-      Restart = "always";
-      RestartSec = "5s";
-    };
-    wantedBy = ["multi-user.target"];
-    wants = ["network-online.target"];
-    after = ["network-online.target"];
-  };
+  # systemd.services."sing-box4" = {
+  #   enable = true;
+  #   description = "sing-box proxy vpn4";
+  #   unitConfig = {
+  #     Type = "simple";
+  #   };
+  #   serviceConfig = {
+  #     ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config4.json".path}";
+  #     Restart = "always";
+  #     RestartSec = "5s";
+  #   };
+  #   wantedBy = ["multi-user.target"];
+  #   wants = ["network-online.target"];
+  #   after = ["network-online.target"];
+  # };
 }
