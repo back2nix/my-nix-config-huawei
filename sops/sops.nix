@@ -5,25 +5,19 @@
     age.generateKey = true;
 
     secrets = {
-      "vpn/ip" = {};
-      "vpn/user" = {};
-      "vpn/private_key_path" = {};
+      # vpn1 = google-seoul-proxy (35.212.30.39)
+      "vpn1/ip" = {};
+      "vpn1/user" = {};
+      "vpn1/private_key_path" = {};
 
-      "vpn-directuser/ip" = {};
-      "vpn-directuser/user" = {};
-      "vpn-directuser/private_key_path" = {};
-
-      "vpn-proxyuser/ip" = {};
-      "vpn-proxyuser/user" = {};
-      "vpn-proxyuser/private_key_path" = {};
+      # vpn2 = germany-1 (178.215.236.246)
+      "vpn2/ip" = {};
+      "vpn2/user" = {};
+      "vpn2/private_key_path" = {};
 
       "vault/root_token" = {};
       # "vault/unseal_Key" = {};
       "autossh/ip" = {};
-
-      "vpn-2222/ip" = {};
-      "vpn-2222/user" = {};
-      "vpn-2222/private_key_path" = {};
 
       # "vault_root_token" = {};
 
@@ -80,10 +74,10 @@
           {
             type = "ssh";
             tag = "ssh-out";
-            server = "${config.sops.placeholder."vpn/ip"}";
+            server = "${config.sops.placeholder."vpn1/ip"}";
             server_port = 22;
-            user = "${config.sops.placeholder."vpn/user"}";
-            private_key_path = "${config.sops.placeholder."vpn/private_key_path"}";
+            user = "${config.sops.placeholder."vpn1/user"}";
+            private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
         ];
         route.rules = [
@@ -117,10 +111,10 @@
           {
             type = "ssh";
             tag = "ssh-out2";
-            server = "${config.sops.placeholder."vpn-proxyuser/ip"}";
+            server = "${config.sops.placeholder."vpn2/ip"}";
             server_port = 22;
-            user = "${config.sops.placeholder."vpn-proxyuser/user"}";
-            private_key_path = "${config.sops.placeholder."vpn-proxyuser/private_key_path"}";
+            user = "${config.sops.placeholder."vpn2/user"}";
+            private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
           }
         ];
         route.rules = [
