@@ -57,57 +57,64 @@
         log.level = "info";
 
         inbounds = [
+          # auto (urltest)
+          {
+            type = "socks";
+            tag = "socks-auto";
+            listen = "0.0.0.0";
+            listen_port = 1082;
+          }
           {
             type = "http";
-            tag = "http-proxy";
+            tag = "http-auto";
             listen = "0.0.0.0";
             listen_port = 1083;
           }
+          # usa (vpn1)
           {
             type = "socks";
-            tag = "socks-proxy";
+            tag = "socks-usa";
             listen = "0.0.0.0";
-            listen_port = 1082;
+            listen_port = 1084;
+          }
+          {
+            type = "http";
+            tag = "http-usa";
+            listen = "0.0.0.0";
+            listen_port = 1085;
+          }
+          # germany (vpn2)
+          {
+            type = "socks";
+            tag = "socks-de";
+            listen = "0.0.0.0";
+            listen_port = 1086;
+          }
+          {
+            type = "http";
+            tag = "http-de";
+            listen = "0.0.0.0";
+            listen_port = 1087;
           }
         ];
         outbounds = [
           {
+            type = "urltest";
+            tag = "auto";
+            outbounds = ["ssh-out1" "ssh-out2"];
+            url = "http://www.gstatic.com/generate_204";
+            interval = "5s";
+            tolerance = 50;
+            idle_timeout = "30m";
+          }
+          {
             type = "ssh";
-            tag = "ssh-out";
+            tag = "ssh-out1";
             server = "${config.sops.placeholder."vpn1/ip"}";
             server_port = 22;
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
-        ];
-        route.rules = [
-          {
-            inbound = ["http-proxy" "socks-proxy"];
-            outbound = "ssh-out";
-          }
-        ];
-      };
-    };
-
-    templates."sing-box-config2.json" = {
-      content = builtins.toJSON {
-        log.level = "info";
-
-        inbounds = [
-          {
-            type = "http";
-            tag = "http-proxy2";
-            listen = "0.0.0.0";
-            listen_port = 1085;
-          }
-          {
-            type = "socks";
-            tag = "socks-proxy2";
-            listen = "0.0.0.0";
-            listen_port = 1084;
-          }
-        ];
-        outbounds = [
           {
             type = "ssh";
             tag = "ssh-out2";
@@ -119,84 +126,19 @@
         ];
         route.rules = [
           {
-            inbound = ["http-proxy2" "socks-proxy2"];
+            inbound = ["socks-auto" "http-auto"];
+            outbound = "auto";
+          }
+          {
+            inbound = ["socks-usa" "http-usa"];
+            outbound = "ssh-out1";
+          }
+          {
+            inbound = ["socks-de" "http-de"];
             outbound = "ssh-out2";
           }
         ];
       };
     };
-
-    # templates."sing-box-config3.json" = {
-    #   content = builtins.toJSON {
-    #     log.level = "info";
-
-    #     inbounds = [
-    #       {
-    #         type = "http";
-    #         tag = "http-proxy3";
-    #         listen = "0.0.0.0";
-    #         listen_port = 1087;
-    #       }
-    #       {
-    #         type = "socks";
-    #         tag = "socks-proxy3";
-    #         listen = "0.0.0.0";
-    #         listen_port = 1086;
-    #       }
-    #     ];
-    #     outbounds = [
-    #       {
-    #         type = "ssh";
-    #         tag = "ssh-out3";
-    #         server = "${config.sops.placeholder."vpn-directuser/ip"}";
-    #         server_port = 22;
-    #         user = "${config.sops.placeholder."vpn-directuser/user"}";
-    #         private_key_path = "${config.sops.placeholder."vpn-directuser/private_key_path"}";
-    #       }
-    #     ];
-    #     route.rules = [
-    #       {
-    #         inbound = ["http-proxy3" "socks-proxy3"];
-    #         outbound = "ssh-out3";
-    #       }
-    #     ];
-    #   };
-    # };
-    # templates."sing-box-config4.json" = {
-    #   content = builtins.toJSON {
-    #     log.level = "info";
-
-    #     inbounds = [
-    #       {
-    #         type = "http";
-    #         tag = "http-proxy4";
-    #         listen = "0.0.0.0";
-    #         listen_port = 1089;
-    #       }
-    #       {
-    #         type = "socks";
-    #         tag = "socks-proxy4";
-    #         listen = "0.0.0.0";
-    #         listen_port = 1088;
-    #       }
-    #     ];
-    #     outbounds = [
-    #       {
-    #         type = "ssh";
-    #         tag = "ssh-out4";
-    #         server = "${config.sops.placeholder."vpn-2222/ip"}";
-    #         server_port = 2222;
-    #         user = "${config.sops.placeholder."vpn-2222/user"}";
-    #         private_key_path = "${config.sops.placeholder."vpn-2222/private_key_path"}";
-    #       }
-    #     ];
-    #     route.rules = [
-    #       {
-    #         inbound = ["http-proxy4" "socks-proxy4"];
-    #         outbound = "ssh-out4";
-    #       }
-    #     ];
-    #   };
-    # };
   };
 }
