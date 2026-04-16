@@ -483,7 +483,19 @@ in {
     }
   ];
 
-  fonts.packages = with pkgs; [times-newer-roman];
+  fonts.packages = with pkgs; [
+    times-newer-roman
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+  ];
+
+  fonts.fontconfig = {
+    defaultFonts = {
+      sansSerif = [ "Noto Sans CJK SC" "Noto Sans" ];
+      serif = [ "Noto Serif CJK SC" "Noto Serif" ];
+      monospace = [ "Noto Sans Mono CJK SC" ];
+    };
+  };
 
   nix = {
     gc = {
