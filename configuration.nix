@@ -319,6 +319,7 @@ in {
       gcloud-proxy
       gcloud-vpn2
       gcloud-vpn3
+      zip
 
 
       (writeShellScriptBin "virt-switch" ''
@@ -485,15 +486,17 @@ in {
 
   fonts.packages = with pkgs; [
     times-newer-roman
+    noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-cjk-serif
+    jetbrains-mono
   ];
 
   fonts.fontconfig = {
     defaultFonts = {
-      sansSerif = [ "Noto Sans CJK SC" "Noto Sans" ];
-      serif = [ "Noto Serif CJK SC" "Noto Serif" ];
-      monospace = [ "Noto Sans Mono CJK SC" ];
+      sansSerif = [ "Noto Sans" "Noto Sans CJK SC" ];
+      serif = [ "Noto Serif" "Noto Serif CJK SC" ];
+      monospace = [ "JetBrains Mono" "Noto Sans Mono" "Noto Sans Mono CJK SC" ];
     };
   };
 
