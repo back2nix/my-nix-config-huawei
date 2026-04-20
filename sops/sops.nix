@@ -119,7 +119,7 @@
             type = "ssh";
             tag = "ssh-out2";
             server = "${config.sops.placeholder."vpn2/ip"}";
-            server_port = 22;
+            server_port = 2222;
             user = "${config.sops.placeholder."vpn2/user"}";
             private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
           }
