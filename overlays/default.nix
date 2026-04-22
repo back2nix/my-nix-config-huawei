@@ -90,19 +90,43 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.63 ---
+# --- НАЧАЛО: Обновление claude-code до 2.1.117 ---
+      # 2.1.117: архитектура изменилась — теперь нативный бинарник вместо cli.js
+      claude-code-native-linux-x64 = prev.stdenv.mkDerivation {
+        name = "claude-code-native-linux-x64-2.1.117";
+        src = prev.fetchurl {
+          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.117.tgz";
+          hash = "sha256-8BpigGqk3QLXKEY/vjI3UXyLb+mPZA5ixd1ZtIpo6qE=";
+        };
+        # бинарник — это bun SFE; strip/autoPatchelfHook повреждают trailer
+        nativeBuildInputs = [ prev.patchelf ];
+        dontStrip = true;
+        unpackPhase = "tar -xzf $src";
+        installPhase = ''
+          install -Dm755 package/claude $out/bin/claude
+          patchelf --set-interpreter ${prev.glibc}/lib/ld-linux-x86-64.so.2 $out/bin/claude
+        '';
+      };
+
       claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.112";
+        version = "2.1.117";
         src = final.fetchzip {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-SJJqU7XHbu9IRGPMJNUg6oaMZiQUKqJhI2wm7BnR1gs=";
+          hash = "sha256-8dRSs6GCwX1bfpz5tKzk6OhmG0aFfcvQOgv2+VK04gg=";
         };
+        postPatch = "cp ${../pkgs/claude-code-2.1.117-package-lock.json} package-lock.json";
         npmDeps = prev.fetchNpmDeps {
           name = "claude-code-${version}-npm-deps";
           inherit src;
-          postPatch = oldAttrs.postPatch;
-          hash = "sha256-x8Y1vODjATE6F6r0GhK427J0h2Et7bsqKoDcWaNO+IM=";
+          postPatch = postPatch;
+          hash = "sha256-BhY98d2bSlaQsRUyturO8rYrtKyYO40W0iXQvrAcamY=";
         };
+        postInstall = (oldAttrs.postInstall or "") + ''
+          chmod +w $out/bin
+          rm -f $out/bin/claude
+          ln -s ${final.claude-code-native-linux-x64}/bin/claude $out/bin/claude
+        '';
+        doInstallCheck = false;
       });
 # --- КОНЕЦ: Обновление claude-code ---
 
