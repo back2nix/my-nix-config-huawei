@@ -90,13 +90,13 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.117 ---
-      # 2.1.117: архитектура изменилась — теперь нативный бинарник вместо cli.js
+# --- НАЧАЛО: Обновление claude-code до 2.1.120 ---
+      # 2.1.120: нативный бинарник через @anthropic-ai/claude-code-linux-x64
       claude-code-native-linux-x64 = prev.stdenv.mkDerivation {
-        name = "claude-code-native-linux-x64-2.1.117";
+        name = "claude-code-native-linux-x64-2.1.120";
         src = prev.fetchurl {
-          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.117.tgz";
-          hash = "sha256-8BpigGqk3QLXKEY/vjI3UXyLb+mPZA5ixd1ZtIpo6qE=";
+          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.120.tgz";
+          hash = "sha256-XRx92GHY2P/wWTpPyejxY8LkwBzKkUwVnvJVkbR0ATE=";
         };
         # бинарник — это bun SFE; strip/autoPatchelfHook повреждают trailer
         nativeBuildInputs = [ prev.patchelf ];
@@ -109,18 +109,23 @@
       };
 
       claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.117";
+        version = "2.1.120";
         src = final.fetchzip {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-8dRSs6GCwX1bfpz5tKzk6OhmG0aFfcvQOgv2+VK04gg=";
+          hash = "sha256-Tjgji4nkDZt6IklSYLDxfYzrsyxMQYB2UAY2KorKyOM=";
         };
-        postPatch = "cp ${../pkgs/claude-code-2.1.117-package-lock.json} package-lock.json";
+        postPatch = ''
+          cp ${../pkgs/claude-code-2.1.120-package-lock.json} package-lock.json
+          cp ${../pkgs/claude-code-2.1.120-package.json} package.json
+        '';
         npmDeps = prev.fetchNpmDeps {
           name = "claude-code-${version}-npm-deps";
           inherit src;
           postPatch = postPatch;
-          hash = "sha256-BhY98d2bSlaQsRUyturO8rYrtKyYO40W0iXQvrAcamY=";
+          forceEmptyCache = true;
+          hash = "sha256-UAHW/GphUilwdhfJoLxzW8naV6gbzsJQPbyzGNmgP1A=";
         };
+        preInstall = "mkdir -p node_modules";
         postInstall = (oldAttrs.postInstall or "") + ''
           chmod +w $out/bin
           rm -f $out/bin/claude
