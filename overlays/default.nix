@@ -126,10 +126,16 @@
           hash = "sha256-UAHW/GphUilwdhfJoLxzW8naV6gbzsJQPbyzGNmgP1A=";
         };
         preInstall = "mkdir -p node_modules";
-        postInstall = (oldAttrs.postInstall or "") + ''
+        # nixpkgs-unstable изменил installPhase на `installBin $src`,
+        # но $src — директория (fetchzip), поэтому переопределяем вручную
+        installPhase = ''
+          runHook preInstall
+          mkdir -p $out/bin
+          runHook postInstall
+        '';
+        postInstall = ''
           chmod +w $out/bin
-          rm -f $out/bin/claude
-          ln -s ${final.claude-code-native-linux-x64}/bin/claude $out/bin/claude
+          ln -sf ${final.claude-code-native-linux-x64}/bin/claude $out/bin/claude
         '';
         doInstallCheck = false;
       });

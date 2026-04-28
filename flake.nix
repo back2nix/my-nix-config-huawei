@@ -114,7 +114,7 @@
             config = {
               allowUnfree = true;
               permittedInsecurePackages = [
-                "openclaw-2026.3.12"
+                # "openclaw-2026.3.12"
               ];
             };
           };

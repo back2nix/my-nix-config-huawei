@@ -114,7 +114,7 @@ in {
       xclip
       gnumake
       # multipass
-      pkgs-master.telegram-desktop
+      pkgs-unstable.telegram-desktop
       # telegram-desktop
       keepassxc
       proxychains
