@@ -20,7 +20,7 @@ in {
 
       "https://nixpkgs-wayland.cachix.org"
       "https://nixpkgs-unfree.cachix.org"
-      "https://cache.nixos-cuda.org"
+      # "https://cache.nixos-cuda.org"
       # "http://127.0.0.1:8080/system"
       # "http://devready.work:8080/system"
     ];
@@ -39,7 +39,7 @@ in {
       "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nj6rs="
       "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
       # "flox-cache-public-1:7F4OyH7ZCnFhcze3fJdfyXYLQw/aV7GEed86nQ7IsOs="
-      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      # "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       "system:Pq0rLW2CHR7DK6bnqoNlpfbjVf6AA1rCbBgf3zaPiCE="
       "system:R0BqH3u7f2NsG4ySt87TfzMecyeh1daZWDjk/8h1z8g="
     ];
