@@ -7,21 +7,16 @@
 }:
 rustPlatform.buildRustPackage rec {
   pname = "rtk";
-  version = "0.23.0";
+  version = "0.38.0";
 
   src = fetchFromGitHub {
     owner = "rtk-ai";
     repo = pname;
     rev = "v${version}";
-    sha256 = "0na42iar3xs6mddvb66flrkgy9y0vx5yfsq8kxv9lf40y249z06a";
+    sha256 = "14jmpd4frn28v3z2sh7y2w8dk2mw2y93b2wfgcm9p3jvmfami0vq";
   };
 
-  cargoHash = "sha256-iO78HENuBjb6u+GaMsab/Hs+ypm8lCSxwpny9ak1djY=";
-
-  postPatch = ''
-    substituteInPlace hooks/rtk-rewrite.sh \
-      --replace-fail "#!/bin/bash" "#!/usr/bin/env bash"
-  '';
+  cargoHash = "sha256-qTDj7xTBM8dOOE7XLTewtHVwHtxVDcvCLs0ebtT2uSI=";
 
   doCheck = false;
 
