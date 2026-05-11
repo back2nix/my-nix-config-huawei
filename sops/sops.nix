@@ -142,7 +142,8 @@
           {
             type = "http";
             tag = "http-out3";
-            server = "10.90.49.196";
+            # server = "10.90.49.196";
+            server = "192.168.43.1";
             server_port = 8080;
           }
         ];
