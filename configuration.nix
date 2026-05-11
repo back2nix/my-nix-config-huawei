@@ -283,12 +283,12 @@ in {
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
       gemini-proxy
-      gemini-vpn2
+      gemini-china
       gemini-vpn3
       appimage-run
       dbeaver-bin
       claude-code-proxy
-      claude-code-vpn2
+      claude-code-china
       claude-code-vpn3
       # claude-code
       xdotool
