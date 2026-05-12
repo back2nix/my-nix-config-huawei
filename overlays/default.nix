@@ -194,8 +194,8 @@
       '';
 
       gemini-china = prev.writeShellScriptBin "gemini-china" ''
-        export HTTP_PROXY="http://127.0.0.1:1084"
-        export HTTPS_PROXY="http://127.0.0.1:1084"
+        export HTTP_PROXY="http://127.0.0.1:1083"
+        export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
         exec ${final.gemini-cli}/bin/gemini "$@"
@@ -218,8 +218,8 @@
       '';
 
       claude-code-china = prev.writeShellScriptBin "claude-code-china" ''
-        export HTTP_PROXY="http://127.0.0.1:1084"
-        export HTTPS_PROXY="http://127.0.0.1:1084"
+        export HTTP_PROXY="http://127.0.0.1:1083"
+        export HTTPS_PROXY="http://127.0.0.1:1083"
         export NO_PROXY="localhost,127.0.0.1,::1"
 
         exec ${final.claude-code}/bin/claude "$@"
