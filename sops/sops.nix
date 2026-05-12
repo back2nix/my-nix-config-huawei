@@ -43,6 +43,7 @@
       };
     };
 
+    # sops/sops.nix - templates."sing-box-config.json"
     templates."sing-box-config.json" = {
       content = builtins.toJSON {
         log.level = "info";
@@ -57,12 +58,13 @@
           # germany (vpn2)
           { type = "socks"; tag = "socks-de"; listen = "0.0.0.0"; listen_port = 1086; }
           { type = "http"; tag = "http-de"; listen = "0.0.0.0"; listen_port = 1087; }
-          # vpn3
+          # vpn3 (прямой доступ к http proxy)
           { type = "socks"; tag = "socks-vpn3"; listen = "0.0.0.0"; listen_port = 1088; }
           { type = "http"; tag = "http-vpn3"; listen = "0.0.0.0"; listen_port = 1089; }
         ];
 
         outbounds = [
+          # --- urltest для auto ---
           {
             type = "urltest";
             tag = "auto";
@@ -72,6 +74,8 @@
             tolerance = 50;
             idle_timeout = "30m";
           }
+
+          # --- vpn1 (google-seoul) напрямую ---
           {
             type = "ssh";
             tag = "ssh-out1";
@@ -80,6 +84,8 @@
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
+
+          # --- vpn2 (germany) напрямую ---
           {
             type = "ssh";
             tag = "ssh-out2";
@@ -88,18 +94,25 @@
             user = "${config.sops.placeholder."vpn2/user"}";
             private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
           }
-          # usa через vpn3 — SSH туннель поднят systemd сервисом на 127.0.0.1:1091
-          {
-            type = "socks";
-            tag = "ssh-out1-via-vpn3";
-            server = "127.0.0.1";
-            server_port = 1091;
-          }
+
+          # --- vpn3: HTTP proxy на телефоне ---
           {
             type = "http";
-            tag = "http-out3";
+            tag = "vpn3-proxy";
             server = "192.168.43.1";
             server_port = 8080;
+          }
+
+          # --- vpn1 через vpn3 (ssh поверх http proxy) ---
+          # sing-box поддерживает detour для SSH outbound
+          {
+            type = "ssh";
+            tag = "ssh-out1-via-vpn3";
+            server = "${config.sops.placeholder."vpn1/ip"}";
+            server_port = 22;
+            user = "${config.sops.placeholder."vpn1/user"}";
+            private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
+            detour = "vpn3-proxy";  # <-- вот вся магия, вместо autossh+ProxyCommand
           }
         ];
 
@@ -107,7 +120,7 @@
           { inbound = ["socks-auto" "http-auto"]; outbound = "auto"; }
           { inbound = ["socks-usa" "http-usa"]; outbound = "ssh-out1-via-vpn3"; }
           { inbound = ["socks-de" "http-de"]; outbound = "ssh-out2"; }
-          { inbound = ["socks-vpn3" "http-vpn3"]; outbound = "http-out3"; }
+          { inbound = ["socks-vpn3" "http-vpn3"]; outbound = "vpn3-proxy"; }
         ];
       };
     };
