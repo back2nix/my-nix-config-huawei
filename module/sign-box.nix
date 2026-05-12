@@ -10,23 +10,23 @@
     after = ["network-online.target"];
     wants = ["network-online.target"];
     wantedBy = ["multi-user.target"];
-
     serviceConfig = {
       Type = "simple";
       ExecStart = pkgs.writeShellScript "ssh-tunnel-vpn3" ''
         exec ${pkgs.autossh}/bin/autossh \
-          -M 0 \
-          -4 -N \
-          -D 127.0.0.1:1091 \
-          -o "ProxyCommand=${pkgs.netcat-openbsd}/bin/nc -X connect -x 192.168.43.1:8080 %h %p" \
-          -o ServerAliveInterval=30 \
-          -o ServerAliveCountMax=3 \
-          -o ExitOnForwardFailure=yes \
-          -o StrictHostKeyChecking=accept-new \
-          google-seoul
-      '';
+        -M 0 \
+        -4 -N \
+        -D 127.0.0.1:1091 \
+        -o "ProxyCommand=${pkgs.netcat-openbsd}/bin/nc -X connect -x 192.168.43.1:8080 %h %p" \
+        -o ServerAliveInterval=2 \
+        -o ServerAliveCountMax=1 \
+        -o ConnectTimeout=3 \
+        -o ExitOnForwardFailure=yes \
+        -o StrictHostKeyChecking=accept-new \
+        google-seoul
+        '';
       Restart = "always";
-      RestartSec = "10s";
+      RestartSec = "5s";
       User = "bg";
     };
   };
