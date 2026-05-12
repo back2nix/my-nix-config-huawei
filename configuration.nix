@@ -633,4 +633,13 @@ in {
   #     value = "unlimited";
   #   }
 # ];
+
+  documentation.enable = false;
+  documentation = {
+    man.enable = false;
+    man.generateCaches = false;
+    doc.enable = false;
+    info.enable = false;
+    nixos.enable = false;
+  };
 }

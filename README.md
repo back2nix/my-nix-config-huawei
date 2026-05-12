@@ -59,3 +59,28 @@ version 2 or later. See the [COPYING][license] file for detalis.
 
 [bug-tracker]: https://gitlab.gnome.org/GNOME/mutter/issues
 [license]: COPYING
+
+
+
+### Proxy
+
+```
+sudo http_proxy=http://10.90.49.196:8080 https_proxy=http://10.90.49.196:8080 \
+      nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 \
+      --option substituters "https://cache.nixos.org"
+
+
+sudo http_proxy=http://192.168.43.1:8080 https_proxy=http://192.168.43.1:8080 \
+      nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 \
+      --option substituters "https://cache.nixos.org"
+
+
+sudo nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 --option substituters "https://cache.nixos.org"
+
+
+ssh -4 -v -o ProxyCommand="nc -X connect -x 192.168.43.1:8080 %h %p" \
+        -D 127.0.0.1:1092 -N google-seoul
+
+
+curl --socks5-hostname 127.0.0.1:1084 https://ifconfig.me
+```
