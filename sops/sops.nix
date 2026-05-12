@@ -49,33 +49,26 @@
         log.level = "info";
 
         inbounds = [
-          # auto (urltest)
           { type = "socks"; tag = "socks-auto"; listen = "0.0.0.0"; listen_port = 1082; }
           { type = "http"; tag = "http-auto"; listen = "0.0.0.0"; listen_port = 1083; }
-          # usa (vpn1) via vpn3
           { type = "socks"; tag = "socks-usa"; listen = "0.0.0.0"; listen_port = 1084; }
           { type = "http"; tag = "http-usa"; listen = "0.0.0.0"; listen_port = 1085; }
-          # germany (vpn2)
           { type = "socks"; tag = "socks-de"; listen = "0.0.0.0"; listen_port = 1086; }
           { type = "http"; tag = "http-de"; listen = "0.0.0.0"; listen_port = 1087; }
-          # vpn3 (прямой доступ к http proxy)
           { type = "socks"; tag = "socks-vpn3"; listen = "0.0.0.0"; listen_port = 1088; }
           { type = "http"; tag = "http-vpn3"; listen = "0.0.0.0"; listen_port = 1089; }
         ];
 
         outbounds = [
-          # --- urltest для auto ---
           {
             type = "urltest";
             tag = "auto";
             outbounds = ["ssh-out1" "ssh-out2"];
             url = "http://www.gstatic.com/generate_204";
-            interval = "5s";
-            tolerance = 50;
-            idle_timeout = "30m";
+            interval = "30s";
+            tolerance = 100;
+            idle_timeout = "3m";
           }
-
-          # --- vpn1 (google-seoul) напрямую ---
           {
             type = "ssh";
             tag = "ssh-out1";
@@ -84,8 +77,6 @@
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
-
-          # --- vpn2 (germany) напрямую ---
           {
             type = "ssh";
             tag = "ssh-out2";
@@ -94,17 +85,12 @@
             user = "${config.sops.placeholder."vpn2/user"}";
             private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
           }
-
-          # --- vpn3: HTTP proxy на телефоне ---
           {
             type = "http";
             tag = "vpn3-proxy";
             server = "192.168.43.1";
             server_port = 8080;
           }
-
-          # --- vpn1 через vpn3 (ssh поверх http proxy) ---
-          # sing-box поддерживает detour для SSH outbound
           {
             type = "ssh";
             tag = "ssh-out1-via-vpn3";
@@ -112,7 +98,7 @@
             server_port = 22;
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
-            detour = "vpn3-proxy";  # <-- вот вся магия, вместо autossh+ProxyCommand
+            detour = "vpn3-proxy";
           }
         ];
 
