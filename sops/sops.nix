@@ -16,17 +16,13 @@
       "vpn2/private_key_path" = {};
 
       "vault/root_token" = {};
-      # "vault/unseal_Key" = {};
       "autossh/ip" = {};
-
-      # "vault_root_token" = {};
 
       "mutter/hide_keywords_list" = {
         owner = config.users.users.bg.name;
         mode = "0400";
       };
 
-      # Остальные секреты...
       "surfshark" = {
         mode = "0440";
         owner = config.users.users.nobody.name;
@@ -47,70 +43,25 @@
       };
     };
 
-    # templates."autossh_ip" = {
-    #   # Плейсхолдер будет заменен на содержимое секрета "autossh/ip"
-    #   content = "${config.sops.placeholder."autossh/ip"}";
-    # };
-
     templates."sing-box-config.json" = {
       content = builtins.toJSON {
         log.level = "info";
 
         inbounds = [
           # auto (urltest)
-          {
-            type = "socks";
-            tag = "socks-auto";
-            listen = "0.0.0.0";
-            listen_port = 1082;
-          }
-          {
-            type = "http";
-            tag = "http-auto";
-            listen = "0.0.0.0";
-            listen_port = 1083;
-          }
-          # usa (vpn1)
-          {
-            type = "socks";
-            tag = "socks-usa";
-            listen = "0.0.0.0";
-            listen_port = 1084;
-          }
-          {
-            type = "http";
-            tag = "http-usa";
-            listen = "0.0.0.0";
-            listen_port = 1085;
-          }
+          { type = "socks"; tag = "socks-auto"; listen = "0.0.0.0"; listen_port = 1082; }
+          { type = "http"; tag = "http-auto"; listen = "0.0.0.0"; listen_port = 1083; }
+          # usa (vpn1) via vpn3
+          { type = "socks"; tag = "socks-usa"; listen = "0.0.0.0"; listen_port = 1084; }
+          { type = "http"; tag = "http-usa"; listen = "0.0.0.0"; listen_port = 1085; }
           # germany (vpn2)
-          {
-            type = "socks";
-            tag = "socks-de";
-            listen = "0.0.0.0";
-            listen_port = 1086;
-          }
-          {
-            type = "http";
-            tag = "http-de";
-            listen = "0.0.0.0";
-            listen_port = 1087;
-          }
-
-          {
-            type = "socks";
-            tag = "socks-vpn3";
-            listen = "0.0.0.0";
-            listen_port = 1088;
-          }
-          {
-            type = "http";
-            tag = "http-vpn3";
-            listen = "0.0.0.0";
-            listen_port = 1089;
-          }
-
+          { type = "socks"; tag = "socks-de"; listen = "0.0.0.0"; listen_port = 1086; }
+          { type = "http"; tag = "http-de"; listen = "0.0.0.0"; listen_port = 1087; }
+          # vpn3
+          { type = "socks"; tag = "socks-vpn3"; listen = "0.0.0.0"; listen_port = 1088; }
+          { type = "http"; tag = "http-vpn3"; listen = "0.0.0.0"; listen_port = 1089; }
         ];
+
         outbounds = [
           {
             type = "urltest";
@@ -137,35 +88,26 @@
             user = "${config.sops.placeholder."vpn2/user"}";
             private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
           }
-
-          # outbounds
+          # usa через vpn3 — SSH туннель поднят systemd сервисом на 127.0.0.1:1091
+          {
+            type = "socks";
+            tag = "ssh-out1-via-vpn3";
+            server = "127.0.0.1";
+            server_port = 1091;
+          }
           {
             type = "http";
             tag = "http-out3";
-            # server = "10.90.49.196";
             server = "192.168.43.1";
             server_port = 8080;
           }
         ];
-        route.rules = [
-          {
-            inbound = ["socks-auto" "http-auto"];
-            outbound = "auto";
-          }
-          {
-            inbound = ["socks-usa" "http-usa"];
-            outbound = "ssh-out1";
-          }
-          {
-            inbound = ["socks-de" "http-de"];
-            outbound = "ssh-out2";
-          }
 
-          # route.rules
-          {
-            inbound = ["socks-vpn3" "http-vpn3"];
-            outbound = "http-out3";
-          }
+        route.rules = [
+          { inbound = ["socks-auto" "http-auto"]; outbound = "auto"; }
+          { inbound = ["socks-usa" "http-usa"]; outbound = "ssh-out1-via-vpn3"; }
+          { inbound = ["socks-de" "http-de"]; outbound = "ssh-out2"; }
+          { inbound = ["socks-vpn3" "http-vpn3"]; outbound = "http-out3"; }
         ];
       };
     };

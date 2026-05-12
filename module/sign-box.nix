@@ -4,6 +4,7 @@
   lib,
   config,
   pkgs,
+  pkgs-unstable,  # <-- добавить
   ...
 }: {
   systemd.services."sing-box" = {
@@ -13,7 +14,7 @@
       Type = "simple";
     };
     serviceConfig = {
-      ExecStart = "${pkgs.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
+      ExecStart = "${pkgs-unstable.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";  # <-- pkgs-unstable
       Restart = "always";
       RestartSec = "5s";
     };
@@ -21,5 +22,4 @@
     wants = ["network-online.target"];
     after = ["network-online.target"];
   };
-
 }
