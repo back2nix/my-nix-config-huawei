@@ -83,4 +83,8 @@ ssh -4 -v -o ProxyCommand="nc -X connect -x 192.168.43.1:8080 %h %p" \
 
 
 curl --socks5-hostname 127.0.0.1:1084 https://ifconfig.me
+
+
+time curl --socks5-hostname 127.0.0.1:1084 https://ifconfig.me
 ```
+
