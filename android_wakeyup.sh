@@ -8,13 +8,12 @@ adb shell svc power stayon true
 echo "Цикл поддержания сетевой активности запущен. Экран можно выключить вручную."
 
 while true; do
-  # Вместо включения экрана (224), отправляем "безобидный" ивент
-  # KEYCODE_UNKNOWN (0) или просто проверку системы, чтобы сбросить таймер сна
-  adb shell input keyevent 0
-  adb shell "input keyevent 224 && input keyevent 223"
+  adb shell input keyevent 0 || true
+  # Включаем и сразу выключаем экран, чтобы сбросить таймеры
+  adb shell "input keyevent 224 && input keyevent 223" || true
 
-  # Альтернатива: если приложение требует именно активного процессора,
-  # можно слать "пробел", но это может мешать в полях ввода.
+  # Печатаем точку без перехода на новую строку
+  echo -n "."
 
   sleep 120
 done
