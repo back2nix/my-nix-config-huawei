@@ -90,12 +90,12 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.131 ---
+# --- НАЧАЛО: Обновление claude-code до 2.1.142 ---
       claude-code-native-linux-x64 = prev.stdenv.mkDerivation {
-        name = "claude-code-native-linux-x64-2.1.131";
+        name = "claude-code-native-linux-x64-2.1.142";
         src = prev.fetchurl {
-          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.131.tgz";
-          hash = "sha256-1fSJdHze3KmeJG9OsZXz3Ufk5Y37u+Ei19F4ofjvhWk=";
+          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.142.tgz";
+          hash = "sha256-TQn2N35LxRRXmotcVps2xxPzkEyJQEkX1YJbrXOVWZ4=";
         };
         # бинарник — это bun SFE; strip/autoPatchelfHook повреждают trailer
         nativeBuildInputs = [ prev.patchelf ];
@@ -108,21 +108,21 @@
       };
 
       claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.131";
+        version = "2.1.142";
         src = final.fetchzip {
           url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-nRSA+kXiOcCTA6nFg1qVBo3p6s8GPQWnWoY1pTxQk2Q=";
+          hash = "sha256-H6mjQ5kGHUmoH6+FKm5urDVzVSF/9x9ct2iMNpQfiX8=";
         };
         postPatch = ''
-          cp ${../pkgs/claude-code-2.1.131-package-lock.json} package-lock.json
-          cp ${../pkgs/claude-code-2.1.131-package.json} package.json
+          cp ${../pkgs/claude-code-2.1.142-package-lock.json} package-lock.json
+          cp ${../pkgs/claude-code-2.1.142-package.json} package.json
         '';
         npmDeps = prev.fetchNpmDeps {
           name = "claude-code-${version}-npm-deps";
           inherit src;
           postPatch = postPatch;
           forceEmptyCache = true;
-          hash = "sha256-cylbkAL3YbeE/R88+Ng/jpk+ArlF5SxVnX5iSX/pyeM=";
+          hash = "sha256-yMG16Iyk8nXpKOyiXNNqX6zzRyXFtXxUlKwDlSwWnZM=";
         };
         preInstall = "mkdir -p node_modules";
         # nixpkgs-unstable изменил installPhase на `installBin $src`,
@@ -140,21 +140,21 @@
       });
 # --- КОНЕЦ: Обновление claude-code ---
 
-# --- НАЧАЛО: Обновление gemini-cli до 0.33.0 ---
+# --- НАЧАЛО: Обновление gemini-cli до 0.42.0 ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.41.1";
+        version = "0.42.0";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-8T13ROsE6NVR120NbFThADjSYy1PApAXqdHzclSA2yc=";
+          hash = "sha256-QYSzJdyjJ5SvPkI/uf/wu8MdM76W+djai6zD38IJpos=";
         };
 
         npmDeps = prev.fetchNpmDeps {
           inherit (oldAttrs) pname;
           inherit version src;
-          hash = "sha256-YHo3mAG9UlEg8J5SCzCu2YhKdlz7lFPon5SweKWQ8rk=";
+          hash = "sha256-hKNEJ/MAseYs8WLr36h40pYv+5nef8EPhZIfmPKYJPY=";
         };
 
         # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
