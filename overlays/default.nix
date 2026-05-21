@@ -140,21 +140,21 @@
       });
 # --- КОНЕЦ: Обновление claude-code ---
 
-# --- НАЧАЛО: Обновление gemini-cli до 0.42.0 ---
+# --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.42.0";
+        version = "0.44.0-nightly.20260518.g5611ff40e";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-QYSzJdyjJ5SvPkI/uf/wu8MdM76W+djai6zD38IJpos=";
+          hash = "sha256-MSdQ55IYvzhk5OSSV2J5FygzH+op7BII1WmAW4b7OGQ=";
         };
 
         npmDeps = prev.fetchNpmDeps {
           inherit (oldAttrs) pname;
           inherit version src;
-          hash = "sha256-hKNEJ/MAseYs8WLr36h40pYv+5nef8EPhZIfmPKYJPY=";
+          hash = "sha256-jPffaU3Cm9AlzJ02XBU56m5eVoGcbu9QWfgz4QVdm9A=";
         };
 
         # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
@@ -181,7 +181,7 @@
           cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
         '';
       });
-      # --- КОНЕЦ: Обновление gemini-cli ---
+      # --- КОНЕЦ: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
 
       gemini-proxy = prev.writeShellScriptBin "gemini" ''
         export HTTP_PROXY="http://127.0.0.1:1083"

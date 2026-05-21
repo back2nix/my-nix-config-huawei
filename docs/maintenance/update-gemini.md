@@ -8,10 +8,19 @@
 
 [Releases google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli/releases)
 
+Теги nightly имеют формат `v0.44.0-nightly.20260518.g5611ff40e` (не просто `v0.44.0-nightly`).
+Актуальный список последних релизов:
+
+```bash
+curl -s "https://api.github.com/repos/google-gemini/gemini-cli/releases?per_page=10" \
+  | python3 -c "import json,sys; [print(r['tag_name']) for r in json.load(sys.stdin)]"
+```
+
 ## 2. Получите хэш исходного кода (src)
 
 ```bash
-nix-prefetch-url --unpack https://github.com/google-gemini/gemini-cli/archive/refs/tags/v<VERSION>.tar.gz | xargs nix hash convert --to sri --type sha256
+nix-prefetch-url --unpack https://github.com/google-gemini/gemini-cli/archive/refs/tags/v<VERSION>.tar.gz 2>&1 | tail -1 \
+  | xargs nix hash convert --hash-algo sha256 --to sri
 ```
 
 ## 3. Отредактируйте `overlays/default.nix`
@@ -20,7 +29,7 @@ nix-prefetch-url --unpack https://github.com/google-gemini/gemini-cli/archive/re
 
 ```nix
 gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-  version = "<VERSION>";
+  version = "<VERSION>";  # например: "0.44.0-nightly.20260518.g5611ff40e"
 
   src = prev.fetchFromGitHub {
     owner = "google-gemini";
@@ -50,13 +59,17 @@ nix build .#nixosConfigurations.yoga14.pkgs.gemini-cli
 Nix выдаст ошибку `hash mismatch`. Скопируйте хэш из строки `got:` и вставьте его в
 `npmDeps.hash`.
 
+> **Если ошибка сети (`Failed sending data to the peer`)** — это временная нестабильность
+> прокси. Запустите сборку повторно. Прокси (`http://127.0.0.1:1083`) уже прописан
+> в окружении `nix-daemon` через `cachix.nix`.
+
 ## 5. Финальная проверка сборки
 
 ```bash
-nix build .#nixosConfigurations.yoga14.pkgs.gemini-cli
+nix build .#nixosConfigurations.yoga14.pkgs.gemini-cli && result/bin/gemini --version
 ```
 
-Нет вывода ошибок — всё готово к `nixos-rebuild switch`.
+Выводит версию без ошибок — всё готово к `nixos-rebuild switch`.
 
 ---
 
@@ -70,3 +83,5 @@ nix build .#nixosConfigurations.yoga14.pkgs.gemini-cli
   т.к. они появились в монорепо и nixpkgs их не симлинкует автоматически.
 - В отличие от `claude-code`, здесь `package-lock.json` **есть в исходниках** (GitHub),
   поэтому `postPatch` к `fetchNpmDeps` передавать не нужно.
+- Теги nightly имеют полный формат с датой и коммитом:
+  `v0.44.0-nightly.20260518.g5611ff40e` — именно его нужно указывать в `version`.
