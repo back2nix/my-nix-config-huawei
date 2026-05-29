@@ -90,55 +90,33 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.142 ---
-      claude-code-native-linux-x64 = prev.stdenv.mkDerivation {
-        name = "claude-code-native-linux-x64-2.1.142";
+# --- НАЧАЛО: Обновление claude-code до 2.1.154 ---
+      claude-code = prev.stdenvNoCC.mkDerivation {
+        pname = "claude-code";
+        version = "2.1.154";
         src = prev.fetchurl {
-          url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.142.tgz";
-          hash = "sha256-TQn2N35LxRRXmotcVps2xxPzkEyJQEkX1YJbrXOVWZ4=";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.154/linux-x64/claude";
+          sha256 = "67f6cab7e6c124010f62ac18f8078bc09e0db6a5b9e8ae874e9e73033c451793";
         };
-        # бинарник — это bun SFE; strip/autoPatchelfHook повреждают trailer
-        nativeBuildInputs = [ prev.patchelf ];
+        dontUnpack = true;
+        dontBuild = true;
         dontStrip = true;
-        unpackPhase = "tar -xzf $src";
-        installPhase = ''
-          install -Dm755 package/claude $out/bin/claude
-          patchelf --set-interpreter ${prev.glibc}/lib/ld-linux-x86-64.so.2 $out/bin/claude
-        '';
-      };
-
-      claude-code = final.unstable.claude-code.overrideAttrs (oldAttrs: rec {
-        version = "2.1.142";
-        src = final.fetchzip {
-          url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-          hash = "sha256-H6mjQ5kGHUmoH6+FKm5urDVzVSF/9x9ct2iMNpQfiX8=";
-        };
-        postPatch = ''
-          cp ${../pkgs/claude-code-2.1.142-package-lock.json} package-lock.json
-          cp ${../pkgs/claude-code-2.1.142-package.json} package.json
-        '';
-        npmDeps = prev.fetchNpmDeps {
-          name = "claude-code-${version}-npm-deps";
-          inherit src;
-          postPatch = postPatch;
-          forceEmptyCache = true;
-          hash = "sha256-yMG16Iyk8nXpKOyiXNNqX6zzRyXFtXxUlKwDlSwWnZM=";
-        };
-        preInstall = "mkdir -p node_modules";
-        # nixpkgs-unstable изменил installPhase на `installBin $src`,
-        # но $src — директория (fetchzip), поэтому переопределяем вручную
+        nativeBuildInputs = [ prev.autoPatchelfHook prev.makeBinaryWrapper ];
+        buildInputs = [ prev.alsa-lib ];
         installPhase = ''
           runHook preInstall
-          mkdir -p $out/bin
+          install -Dm755 $src $out/bin/claude
+          wrapProgram $out/bin/claude \
+            --set DISABLE_AUTOUPDATER 1 \
+            --set DISABLE_INSTALLATION_CHECKS 1 \
+            --set USE_BUILTIN_RIPGREP 0 \
+            --prefix LD_LIBRARY_PATH : ${prev.lib.makeLibraryPath [ prev.alsa-lib ]} \
+            --prefix PATH : ${prev.lib.makeBinPath [ prev.procps prev.ripgrep prev.bubblewrap prev.socat ]}
           runHook postInstall
         '';
-        postInstall = ''
-          chmod +w $out/bin
-          ln -sf ${final.claude-code-native-linux-x64}/bin/claude $out/bin/claude
-        '';
-        doInstallCheck = false;
-      });
-# --- КОНЕЦ: Обновление claude-code ---
+        meta.mainProgram = "claude";
+      };
+# --- КОНЕЦ: Обновление claude-code до 2.1.154 ---
 
 # --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
