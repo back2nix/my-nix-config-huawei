@@ -89,7 +89,7 @@
             type = "http";
             tag = "vpn3-proxy";
             # server = "192.168.43.1"; # mobile
-            server = "192.168.1.4"; # wifi
+            server = "192.168.1.5"; # wifi
             server_port = 8080;
           }
           {
