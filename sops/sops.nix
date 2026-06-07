@@ -49,26 +49,13 @@
         log.level = "info";
 
         inbounds = [
-          { type = "socks"; tag = "socks-auto"; listen = "0.0.0.0"; listen_port = 1082; }
-          { type = "http"; tag = "http-auto"; listen = "0.0.0.0"; listen_port = 1083; }
-          { type = "socks"; tag = "socks-usa"; listen = "0.0.0.0"; listen_port = 1084; }
-          { type = "http"; tag = "http-usa"; listen = "0.0.0.0"; listen_port = 1085; }
-          { type = "socks"; tag = "socks-de"; listen = "0.0.0.0"; listen_port = 1086; }
-          { type = "http"; tag = "http-de"; listen = "0.0.0.0"; listen_port = 1087; }
-          { type = "socks"; tag = "socks-vpn3"; listen = "0.0.0.0"; listen_port = 1088; }
-          { type = "http"; tag = "http-vpn3"; listen = "0.0.0.0"; listen_port = 1089; }
+          { type = "socks"; tag = "socks-usa"; listen = "0.0.0.0"; listen_port = 1082; }
+          { type = "http"; tag = "http-usa"; listen = "0.0.0.0"; listen_port = 1083; }
+          { type = "socks"; tag = "socks-china"; listen = "0.0.0.0"; listen_port = 1084; }
+          { type = "http"; tag = "http-china"; listen = "0.0.0.0"; listen_port = 1085; }
         ];
 
         outbounds = [
-          {
-            type = "urltest";
-            tag = "auto";
-            outbounds = ["ssh-out1" "ssh-out2"];
-            url = "http://www.gstatic.com/generate_204";
-            interval = "30s";
-            tolerance = 100;
-            idle_timeout = "3m";
-          }
           {
             type = "ssh";
             tag = "ssh-out1";
@@ -78,18 +65,11 @@
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
           {
-            type = "ssh";
-            tag = "ssh-out2";
-            server = "${config.sops.placeholder."vpn2/ip"}";
-            server_port = 22;
-            user = "${config.sops.placeholder."vpn2/user"}";
-            private_key_path = "${config.sops.placeholder."vpn2/private_key_path"}";
-          }
-          {
             type = "http";
             tag = "vpn3-proxy";
-            # server = "192.168.43.1"; # mobile
-            server = "192.168.1.5"; # wifi
+            # server = "192.168.43.1"; # mobile-china
+            # server = "192.168.1.5"; # wifi-china
+            server = "192.168.3.6"; # wifi-home
             server_port = 8080;
           }
           {
@@ -104,10 +84,8 @@
         ];
 
         route.rules = [
-          { inbound = ["socks-auto" "http-auto"]; outbound = "auto"; }
-          { inbound = ["socks-usa" "http-usa"]; outbound = "ssh-out1-via-vpn3"; }
-          { inbound = ["socks-de" "http-de"]; outbound = "ssh-out2"; }
-          { inbound = ["socks-vpn3" "http-vpn3"]; outbound = "vpn3-proxy"; }
+          { inbound = ["socks-usa" "http-usa"]; outbound = "ssh-out1"; }
+          { inbound = ["socks-china" "http-china"]; outbound = "ssh-out1-via-vpn3"; }
         ];
       };
     };

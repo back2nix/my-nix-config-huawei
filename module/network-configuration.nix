@@ -52,8 +52,10 @@
               6443,    # K3S API Server
               10250,   # K3S Kubelet
               6379,    # redis
-              1084,    # proxy usa
-              1092,    # proxy usa
+              1082,    # proxy usa (socks)
+              1083,    # proxy usa (http)
+              1084,    # proxy china (socks)
+              1085,    # proxy china (http)
               8080,    # Gateway
               8081,    # Landing
               8082,    # Chat
