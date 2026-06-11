@@ -120,6 +120,9 @@
     # Отключаем tmux-copycat Ctrl+R и используем Fish fzf
       unbind -n C-r
       bind -n C-r send-keys C-r
+
+      # Отключить C-a + Space (next-layout, менял расположение панелей)
+      unbind Space
     '';
   };
 }
