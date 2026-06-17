@@ -102,6 +102,11 @@
   # gdm.wayland больше не поддерживается в GNOME 50 — Wayland по умолчанию
   services.desktopManager.gnome.enable = true;
 
+  # Отключаем файловый индексатор GNOME (localsearch/tinysparql, бывший tracker).
+  # Он жрёт CPU, сканируя home. Нам не нужен.
+  services.gnome.localsearch.enable = false;
+  services.gnome.tinysparql.enable = false;
+
   services.libinput = {
     enable = true;
     touchpad = {
