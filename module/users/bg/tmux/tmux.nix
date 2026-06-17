@@ -20,9 +20,40 @@
       tmuxPlugins.sensible
       tmuxPlugins.yank
       tmuxPlugins.vim-tmux-navigator
-      tmuxPlugins.onedark-theme
+      # tmuxPlugins.onedark-theme  # сломан: шебанг /bin/bash отсутствует на NixOS
+      #                              + опции tmux 2.x удалены в 3.x. Тема встроена ниже.
     ];
     extraConfig = ''
+      # --- Тема onedark (встроена вместо плагина onedark-theme) ---
+      # Современный синтаксис tmux 3.x (-style вместо *-fg/*-bg/*-attr)
+      set -g status on
+      set -g status-justify left
+      set -g status-left-length 100
+      set -g status-right-length 100
+
+      set -g status-style "fg=#aab2bf,bg=#282c34"
+      set -g message-style "fg=#aab2bf,bg=#282c34"
+      set -g message-command-style "fg=#aab2bf,bg=#282c34"
+
+      setw -g window-status-style "fg=#282c34,bg=#282c34"
+      setw -g window-status-activity-style "fg=#282c34,bg=#282c34"
+      setw -g window-status-separator ""
+
+      set -g window-style "fg=#5c6370"
+      set -g window-active-style "fg=#aab2bf"
+
+      set -g pane-border-style "fg=#aab2bf,bg=#282c34"
+      set -g pane-active-border-style "fg=#98c379,bg=#282c34"
+
+      set -g display-panes-active-colour "#e5c07b"
+      set -g display-panes-colour "#61afef"
+
+      set -g status-right "#[fg=#aab2bf,bg=#282c34,nounderscore,noitalics]%R  %d/%m/%Y #[fg=#3e4452,bg=#282c34]#[fg=#3e4452,bg=#3e4452]#[fg=#aab2bf,bg=#3e4452] #[fg=#98c379,bg=#3e4452,nobold,nounderscore,noitalics]#[fg=#282c34,bg=#98c379,bold] #h #[fg=#e5c07b,bg=#98c379]#[fg=#e06c75,bg=#e5c07b]"
+      set -g status-left "#[fg=#282c34,bg=#98c379,bold] #S #[fg=#98c379,bg=#282c34,nobold,nounderscore,noitalics]"
+      set -g window-status-format "#[fg=#282c34,bg=#282c34,nobold,nounderscore,noitalics]#[fg=#aab2bf,bg=#282c34] #I  #W #[fg=#282c34,bg=#282c34,nobold,nounderscore,noitalics]"
+      set -g window-status-current-format "#[fg=#282c34,bg=#3e4452,nobold,nounderscore,noitalics]#[fg=#aab2bf,bg=#3e4452,nobold] #I  #W #[fg=#3e4452,bg=#282c34,nobold,nounderscore,noitalics]"
+      # --- конец темы onedark ---
+
       set -g mouse on
       unbind -n MouseDrag1Pane
       bind -n MouseDrag1Pane if -F '#{mouse_any_flag}' 'if -F "#{pane_in_mode}" "copy-mode -M" "send-keys -M"' 'copy-mode -M'

@@ -11,8 +11,11 @@
 in {
   inherit imports;
   nix.settings = {
+    # HTTP/2 (nghttp2) в nix залипает на середине NAR через прокси (offset-обрыв,
+    # "Less than 1 byte/sec"); curl работает по HTTP/1.1. См. NixOS/nix#11352.
+    http2 = false;
+
     substituters = [
-      "https://cache.garnix.io/"
       "https://cache.nixos.org/"
       # "https://cache.flox.dev"
       "https://robotnix.cachix.org"
