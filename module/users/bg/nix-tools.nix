@@ -8,7 +8,7 @@
     nix-init # <- generate nix package expressions from url
     nix-inspect # <- configuration inspector
     nix-melt # <- flake.lock explorer
-    nixfmt-rfc-style
+    nixfmt
     nixpkgs-review
     nvd # <- diff package changes between versions
   ];

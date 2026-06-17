@@ -207,7 +207,7 @@ in {
       bashInteractive
       bashdbInteractive
       bash-completion
-      lunarvim
+      # lunarvim удалён из nixpkgs (заброшен upstream)
       yazi
       blender
       lazydocker
@@ -244,7 +244,7 @@ in {
 
       s3cmd
       minio-client
-      audio-recorder
+      # audio-recorder удалён из nixpkgs (заброшен, сломан); альтернатива: gnome-sound-recorder
 
       (pkgs-master.inkscape-with-extensions.override {
         inkscapeExtensions = with pkgs-master.inkscape-extensions; [
@@ -292,24 +292,8 @@ in {
     };
   };
 
-  nixpkgs.config = {
-    # permittedInsecurePackages = ["curl-impersonate-chrome-0.5.4"];
-
-    allowUnfree = true;
-
-    allowUnfreePredicate = pkg:
-      builtins.elem (lib.getName pkg) [
-        # "opera"
-        "google-chrome"
-        "zoom"
-        "xmind"
-        "genymotion"
-        "anydesk"
-        # "yandex-browser-stable-24.4.1.915-1"
-        # "yandex-browser"
-        # "microsoft-edge-stable"
-      ];
-  };
+  # NOTE: nixpkgs.config here is ignored because home-manager.useGlobalPkgs = true.
+  # allowUnfree / allowUnfreePredicate are configured in configuration.nix instead.
 
   programs = {
     nix-index = {

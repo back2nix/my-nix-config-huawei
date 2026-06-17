@@ -40,7 +40,7 @@
                 $SERIAL 1 \
                 "[(0, 0, 1.25, uint32 1, true, [('eDP-1', '2880x1800@60.000', {})])]" \
                 "{}"
-              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
+              ${pkgs.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
               ;;
             *"orientation changed"*"right"*)
               ${pkgs.glib}/bin/gdbus call --session \
@@ -50,7 +50,7 @@
                 $SERIAL 1 \
                 "[(0, 0, 1.25, uint32 3, true, [('eDP-1', '2880x1800@60.000', {})])]" \
                 "{}"
-              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
+              ${pkgs.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
               ;;
             *"orientation changed"*"normal"*)
               ${pkgs.glib}/bin/gdbus call --session \
@@ -60,7 +60,7 @@
                 $SERIAL 1 \
                 "[(0, 0, 1.25, uint32 0, true, [('eDP-1', '2880x1800@60.000', {})])]" \
                 "{}"
-              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
+              ${pkgs.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
               ;;
             *"orientation changed"*"inverted"*)
               ${pkgs.glib}/bin/gdbus call --session \
@@ -70,7 +70,7 @@
                 $SERIAL 1 \
                 "[(0, 0, 1.25, uint32 2, true, [('eDP-1', '2880x1800@60.000', {})])]" \
                 "{}"
-              ${pkgs.xorg.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
+              ${pkgs.xinput}/bin/xinput set-prop "Wacom HID 53FD Finger" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
               ;;
           esac
         done &
@@ -99,7 +99,7 @@
 
   # Эти опции действительно переехали в корень services
   services.displayManager.gdm.enable = true;
-  services.displayManager.gdm.wayland = true;
+  # gdm.wayland больше не поддерживается в GNOME 50 — Wayland по умолчанию
   services.desktopManager.gnome.enable = true;
 
   services.libinput = {
@@ -115,8 +115,8 @@
 
   environment.systemPackages = with pkgs; [
     xf86_input_wacom
-    xorg.xinput
-    xorg.xf86inputlibinput
+    xinput
+    xf86-input-libinput
     iio-sensor-proxy
     onboard
     glib # для gdbus
@@ -125,13 +125,13 @@
       export PATH="${
         pkgs.lib.makeBinPath [
           pkgs.glib
-          pkgs.xorg.xinput
+          pkgs.xinput
           pkgs.libnotify
           pkgs.coreutils
           pkgs.util-linux
           pkgs.procps
           pkgs.gawk
-          pkgs.xorg.xset
+          pkgs.xset
         ]
       }:$PATH"
       ${builtins.readFile ./toggle-flip.sh}

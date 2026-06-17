@@ -26,8 +26,8 @@ in {
     ];
 
     trusted-substituters = [
-      "cache.nixos.org"
-      "nix-community.cachix.org"
+      "https://cache.nixos.org/"
+      "https://nix-community.cachix.org"
       # "http://127.0.0.1:8080/system"
       # "http://devready.work:8080/system"
     ];

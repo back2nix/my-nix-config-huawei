@@ -6,6 +6,10 @@
   # Отключаем systemd.network при использовании NetworkManager
   systemd.network.enable = lib.mkForce false;
 
+  # resolv.conf управляется вручную ниже, поэтому resolvconf отключаем
+  # (иначе ассерт-конфликт с environment.etc."resolv.conf")
+  networking.resolvconf.enable = lib.mkForce false;
+
   environment.etc."resolv.conf".text = ''
     nameserver 127.0.0.1
     nameserver 8.8.8.8

@@ -292,7 +292,7 @@ in {
       claude-code-vpn3
       # claude-code
       xdotool
-      xorg.xwininfo
+      xwininfo
       gnome-screenshot
 
       gnome-shell
@@ -469,7 +469,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-25.10.1.1173-1"
+    "my-yandex-browser-stable-26.4.1.1101-1"
     "claude-code"
     "mbedtls-2.28.10"
     # "openclaw-2026.3.12"
@@ -637,7 +637,7 @@ in {
   documentation.enable = false;
   documentation = {
     man.enable = false;
-    man.generateCaches = false;
+    man.cache.enable = false;
     doc.enable = false;
     info.enable = false;
     nixos.enable = false;

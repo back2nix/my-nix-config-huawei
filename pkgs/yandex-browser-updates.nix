@@ -12,6 +12,7 @@
   snappy,
   xdg-utils,
   xorg,
+  libxkbfile,
   alsa-lib,
   atk,
   cairo,
@@ -59,7 +60,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "25.10.1.1173-1";
+      stable = "26.4.1.1101-1";
     }
     .${
       edition
@@ -69,7 +70,7 @@
     {
       corporate = "";
       beta = "";
-      stable = "sha256-MewVX1C6DsnE1IQTIurZsZZCmSbt7a7gxMm0yqk3qmQ=";
+      stable = "sha256-DXzTEADHRL8qxF8Mfe4soXOZdCCFvocWW1r0wgUS2uE=";
     }
     .${
       edition
@@ -107,7 +108,7 @@ in
       nss
       snappy
       xdg-utils
-      xorg.libxkbfile
+      libxkbfile
       alsa-lib
       at-spi2-atk
       at-spi2-core
@@ -161,8 +162,12 @@ in
       cp $out/share/applications/yandex-browser${app}.desktop $out/share/applications/${pname}.desktop || true
       rm -f $out/share/applications/yandex-browser.desktop
       substituteInPlace $out/share/applications/${pname}.desktop --replace /usr/ $out/
-      substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace /opt/ $out/opt/
-      substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace /opt/ $out/opt/
+      # В свежих .deb файла menu/*.menu больше нет — подставляем только если есть
+      [ -f $out/share/menu/yandex-browser${app}.menu ] && \
+        substituteInPlace $out/share/menu/yandex-browser${app}.menu --replace-quiet /opt/ $out/opt/
+      [ -f $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml ] && \
+        substituteInPlace $out/share/gnome-control-center/default-apps/yandex-browser${app}.xml --replace-quiet /opt/ $out/opt/
+      true
 
       ln -sf ${vivaldi-ffmpeg-codecs}/lib/libffmpeg.so $out/opt/yandex/browser${app}/libffmpeg.so
 

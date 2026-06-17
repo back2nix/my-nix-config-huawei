@@ -12,7 +12,7 @@
 
     (final: prev: {
       unstable = import inputs.nixpkgs-unstable {
-        inherit (prev) system;
+        inherit (prev.stdenv.hostPlatform) system;
         config.allowUnfree = true;
       };
     })
@@ -35,30 +35,37 @@
       #   patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
       # });
 
-      gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
-        patches = (oldAttrs.patches or []) ++ [ ./gnome-shell.patch ];
-      });
+      # gnome-shell — стандартный из nixpkgs.
+      # Кастомный патч ./gnome-shell.patch не накладывается на gnome-shell 50.1
+      # (изменился screenshot.js / shell-screenshot.c). Чтобы вернуть — обнови
+      # патч под новую версию и раскомментируй блок:
+      # gnome-shell = prev.gnome-shell.overrideAttrs (oldAttrs: {
+      #   patches = (oldAttrs.patches or []) ++ [ ./gnome-shell.patch ];
+      # });
       # --- КОНЕЦ: Патч для gnome-screenshot ---
 
-      mutter = prev.mutter.overrideAttrs (oldAttrs: {
-        # Указываем на исправленные исходники
-        # version = "48.3.1-my";
-        src = inputs.mutter-src;
-
-        # Добавляем патч, который копирует недостающий gvdb subproject
-        postPatch = (oldAttrs.postPatch or "") + ''
-          echo "Unpacking glib source to a temporary directory to get gvdb subproject..."
-          # 1. Создаем временную папку
-          local glib_unpacked_src=$(mktemp -d)
-          # 2. Распаковываем архив glib в эту папку
-          tar xf ${final.glib.src} -C $glib_unpacked_src --strip-components=1
-          # 3. Копируем нужную под-папку из распакованных исходников
-          cp -r $glib_unpacked_src/subprojects/gvdb subprojects/
-          # 4. Прибираемся за собой
-          rm -rf $glib_unpacked_src
-          echo "Successfully copied gvdb subproject."
-        '';
-      });
+      # mutter — используем стандартный из nixpkgs.
+      # Чтобы вернуть кастомную сборку (mutter-src + gvdb subproject из glib),
+      # раскомментируй блок ниже:
+      # mutter = prev.mutter.overrideAttrs (oldAttrs: {
+      #   # Указываем на исправленные исходники
+      #   # version = "48.3.1-my";
+      #   src = inputs.mutter-src;
+      #
+      #   # Добавляем патч, который копирует недостающий gvdb subproject
+      #   postPatch = (oldAttrs.postPatch or "") + ''
+      #     echo "Unpacking glib source to a temporary directory to get gvdb subproject..."
+      #     # 1. Создаем временную папку
+      #     local glib_unpacked_src=$(mktemp -d)
+      #     # 2. Распаковываем архив glib в эту папку
+      #     tar xf ${final.glib.src} -C $glib_unpacked_src --strip-components=1
+      #     # 3. Копируем нужную под-папку из распакованных исходников
+      #     cp -r $glib_unpacked_src/subprojects/gvdb subprojects/
+      #     # 4. Прибираемся за собой
+      #     rm -rf $glib_unpacked_src
+      #     echo "Successfully copied gvdb subproject."
+      #   '';
+      # });
 
       # claude-code-proxy = prev.writeShellScriptBin "claude" ''
       # export HTTP_PROXY="http://127.0.0.1:1083"

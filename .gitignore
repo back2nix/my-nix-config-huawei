@@ -8,3 +8,5 @@ shadowsocks*.json
 *.qcow2
 .null-ls*
 .git*
+data/
+E
