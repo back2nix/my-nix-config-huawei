@@ -90,13 +90,13 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.170 ---
+# --- НАЧАЛО: Обновление claude-code до 2.1.179 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
-        version = "2.1.170";
+        version = "2.1.179";
         src = prev.fetchurl {
-          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.170/linux-x64/claude";
-          sha256 = "849e007277a0442ab27570d3e3d6d43787507946590e8dd1947e5a39b7081f9e";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.179/linux-x64/claude";
+          sha256 = "6d8422de5ac8ac2077b20e2a6307083f85609aaf45f8c783ec2f7d71e8781e70";
         };
         dontUnpack = true;
         dontBuild = true;
@@ -116,7 +116,7 @@
         '';
         meta.mainProgram = "claude";
       };
-# --- КОНЕЦ: Обновление claude-code до 2.1.170 ---
+# --- КОНЕЦ: Обновление claude-code до 2.1.179 ---
 
 # --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
