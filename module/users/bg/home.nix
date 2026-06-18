@@ -407,17 +407,26 @@ in {
     enable = true;
     package = pkgs-master.google-chrome;
 
+    # GPU-композитинг на этом Intel Lunar Lake + Mesa:
+    #   - ANGLE-GL вообще не инициализируется → всё software.
+    #   - ANGLE-Vulkan даёт HW растеризацию/WebGL/видео, НО под нативным
+    #     --ozone-platform=wayland Chromium не умеет VK_KHR_wayland_surface
+    #     для display-композитора → "Compositing: Software only" (весь
+    #     backbuffer композитится на CPU, GPU-процесс жрёт ~30мс/кадр).
+    # Решение: Vulkan + --ozone-platform=x11 (XWayland) — там композитор
+    # использует VK_KHR_xcb_surface, который поддержан → "Compositing:
+    # Hardware accelerated" + WebGL без "reduced performance". Проверено на
+    # chrome://gpu. Размен: XWayland вместо нативного Wayland.
+    # См. brave/brave-browser#55345 (DefaultANGLEVulkan + Wayland = soft-composite).
+    # --disable-gpu-video-decode убран: на Vulkan-пути Video Decode встаёт на HW.
     commandLineArgs = [
-      "--ozone-platform=wayland"
-      "--enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE"
+      "--ozone-platform=x11"
+      "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE,WebRTCPipeWireCapturer"
+      "--use-angle=vulkan"
+      "--ignore-gpu-blocklist"
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
-      "--ignore-gpu-blocklist"
-      "--use-angle=vulkan"
-      "--disable-gpu-video-decode"
       "--disable-features=GlobalMediaControls"
-      ## добавил
-      "--enable-features=SkiaGraphite"
     ];
   };
 
