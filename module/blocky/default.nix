@@ -13,19 +13,29 @@
         http = 4000;
       };
 
+      # bootstrapDns нужен, чтобы зарезолвить hostname'ы DoH/DoT upstream'ов.
+      # Только plain IP и только напрямую (без прокси) — иначе курица/яйцо.
       bootstrapDns = [
-        "8.8.8.8"
         "9.9.9.9"
         "1.1.1.1"
       ];
 
       upstreams = {
+        # strict = строгий порядок с откатом: сначала защищённый DNS (DoH→DoT),
+        # и только если оба недоступны — откат на plain. Это honest secure-first
+        # с failover внутри blocky. Если же сам blocky умрёт — отдельный plain
+        # fallback живёт в /etc/resolv.conf (network-configuration.nix).
+        strategy = "strict";
+        # blocky всегда стартует, даже если upstream'ы недоступны (init в фоне) —
+        # критично, чтобы DNS не падал намертво. В blocky v0.26 это ключ
+        # upstreams.init.strategy, а НЕ верхнеуровневый startStrategy.
+        init.strategy = "fast";
         groups = {
           default = [
-            "8.8.8.8"
-            "9.9.9.9"
-            "1.1.1.1"
             "https://dns.quad9.net/dns-query"
+            "tcp-tls:dns.quad9.net"
+            "9.9.9.9"
+            "149.112.112.112"
           ];
         };
       };
