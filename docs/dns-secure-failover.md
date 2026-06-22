@@ -82,9 +82,34 @@ upstreams = {
 зарезолвить hostname, а резолвер завёрнут в этот же прокси. Здесь sing-box
 подключается к серверам **по IP**, то есть DNS ему для туннелей не нужен.
 Поэтому завернуть secure DNS в proxy (для обхода цензуры/отравления DNS под GFW)
-безопасно. blocky сам через SOCKS/HTTP не ходит — потребуется промежуточный
-`dnscrypt-proxy` (`proxy = socks5://127.0.0.1:1084`) с **plain IP bootstrap'ом**.
-Это отдельный Вариант B, здесь не реализован.
+безопасно. blocky сам через SOCKS/HTTP не ходит — промежуточным звеном стоит
+`dnscrypt-proxy` (`module/dnscrypt-proxy.nix`).
+
+### Вариант B — реализован
+
+`module/dnscrypt-proxy.nix`: dnscrypt-proxy2 слушает `127.0.0.1:5300`, держит
+DoH к Quad9 и заворачивает его в sing-box через `proxy = socks5://127.0.0.1:1082`
+(`socks-usa` → `ssh-out1`, прямой SSH-тоннель на google-seoul, выход за GFW одним
+прыжком). Quad9 задан static-стампом с зашитым IP `9.9.9.9`, поэтому
+bootstrap-резолв hostname не нужен — петли курица/яйцо нет. `force_tcp = true`
+(DoH по TCP/443, SOCKS у sing-box тоже TCP). Юнит стартует `after sing-box.service`.
+
+В `module/blocky/default.nix` группа `default` (strict):
+```nix
+default = [
+  "127.0.0.1:5300"   # secure через proxy (dnscrypt-proxy → sing-box → Quad9 DoH)
+  "9.9.9.9"          # plain fallback, если proxy/тоннель недоступны
+  "149.112.112.112"
+];
+```
+Трёхуровневый failover: proxy-DoH → plain (strict внутри blocky) → plain из
+resolv.conf (если blocky умрёт).
+
+Проверка, что secure-путь жив:
+```
+dig @127.0.0.1 +short example.com     # через blocky → dnscrypt-proxy → тоннель
+journalctl -u dnscrypt-proxy -f       # видно проксируемый Quad9
+```
 
 ## Как откатиться без перезагрузки
 

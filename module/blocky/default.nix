@@ -32,8 +32,10 @@
         init.strategy = "fast";
         groups = {
           default = [
-            "https://dns.quad9.net/dns-query"
-            "tcp-tls:dns.quad9.net"
+            # secure через proxy: dnscrypt-proxy → socks5 1082 → ssh-out1 → Quad9 DoH
+            # (module/dnscrypt-proxy.nix). Обходит цензуру/отравление DNS под GFW.
+            "127.0.0.1:5300"
+            # если dnscrypt-proxy/тоннель недоступны — strict откатывается на plain.
             "9.9.9.9"
             "149.112.112.112"
           ];

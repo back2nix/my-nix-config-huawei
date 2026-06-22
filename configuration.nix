@@ -62,6 +62,7 @@ in {
     # ./module/dns-doh-https.nix
     # ./module/dns-blocky.nix
     ./module/blocky/default.nix
+    ./module/dnscrypt-proxy.nix
 
     # Сеть и контейнеры
     ./module/network-configuration.nix
