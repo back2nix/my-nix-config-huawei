@@ -220,7 +220,7 @@ in {
       kondo # delete depedenc
       hyperfine # замер времени запуска
       btop
-      pkgs-master.devenv
+      devenv
       # bottles # Wine Easy-to-use wineprefix manager
       gomodifytags
       simplescreenrecorder
@@ -421,12 +421,25 @@ in {
     # --disable-gpu-video-decode убран: на Vulkan-пути Video Decode встаёт на HW.
     commandLineArgs = [
       "--ozone-platform=x11"
-      "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE,WebRTCPipeWireCapturer"
+      # RawDraw / TreesInViz — экспериментальные GPU-фичи, держатся в ОДНОМ
+      # --enable-features (второй такой флаг затёр бы Vulkan-список → soft-compositing).
+      # Проверено chrome://gpu: , "TreesInViz: Enabled",  "Raw Draw: Enabled" - не дает запустить chrome белый экран
+      # Vulkan/WebGPU/Compositing остались Hardware accelerated.
+      "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE,WebRTCPipeWireCapturer,TreesInViz"
       "--use-angle=vulkan"
       "--ignore-gpu-blocklist"
       "--enable-gpu-rasterization"
       "--enable-zero-copy"
       "--disable-features=GlobalMediaControls"
+      # WebGPU: chrome://gpu показывал "WebGPU: Disabled". На Linux WebGPU
+      # за флагом — включается ОТДЕЛЬНЫМ switch'ем --enable-unsafe-webgpu,
+      # а НЕ вторым --enable-features=... . Прошлая попытка (ece7c8a) добавила
+      # webgpu вторым "--enable-features=SkiaGraphite,..." — Chrome берёт только
+      # ПОСЛЕДНИЙ --enable-features, из-за чего затирался Vulkan-список и падал
+      # композитинг → всё откатили (5a90d96). Отдельный switch не конфликтует.
+      # Проверено: chrome://gpu → "WebGPU: Hardware accelerated",
+      # navigator.gpu.requestAdapter() → Intel xe-2lpg, Vulkan/Compositing целы.
+      "--enable-unsafe-webgpu"
     ];
   };
 
