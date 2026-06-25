@@ -11,3 +11,4 @@ shadowsocks*.json
 data/
 E
 .claude/
+graphify-out
