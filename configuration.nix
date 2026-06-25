@@ -174,6 +174,7 @@ in {
   };
 
   security.rtkit.enable = true;
+  security.apparmor.enable = true;
 
   security.sudo.extraConfig = ''
     bg ALL=(ALL) NOPASSWD: ${pkgs.colmena}/bin/colmena
@@ -214,7 +215,6 @@ in {
 
       # Контейнеры и кластеры
       docker
-      docker-compose
       minikube
       kubectl
       kubernetes-helm
@@ -235,8 +235,6 @@ in {
       # Утилиты системы
       nixos-generators
       usbutils
-      pciutils
-      bluez-tools
       # gnome-settings-daemon
       my-yandex-browser-stable
       age
@@ -347,6 +345,11 @@ in {
 
       # pkgs-unstable.antigravity
       rtk
+
+      # Security / контейнерный анализ
+      trivy        # сканер уязвимостей образов и FS
+      dive         # анализ слоёв docker-образов
+      lazydocker   # TUI для docker
     ];
 
     etc."proxychains.conf".text = ''
@@ -436,7 +439,18 @@ in {
 
     openssh = {
       enable = true;
-      settings.X11Forwarding = true;
+      settings = {
+        X11Forwarding = true;
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = "no";
+      };
+    };
+
+    fail2ban = {
+      enable = true;
+      maxretry = 5;
+      bantime = "1h";
     };
 
     flatpak.enable = true;

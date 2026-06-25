@@ -64,6 +64,8 @@
 
   services = {
     fstrim.enable = true;
+    # GNOME тянет power-profiles-daemon, который конфликтует с tlp.
+    power-profiles-daemon.enable = false;
     tlp = {
       enable = true;
       settings = {
