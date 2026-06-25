@@ -28,6 +28,8 @@
       # Настройка окружения
       set -gx LANG en_US.UTF-8
       set -gx PATH $PATH $HOME/.cargo/bin
+      # uv ставит python и `uv tool install` бинарники в ~/.local/bin
+      fish_add_path -g $HOME/.local/bin
       set -g fish_complete_path_as_name true
       direnv hook fish | source
 

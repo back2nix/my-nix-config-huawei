@@ -180,6 +180,10 @@ in {
   '';
 
   environment = {
+    # Добавляет ~/.local/bin в PATH для всех шеллов (fish/zsh/bash),
+    # сюда uv кладёт python и uv tool install бинарники.
+    localBinInPath = true;
+
     sessionVariables = rec {
       GTK_THEME = "Adwaita:dark";
       MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
@@ -364,7 +368,9 @@ in {
     fish.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld = {
-      package = inputs.nix-ld-rs;
+      # Дефолтный nixpkgs nix-ld (2.x, та же rust-реализация).
+      # Кастомный inputs.nix-ld-rs больше не собирался на новом rustc и
+      # подсовывал исходники без бинаря -> битый /lib64/ld-linux.
       enable = true;
       libraries = with pkgs; [
         gcc
