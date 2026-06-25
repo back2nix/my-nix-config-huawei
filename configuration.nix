@@ -324,6 +324,7 @@ in {
       gcloud-vpn3
       zip
 
+      # scrcpy # genymobile , pronounced "screen copy"
 
       (writeShellScriptBin "virt-switch" ''
         # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ
