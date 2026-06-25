@@ -10,3 +10,4 @@ shadowsocks*.json
 .git*
 data/
 E
+.claude/
