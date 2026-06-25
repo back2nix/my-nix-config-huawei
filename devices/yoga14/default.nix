@@ -61,11 +61,6 @@
       "intel_pstate=active"
       "intel_iommu=on"
       "iommu=pt"
-
-      # DPDK
-      "default_hugepagesz=2M"
-      "hugepagesz=2M"
-      "hugepages=1024"
     ];
 
     extraModprobeConfig = ''
@@ -80,26 +75,26 @@
     '';
   };
 
-  # ПРАВИЛЬНАЯ настройка Intel GPU для Lunar Lake
-  hardware.intelgpu = {
-    driver = "xe"; # Используем xe драйвер для Lunar Lake
-    vaapiDriver = "intel-media-driver";
-  };
-
-  # Включаем графику
+  # Intel GPU (driver=xe, vaapiDriver=intel-media-driver) и базовые пакеты
+  # графики уже настраивает модуль nixos-hardware lenovo-yoga-7-14ILL10
+  # (common/gpu/intel/lunar-lake), поэтому здесь только дополнения.
   hardware.graphics = {
     enable = true;
     extraPackages = with pkgs; [
-      intel-media-driver # VA-API драйвер для видео
       intel-vaapi-driver
       libva-vdpau-driver
       libvdpau-va-gl
-      intel-compute-runtime # OpenCL драйвер
       mesa
       libva
       libva-utils
     ];
   };
+
+  # zram-своп для отзывчивости (физического свопа на диске нет)
+  zramSwap.enable = true;
+
+  # thermald — управление троттлингом для Intel Core Ultra (Lunar Lake)
+  services.thermald.enable = true;
 
   # Переменные среды для стабильной работы графики
   environment.variables = {
@@ -192,8 +187,6 @@
     mesa-demos
     vulkan-tools
     intel-gpu-tools
-
-    dpdk
   ];
 
   networking.useDHCP = lib.mkDefault true;
@@ -258,5 +251,5 @@
     }
   '';
 
-  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  # hardware.cpu.intel.updateMicrocode уже задаётся модулем nixos-hardware.
 }
