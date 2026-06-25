@@ -176,7 +176,25 @@ in {
       eog # image viewer
       evince # pdf reader
       zoom-us
-      gimp
+      # GIMP forced onto XWayland: under native Wayland on GNOME the tablet path
+      # drops the Wacom stylus tip-down event, so the pen only drew while a pen
+      # button was held. GDK_BACKEND=x11 routes GIMP through XWayland, where the
+      # tip maps to button 1 normally. Wraps gimp-3.0 (used by the .desktop too).
+      (symlinkJoin {
+        name = "gimp-x11";
+        paths = [ gimp ];
+        nativeBuildInputs = [ makeWrapper ];
+        postBuild = ''
+          for b in gimp-3.0 gimp-console-3.0; do
+            rm -f "$out/bin/$b"
+            makeWrapper "${gimp}/bin/$b" "$out/bin/$b" --set GDK_BACKEND x11
+          done
+          ln -sf gimp-3.0 "$out/bin/gimp"
+          ln -sf gimp-3.0 "$out/bin/gimp-3"
+          ln -sf gimp-console-3.0 "$out/bin/gimp-console"
+          ln -sf gimp-console-3.0 "$out/bin/gimp-console-3"
+        '';
+      })
       pkgs-master.rawtherapee
       # ffmpeg_5-full
       ffmpeg-full
