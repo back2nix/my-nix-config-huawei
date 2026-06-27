@@ -23,7 +23,7 @@
   networking.hostName = "desktop";
 
   # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # --- CUDA and NVIDIA Configuration ---
   hardware.graphics = {
