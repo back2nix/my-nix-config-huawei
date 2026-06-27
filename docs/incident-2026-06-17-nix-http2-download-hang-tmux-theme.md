@@ -80,3 +80,80 @@ http2 = false;
 2. Прямое соединение к кэшу висит? → ходи через прокси (sing-box 1082/1083) и
    проверь, что `nix-daemon` реально перезапущен с нужным env
    (`sudo cat /proc/$(pgrep -o nix-daemon)/environ | tr '\0' '\n' | grep -i proxy`).
+
+---
+
+# Инцидент 2026-06-27 (desktop): `error: Cannot parse Nix store 'cache.nixos.org'`
+
+## Симптомы
+
+На сервере `desktop` (`ssh bg@192.168.3.78`) `sudo nixos-rebuild switch --flake
+…#desktop --option http2 false --option substituters "https://cache.nixos.org"`
+падает сразу:
+```
+building the system configuration...
+error: Cannot parse Nix store 'cache.nixos.org'
+Try 'nix --help' for more information.
+Command 'nix … build … --option http2 false --option substituters https://cache.nixos.org' returned non-zero exit status 1.
+```
+Подсказка `Try 'nix --help'` ⇒ это `UsageError` на этапе разбора настроек, а не
+ошибка вычисления флейка.
+
+## Причина: голый хост (без схемы) в `trusted-substituters` устаревшего `/etc/nix/nix.conf`
+
+Сообщение `Cannot parse Nix store '<X>'` nix выдаёт, когда в настройке типа
+«стор» (`substituters`/`trusted-substituters`) лежит **голое имя хоста без
+`https://`**. Проверено: `--option substituters "cache.nixos.org"` (без схемы)
+даёт ровно эту строку; со схемой — ок.
+
+На `desktop` развёрнутый `/etc/nix/nix.conf` (старое поколение, ещё с garnix и
+cuda) содержал:
+```
+trusted-substituters = cache.nixos.org nix-community.cachix.org   # ← без https://
+```
+Почему **только под root**: `bg` ходит через `nix-daemon` и `trusted-substituters`
+в стор-объекты не разбирает (для него голое имя безразлично — `nix build` как
+`bg` собирает десктоп без ошибок). Root же открывает локальный стор напрямую и
+парсит `trusted-substituters` в сторы → голое имя кидает `UsageError`.
+
+**Важно — `--option` НЕ помогает.** `--option trusted-substituters ""`
+(и `--option substituters ""`) не убирают ошибку: root открывает стор с
+**файловым** merged-конфигом и парсит `trusted-substituters` ещё до того, как
+применятся CLI-overrides. Проверено на сервере — падает с теми же флагами.
+Лечится только правкой самого файла `/etc/nix/nix.conf`.
+
+Курица-и-яйцо: в репозитории `cachix.nix` это **уже исправлено** (схемы есть:
+`"https://cache.nixos.org/"`, `"https://nix-community.cachix.org"`), но живая
+система старее этого фикса, и пересобраться через сломанный `nix.conf` нельзя.
+
+### Фикс (разовый, чтобы прошла одна пересборка)
+
+`/etc/nix/nix.conf` — симлинк на read-only стор (`/etc/static/...`), писать сквозь
+него нельзя. Подменяем симлинк реальным исправленным файлом; успешный `switch`
+потом сам перегенерит `/etc/nix/nix.conf` из `cachix.nix`.
+```
+sudo cp -L /etc/nix/nix.conf /etc/nix/nix.conf.fixed
+sudo sed -i \
+  -e 's#^substituters = .*#substituters = https://cache.nixos.org/ https://nix-community.cachix.org#' \
+  -e 's#^trusted-substituters = .*#trusted-substituters = https://cache.nixos.org/ https://nix-community.cachix.org#' \
+  /etc/nix/nix.conf.fixed
+sudo mv /etc/nix/nix.conf /etc/nix/nix.conf.symlink-bak
+sudo mv /etc/nix/nix.conf.fixed /etc/nix/nix.conf
+
+sudo nixos-rebuild switch \
+  --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#desktop \
+  --option http2 false
+```
+Правок в репозитории не требуется: причина — устаревший развёрнутый `nix.conf`,
+а не текущий код.
+
+### Диагностика
+
+- `nix build nixpkgs#hello --dry-run --option substituters "cache.nixos.org"`
+  (как `bg`) — голое имя даёт `warning: Cannot parse Nix store 'cache.nixos.org'`,
+  подтверждая, что строку рождает голый хост в стор-настройке.
+- `sudo nix config show | grep -nE 'substituters'` — видно итоговый merged-конфиг
+  root-а; ищем запись без `https://`. ВНИМАНИЕ: `grep -r cache.nixos.org /etc/nix/`
+  ничего не найдёт — `nix.conf` там симлинк, а `grep -r` симлинки не разворачивает.
+- Быстрая проверка фикса (падает мгновенно на setup, если ошибка осталась):
+  `sudo nix build '<flake>#nixosConfigurations."desktop"...toplevel' --dry-run --option http2 false`

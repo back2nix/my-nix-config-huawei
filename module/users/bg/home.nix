@@ -201,7 +201,7 @@ in {
       # genymotion
       qemu
       firefox
-      anydesk
+      # anydesk
       audacity
       # yandex-browser
       distrobox
