@@ -38,7 +38,7 @@
       # Убедитесь, что IP актуален
 
       10.0.0.1 vpn.local casino.local app.local grafana.local grafana.casino.local pyroscope.local prometheus.local postgres.local victoriametrics.casino.local pyroscope.casino.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local china.local grpc.china.local office.china.local
-      109.69.21.245 app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
+      # 192.168.3.78 casino.remote grafana.remote grafana.casino.remote app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
     '';
 
     nftables = {

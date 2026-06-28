@@ -54,6 +54,11 @@
       set -g window-status-current-format "#[fg=#282c34,bg=#3e4452,nobold,nounderscore,noitalics]#[fg=#aab2bf,bg=#3e4452,nobold] #I  #W #[fg=#3e4452,bg=#282c34,nobold,nounderscore,noitalics]"
       # --- конец темы onedark ---
 
+      # OSC 52 clipboard passthrough: works through SSH without X11 tricks
+      # screen-256color doesn't advertise Ms by default, so we add it manually
+      set -g set-clipboard on
+      set -ga terminal-overrides ',screen-256color:Ms=\E]52;%p1%s;%p2%s\007'
+
       set -g mouse on
       unbind -n MouseDrag1Pane
       bind -n MouseDrag1Pane if -F '#{mouse_any_flag}' 'if -F "#{pane_in_mode}" "copy-mode -M" "send-keys -M"' 'copy-mode -M'
@@ -65,6 +70,7 @@
 
       # Vim-style копирование (работает независимо от раскладки в режиме vi)
       bind -T copy-mode-vi v send-keys -X begin-selection
+      # y: copy-selection-and-cancel + set-clipboard on → tmux отправляет OSC 52 → kitty
       bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
       bind -T copy-mode-vi r send-keys -X rectangle-toggle
 
