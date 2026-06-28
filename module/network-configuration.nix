@@ -39,6 +39,7 @@
 
       10.0.0.1 vpn.local casino.local app.local grafana.local grafana.casino.local pyroscope.local prometheus.local postgres.local victoriametrics.casino.local pyroscope.casino.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local china.local grpc.china.local office.china.local
       192.168.3.78 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
+      # 10.0.0.1 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
       # 192.168.3.78 casino.remote grafana.remote grafana.casino.remote app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
     '';
 
