@@ -58,11 +58,9 @@
     cudaPackages.cudatoolkit
   ];
 
-  # --- K3s Agent Configuration (Slave) ---
+  # --- K3s standalone server ---
   services.k3s = {
     enable = true;
-    role = "agent";
-    serverAddr = "https://192.168.3.18:6443";
-    token = "K104caae4ecc48a34d39454d4c8b3e4e27577b2a31eb1a5ce0cb15250eb2f7d5dfc::server:3cabe09aba6d084178da21b8b6b8cce6";
+    role = "server";
   };
 }
