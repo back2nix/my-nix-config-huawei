@@ -9,7 +9,6 @@
   ...
 }: {
   nixpkgs.overlays = [
-
     (final: prev: {
       unstable = import inputs.nixpkgs-unstable {
         inherit (prev.stdenv.hostPlatform) system;
@@ -97,7 +96,7 @@
       #     "$@"
       # '';
 
-# --- НАЧАЛО: Обновление claude-code до 2.1.195 ---
+      # --- НАЧАЛО: Обновление claude-code до 2.1.195 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
         version = "2.1.195";
@@ -108,8 +107,8 @@
         dontUnpack = true;
         dontBuild = true;
         dontStrip = true;
-        nativeBuildInputs = [ prev.autoPatchelfHook prev.makeBinaryWrapper ];
-        buildInputs = [ prev.alsa-lib ];
+        nativeBuildInputs = [prev.autoPatchelfHook prev.makeBinaryWrapper];
+        buildInputs = [prev.alsa-lib];
         installPhase = ''
           runHook preInstall
           install -Dm755 $src $out/bin/claude
@@ -117,15 +116,15 @@
             --set DISABLE_AUTOUPDATER 1 \
             --set DISABLE_INSTALLATION_CHECKS 1 \
             --set USE_BUILTIN_RIPGREP 0 \
-            --prefix LD_LIBRARY_PATH : ${prev.lib.makeLibraryPath [ prev.alsa-lib ]} \
-            --prefix PATH : ${prev.lib.makeBinPath [ prev.procps prev.ripgrep prev.bubblewrap prev.socat ]}
+            --prefix LD_LIBRARY_PATH : ${prev.lib.makeLibraryPath [prev.alsa-lib]} \
+            --prefix PATH : ${prev.lib.makeBinPath [prev.procps prev.ripgrep prev.bubblewrap prev.socat]}
           runHook postInstall
         '';
         meta.mainProgram = "claude";
       };
-# --- КОНЕЦ: Обновление claude-code до 2.1.195 ---
+      # --- КОНЕЦ: Обновление claude-code до 2.1.195 ---
 
-# --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
+      # --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
         version = "0.44.0-nightly.20260518.g5611ff40e";
 
@@ -157,14 +156,16 @@
           sed -i 's|execSync.*npm run build --workspaces.*|execSync("npm run build --workspace=packages/sdk --workspace=packages/devtools --workspace=packages/core --workspace=packages/cli", { stdio: "inherit", cwd: root });|' scripts/build.js
         '';
 
-        postInstall = (oldAttrs.postInstall or "") + ''
-          # Копируем новые пакеты, появившиеся в версии 0.30.0, чтобы не было битых симлинков
-          rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
-          cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
+        postInstall =
+          (oldAttrs.postInstall or "")
+          + ''
+            # Копируем новые пакеты, появившиеся в версии 0.30.0, чтобы не было битых симлинков
+            rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
+            cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
 
-          rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
-          cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
-        '';
+            rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
+            cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
+          '';
       });
       # --- КОНЕЦ: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
 
@@ -242,8 +243,7 @@
         exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
       '';
 
-      rtk = final.callPackage ../pkgs/rtk.nix { };
-
+      rtk = final.callPackage ../pkgs/rtk.nix {};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
       #   export HTTP_PROXY="http://127.0.0.1:1083"

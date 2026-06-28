@@ -174,16 +174,16 @@
         # NixOS конфигурации
         nixosConfigurations = {
           asus = mkSystem "asus-ux3405m" [
-             # Точного модуля для Zenbook UX3405MA (Intel Core Ultra / Meteor Lake)
-             # в nixos-hardware нет, поэтому используем generic common-модули.
-             inputs.nixos-hardware.nixosModules.common-cpu-intel
-             inputs.nixos-hardware.nixosModules.common-gpu-intel
-             inputs.nixos-hardware.nixosModules.common-pc-laptop
-             inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
+            # Точного модуля для Zenbook UX3405MA (Intel Core Ultra / Meteor Lake)
+            # в nixos-hardware нет, поэтому используем generic common-модули.
+            inputs.nixos-hardware.nixosModules.common-cpu-intel
+            inputs.nixos-hardware.nixosModules.common-gpu-intel
+            inputs.nixos-hardware.nixosModules.common-pc-laptop
+            inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
           ];
           huawei = mkSystem "huawei-rlef-x" [];
           yoga14 = mkSystem "yoga14" [
-             inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+            inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
           ];
           desktop = mkSystem "desktop" [];
         };

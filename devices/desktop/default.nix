@@ -42,7 +42,7 @@
   };
 
   boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
-  boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
+  boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
 
   # --- Virtualisation with NVIDIA support ---
   hardware.nvidia-container-toolkit.enable = true;

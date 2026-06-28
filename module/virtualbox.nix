@@ -4,19 +4,18 @@
   lib,
   ...
 }: {
-
   # # Останови libvirtd если он запущен
-# sudo systemctl stop libvirtd
+  # sudo systemctl stop libvirtd
 
-# # Выгрузи модули KVM
-# sudo modprobe -r kvm_intel  # для Intel
-# sudo modprobe -r kvm_amd    # для AMD
-# sudo modprobe -r kvm
+  # # Выгрузи модули KVM
+  # sudo modprobe -r kvm_intel  # для Intel
+  # sudo modprobe -r kvm_amd    # для AMD
+  # sudo modprobe -r kvm
 
-# # Загрузи модули VirtualBox
-# sudo modprobe vboxdrv
-# sudo modprobe vboxnetflt
-# sudo modprobe vboxnetadp
+  # # Загрузи модули VirtualBox
+  # sudo modprobe vboxdrv
+  # sudo modprobe vboxnetflt
+  # sudo modprobe vboxnetadp
 
   # Отключаем KVM для работы VirtualBox
   # boot.blacklistedKernelModules = [ "kvm" "kvm_intel" "kvm_amd" ];

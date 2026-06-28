@@ -39,7 +39,7 @@
       "xray/publicKey" = {};
       "xray/uuid" = {};
       "attic/env" = {
-        restartUnits = [ "atticd.service" ];
+        restartUnits = ["atticd.service"];
       };
     };
 
@@ -49,10 +49,30 @@
         log.level = "info";
 
         inbounds = [
-          { type = "socks"; tag = "socks-usa"; listen = "0.0.0.0"; listen_port = 1082; }
-          { type = "http"; tag = "http-usa"; listen = "0.0.0.0"; listen_port = 1083; }
-          { type = "socks"; tag = "socks-china"; listen = "0.0.0.0"; listen_port = 1084; }
-          { type = "http"; tag = "http-china"; listen = "0.0.0.0"; listen_port = 1085; }
+          {
+            type = "socks";
+            tag = "socks-usa";
+            listen = "0.0.0.0";
+            listen_port = 1082;
+          }
+          {
+            type = "http";
+            tag = "http-usa";
+            listen = "0.0.0.0";
+            listen_port = 1083;
+          }
+          {
+            type = "socks";
+            tag = "socks-china";
+            listen = "0.0.0.0";
+            listen_port = 1084;
+          }
+          {
+            type = "http";
+            tag = "http-china";
+            listen = "0.0.0.0";
+            listen_port = 1085;
+          }
         ];
 
         outbounds = [
@@ -84,8 +104,14 @@
         ];
 
         route.rules = [
-          { inbound = ["socks-usa" "http-usa"]; outbound = "ssh-out1"; }
-          { inbound = ["socks-china" "http-china"]; outbound = "ssh-out1-via-vpn3"; }
+          {
+            inbound = ["socks-usa" "http-usa"];
+            outbound = "ssh-out1";
+          }
+          {
+            inbound = ["socks-china" "http-china"];
+            outbound = "ssh-out1-via-vpn3";
+          }
         ];
       };
     };

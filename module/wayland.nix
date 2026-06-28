@@ -39,10 +39,10 @@
   # Пакеты, необходимые для окружения Wayland
   environment.systemPackages = with pkgs; [
     # Wayland утилиты
-    wl-clipboard      # Утилита для буфера обмена
+    wl-clipboard # Утилита для буфера обмена
     # wlr-randr         # Аналог xrandr для композиторов на wlroots (может быть полезен)
-    libinput          # Библиотека для обработки ввода
-    iio-sensor-proxy  # Для автоповорота экрана
+    libinput # Библиотека для обработки ввода
+    iio-sensor-proxy # Для автоповорота экрана
 
     # Виртуальная клавиатура для Wayland
     squeekboard

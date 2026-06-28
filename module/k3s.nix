@@ -10,8 +10,8 @@
 in {
   systemd.services.k3s-lo-ip = {
     description = "Add 10.0.0.1/32 to loopback for k3s node IP";
-    before = [ "k3s.service" ];
-    wantedBy = [ "k3s.service" ];
+    before = ["k3s.service"];
+    wantedBy = ["k3s.service"];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -24,22 +24,23 @@ in {
     enable = lib.mkDefault true;
     role = lib.mkDefault "server";
     package = pkgs.k3s;
-    
+
     # Эти опции стандартные для модуля k3s в NixOS
     # serverAddr = ...;
     # token = ...;
     # Но мы будем использовать их через передачу в устройствах
 
     extraFlags = toString ([
-      "--kubelet-arg=fail-swap-on=false"
-      "--node-ip 10.0.0.1"
-      "--node-external-ip 10.0.0.1"
-      "--advertise-address 10.0.0.1"
-      "--flannel-iface lo"
-    ] ++ (lib.optionals isServer [
-      "--write-kubeconfig-mode 644"
-      "--disable=traefik"
-    ]));
+        "--kubelet-arg=fail-swap-on=false"
+        "--node-ip 10.0.0.1"
+        "--node-external-ip 10.0.0.1"
+        "--advertise-address 10.0.0.1"
+        "--flannel-iface lo"
+      ]
+      ++ (lib.optionals isServer [
+        "--write-kubeconfig-mode 644"
+        "--disable=traefik"
+      ]));
   };
 
   # Создаем группу k3s
@@ -57,6 +58,9 @@ in {
   ];
 
   environment.variables = {
-    KUBECONFIG = if isServer then "/etc/rancher/k3s/k3s.yaml" else null;
+    KUBECONFIG =
+      if isServer
+      then "/etc/rancher/k3s/k3s.yaml"
+      else null;
   };
 }

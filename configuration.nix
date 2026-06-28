@@ -33,18 +33,21 @@ in {
 
   nixpkgs.config.allowUnfree = true;
   # nixpkgs.config.cudaSupport = true;
-  nixpkgs.config.allowUnfreePredicate =
-    p:
+  nixpkgs.config.allowUnfreePredicate = p:
     builtins.all (
       license:
-      license.free
-      || builtins.elem license.shortName [
-        "CUDA EULA"
-        "cuDNN EULA"
-        "cuTENSOR EULA"
-        "NVidia OptiX EULA"
-      ]
-    ) (if builtins.isList p.meta.license then p.meta.license else [ p.meta.license ]);
+        license.free
+        || builtins.elem license.shortName [
+          "CUDA EULA"
+          "cuDNN EULA"
+          "cuTENSOR EULA"
+          "NVidia OptiX EULA"
+        ]
+    ) (
+      if builtins.isList p.meta.license
+      then p.meta.license
+      else [p.meta.license]
+    );
 
   imports = [
     ./cachix.nix
@@ -78,7 +81,6 @@ in {
     # ./module/tor.nix
     ./module/attic.nix
   ];
-
 
   # ==========================================
   # Настройки Attic (взято из examples/attic)
@@ -114,7 +116,7 @@ in {
   # services.monitoring-stack.enable = true;
 
   boot = {
-    binfmt.emulatedSystems = [ "aarch64-linux" ];
+    binfmt.emulatedSystems = ["aarch64-linux"];
     # asus специфичные настройки
     # extraModprobeConfig = ''
     #   options bluetooth disable_ertm=1
@@ -329,12 +331,12 @@ in {
       (writeShellScriptBin "virt-switch" ''
         # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ
         export PATH="${lib.makeBinPath [
-          kmod          # modprobe, lsmod, rmmod
-          procps        # pkill
-          gnugrep       # grep
-          systemd       # systemctl
-          coreutils     # echo, sleep и т.д.
-          util-linux    # на всякий случай
+          kmod # modprobe, lsmod, rmmod
+          procps # pkill
+          gnugrep # grep
+          systemd # systemctl
+          coreutils # echo, sleep и т.д.
+          util-linux # на всякий случай
         ]}:$PATH"
 
         # Теперь вставляем код из файла
@@ -348,9 +350,9 @@ in {
       rtk
 
       # Security / контейнерный анализ
-      trivy        # сканер уязвимостей образов и FS
-      dive         # анализ слоёв docker-образов
-      lazydocker   # TUI для docker
+      trivy # сканер уязвимостей образов и FS
+      dive # анализ слоёв docker-образов
+      lazydocker # TUI для docker
     ];
 
     etc."proxychains.conf".text = ''
@@ -516,9 +518,9 @@ in {
 
   fonts.fontconfig = {
     defaultFonts = {
-      sansSerif = [ "Noto Sans" "Noto Sans CJK SC" ];
-      serif = [ "Noto Serif" "Noto Serif CJK SC" ];
-      monospace = [ "JetBrains Mono" "Noto Sans Mono" "Noto Sans Mono CJK SC" ];
+      sansSerif = ["Noto Sans" "Noto Sans CJK SC"];
+      serif = ["Noto Serif" "Noto Serif CJK SC"];
+      monospace = ["JetBrains Mono" "Noto Sans Mono" "Noto Sans Mono CJK SC"];
     };
   };
 
@@ -623,9 +625,9 @@ in {
     config = {
       common = {
         # Говорим системе: "Что бы ни случилось, используй GNOME-портал"
-        default = [ "gnome" ];
+        default = ["gnome"];
         # Для секретов (связка ключей) тоже явно укажем
-        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+        "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
       };
     };
 
@@ -640,7 +642,6 @@ in {
     source = "${pkgs.gpu-screen-recorder}/bin/gsr-kms-server";
   };
 
-
   # security.pam.loginLimits = [
   #   {
   #     domain = "*";
@@ -654,7 +655,7 @@ in {
   #     item = "nofile";
   #     value = "unlimited";
   #   }
-# ];
+  # ];
 
   documentation.enable = false;
   documentation = {

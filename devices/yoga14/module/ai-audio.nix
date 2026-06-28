@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{pkgs, ...}: {
   services.pipewire = {
     enable = true;
     pulse.enable = true;
@@ -12,7 +12,7 @@
             "capture.props" = {
               "node.name" = "AI_System_Proxy";
               "media.class" = "Audio/Sink";
-              "audio.position" = [ "FL" "FR" ];
+              "audio.position" = ["FL" "FR"];
             };
             "playback.props" = {
               "node.name" = "AI_System_Proxy_Output";

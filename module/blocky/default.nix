@@ -1,9 +1,12 @@
-{ config, pkgs, lib, ... }:
-
 {
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   # Открываем порты в фаерволе для DNS
-  networking.firewall.allowedUDPPorts = [ 53 ];
-  networking.firewall.allowedTCPPorts = [ 53 ];
+  networking.firewall.allowedUDPPorts = [53];
+  networking.firewall.allowedTCPPorts = [53];
 
   services.blocky = {
     enable = true;
@@ -49,12 +52,12 @@
             "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/pro.txt"
             "https://raw.githubusercontent.com/back2nix/blocky/refs/heads/master/hosts"
           ];
-          fakenews = [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts" ];
-          gambling = [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts" ];
-          adult = [ "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn-only/hosts" ];
+          fakenews = ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-only/hosts"];
+          gambling = ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/gambling-only/hosts"];
+          adult = ["https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn-only/hosts"];
         };
         clientGroupsBlock = {
-          default = [ "ads" "fakenews" "gambling" "adult" ];
+          default = ["ads" "fakenews" "gambling" "adult"];
         };
       };
 

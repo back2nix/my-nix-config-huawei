@@ -3,27 +3,25 @@
   lib,
   config,
   ...
-}:
-let
+}: let
   cfg = config.services.attic;
   atticd = lib.getExe cfg.package;
-  settingsFormat = pkgs.formats.toml { };
+  settingsFormat = pkgs.formats.toml {};
   generatedConfigFile = settingsFormat.generate "attic.toml" cfg.settings;
-in
-{
+in {
   options.services.attic = {
     # ... твои опции без изменений ...
     enable = lib.mkEnableOption "attic";
-    package = lib.mkPackageOption pkgs "attic-server" { };
+    package = lib.mkPackageOption pkgs "attic-server" {};
     settings = lib.mkOption {
       type = lib.types.submodule {
         freeformType = settingsFormat.type;
         options = {
           storage = {
             type = lib.mkOption {
-              type = lib.types.enum [ "local" "s3" ];
+              type = lib.types.enum ["local" "s3"];
             };
-            path = lib.mkOption { type = lib.types.str; };
+            path = lib.mkOption {type = lib.types.str;};
           };
         };
       };
@@ -58,8 +56,8 @@ in
 
     systemd.services.atticd = {
       description = "Attic Binary Cache Server";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      wantedBy = ["multi-user.target"];
+      after = ["network.target"];
 
       serviceConfig = {
         User = "atticd";
@@ -85,6 +83,6 @@ in
       };
     };
 
-    environment.systemPackages = [ cfg.package ];
+    environment.systemPackages = [cfg.package];
   };
 }

@@ -28,7 +28,7 @@ rustPlatform.buildRustPackage rec {
     description = "CLI proxy that reduces LLM token consumption by 60-90%";
     homepage = "https://github.com/rtk-ai/rtk";
     license = licenses.mit;
-    maintainers = with maintainers; [ ];
+    maintainers = with maintainers; [];
     mainProgram = "rtk";
   };
 }

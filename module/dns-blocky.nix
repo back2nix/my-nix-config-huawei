@@ -166,8 +166,8 @@ in {
       settings = {
         upstreams = {
           groups.default = upstreamServers.${cfg.mode};
-          init.strategy = "failOnError";  # Важно!
-          timeout = "2s";  # Добавь таймаут
+          init.strategy = "failOnError"; # Важно!
+          timeout = "2s"; # Добавь таймаут
         };
 
         blocking = {
@@ -181,14 +181,14 @@ in {
         caching = {
           maxTime = "30m";
           maxItemsCount = 0;
-          prefetching = false;  # Выключи это
+          prefetching = false; # Выключи это
           prefetchExpires = "2h";
           prefetchThreshold = 5;
           prefetchMaxItemsCount = 0;
         };
 
         ports = {
-          dns = 53;  # Слушать на всех интерфейсах
+          dns = 53; # Слушать на всех интерфейсах
           http = "0.0.0.0:4000";
         };
 
@@ -206,14 +206,13 @@ in {
           # logRetentionDays = 90;
         };
 
-
         bootstrapDns = [
           "tcp+udp:1.1.1.1"
           "tcp+udp:8.8.8.8"
         ];
 
         # Добавь эти настройки:
-        connectIPVersion = "v4";  # Только IPv4 для упрощения
+        connectIPVersion = "v4"; # Только IPv4 для упрощения
 
         ede.enable = true;
       };

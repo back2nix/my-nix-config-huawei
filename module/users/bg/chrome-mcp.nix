@@ -34,7 +34,7 @@ in {
           (pkgs.writeScriptBin "chrome-mcp" ''
             USER_DATA_DIR="$HOME/${cfg.userDataDir}"
             mkdir -p "$USER_DATA_DIR"
-            
+
             exec ${cfg.package}/bin/google-chrome-stable \
               --remote-debugging-port=${toString cfg.port} \
               --user-data-dir="$USER_DATA_DIR" \

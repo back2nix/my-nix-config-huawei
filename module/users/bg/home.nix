@@ -182,8 +182,8 @@ in {
       # tip maps to button 1 normally. Wraps gimp-3.0 (used by the .desktop too).
       (symlinkJoin {
         name = "gimp-x11";
-        paths = [ gimp ];
-        nativeBuildInputs = [ makeWrapper ];
+        paths = [gimp];
+        nativeBuildInputs = [makeWrapper];
         postBuild = ''
           for b in gimp-3.0 gimp-console-3.0; do
             rm -f "$out/bin/$b"

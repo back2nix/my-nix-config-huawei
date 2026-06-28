@@ -13,8 +13,6 @@
     enable = true;
     videoDrivers = ["modesetting"];
 
-
-
     xkb = {
       layout = "us,ru";
       options = "grp:caps_toggle,grp_led:caps,compose:ralt";

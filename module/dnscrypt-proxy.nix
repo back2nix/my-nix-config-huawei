@@ -1,5 +1,9 @@
-{ config, pkgs, lib, ... }:
-
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 # Вариант B: secure DNS через proxy (обход цензуры/отравления DNS под GFW).
 #
 # blocky сам через SOCKS/HTTP ходить не умеет, поэтому промежуточным звеном
@@ -16,14 +20,14 @@
   services.dnscrypt-proxy = {
     enable = true;
     settings = {
-      listen_addresses = [ "127.0.0.1:5300" ];
+      listen_addresses = ["127.0.0.1:5300"];
 
       # DoH идёт по TCP/443, а SOCKS у sing-box — TCP. UDP через прокси не нужен.
       force_tcp = true;
 
       # Не тянем публичный список резолверов (его загрузка сама требовала бы
       # bootstrap-DNS). Работаем только по своему static-стампу ниже.
-      server_names = [ "quad9-doh-proxied" ];
+      server_names = ["quad9-doh-proxied"];
       ignore_system_dns = true;
 
       # Весь исходящий трафик dnscrypt-proxy — через sing-box socks-usa (1082),
@@ -31,16 +35,15 @@
       proxy = "socks5://127.0.0.1:1082";
 
       # IP уже зашит в стамп → bootstrap не используется, но поле обязательно.
-      bootstrap_resolvers = [ "9.9.9.9:53" "1.1.1.1:53" ];
+      bootstrap_resolvers = ["9.9.9.9:53" "1.1.1.1:53"];
 
-      static.quad9-doh-proxied.stamp =
-        "sdns://AgcAAAAAAAAABzkuOS45LjkADWRucy5xdWFkOS5uZXQKL2Rucy1xdWVyeQ";
+      static.quad9-doh-proxied.stamp = "sdns://AgcAAAAAAAAABzkuOS45LjkADWRucy5xdWFkOS5uZXQKL2Rucy1xdWVyeQ";
     };
   };
 
   # dnscrypt-proxy бесполезен без тоннеля — стартуем после sing-box.
   systemd.services.dnscrypt-proxy = {
-    after = [ "sing-box.service" ];
-    wants = [ "sing-box.service" ];
+    after = ["sing-box.service"];
+    wants = ["sing-box.service"];
   };
 }

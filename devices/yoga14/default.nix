@@ -49,7 +49,7 @@
       "uio_pci_generic"
     ];
 
-    extraModulePackages = [ config.boot.kernelPackages.akvcam ];
+    extraModulePackages = [config.boot.kernelPackages.akvcam];
 
     # ПРАВИЛЬНЫЕ параметры ядра для Lunar Lake
     kernelParams = [
