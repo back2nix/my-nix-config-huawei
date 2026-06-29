@@ -238,7 +238,7 @@ in {
       nixos-generators
       usbutils
       # gnome-settings-daemon
-      my-yandex-browser-stable
+      # my-yandex-browser-stable
       age
 
       # Мультимедиа
@@ -493,7 +493,7 @@ in {
   };
 
   nixpkgs.config.permittedInsecurePackages = [
-    "my-yandex-browser-stable-26.4.1.1110-1"
+    # "my-yandex-browser-stable-26.4.1.1110-1"
     "claude-code"
     "mbedtls-2.28.10"
     # "openclaw-2026.3.12"
