@@ -51,10 +51,10 @@
     };
 
     mutter-src = {
-      # url = "path:./mutter-48.3";
+      # url = "path:./mutter-50.2";
       # type = "git";
-      url = "git+ssh://git@github.com/back2nix/mutter.git?ref=49.2";
-      # ref = "49.2";
+      url = "git+ssh://git@github.com/back2nix/mutter.git?ref=50.2";
+      # ref = "50.2";
       # rev = "7298e5305a3ed62f0adfb85bda2d5f322811f096";
       flake = false;
     };

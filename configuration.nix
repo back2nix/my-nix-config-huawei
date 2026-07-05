@@ -353,6 +353,7 @@ in {
       trivy # сканер уязвимостей образов и FS
       dive # анализ слоёв docker-образов
       lazydocker # TUI для docker
+      brave
     ];
 
     etc."proxychains.conf".text = ''
