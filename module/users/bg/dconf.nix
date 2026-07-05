@@ -57,6 +57,9 @@
         "window-calls@domandoman.xyz"
       ];
     };
+    "org/gnome/desktop/interface" = {
+      enable-animations = false;
+    };
     # Настройки масштабирования (если нужны)
     # Раскомментируй и настрой под свои нужды:
     # "org/gnome/desktop/interface" = {

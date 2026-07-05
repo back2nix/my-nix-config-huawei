@@ -190,6 +190,7 @@ in {
     sessionVariables = rec {
       GTK_THEME = "Adwaita:dark";
       MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
+      MUTTER_FORCE_HIDE_CURSOR = 1;
     };
     shells = with pkgs; [fish];
 

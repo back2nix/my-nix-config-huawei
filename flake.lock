@@ -241,16 +241,16 @@
     "mutter-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1783271691,
-        "narHash": "sha256-8TetSV2tgrx8dkOgB5NytYMojihYoapYTxteG/6aDis=",
-        "ref": "50.2",
-        "rev": "42f80e17aa0621b800c2dad5d23d8dff73f7f1a3",
-        "revCount": 35567,
+        "lastModified": 1783282626,
+        "narHash": "sha256-ebdeFWXu5ViGeqkHSbrchk9vW4wW4F91a160A08OVrQ=",
+        "ref": "50.2-test",
+        "rev": "c039ef2fa4397df71ba32d9c0ce06e6a6afb90f2",
+        "revCount": 35568,
         "type": "git",
         "url": "ssh://git@github.com/back2nix/mutter.git"
       },
       "original": {
-        "ref": "50.2",
+        "ref": "50.2-test",
         "type": "git",
         "url": "ssh://git@github.com/back2nix/mutter.git"
       }
