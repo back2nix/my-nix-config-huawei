@@ -190,7 +190,9 @@ in {
     sessionVariables = rec {
       GTK_THEME = "Adwaita:dark";
       MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
+      MUTTER_ALWAYS_ON_TOP_BY_TITLE = "$(cat ${config.sops.secrets."mutter/mutter_always_on_top_by_title".path})";
       MUTTER_FORCE_HIDE_CURSOR = 1;
+      MUTTER_HIDE_ACTORS_BY_NAME="screencast-hide";
     };
     shells = with pkgs; [fish];
 

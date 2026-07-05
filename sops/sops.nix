@@ -23,6 +23,11 @@
         mode = "0400";
       };
 
+      "mutter/mutter_always_on_top_by_title" = {
+        owner = config.users.users.bg.name;
+        mode = "0400";
+      };
+
       "surfshark" = {
         mode = "0440";
         owner = config.users.users.nobody.name;
