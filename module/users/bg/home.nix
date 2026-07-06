@@ -362,6 +362,9 @@ in {
       enable = true;
       lfs.enable = true;
       settings = {
+        core = {
+          quotepath = false; # показывать кириллицу в именах файлов, а не \320\260
+        };
         user = {
           name = "back2nix";
           email = "back2nix@list.ru";
