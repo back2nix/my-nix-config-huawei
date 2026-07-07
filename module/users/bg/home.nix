@@ -461,6 +461,7 @@ in {
       # Проверено: chrome://gpu → "WebGPU: Hardware accelerated",
       # navigator.gpu.requestAdapter() → Intel xe-2lpg, Vulkan/Compositing целы.
       "--enable-unsafe-webgpu"
+      "--remote-debugging-port=9222"
     ];
   };
 

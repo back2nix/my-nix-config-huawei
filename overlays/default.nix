@@ -97,13 +97,13 @@
       #     "$@"
       # '';
 
-      # --- НАЧАЛО: Обновление claude-code до 2.1.201 ---
+      # --- НАЧАЛО: Обновление claude-code до 2.1.202 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
-        version = "2.1.201";
+        version = "2.1.202";
         src = prev.fetchurl {
-          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.201/linux-x64/claude";
-          sha256 = "a34809a6839fdefff21b9347d7fb5b6b58e6a9cc208a5e62853f29c83eb107a3";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.202/linux-x64/claude";
+          sha256 = "71590202249892db3805ecd5b867f831f04b8129eaabd3f9a5bd4ba16b52c839";
         };
         dontUnpack = true;
         dontBuild = true;
@@ -123,52 +123,64 @@
         '';
         meta.mainProgram = "claude";
       };
-      # --- КОНЕЦ: Обновление claude-code до 2.1.201 ---
+      # --- КОНЕЦ: Обновление claude-code до 2.1.202 ---
 
-      # --- НАЧАЛО: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
+      # --- НАЧАЛО: Обновление gemini-cli до 0.49.0 ---
+      # База — свежая деривация из unstable (0.47.0). Начиная с ~0.45 nixpkgs
+      # перешёл на сборку через `npmBuildScript = "bundle"` (esbuild) с новым
+      # installPhase, поэтому старые postPatch/postInstall (правка scripts/build.js,
+      # ручное копирование packages/sdk и packages/devtools) больше не нужны и
+      # только ломали бы сборку. Override теперь минимальный: version + src +
+      # npmDeps. Всё остальное (postPatch, installPhase) наследуется из nixpkgs.
+      #
+      # ВНИМАНИЕ: npmDeps считается внутри buildNpmPackage по локальным аргументам,
+      # а не по finalAttrs, поэтому overrideAttrs его НЕ пересчитывает — переопределяем
+      # вручную под новый src (иначе тянулись бы зависимости базовой версии).
+      #
+      # Целимся в последний СТАБИЛЬНЫЙ релиз 0.49.0. Последний nightly (0.51.x на
+      # 2026-07-07) не собирается: его package-lock.json ссылается на tar@7.5.8,
+      # который npm не может разрешить из offline-кэша даже с fetcher v2 и
+      # --legacy-peer-deps (битый lockfile самого nightly).
+      #
+      # Начиная с 0.48 workspace vscode-ide-companion тянет транзитивный `tar`,
+      # который fetcher v1 не кладёт в offline-кэш (ENOTCACHED). Нужен fetcher v2.
+      # npmDepsFetcherVersion — локальный аргумент buildNpmPackage, overrideAttrs его
+      # не видит; напрямую правим env.NIX_NPM_FETCHER_VERSION (база на structured-attrs).
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.44.0-nightly.20260518.g5611ff40e";
+        version = "0.49.0";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-MSdQ55IYvzhk5OSSV2J5FygzH+op7BII1WmAW4b7OGQ=";
+          hash = "sha256-C47U5nTWB0Dq2iPRujRHMDjyyrU0d6xZ3Uv7URcIcg8=";
         };
 
-        npmDeps = prev.fetchNpmDeps {
+        env = (oldAttrs.env or {}) // {NIX_NPM_FETCHER_VERSION = 2;};
+        npmDeps = final.unstable.fetchNpmDeps {
           inherit (oldAttrs) pname;
           inherit version src;
-          hash = "sha256-jPffaU3Cm9AlzJ02XBU56m5eVoGcbu9QWfgz4QVdm9A=";
+          fetcherVersion = 2;
+          hash = "sha256-e3gPyBJg2TPGywpR7iqpDtcRdq6AWlvY725kIGPJmCo=";
         };
 
-        # ИЗМЕНЕНИЕ ЗДЕСЬ: Мы убрали `(oldAttrs.postPatch or "") +`,
-        # чтобы старые правила из nixpkgs не отключали сборку devtools!
-        postPatch = ''
-          find . -name "package.json" -not -path "*/node_modules/*" | while read -r pkg; do
-            pkg_name=$(${prev.jq}/bin/jq -r '.name // empty' "$pkg")
-            if [[ "$pkg_name" == *"vscode-ide-companion"* ]] || [[ "$pkg_name" == *"test-utils"* ]]; then
-              echo "Disabling build for $pkg_name..."
-              ${prev.jq}/bin/jq '.scripts.build = "echo skip"' "$pkg" > "$pkg.tmp" && mv "$pkg.tmp" "$pkg"
-            fi
-          done
-
-          # Патчим корневой build.js — заменяем параллельный --workspaces на последовательную сборку
-          sed -i 's|execSync.*npm run build --workspaces.*|execSync("npm run build --workspace=packages/sdk --workspace=packages/devtools --workspace=packages/core --workspace=packages/cli", { stdio: "inherit", cwd: root });|' scripts/build.js
-        '';
-
-        postInstall =
-          (oldAttrs.postInstall or "")
+        # Апстрим 0.49.0 рассинхронизирован: в package.json ряда workspace'ов
+        # точечно пришпилены версии, отличные от резолва в package-lock.json
+        # (tar 7.5.8 vs 7.5.11, clipboardy 5.2.0 vs 5.2.1). npm видит рассинхрон
+        # и лезет за отсутствующими версиями мимо offline-кэша (ETARGET).
+        # Приводим package.json к версиям из lockfile. Сам lockfile не трогаем,
+        # поэтому npmDeps.hash не меняется. Список найден сравнением exact-пинов
+        # package.json с резолвом в package-lock.json — при апдейте перепроверить.
+        postPatch =
+          (oldAttrs.postPatch or "")
           + ''
-            # Копируем новые пакеты, появившиеся в версии 0.30.0, чтобы не было битых симлинков
-            rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
-            cp -r packages/sdk $out/share/gemini-cli/node_modules/@google/gemini-cli-sdk || true
-
-            rm -f $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
-            cp -r packages/devtools $out/share/gemini-cli/node_modules/@google/gemini-cli-devtools || true
+            substituteInPlace packages/a2a-server/package.json packages/cli/package.json \
+              --replace-quiet '"tar": "7.5.8"' '"tar": "7.5.11"'
+            substituteInPlace packages/cli/package.json \
+              --replace-quiet '"clipboardy": "5.2.0"' '"clipboardy": "5.2.1"'
           '';
       });
-      # --- КОНЕЦ: Обновление gemini-cli до 0.44.0-nightly.20260518.g5611ff40e ---
+      # --- КОНЕЦ: Обновление gemini-cli до 0.49.0 ---
 
       gemini-proxy = prev.writeShellScriptBin "gemini" ''
         export HTTP_PROXY="http://127.0.0.1:1083"
