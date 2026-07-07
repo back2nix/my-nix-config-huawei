@@ -10,6 +10,9 @@
   networking.hostName = "huawei-rlef-x";
 
   boot = {
+    # Свежее ядро — важно для нового Intel xe-iGPU (как на asus/yoga14).
+    kernelPackages = pkgs.linuxPackages_latest;
+
     initrd.availableKernelModules = [
       "xhci_pci"
       "nvme"
@@ -46,7 +49,12 @@
     ];
   };
 
-  swapDevices = [{device = "/dev/disk/by-uuid/61e8160b-42b0-428f-8aef-1b993654838d";}];
+  # Только swap-раздел. mkForce отменяет 16 GB swapfile из общего
+  # configuration.nix — иначе на huawei было бы двойное перекрытие свопа.
+  swapDevices = lib.mkForce [{device = "/dev/disk/by-uuid/61e8160b-42b0-428f-8aef-1b993654838d";}];
+
+  # zram — быстрый сжатый своп в RAM для отзывчивости (как у yoga14).
+  zramSwap.enable = true;
 
   networking.useDHCP = lib.mkDefault true;
   networking.nat.externalInterface = "wlo1";
@@ -59,8 +67,26 @@
       enable = true;
       # driSupport = true;
       # driSupport32Bit = true;
+      # VAAPI-драйверы для аппаратного декодирования видео. Здесь, а не в
+      # environment.systemPackages — иначе libva их не подхватывает и декод
+      # идёт на CPU (лишний нагрев и разряд батареи).
+      extraPackages = with pkgs; [
+        intel-media-driver
+        vpl-gpu-rt
+        libva-vdpau-driver
+        libvdpau-va-gl
+        mesa
+        libva
+        libva-utils
+      ];
     };
   };
+
+  # Указываем libva использовать современный iHD-драйвер (intel-media-driver).
+  environment.variables.LIBVA_DRIVER_NAME = "iHD";
+
+  # thermald — управление троттлингом для Intel (asus/yoga14 уже включают).
+  services.thermald.enable = true;
 
   services = {
     fstrim.enable = true;
