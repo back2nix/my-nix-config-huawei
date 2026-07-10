@@ -1,9 +1,24 @@
 # Загружаем переменные из .env
 set dotenv-load
 
-# Основная команда для пересборки системы
-default:
-    sudo nixos-rebuild switch --flake .#{{env_var('DEVICE')}}
+# Основная команда для пересборки системы (автоопределение устройства по hostname)
+default: switch
+
+# Пересборка текущей системы: сам определяет цель flake по hostname
+switch:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$(hostname)" in
+        huawei-rlef-x) device=huawei ;;
+        yoga14)        device=yoga14 ;;
+        desktop)       device=desktop ;;
+        asus-ux3405m)  device=asus ;;
+        *) echo "Неизвестный hostname: $(hostname). Используй: just switch-device <device>" >&2; exit 1 ;;
+    esac
+    echo "Пересборка .#${device} для hostname $(hostname)"
+    sudo nixos-rebuild switch --flake ".#${device}" \
+        --option http2 false \
+        --option substituters "https://cache.nixos.org"
 
 # Пересборка NixOS
 nix:

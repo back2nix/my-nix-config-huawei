@@ -17,6 +17,7 @@ in {
     # inputs.nixvim.homeManagerModules.nixvim
     ./chrome-ssl-keylog.nix
     ./chrome-mcp.nix
+    ./chrome-debug.nix
     ./dconf.nix
     ./tmux/tmux.nix
     # ./zsh/zsh.nix
@@ -32,6 +33,10 @@ in {
   };
 
   programs.chrome-mcp = {
+    enable = true;
+  };
+
+  programs.chrome-debug = {
     enable = true;
   };
 
