@@ -20,6 +20,10 @@
 
   boot = {
     # kernelPackages = pkgs.linuxPackages_zen;
+    # CachyOS-ядро (BORE + LTO + O3) — включать отдельно, т.к. смена ядра
+    # тянет полную пересборку модулей/initrd:
+    #   kernelPackages = pkgs.linuxPackages_cachyos;
+    # (требует inputs.chaotic.nixosModules.default в flake.nix для yoga14)
     kernelPackages = pkgs.linuxPackages_latest;
 
     kernelModules = [
@@ -92,6 +96,28 @@
 
   # zram-своп для отзывчивости (физического свопа на диске нет)
   zramSwap.enable = true;
+
+  # sched-ext: BPF-планировщик из userspace (как у CachyOS). Самый большой
+  # выигрыш в отзывчивости десктопа/интерактива. scx_lavd оптимизирован под
+  # latency/десктоп; на ноутбуке экономит и энергию.
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
+
+  # ananicy-cpp — авто-приоритеты (nice/ioclass) для процессов, аналог того,
+  # что в CachyOS даёт cachyos-settings.
+  services.ananicy = {
+    enable = true;
+    package = pkgs.ananicy-cpp;
+  };
+
+  # sysctl-тюнинг из 99-cachyos-settings.conf.
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 100; # агрессивнее используем zram (сжатый своп в RAM)
+    "vm.vfs_cache_pressure" = 50; # дольше держим dentry/inode кеш
+    "kernel.sched_cfs_bandwidth_slice_us" = 3000;
+  };
 
   # thermald — управление троттлингом для Intel Core Ultra (Lunar Lake)
   services.thermald.enable = true;

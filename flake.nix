@@ -11,6 +11,12 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware";
 
+    # CachyOS-ядро (BORE + LTO + O3) и оверлеи через chaotic-nyx.
+    # Namespace специально НЕ follows nixpkgs — chaotic собирается под свой
+    # unstable и предоставляет бинарный кеш nyx.chaotic.cx (иначе многочасовая
+    # локальная сборка ядра).
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -184,6 +190,9 @@
           huawei = mkSystem "huawei-rlef-x" [];
           yoga14 = mkSystem "yoga14" [
             inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+            # CachyOS-оверлей (даёт pkgs.linuxPackages_cachyos, кеш nyx.chaotic.cx).
+            # Включать вместе с kernelPackages = pkgs.linuxPackages_cachyos:
+            # inputs.chaotic.nixosModules.default
           ];
           desktop = mkSystem "desktop" [];
         };
