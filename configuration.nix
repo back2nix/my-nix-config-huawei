@@ -375,7 +375,6 @@ in {
 
   programs = {
     openvpn3.enable = true;
-    zsh.enable = true;
     fish.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld = {

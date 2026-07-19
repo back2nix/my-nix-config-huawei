@@ -321,7 +321,7 @@ in {
   programs = {
     nix-index = {
       enable = true;
-      enableZshIntegration = true;
+      enableFishIntegration = true;
     };
 
     jq.enable = true;
@@ -355,12 +355,13 @@ in {
 
     zoxide = {
       enable = true;
-      enableZshIntegration = true;
+      enableFishIntegration = true;
     };
 
     direnv = {
       enable = true;
-      enableZshIntegration = true;
+      enableFishIntegration = true;
+      nix-direnv.enable = true; # быстрый кеш для nix-shell/flake use
     };
 
     git = {

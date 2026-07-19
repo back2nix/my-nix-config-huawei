@@ -63,6 +63,7 @@
               1083,    # proxy usa (http)
               1084,    # proxy china (socks)
               1085,    # proxy china (http)
+              5173,    # casino
               8080,    # Gateway
               8081,    # Landing
               8082,    # Chat

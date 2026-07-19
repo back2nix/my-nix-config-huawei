@@ -16,7 +16,6 @@ in {
 
   home-manager.users.root = {...}: {
     imports = [
-      ./bg/zsh/zsh.nix
       ./bg/fish/fish.nix
       ./bg/nixvim.nix
     ];

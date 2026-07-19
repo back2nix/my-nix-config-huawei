@@ -19,19 +19,21 @@
       set -gx fish_history fish
       set -g fish_history_size 100000
 
-      # КРИТИЧНО: Форсируем сохранение и синхронизацию истории в tmux
-      function __save_and_merge_history --on-event fish_postexec
-        history save
+      # Синхронизация истории между панелями tmux.
+      # history save убран: делал fsync после КАЖДОЙ команды (лаг на диске);
+      # fish и так автосохраняет историю. Достаточно merge — подтягивает
+      # команды из других сессий.
+      function __merge_history --on-event fish_postexec
         history merge
       end
 
       # Настройка окружения
       set -gx LANG en_US.UTF-8
-      set -gx PATH $PATH $HOME/.cargo/bin
-      # uv ставит python и `uv tool install` бинарники в ~/.local/bin
+      # cargo/uv бинарники — через fish_add_path (без дублирования PATH)
+      fish_add_path -g $HOME/.cargo/bin
       fish_add_path -g $HOME/.local/bin
       set -g fish_complete_path_as_name true
-      direnv hook fish | source
+      # direnv hook подключается нативно через programs.direnv.enableFishIntegration
 
       set -gx IP_COLOR true
       set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
@@ -54,7 +56,10 @@
       set -g color_status_superuser_str yellow
       set -g VIRTUAL_ENV_DISABLE_PROMPT 1
 
-      bind \cr history-pager
+      # Ctrl-R отдан fzf (programs.fzf.enableFishIntegration) — история с
+      # fuzzy-поиском и превью. Раньше здесь был bind \cr history-pager,
+      # который перебивал fzf. Вернуть fish-pager: раскомментируй строку ниже.
+      # bind \cr history-pager
     '';
 
     plugins = [
@@ -108,16 +113,8 @@
           sha256 = "sha256-s1o188TlwpUQEN3X5MxUlD/2CFCpEkWu83U9O+wg3VU=";
         };
       }
-      # z - быстрая навигация по каталогам
-      {
-        name = "z";
-        src = pkgs.fetchFromGitHub {
-          owner = "jethrokuan";
-          repo = "z";
-          rev = "e0e1b9dfdba362f8ab1ae8c1afc7ccf62b89f7eb";
-          sha256 = "0dbnir6jbwjpjalz14snzd3cgdysgcs3raznsijd6savad3qhijc";
-        };
-      }
+      # z заменён на zoxide (programs.zoxide, Rust) — быстрее и умнее.
+      # Команда z работает как раньше; добавился zi (интерактивный fzf-выбор).
       # Подсветка синтаксиса
       {
         name = "fish-colored-man";
@@ -204,7 +201,34 @@
         ssh -R "$argv[2]":0.0.0.0:$argv[1] "$server" -N
       '';
 
-      # Аналогичные функции для r2l-port, l2r, l2r-port можно добавить по такому же принципу
+      # fuzzy-открыть файл в $EDITOR (fe [путь])
+      fe = ''
+        set -l selected_file (rg --files $argv[1] | fzf)
+        if test -n "$selected_file"
+          $EDITOR $selected_file
+        end
+      '';
+
+      # fuzzy-поиск по содержимому → открыть на нужной строке (se <паттерн>)
+      se = ''
+        set -l fileline (rg -n $argv[1] | fzf --preview 'bat -f (echo {} | cut -d ":" -f 1) -r (echo {} | cut -d ":" -f 2):(math (echo {} | cut -d ":" -f 2) + 150)' | awk '{print $1}' | string replace -r '.$' "")
+        if test -n "$fileline"
+          $EDITOR (string split ':' $fileline)[1] +(string split ':' $fileline)[2]
+        end
+      '';
+
+      # fuzzy-выбор коммита с превью diff (fl)
+      fl = ''
+        set -l commit (git log --oneline --color=always | fzf --ansi --preview="echo {} | cut -d ' ' -f 1 | xargs -I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1)
+        if test -n "$commit"
+          git log --pretty=short -n 1 $commit
+        end
+      '';
+
+      # git diff изменённых файлов через bat (gd)
+      gd = ''
+        git diff --name-only --diff-filter=d $argv | xargs bat --diff
+      '';
 
       # fzf-history-widget = ''
       #   history merge  # Синхронизируем историю
@@ -261,30 +285,8 @@
       diff = ''${pkgs-master.delta}/bin/delta --side-by-side --line-numbers --syntax-theme="Dracula" --file-style="bold yellow" --hunk-header-style="omit" --plus-style="syntax #003800" --minus-style="syntax #3f0001" --zero-style="syntax" --whitespace-error-style="magenta reverse" --navigate'';
 
       st = "stat --format '%a'";
-      fe = ''
-        set selected_file (rg --files $argv[1] | fzf)
-        if test -n "$selected_file"
-        $EDITOR $selected_file
-        end
-      '';
-
-      se = ''
-        set fileline (rg -n $argv[1] | fzf --preview 'bat -f (echo {} | cut -d ":" -f 1) -r (echo {} | cut -d ":" -f 2):(math (echo {} | cut -d ":" -f 2) + 150)' | awk '{print $1}' | string replace -r '.$' "")
-        if test -n "$fileline"
-        $EDITOR (string split ':' $fileline)[1] +(string split ':' $fileline)[2]
-        end
-      '';
-
-      fl = ''
-        set commit (git log --oneline --color=always | fzf --ansi --preview="echo {} | cut -d ' ' -f 1 | xargs -I @ sh -c 'git log --pretty=medium -n 1 @; git diff @^ @' | bat --color=always" | cut -d ' ' -f 1)
-        if test -n "$commit"
-        git log --pretty=short -n 1 $commit
-        end
-      '';
-
-      gd = ''
-        git diff --name-only --diff-filter=d $argv | xargs bat --diff
-      '';
+      # fe / se / fl / gd вынесены в functions = {} ниже:
+      # многострочные тела с set/if/$argv в shellAliases работали ненадёжно.
 
       cdnix = "cd ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei";
       cdinfo = "cd ~/Documents/code/github.com/back2nix/info";
