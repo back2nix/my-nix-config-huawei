@@ -291,14 +291,13 @@ in {
 
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
-      gemini-proxy
+      # Только *-china: единственные разрешённые AI-CLI, ходят через China proxy.
+      # Generic (claude/gemini), *-proxy и *-vpn3 намеренно НЕ ставим, чтобы не
+      # было точки прямого/иного запуска в обход china-прокси.
       gemini-china
-      gemini-vpn3
       appimage-run
       dbeaver-bin
-      claude-code-proxy
       claude-code-china
-      claude-code-vpn3
       # claude-code
       xdotool
       xwininfo
