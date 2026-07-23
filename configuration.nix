@@ -10,6 +10,17 @@
   my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
     edition = "stable";
   };
+
+  # Obsidian падает на Wayland (electron/ozone), форсируем X11 (XWayland).
+  obsidian-x11 = pkgs.symlinkJoin {
+    name = "obsidian";
+    paths = [pkgs.obsidian];
+    buildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram $out/bin/obsidian \
+        --add-flags "--ozone-platform=x11"
+    '';
+  };
 in {
   nix = {
     # nixPath = [ "nixpkgs=flake:nixpkgs" ];
@@ -321,7 +332,7 @@ in {
       gpu-screen-recorder
       openssl
 
-      obsidian
+      obsidian-x11
 
       google-cloud-sdk
       gcloud-proxy
