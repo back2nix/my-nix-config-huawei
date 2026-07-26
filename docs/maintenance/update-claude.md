@@ -11,7 +11,7 @@
 Замените `<VERSION>` на нужную версию:
 
 ```bash
-curl -s --socks5-hostname 127.0.0.1:1084 \
+curl -s --socks5-hostname 127.0.0.1:1082 \
   "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/<VERSION>/manifest.json" \
   | python3 -m json.tool
 ```
