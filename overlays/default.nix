@@ -28,7 +28,23 @@
 
     # Overlay 2: Use `final` and `prev` to express
     # the relationship between the new and the old
-    (final: prev: {
+    (final: prev: let
+      # Единая обёртка «гонять CLI через China proxy».
+      # name — имя создаваемой команды, program — путь к реальному бинарю.
+      # Порт 1083 — http-china inbound из sops/sops.nix; задан здесь один раз,
+      # чтобы при его смене не править каждую обёртку по отдельности.
+      mkChinaWrapper = {
+        name,
+        program,
+      }:
+        prev.writeShellScriptBin name ''
+          export HTTP_PROXY="http://127.0.0.1:1083"
+          export HTTPS_PROXY="http://127.0.0.1:1083"
+          export NO_PROXY="localhost,127.0.0.1,::1"
+
+          exec ${program} "$@"
+        '';
+    in {
       # --- НАЧАЛО: Патч для gnome-screenshot ---
       # gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
       #   patches = (oldAttrs.patches or []) ++ [ ./gnome-screenshot-no-flash.patch ];
@@ -182,79 +198,36 @@
       });
       # --- КОНЕЦ: Обновление gemini-cli до 0.49.0 ---
 
-      gemini-proxy = prev.writeShellScriptBin "gemini" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
+      # --- НАЧАЛО: kimi-code ---
+      # Деривация повторяет то, что делает официальный install.sh
+      # (curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash),
+      # но декларативно и без записи в ~/.kimi-code/bin и rc-файлы.
+      kimi-code = final.callPackage ../pkgs/kimi-code.nix {};
+      # --- КОНЕЦ: kimi-code ---
 
-        # Изменено: используем наш переопределенный final.gemini-cli
-        # вместо final.unstable.gemini-cli
-        exec ${final.gemini-cli}/bin/gemini "$@"
-      '';
+      # Обёртки через China proxy. Только *-china: generic-имена (claude,
+      # gemini, kimi, gcloud), *-proxy, *-vpn2 и *-vpn3 намеренно не определяем,
+      # чтобы не существовало точки запуска мимо china-прокси.
+      # gemini берём из final.gemini-cli (наш override), не из final.unstable.
+      gemini-china = mkChinaWrapper {
+        name = "gemini-china";
+        program = "${final.gemini-cli}/bin/gemini";
+      };
 
-      gemini-china = prev.writeShellScriptBin "gemini-china" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
+      claude-code-china = mkChinaWrapper {
+        name = "claude-code-china";
+        program = "${final.claude-code}/bin/claude";
+      };
 
-        exec ${final.gemini-cli}/bin/gemini "$@"
-      '';
+      kimi-code-china = mkChinaWrapper {
+        name = "kimi-china";
+        program = "${final.kimi-code}/bin/kimi";
+      };
 
-      gemini-vpn3 = prev.writeShellScriptBin "gemini-vpn3" ''
-        export HTTP_PROXY="http://127.0.0.1:1087"
-        export HTTPS_PROXY="http://127.0.0.1:1087"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${final.gemini-cli}/bin/gemini "$@"
-      '';
-
-      claude-code-proxy = prev.writeShellScriptBin "claude-code" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${final.claude-code}/bin/claude "$@"
-      '';
-
-      claude-code-china = prev.writeShellScriptBin "claude-code-china" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${final.claude-code}/bin/claude "$@"
-      '';
-
-      claude-code-vpn3 = prev.writeShellScriptBin "claude-code-vpn3" ''
-        export HTTP_PROXY="http://127.0.0.1:1087"
-        export HTTPS_PROXY="http://127.0.0.1:1087"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${final.claude-code}/bin/claude "$@"
-      '';
-
-      gcloud-proxy = prev.writeShellScriptBin "gcloud" ''
-        export HTTP_PROXY="http://127.0.0.1:1083"
-        export HTTPS_PROXY="http://127.0.0.1:1083"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
-      '';
-
-      gcloud-vpn2 = prev.writeShellScriptBin "gcloud-vpn2" ''
-        export HTTP_PROXY="http://127.0.0.1:1085"
-        export HTTPS_PROXY="http://127.0.0.1:1085"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
-      '';
-
-      gcloud-vpn3 = prev.writeShellScriptBin "gcloud-vpn3" ''
-        export HTTP_PROXY="http://127.0.0.1:1087"
-        export HTTPS_PROXY="http://127.0.0.1:1087"
-        export NO_PROXY="localhost,127.0.0.1,::1"
-
-        exec ${prev.google-cloud-sdk}/bin/gcloud "$@"
-      '';
+      gcloud-china = mkChinaWrapper {
+        name = "gcloud-china";
+        program = "${prev.google-cloud-sdk}/bin/gcloud";
+      };
 
       rtk = final.callPackage ../pkgs/rtk.nix {};
 

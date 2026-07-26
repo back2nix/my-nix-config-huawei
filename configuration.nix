@@ -302,13 +302,16 @@ in {
 
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
-      # Только *-china: единственные разрешённые AI-CLI, ходят через China proxy.
-      # Generic (claude/gemini), *-proxy и *-vpn3 намеренно НЕ ставим, чтобы не
-      # было точки прямого/иного запуска в обход china-прокси.
+      # Только *-china: единственные разрешённые обёртки, ходят через China proxy.
+      # Generic-имена (claude/gemini/kimi/gcloud), *-proxy, *-vpn2 и *-vpn3 не
+      # определены в оверлее вовсе — чтобы не было точки запуска в обход
+      # china-прокси. Так же оформлен gcloud-china ниже.
       gemini-china
       appimage-run
       dbeaver-bin
       claude-code-china
+      kimi-code-china
+      opencode
       # claude-code
       xdotool
       xwininfo
@@ -335,9 +338,7 @@ in {
       obsidian-x11
 
       google-cloud-sdk
-      gcloud-proxy
-      gcloud-vpn2
-      gcloud-vpn3
+      gcloud-china
       zip
 
       # scrcpy # genymobile , pronounced "screen copy"
