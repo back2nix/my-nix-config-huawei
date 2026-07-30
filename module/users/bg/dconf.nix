@@ -55,10 +55,15 @@
       disable-user-extensions = false;
       enabled-extensions = [
         "window-calls@domandoman.xyz"
+        "osk-globe-cycle@back2nix"
       ];
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;
+    };
+    # Экранная клавиатура GNOME (всплывает при вводе с тачскрина)
+    "org/gnome/desktop/a11y/applications" = {
+      screen-keyboard-enabled = true;
     };
     # Настройки масштабирования (если нужны)
     # Раскомментируй и настрой под свои нужды:

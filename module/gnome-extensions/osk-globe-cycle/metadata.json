@@ -1,0 +1,7 @@
+{
+  "uuid": "osk-globe-cycle@back2nix",
+  "name": "OSK Globe Cycles Layout",
+  "description": "Кнопка-глобус на экранной клавиатуре сразу переключает раскладку вместо открытия меню выбора языка (которое не реагирует на касания в модальных диалогах вроде Alt+F2).",
+  "shell-version": ["48", "49", "50"],
+  "session-modes": ["user", "unlock-dialog"]
+}

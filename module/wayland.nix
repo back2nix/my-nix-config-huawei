@@ -44,8 +44,9 @@
     libinput # Библиотека для обработки ввода
     iio-sensor-proxy # Для автоповорота экрана
 
-    # Виртуальная клавиатура для Wayland
-    squeekboard
+    # Виртуальная клавиатура: в GNOME используется штатная OSK
+    # (org.gnome.desktop.a11y.applications screen-keyboard-enabled),
+    # squeekboard тут не подхватывается — он для Phosh.
 
     # Пакет для поддержки планшетов Wacom
     libwacom

@@ -86,6 +86,7 @@ in {
     # Выберите один из модулей дисплейного сервера:
     ./module/x11.nix # Раскомментируйте для X11
     # ./module/wayland.nix   # Раскомментируйте для Wayland
+    ./module/osk-globe-cycle.nix # Глобус на экранной клавиатуре переключает раскладку
     # ./module/monitoring.nix
     ./module/sign-box.nix
     # ./module/vault.nix

@@ -99,10 +99,14 @@ get_time_ms() {
 
 enable_screen_keyboard() {
     echo "Включаем экранную клавиатуру для пользователя $ACTUAL_USER..."
+    run_as_user "$ACTUAL_USER" "$(command -v gsettings)" set \
+        org.gnome.desktop.a11y.applications screen-keyboard-enabled true
 }
 
 disable_screen_keyboard() {
     echo "Выключаем экранную клавиатуру для пользователя $ACTUAL_USER..."
+    run_as_user "$ACTUAL_USER" "$(command -v gsettings)" set \
+        org.gnome.desktop.a11y.applications screen-keyboard-enabled false
 }
 
 # Проверка заблокирована ли клавиатура
