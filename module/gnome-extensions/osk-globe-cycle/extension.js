@@ -1,59 +1,78 @@
-// Две независимые проблемы экранной клавиатуры GNOME, обе чинятся здесь.
+// Точка входа: три независимые доработки экранной клавиатуры GNOME.
 //
-// 1. Кнопка-глобус открывает LanguageSelectionPopup (ui/keyboard.js), который
-//    добавляется через Main.layoutManager.addTopChrome. В модальных диалогах
-//    (Alt+F2, экран блокировки, polkit) Main.pushModal делает
-//    global.stage.grab(dialog) — захват ограничен поддеревом диалога, и попап,
-//    лежащий вне его, не получает событий касания. Клавиши самой OSK при этом
-//    работают, поэтому переключаем раскладку прямо в обработчике клавиши,
-//    не открывая меню. Логика цикла повторяет
-//    InputSourceManager._modifiersSwitcher() из ui/status/keyboard.js.
+//   lib/oskLayouts.js  — ru-extended.json для полей ввода TERMINAL;
+//   lib/globeCycle.js  — глобус переключает раскладку без меню;
+//   lib/swipe/         — ввод слов ведением пальца по клавиатуре.
 //
-// 2. В терминале (content purpose = TERMINAL) _updateLayout ищет раскладку
-//    "<группа>-extended". В gnome-shell есть только at/de/us/za-extended,
-//    поэтому для русского всегда срабатывал фолбэк на us-extended — в консоли
-//    клавиатура оставалась английской при любой выбранной раскладке.
-//    Регистрируем собственный GResource с ru-extended.json: KeyboardModel
-//    грузит раскладки обычным resource:// URI, так что патчить код не нужно.
-
-import Gio from 'gi://Gio';
+// Каждая живёт своим модулем и включается независимо; здесь только сборка
+// и проброс настроек.
 
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
-import {Keyboard} from 'resource:///org/gnome/shell/ui/keyboard.js';
-import * as InputSourceManager from 'resource:///org/gnome/shell/ui/status/keyboard.js';
+
+import * as Log from './lib/log.js';
+
+import {GlobeCycle} from './lib/globeCycle.js';
+import {KeyboardWatcher} from './lib/keyboardWatcher.js';
+import {OskLayouts} from './lib/oskLayouts.js';
+import {SwipeTyping} from './lib/swipe/swipeTyping.js';
 
 export default class OskGlobeCycleExtension extends Extension {
     enable() {
-        this._resource = Gio.Resource.load(`${this.path}/osk-layouts.gresource`);
-        Gio.resources_register(this._resource);
+        this._settings = this.getSettings();
 
-        this._originalPopupLanguageMenu = Keyboard.prototype._popupLanguageMenu;
+        this._layouts = new OskLayouts(this.path);
+        this._layouts.enable();
 
-        Keyboard.prototype._popupLanguageMenu = function () {
-            const manager = InputSourceManager.getInputSourceManager();
-            const sourceIndexes = Object.keys(manager.inputSources);
-            if (sourceIndexes.length < 2)
-                return;
+        this._globeCycle = new GlobeCycle();
+        this._globeCycle.enable();
 
-            const current = manager.currentSource ?? manager.inputSources[sourceIndexes[0]];
+        this._swipeTyping = null;
+        this._watcher = new KeyboardWatcher(
+            keyboard => this._swipeTyping?.attach(keyboard));
 
-            let nextIndex = current.index + 1;
-            if (nextIndex > sourceIndexes[sourceIndexes.length - 1])
-                nextIndex = 0;
+        this._settings.connectObject(
+            'changed::debug', () => this._syncDebug(),
+            'changed::swipe-typing', () => this._syncSwipeTyping(),
+            this);
 
-            let next;
-            while (!(next = manager.inputSources[nextIndex]))
-                nextIndex += 1;
-
-            next.activate(true);
-        };
+        this._syncDebug();
+        this._syncSwipeTyping();
     }
 
     disable() {
-        Keyboard.prototype._popupLanguageMenu = this._originalPopupLanguageMenu;
-        this._originalPopupLanguageMenu = null;
+        this._settings.disconnectObject(this);
+        this._settings = null;
 
-        Gio.resources_unregister(this._resource);
-        this._resource = null;
+        this._watcher.stop();
+        this._watcher = null;
+
+        this._swipeTyping?.destroy();
+        this._swipeTyping = null;
+
+        this._globeCycle.disable();
+        this._globeCycle = null;
+
+        this._layouts.disable();
+        this._layouts = null;
+    }
+
+    _syncDebug() {
+        Log.setDebug(this._settings.get_boolean('debug'));
+    }
+
+    _syncSwipeTyping() {
+        const enabled = this._settings.get_boolean('swipe-typing');
+
+        if (enabled === !!this._swipeTyping)
+            return;
+
+        if (enabled) {
+            this._swipeTyping = new SwipeTyping(`${this.path}/dictionaries`);
+            this._watcher.start();
+        } else {
+            this._watcher.stop();
+            this._swipeTyping.destroy();
+            this._swipeTyping = null;
+        }
     }
 }

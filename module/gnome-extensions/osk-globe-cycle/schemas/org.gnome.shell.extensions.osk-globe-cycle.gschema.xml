@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.osk-globe-cycle"
+          path="/org/gnome/shell/extensions/osk-globe-cycle/">
+    <key name="swipe-typing" type="b">
+      <default>true</default>
+      <summary>Ввод ведением пальца</summary>
+      <description>
+        Распознавать слова по траектории пальца, не отрывая его от клавиатуры.
+      </description>
+    </key>
+    <key name="debug" type="b">
+      <default>false</default>
+      <summary>Отладочный вывод</summary>
+      <description>
+        Писать в journalctl распознанные варианты и их оценки.
+      </description>
+    </key>
+  </schema>
+</schemalist>
