@@ -89,6 +89,13 @@
 
       glib-compile-schemas schemas
 
+      # Помощник захвата клавиатуры запускается из gnome-shell, а там в PATH
+      # питона может не быть вовсе — прописываем абсолютный путь и в шебанге,
+      # и в командной строке Gio.Subprocess.
+      patchShebangs helpers
+      substituteInPlace lib/kbdLock.js \
+        --replace-fail "'python3'" "'${pkgs.python3}/bin/python3'"
+
       runHook postBuild
     '';
 
@@ -103,9 +110,14 @@
 
       cp -r lib     "${target}/lib"
       cp -r schemas "${target}/schemas"
+      cp -r helpers "${target}/helpers"
       cp -r ${dictionaries} "${target}/dictionaries"
 
       chmod -R a-w,a+rX "${target}/lib" "${target}/schemas" "${target}/dictionaries"
+
+      # Помощнику нужен бит исполнения: его запускают как отдельный процесс.
+      chmod -R a-w,a+rX "${target}/helpers"
+      chmod a+x "${target}/helpers/kbd-grab.py"
 
       runHook postInstall
     '';

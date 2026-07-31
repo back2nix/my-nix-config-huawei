@@ -16,13 +16,27 @@ export class KeyboardWatcher {
     constructor(onKeyboard) {
         this._onKeyboard = onKeyboard;
         this._originalInit = null;
+        this._current = null;
+    }
+
+    /**
+     * Последняя созданная клавиатура — чтобы потребитель, включённый уже
+     * после её появления, мог подключиться без ожидания пересоздания.
+     *
+     * @returns {object|null}
+     */
+    get currentKeyboard() {
+        return this._current;
     }
 
     start() {
         if (this._originalInit)
             return;
 
-        const notify = this._onKeyboard;
+        const notify = keyboard => {
+            this._current = keyboard;
+            this._onKeyboard(keyboard);
+        };
         const original = Keyboard.prototype._init;
         this._originalInit = original;
 
@@ -43,5 +57,6 @@ export class KeyboardWatcher {
 
         Keyboard.prototype._init = this._originalInit;
         this._originalInit = null;
+        this._current = null;
     }
 }
