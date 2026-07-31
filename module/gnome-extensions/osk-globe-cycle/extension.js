@@ -35,11 +35,11 @@ export default class OskGlobeCycleExtension extends Extension {
 
         // Панель создаётся первой: и Floating, и KbdLock сообщают в неё
         // состояние, причём KbdLock может сделать это уже из enable().
-        this._toolbar = new Toolbar({
-            onMove: () => this._floating.toggleMove(),
-            onResize: () => this._floating.toggleResize(),
-            onLock: () => this._kbdLock.toggle(),
-        });
+        //
+        // Сами нажатия панель не обрабатывает — их разбирает Floating,
+        // потому что в модальных диалогах события доставляются в обход
+        // цепочки актёров и штатная механика кнопок не срабатывает.
+        this._toolbar = new Toolbar();
 
         this._floating = new Floating(this._settings,
             state => this._toolbar.setState(state));
@@ -55,11 +55,13 @@ export default class OskGlobeCycleExtension extends Extension {
         // и панель кнопок, и геометрия. Поэтому он живёт всё время работы
         // расширения, а не только при включённом свайпе.
         this._watcher = new KeyboardWatcher(keyboard => {
+            // Панель строится первой: Floating при подключении сразу считает
+            // её положение рядом с клавишами.
+            this._toolbar.attach();
+            this._floating.setToolbar(this._toolbar, {
+                onLock: () => this._kbdLock.toggle(),
+            });
             this._floating.attach(keyboard);
-            this._toolbar.attach(keyboard);
-            // Панель строится заново на каждую клавиатуру, поэтому и ссылку
-            // на её актёр обновляем здесь же.
-            this._floating.setToolbar(this._toolbar.actor);
             this._toolbar.setState({
                 move: this._floating.isMoveMode,
                 resize: this._floating.isResizeMode,

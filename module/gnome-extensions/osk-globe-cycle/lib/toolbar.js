@@ -1,16 +1,31 @@
-// Полоска кнопок над клавиатурой: перемещение, изменение размера, замок.
+// Панель кнопок: перемещение, изменение размера, замок.
 //
-// Кнопки живут отдельной строкой внутри самого актёра Keyboard, первым
-// ребёнком — до _suggestions и _aspectContainer. Вкладывать их в
-// _aspectContainer нельзя: тот подгоняет содержимое под соотношение сторон
-// раскладки и растянул бы иконки вместе с клавишами.
+// Расположение. Панель — САМОСТОЯТЕЛЬНЫЙ элемент поверх экрана
+// (Main.layoutManager.addTopChrome), а не ребёнок клавиатуры. Так и должно
+// быть: её место — сбоку ОТ клавиатуры, во внешней области.
 //
-// Keyboard пересоздаётся при каждом включении экранной клавиатуры
-// (KeyboardManager._syncEnabled), поэтому панель строится заново в attach()
-// на каждый экземпляр, а прежняя уничтожается.
+// Прежние попытки вложить её внутрь не работали. Ребёнком Keyboard она
+// отбирала высоту у сетки клавиш (Keyboard — вертикальный St.BoxLayout,
+// любой ребёнок становится строкой). Ребёнком _aspectContainer с выносом
+// через translation_x она оставалась внутри области клавиш и перекрывала их:
+// AspectContainer сужает собственную аллокацию до пропорции раскладки, и
+// вложенный актёр живёт в этих же границах. Единственный способ оказаться
+// снаружи — не быть ребёнком вовсе.
+//
+// Позицию задаёт lib/floating.js через updatePosition(): он знает реальную
+// экранную геометрию области клавиш (с учётом сдвига и масштаба) и ставит
+// колонку справа от неё, а если справа не помещается — слева.
+//
+// Нажатия панель не обрабатывает — их разбирает Floating по координатам.
+// Полагаться на St.Button нельзя: в модальных диалогах (Alt+F2, экран
+// блокировки) события доставляются в обход цепочки актёров через
+// Main.keyboard.maybeHandleEvent() → actor.event(), и внутренняя механика
+// кнопки не срабатывает.
 
 import Clutter from 'gi://Clutter';
 import St from 'gi://St';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 // Иконки проверены по установленной теме Adwaita.
 const ICON_MOVE = 'list-drag-handle-symbolic';
@@ -18,23 +33,23 @@ const ICON_RESIZE = 'zoom-fit-best-symbolic';
 const ICON_LOCKED = 'changes-prevent-symbolic';
 const ICON_UNLOCKED = 'changes-allow-symbolic';
 
+// Зазор между клавишами и колонкой кнопок.
+const GAP = 10;
+
+const BUTTON_BASE =
+    'padding: 8px; border-radius: 8px; background-color: rgba(70, 70, 70, 0.9);';
+const BUTTON_ACTIVE =
+    'padding: 8px; border-radius: 8px; background-color: rgba(120, 170, 255, 0.85);';
+
 export class Toolbar {
-    /**
-     * @param {object} handlers обработчики нажатий
-     * @param {() => void} handlers.onMove   переключить режим перемещения
-     * @param {() => void} handlers.onResize переключить режим масштабирования
-     * @param {() => void} handlers.onLock   переключить замок физической клавиатуры
-     */
-    constructor({onMove, onResize, onLock}) {
-        this._handlers = {onMove, onResize, onLock};
+    constructor() {
         this._box = null;
         this._buttons = null;
         this._state = {move: false, resize: false, locked: false};
     }
 
     /**
-     * Актёр панели — нужен Floating, чтобы пропускать её нажатия мимо
-     * перехватчика касаний.
+     * Актёр панели.
      *
      * @returns {object|null}
      */
@@ -43,46 +58,96 @@ export class Toolbar {
     }
 
     /**
-     * Построить панель в новом экземпляре клавиатуры.
-     *
-     * @param {object} keyboard экземпляр Keyboard
+     * Построить панель. Вызывается на каждый новый экземпляр Keyboard
+     * (KeyboardManager._syncEnabled() пересоздаёт его при каждом включении).
      */
-    attach(keyboard) {
+    attach() {
         this.destroy();
-
-        if (!keyboard)
-            return;
 
         this._box = new St.BoxLayout({
             style_class: 'osk-toolbar',
-            x_align: Clutter.ActorAlign.CENTER,
-            // Панель не должна съедать высоту у клавиш: строка фиксированная,
-            // всё лишнее место по-прежнему достаётся _aspectContainer.
-            y_expand: false,
+            orientation: Clutter.Orientation.VERTICAL,
             reactive: true,
-            // Свой фон: заливку актёра Keyboard мы снимаем (иначе она
-            // растягивается во всю ширину монитора), поэтому панель должна
-            // рисовать подложку сама, ровно под собой.
-            style: 'spacing: 12px; padding: 6px 10px; '
+            style: 'spacing: 8px; padding: 8px; '
                 + 'background-color: rgba(48, 48, 48, 0.95); '
-                + 'border-radius: 10px;',
+                + 'border-radius: 12px;',
         });
 
         this._buttons = {
-            move: this._addButton(ICON_MOVE, 'Переместить клавиатуру',
-                this._handlers.onMove),
-            resize: this._addButton(ICON_RESIZE, 'Изменить размер щипком',
-                this._handlers.onResize),
-            lock: this._addButton(ICON_UNLOCKED, 'Заблокировать физическую клавиатуру',
-                this._handlers.onLock),
+            move: this._addButton(ICON_MOVE),
+            resize: this._addButton(ICON_RESIZE),
+            lock: this._addButton(ICON_UNLOCKED),
         };
 
-        keyboard.insert_child_at_index(this._box, 0);
+        // Верхний слой поверх окон, вне поддерева клавиатуры.
+        Main.layoutManager.addTopChrome(this._box);
+        this._box.hide();
+
         this._sync();
     }
 
     /**
-     * Отразить текущие режимы на кнопках.
+     * Поставить колонку сбоку от области клавиш.
+     *
+     * @param {object|null} keys экранная геометрия клавиш {x, y, width, height}
+     * @param {object|null} monitor монитор клавиатуры
+     * @param {boolean} visible показана ли клавиатура
+     */
+    updatePosition(keys, monitor, visible) {
+        if (!this._box)
+            return;
+
+        if (!visible || !keys || !monitor || keys.width <= 0) {
+            this._box.hide();
+            return;
+        }
+
+        const [, width] = this._box.get_preferred_width(-1);
+        const [, height] = this._box.get_preferred_height(-1);
+
+        // Справа от клавиш, а если там не помещается — слева.
+        let x = keys.x + keys.width + GAP;
+        if (x + width > monitor.x + monitor.width)
+            x = keys.x - GAP - width;
+
+        // Совсем не поместилось ни с одной стороны — прижимаем к краю,
+        // лишь бы кнопки оставались доступны.
+        x = Math.min(Math.max(x, monitor.x),
+            monitor.x + monitor.width - width);
+
+        // По вертикали — по верхней кромке клавиш, не вылезая за монитор.
+        let y = keys.y;
+        y = Math.min(Math.max(y, monitor.y),
+            monitor.y + monitor.height - height);
+
+        this._box.set_position(Math.round(x), Math.round(y));
+        this._box.show();
+    }
+
+    /**
+     * Какая кнопка находится под точкой экрана.
+     *
+     * @param {number} x координата в системе стейджа
+     * @param {number} y координата в системе стейджа
+     * @returns {string|null} 'move' | 'resize' | 'lock' | null
+     */
+    hitTest(x, y) {
+        if (!this._buttons || !this._box?.visible)
+            return null;
+
+        for (const [name, button] of Object.entries(this._buttons)) {
+            const [bx, by] = button.get_transformed_position();
+            const [bw, bh] = button.get_transformed_size();
+            if (Number.isFinite(bx) && x >= bx && x <= bx + bw &&
+                y >= by && y <= by + bh)
+                return name;
+        }
+
+        return null;
+    }
+
+    /**
+     * Отразить текущее состояние на кнопках.
      *
      * @param {object} state частичное состояние {move, resize, locked}
      */
@@ -92,25 +157,21 @@ export class Toolbar {
     }
 
     destroy() {
-        this._box?.destroy();
+        if (this._box) {
+            Main.layoutManager.removeChrome(this._box);
+            this._box.destroy();
+        }
         this._box = null;
         this._buttons = null;
     }
 
-    _addButton(iconName, tooltip, onClicked) {
-        const button = new St.Button({
+    _addButton(iconName) {
+        // St.Bin, а не St.Button: нажатия разбирает Floating.
+        const button = new St.Bin({
             style_class: 'osk-toolbar-button',
-            can_focus: false,
-            // Клавиатура не забирает фокус ввода, и кнопки не должны тоже —
-            // иначе набор уходит не в то окно.
-            child: new St.Icon({icon_name: iconName, icon_size: 20}),
-            accessible_name: tooltip,
-            style: 'padding: 6px; border-radius: 6px;',
-        });
-
-        button.connect('clicked', () => {
-            onClicked?.();
-            return Clutter.EVENT_STOP;
+            reactive: true,
+            child: new St.Icon({icon_name: iconName, icon_size: 22}),
+            style: BUTTON_BASE,
         });
 
         this._box.add_child(button);
@@ -121,23 +182,14 @@ export class Toolbar {
         if (!this._buttons)
             return;
 
-        // Активный режим подсвечиваем инлайновым стилем: у панели нет своего
-        // css в теме оболочки, а таскать с расширением stylesheet ради трёх
-        // кнопок не хочется.
-        const mark = (button, active) => {
-            button.style = active
-                ? 'padding: 6px; border-radius: 6px; background-color: rgba(120,170,255,0.45);'
-                : 'padding: 6px; border-radius: 6px;';
-        };
-
-        mark(this._buttons.move, this._state.move);
-        mark(this._buttons.resize, this._state.resize);
-        mark(this._buttons.lock, this._state.locked);
+        this._buttons.move.style =
+            this._state.move ? BUTTON_ACTIVE : BUTTON_BASE;
+        this._buttons.resize.style =
+            this._state.resize ? BUTTON_ACTIVE : BUTTON_BASE;
+        this._buttons.lock.style =
+            this._state.locked ? BUTTON_ACTIVE : BUTTON_BASE;
 
         this._buttons.lock.child.icon_name =
             this._state.locked ? ICON_LOCKED : ICON_UNLOCKED;
-        this._buttons.lock.accessible_name = this._state.locked
-            ? 'Разблокировать физическую клавиатуру'
-            : 'Заблокировать физическую клавиатуру';
     }
 }

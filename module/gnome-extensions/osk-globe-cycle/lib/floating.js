@@ -11,29 +11,30 @@
 // задаёт LayoutManager._updateKeyboardBox()), а двигаем мы дочерний актор
 // внутри неё через translation_x/translation_y.
 //
-// Фон #keyboard { background-color: ... } рисует сам актор Keyboard, так что
-// при уменьшенной ширине лишней заливки не остаётся — правило по #id,
-// перебить его можно только инлайновым set_style(), что мы и делаем для
-// подсветки активного режима.
-//
 // Про жесты. В Clutter 18 не осталось ни ZoomAction, ни PinchGesture, ни
 // DragAction/GestureAction — весь набор это Action, Gesture, PressGesture,
 // ClickGesture, LongPressGesture, PanGesture. Свой жест поверх
 // Clutter.Gesture написать тоже нельзя: в Clutter-18.gir виртуальные методы
 // point_began/point_moved/point_ended/may_recognize и методы
 // set_state()/get_point_coords_abs() помечены introspectable="0", то есть из
-// GJS недоступны — ни переопределить, ни вызвать. Поэтому оба режима сделаны
-// на сырых touch-событиях через сигнал 'captured-event': он идёт по цепочке
+// GJS недоступны — ни переопределить, ни вызвать. Поэтому всё сделано на
+// сырых touch-событиях через сигнал 'captured-event': он идёт по цепочке
 // сверху вниз (стейдж → клавиатура → кнопка клавиши), так что мы
-// перехватываем касание раньше кнопки и во взведённом режиме клавиши не
-// печатают. Пальцы различаем по ClutterEventSequence.get_slot() —
-// единственный интроспектируемый способ получить стабильный идентификатор
-// касания (сами обёртки ClutterEventSequence в GJS сравнивать нельзя).
+// перехватываем касание раньше кнопки и клавиши не печатают. Пальцы
+// различаем по ClutterEventSequence.get_slot() — единственный
+// интроспектируемый способ получить стабильный идентификатор касания
+// (сами обёртки ClutterEventSequence в GJS сравнивать нельзя).
+//
+// Второй путь доставки — модальные диалоги (Alt+F2, экран блокировки).
+// Там ModalDialog.vfunc_captured_event() зовёт Main.keyboard.maybeHandleEvent(),
+// который вызывает actor.event() напрямую на целевом актёре, минуя цепочку:
+// наш captured-event не эмитится вовсе. Поэтому maybeHandleEvent() тоже
+// патчится, и оба пути сходятся в один обработчик _onCapturedEvent().
 
 import Clutter from 'gi://Clutter';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import {Keyboard} from 'resource:///org/gnome/shell/ui/keyboard.js';
+import {Keyboard, KeyboardManager} from 'resource:///org/gnome/shell/ui/keyboard.js';
 
 import * as Log from './log.js';
 
@@ -86,21 +87,25 @@ export class Floating {
         this._originalGestureProgress = null;
 
         this._keyboard = null;
+        this._toolbar = null;
         this._toolbarActor = null;
+        this._onLock = null;
+        // Кнопка, на которой началось текущее нажатие.
+        this._pressedButton = null;
         this._capturedEventId = 0;
         this._allocationNotifyId = 0;
+        this._visibilityId = 0;
         this._heightNotifyId = 0;
 
-        this._moveMode = false;
         this._resizeMode = false;
+        // Точка, от которой отсчитывается текущее перетаскивание.
+        this._dragAnchor = null;
 
         // slot касания -> {x, y} последних координат.
         this._points = new Map();
         // Расстояние между двумя пальцами в момент начала щипка.
         this._pinchBegin = 0;
         this._pinchRatio = 1;
-        // Перетаскивание мышью/тачпадом (без сенсорного экрана).
-        this._pointerDrag = null;
 
         // Незакоммиченный сдвиг текущего перетаскивания (в GSettings пишем
         // только по окончании жеста, чтобы не долбить dconf каждый кадр).
@@ -110,7 +115,8 @@ export class Floating {
     }
 
     get isMoveMode() {
-        return this._moveMode;
+        // Перемещение больше не режим, а удержание кнопки.
+        return this._dragging;
     }
 
     get isResizeMode() {
@@ -208,6 +214,28 @@ export class Floating {
             this.translation_y = y * progress;
         };
 
+        // Перехватчик висит на стейдже, а не на актёре клавиатуры: панель
+        // кнопок лежит СНАРУЖИ клавиатуры (это отдельный элемент верхнего
+        // слоя), и её касания до поддерева Keyboard не доходят вовсе.
+        // Обработчик первым делом выходит, если событие нас не касается.
+        this._capturedEventId = global.stage.connect('captured-event',
+            (_actor, event) => this._onCapturedEvent(event));
+
+        // В модальных диалогах (Alt+F2, экран блокировки, polkit) события до
+        // клавиатуры доходят другим путём: ModalDialog.vfunc_captured_event()
+        // зовёт Main.keyboard.maybeHandleEvent(), а тот доставляет событие
+        // напрямую целевому актёру через actor.event(), минуя цепочку. Наш
+        // captured-event на Keyboard при этом не эмитится вовсе — поэтому там
+        // не работали ни жесты, ни кнопки панели. Вклиниваемся в этот путь.
+        this._originalMaybeHandleEvent = KeyboardManager.prototype.maybeHandleEvent;
+        const originalMaybe = this._originalMaybeHandleEvent;
+        KeyboardManager.prototype.maybeHandleEvent = function (event) {
+            if (self._enabledInSettings() &&
+                self._onCapturedEvent(event) === Clutter.EVENT_STOP)
+                return true;
+            return originalMaybe.call(this, event);
+        };
+
         this._settings.connectObject(
             'changed::floating', () => this._resync(),
             'changed::scale-percent', () => this._resync(),
@@ -224,9 +252,15 @@ export class Floating {
 
         this._settings.disconnectObject(this);
 
-        this._moveMode = false;
+        this._dragging = false;
         this._resizeMode = false;
         this._resetGestureState();
+
+        if (this._capturedEventId) {
+            global.stage.disconnect(this._capturedEventId);
+            this._capturedEventId = 0;
+        }
+
         this._disconnectCapturedEvent();
         this._restoreHeightNotify();
 
@@ -234,6 +268,9 @@ export class Floating {
         this._keyboard = null;
 
         Keyboard.prototype._relayout = this._originalRelayout;
+        KeyboardManager.prototype.maybeHandleEvent = this._originalMaybeHandleEvent;
+        this._originalMaybeHandleEvent = null;
+
         Keyboard.prototype._animateShow = this._originalAnimateShow;
         Keyboard.prototype._animateShowComplete = this._originalAnimateShowComplete;
         Keyboard.prototype.gestureProgress = this._originalGestureProgress;
@@ -279,18 +316,16 @@ export class Floating {
         this._heightNotifyId = 0;
         this._keyboard = keyboard;
 
-        // Обработчик держим подключённым всегда, а не переподключаем на
-        // каждое переключение режима: он первым делом выходит, если ни один
-        // режим не взведён, так что накладные расходы нулевые, зато нет
-        // риска забыть отключить его при пересоздании клавиатуры.
-        this._capturedEventId = keyboard.connect('captured-event',
-            (_actor, event) => this._onCapturedEvent(event));
-
         // Позиция считается от фактической аллокации, а она становится
         // известна только после переразмещения. Пересчитываем по факту:
         // запись translation_* аллокацию не меняет, зацикливания нет.
         this._allocationNotifyId = keyboard.connect('notify::allocation',
             () => this._syncPosition(this._keyboard));
+
+        // Панель живёт отдельно от клавиатуры, поэтому показывать и прятать
+        // её приходится вручную вслед за ней.
+        this._visibilityId = keyboard.connect('visibility-changed',
+            () => this._syncToolbarPosition());
 
         this._syncStyle();
 
@@ -303,25 +338,14 @@ export class Floating {
      *
      * @param {object|null} actor актёр панели
      */
-    setToolbar(actor) {
-        this._toolbarActor = actor;
-    }
-
-    toggleMove() {
-        this._moveMode = !this._moveMode;
-        // Два режима одновременно не имеют смысла: оба перехватывают
-        // одни и те же касания в фазе capture.
-        if (this._moveMode)
-            this._resizeMode = false;
-        this._resetGestureState();
-        this._syncStyle();
-        this._emitMode();
+    setToolbar(toolbar, handlers = {}) {
+        this._toolbar = toolbar;
+        this._toolbarActor = toolbar?.actor ?? null;
+        this._onLock = handlers.onLock ?? null;
     }
 
     toggleResize() {
         this._resizeMode = !this._resizeMode;
-        if (this._resizeMode)
-            this._moveMode = false;
         this._resetGestureState();
         this._syncStyle();
         this._emitMode();
@@ -334,7 +358,7 @@ export class Floating {
     }
 
     _emitMode() {
-        this._onModeChanged({move: this._moveMode, resize: this._resizeMode});
+        this._onModeChanged({move: this._dragging, resize: this._resizeMode});
     }
 
     _resync() {
@@ -584,6 +608,43 @@ export class Floating {
         const {x, y} = this._targetPosition(keyboard);
         keyboard.translation_x = x;
         keyboard.translation_y = y;
+        this._syncToolbarPosition();
+    }
+
+    /**
+     * Экранная геометрия области клавиш — с учётом сдвига и масштаба.
+     *
+     * @returns {{x: number, y: number, width: number, height: number}|null}
+     */
+    _keysRect() {
+        const content = this._keyboard?._aspectContainer;
+        if (!content)
+            return null;
+
+        const [x, y] = content.get_transformed_position();
+        const [width, height] = content.get_transformed_size();
+
+        if (!Number.isFinite(x) || !Number.isFinite(y) || width <= 0)
+            return null;
+
+        return {x, y, width, height};
+    }
+
+    /**
+     * Поставить панель кнопок сбоку от клавиш.
+     *
+     * Панель — отдельный элемент верхнего слоя, а не ребёнок клавиатуры,
+     * поэтому её положение приходится вести вручную, вслед за клавишами.
+     */
+    _syncToolbarPosition() {
+        if (!this._toolbar)
+            return;
+
+        const visible = !!this._keyboard?.visible &&
+            !!Main.layoutManager.keyboardBox?.visible;
+
+        this._toolbar.updatePosition(this._keysRect(),
+            Main.layoutManager.keyboardMonitor, visible);
     }
 
     /**
@@ -636,23 +697,24 @@ export class Floating {
     // --- события ---------------------------------------------------------
 
     _disconnectCapturedEvent() {
-        if (this._capturedEventId && this._keyboard) {
-            this._keyboard.disconnect(this._capturedEventId);
+        if (this._keyboard) {
             this._keyboard.set_style(null);
             this._keyboard._aspectContainer?.set_style(null);
         }
-        this._capturedEventId = 0;
 
         if (this._allocationNotifyId && this._keyboard)
             this._keyboard.disconnect(this._allocationNotifyId);
         this._allocationNotifyId = 0;
+
+        if (this._visibilityId && this._keyboard)
+            this._keyboard.disconnect(this._visibilityId);
+        this._visibilityId = 0;
     }
 
     _resetGestureState() {
         this._points.clear();
         this._pinchBegin = 0;
         this._pinchRatio = 1;
-        this._pointerDrag = null;
         this._dragging = false;
         this._dragOffsetX = 0;
         this._dragOffsetY = 0;
@@ -675,15 +737,25 @@ export class Floating {
      * @returns {boolean} Clutter.EVENT_STOP или Clutter.EVENT_PROPAGATE
      */
     _onCapturedEvent(event) {
-        if (!this._moveMode && !this._resizeMode)
-            return Clutter.EVENT_PROPAGATE;
         if (!this._keyboard)
             return Clutter.EVENT_PROPAGATE;
 
-        // Панель кнопок лежит внутри самого актёра Keyboard, поэтому её
-        // нажатия тоже приходят сюда. Гасить их нельзя: иначе взведённый
-        // режим невозможно будет выключить той же кнопкой, которой включили.
-        if (this._isToolbarEvent(event))
+        // Нажатия на панель разбираем сами — и в обычном режиме, и в
+        // модальном. Полагаться на St.Button нельзя: при доставке через
+        // maybeHandleEvent() его внутренняя механика не срабатывает.
+        const handled = this._handleToolbar(event);
+        if (handled !== null)
+            return handled;
+
+        // Всё остальное — только когда взведён режим масштабирования либо
+        // идёт перетаскивание, начатое с кнопки.
+        if (!this._resizeMode && !this._dragging)
+            return Clutter.EVENT_PROPAGATE;
+
+        // Перехватчик висит на стейдже и видит вообще все события, поэтому
+        // щипок разбираем только над самими клавишами: иначе взведённый
+        // режим глушил бы касания по всему экрану.
+        if (this._resizeMode && !this._isOverKeys(event))
             return Clutter.EVENT_PROPAGATE;
 
         switch (event.type()) {
@@ -694,49 +766,119 @@ export class Floating {
         case Clutter.EventType.TOUCH_END:
         case Clutter.EventType.TOUCH_CANCEL:
             return this._onTouchEnd(event);
-        case Clutter.EventType.BUTTON_PRESS:
-            return this._onButtonPress(event);
-        case Clutter.EventType.MOTION:
-            return this._onMotion(event);
-        case Clutter.EventType.BUTTON_RELEASE:
-            return this._onButtonRelease(event);
         default:
             return Clutter.EVENT_PROPAGATE;
         }
     }
 
     /**
-     * Пришло ли событие из панели кнопок (lib/toolbar.js).
-     *
-     * Поднимаемся от источника события вверх до самого Keyboard: всё, что
-     * помечено классом osk-toolbar, пропускаем к кнопкам нетронутым.
+     * Попадает ли событие в область клавиш.
      *
      * @param {object} event Clutter.Event
      * @returns {boolean}
      */
-    _isToolbarEvent(event) {
-        const toolbar = this._toolbarActor;
-        if (!toolbar)
+    _isOverKeys(event) {
+        const keys = this._keysRect();
+        if (!keys)
             return false;
 
-        // Основной путь: прямая проверка родства. contains() отвечает и за
-        // сам актёр панели, и за любую вложенную кнопку с иконкой.
-        const source = event.get_source();
-        if (source && toolbar.contains(source))
-            return true;
-
-        // Запасной путь по координатам: у сенсорных событий источником может
-        // оказаться не тот актёр, по которому реально попал палец (пикинг
-        // в фазе capture ещё не обязан совпадать с конечной целью). Панель
-        // маленькая, поэтому промах здесь дороже лишней проверки.
         const [x, y] = event.get_coords();
-        const [tx, ty] = toolbar.get_transformed_position();
-        const [tw, th] = toolbar.get_transformed_size();
-        if (Number.isFinite(tx) && Number.isFinite(ty) &&
-            x >= tx && x <= tx + tw && y >= ty && y <= ty + th)
-            return true;
+        return x >= keys.x && x <= keys.x + keys.width &&
+            y >= keys.y && y <= keys.y + keys.height;
+    }
 
-        return false;
+    /**
+     * Разбор нажатий на панель кнопок.
+     *
+     * Кнопка перемещения работает удержанием: нажал — и сразу тащишь, отпустил
+     * — зафиксировалось. Прежний вариант (нажать, потом отдельно тащить) был
+     * неудобен и к тому же требовал отдельного выключения режима.
+     *
+     * Кнопки размера и замка срабатывают обычным нажатием: щипок двумя
+     * пальцами нельзя выполнить, удерживая кнопку, поэтому масштабирование
+     * остаётся взводимым режимом.
+     *
+     * @param {object} event Clutter.Event
+     * @returns {boolean|null} результат обработки либо null, если событие
+     *   к панели не относится
+     */
+    _handleToolbar(event) {
+        const toolbar = this._toolbar;
+        if (!toolbar)
+            return null;
+
+        const type = event.type();
+        const isPress = type === Clutter.EventType.TOUCH_BEGIN ||
+            type === Clutter.EventType.BUTTON_PRESS;
+        const isRelease = type === Clutter.EventType.TOUCH_END ||
+            type === Clutter.EventType.TOUCH_CANCEL ||
+            type === Clutter.EventType.BUTTON_RELEASE;
+
+        if (isPress) {
+            const [x, y] = event.get_coords();
+            const button = toolbar.hitTest(x, y);
+            if (!button)
+                return null;
+
+            this._pressedButton = button;
+
+            if (button === 'move') {
+                // Перетаскивание начинается прямо здесь, без промежуточного
+                // режима: дальнейшие движения уже уводят клавиатуру.
+                this._resizeMode = false;
+                this._dragging = true;
+                this._dragOffsetX = 0;
+                this._dragOffsetY = 0;
+                this._dragAnchor = {x, y};
+                this._syncStyle();
+                this._emitMode();
+            }
+
+            return Clutter.EVENT_STOP;
+        }
+
+        // Пока тащим от кнопки перемещения, движение принадлежит панели,
+        // где бы палец сейчас ни находился.
+        if (this._pressedButton === 'move' && this._dragging) {
+            if (type === Clutter.EventType.TOUCH_UPDATE ||
+                type === Clutter.EventType.MOTION) {
+                const [x, y] = event.get_coords();
+                this._dragOffsetX += x - this._dragAnchor.x;
+                // offset-y растёт вверх, координаты Clutter — вниз.
+                this._dragOffsetY -= y - this._dragAnchor.y;
+                this._dragAnchor = {x, y};
+                this._syncPosition(this._keyboard);
+                return Clutter.EVENT_STOP;
+            }
+
+            if (isRelease) {
+                this._commitOffsets();
+                this._pressedButton = null;
+                this._dragAnchor = null;
+                this._syncStyle();
+                this._emitMode();
+                return Clutter.EVENT_STOP;
+            }
+        }
+
+        if (isRelease && this._pressedButton) {
+            const [x, y] = event.get_coords();
+            const button = toolbar.hitTest(x, y);
+            const pressed = this._pressedButton;
+            this._pressedButton = null;
+
+            // Срабатываем только если отпустили на той же кнопке.
+            if (button === pressed) {
+                if (pressed === 'resize')
+                    this.toggleResize();
+                else if (pressed === 'lock')
+                    this._onLock?.();
+            }
+
+            return Clutter.EVENT_STOP;
+        }
+
+        return null;
     }
 
     /**
@@ -770,12 +912,6 @@ export class Floating {
             this._keyboard.set_pivot_point(0.5, 1.0);
         }
 
-        if (this._moveMode && this._points.size === 1) {
-            this._dragging = true;
-            this._dragOffsetX = 0;
-            this._dragOffsetY = 0;
-        }
-
         return Clutter.EVENT_STOP;
     }
 
@@ -785,7 +921,6 @@ export class Floating {
             return Clutter.EVENT_PROPAGATE;
 
         const [x, y] = event.get_coords();
-        const previous = this._points.get(slot);
         this._points.set(slot, {x, y});
 
         if (this._resizeMode && this._points.size === 2 && this._pinchBegin > 0) {
@@ -795,12 +930,6 @@ export class Floating {
             // прогоняет пикинг через ту же матрицу трансформации, поэтому
             // касания продолжают попадать в нужные клавиши.
             this._applyScale(this._keyboard, this._pinchRatio);
-        } else if (this._moveMode && this._dragging && this._points.size === 1) {
-            this._dragOffsetX += x - previous.x;
-            // offset-y растёт вверх (см. _targetPosition), а координаты
-            // Clutter — вниз, отсюда знак минус.
-            this._dragOffsetY -= y - previous.y;
-            this._syncPosition(this._keyboard);
         }
 
         return Clutter.EVENT_STOP;
@@ -820,48 +949,8 @@ export class Floating {
             this._commitScale(this._pinchRatio);
             this._pinchBegin = 0;
             this._pinchRatio = 1;
-        } else if (this._moveMode && this._dragging && this._points.size === 0) {
-            this._commitOffsets();
         }
 
-        return Clutter.EVENT_STOP;
-    }
-
-    // Мышь/тачпад: режим перемещения должен работать и без сенсорного
-    // экрана, поэтому дублируем логику на кнопке указателя.
-
-    _onButtonPress(event) {
-        if (!this._moveMode)
-            return Clutter.EVENT_PROPAGATE;
-        if (event.get_button() !== Clutter.BUTTON_PRIMARY)
-            return Clutter.EVENT_PROPAGATE;
-
-        const [x, y] = event.get_coords();
-        this._pointerDrag = {x, y};
-        this._dragging = true;
-        this._dragOffsetX = 0;
-        this._dragOffsetY = 0;
-        return Clutter.EVENT_STOP;
-    }
-
-    _onMotion(event) {
-        if (!this._pointerDrag)
-            return Clutter.EVENT_PROPAGATE;
-
-        const [x, y] = event.get_coords();
-        this._dragOffsetX += x - this._pointerDrag.x;
-        this._dragOffsetY -= y - this._pointerDrag.y;
-        this._pointerDrag = {x, y};
-        this._syncPosition(this._keyboard);
-        return Clutter.EVENT_STOP;
-    }
-
-    _onButtonRelease(_event) {
-        if (!this._pointerDrag)
-            return Clutter.EVENT_PROPAGATE;
-
-        this._pointerDrag = null;
-        this._commitOffsets();
         return Clutter.EVENT_STOP;
     }
 
@@ -893,7 +982,6 @@ export class Floating {
         this._settings.set_int('offset-x', x);
         this._settings.set_int('offset-y', y);
         this._syncPosition(this._keyboard);
-        this._disarm();
     }
 
     /**
@@ -936,9 +1024,8 @@ export class Floating {
      * где клавиши не печатают, нельзя.
      */
     _disarm() {
-        if (!this._moveMode && !this._resizeMode)
+        if (!this._resizeMode)
             return;
-        this._moveMode = false;
         this._resizeMode = false;
         this._syncStyle();
         this._emitMode();
@@ -961,7 +1048,7 @@ export class Floating {
             return;
 
         let style = STYLE_CONTENT;
-        if (this._moveMode)
+        if (this._dragging)
             style += STYLE_MOVE;
         else if (this._resizeMode)
             style += STYLE_RESIZE;
