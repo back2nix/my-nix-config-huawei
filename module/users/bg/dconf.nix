@@ -75,7 +75,7 @@
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
     "org/gnome/shell/extensions/custom-command-toggle" = {
       numbuttons-setting = 1;
-      entryrow3-setting = "Admin VPN";
+      entryrow3-setting = "WinJoy VPN";
       entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
       entryrow1-setting = "systemctl start amneziawg-egg.service";
       entryrow2-setting = "systemctl stop amneziawg-egg.service";
