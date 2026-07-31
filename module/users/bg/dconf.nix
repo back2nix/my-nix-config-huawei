@@ -56,7 +56,40 @@
       enabled-extensions = [
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
+        "custom-command-toggle@storageb.github.com"
       ];
+    };
+
+    # Тумблер admin-VPN до прод-сервера в Quick Settings + индикатор в топ-баре.
+    # NetworkManager AmneziaWG не понимает (обфусцированный форк WireGuard — см.
+    # module/wireguard-eggventure.nix), поэтому штатного VPN-переключателя нет и
+    # быть не может; этот дёргает systemd-юнит напрямую. Право на start/stop без
+    # пароля даёт polkit-правило, ограниченное РОВНО этим юнитом (там же).
+    #
+    # Главная польза здесь — не сам переключатель (юнит и так поднимается при
+    # загрузке), а ИНДИКАТОР: сейчас об отвале туннеля узнаёшь только по
+    # отвалившемуся kubectl.
+    #
+    # ⚠️ Расширения GNOME ломаются на каждом мажоре шелла. При переезде на
+    # GNOME 51 проверь shell-version в metadata.json ДО switch — иначе тумблер
+    # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
+    "org/gnome/shell/extensions/custom-command-toggle" = {
+      numbuttons-setting = 1;
+      entryrow3-setting = "Admin VPN";
+      entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
+      entryrow1-setting = "systemctl start amneziawg-egg.service";
+      entryrow2-setting = "systemctl stop amneziawg-egg.service";
+      # Состояние берём из systemd, а не из памяти расширения: иначе после
+      # ребута или падения юнита тумблер показывал бы неправду.
+      # UP/DOWN, а не сырой вывод is-active: сверка внутри расширения — поиск по
+      # границе слова, и `active` совпало бы с `inactive`.
+      checkcommand1-setting = "systemctl is-active --quiet amneziawg-egg.service && echo UP || echo DOWN";
+      checkregex1-setting = "UP";
+      checkcommandsync1-setting = true;
+      checkcommandinterval1-setting = 10;
+      initialtogglestate1-setting = 3; # не трогать юнит при логине
+      showindicator1-setting = true;
+      runcommandatboot1-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;

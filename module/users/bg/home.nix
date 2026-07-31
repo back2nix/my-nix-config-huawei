@@ -305,6 +305,8 @@ in {
       '')
 
       gnomeExtensions.window-calls
+      # Тумблер+индикатор admin-VPN в Quick Settings (настройка — dconf.nix).
+      gnomeExtensions.custom-command-toggle
     ];
 
     file = {

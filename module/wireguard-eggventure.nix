@@ -113,6 +113,27 @@ in {
     '';
   };
 
+  # Переключатель admin-VPN в Quick Settings GNOME (расширение
+  # custom-command-toggle, включается в module/users/bg/dconf.nix) дёргает этот
+  # юнит напрямую — NetworkManager AmneziaWG не понимает, поэтому иначе никак.
+  # ☢️ Правило намеренно УЗКОЕ: проверяются одновременно action.id, ИМЯ ЮНИТА и
+  # глагол. Без lookup("unit") пользователь bg получил бы право управлять ЛЮБЫМ
+  # системным сервисом, включая sshd и firewall — это не «удобство», а
+  # эскалация привилегий. subject.local && subject.active отсекают ssh-сессии и
+  # залоченный экран. `systemctl is-active` пароля не требует вовсе (read-only).
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          action.lookup("unit") == "amneziawg-egg.service" &&
+          (action.lookup("verb") == "start" ||
+           action.lookup("verb") == "stop"  ||
+           action.lookup("verb") == "restart") &&
+          subject.user == "bg" && subject.local && subject.active) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
   # Правило в nftables-ruleset (module/network-configuration.nix) НАМЕРЕННО не
   # добавляется. Исходящие UDP/51820 уже разрешены set'ом system_udp, а ответный
   # трафик проходит по `ct state established accept` — туннель работает как есть.
