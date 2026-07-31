@@ -12,6 +12,14 @@
     (modulesPath + "/installer/scan/not-detected.nix")
     ./hardware-configuration.nix
 
+    # Admin-VPN до casino-VPS. Импорт ЗДЕСЬ, а не в общем configuration.nix,
+    # намеренно: peer 10.100.0.2 на сервере один, и подключение второй машины с
+    # тем же ключом и адресом ломало бы туннель обеим (WireGuard привязывает
+    # endpoint к публичному ключу — последний рукопожавшийся перетягивает сессию).
+    # Если админ-доступ понадобится с другой машины — ей нужна СВОЯ пара ключей
+    # и свой адрес (10.100.0.4/32) в casino-vps/modules/wireguard.nix.
+    ../../module/wireguard-eggventure.nix
+
     # Подключаем наш новый модуль аудио-моста
     ./module/ai-audio.nix
   ];
