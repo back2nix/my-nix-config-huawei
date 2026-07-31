@@ -8,6 +8,8 @@
 #     Main.pushModal);
 #   * ru-extended.json для полей ввода с purpose = TERMINAL, где иначе
 #     всегда подставлялась us-extended;
+#   * extended-раскладка (стрелки, Tab, Ctrl, Alt) во всех полях ввода, а не
+#     только в терминальных;
 #   * ввод слов ведением пальца по клавишам (свайп), как на телефоне.
 #
 # Подробности реализации — в комментариях внутри gnome-extensions/.
@@ -72,6 +74,17 @@
       done
     '';
 
+  # us-extended.json из того gnome-shell, с которым собирается система.
+  # Кладётся в наш GResource под именем us.json — см. ниже.
+  usExtended =
+    pkgs.runCommand "osk-us-extended" {
+      nativeBuildInputs = [pkgs.glib];
+    } ''
+      gresource extract \
+        "${pkgs.gnome-shell}/share/gnome-shell/gnome-shell-osk-layouts.gresource" \
+        /org/gnome/shell/osk-layouts/us-extended.json > "$out"
+    '';
+
   extension = pkgs.stdenvNoCC.mkDerivation {
     pname = "gnome-shell-extension-osk-globe-cycle";
     version = "2.0";
@@ -81,6 +94,12 @@
 
     buildPhase = ''
       runHook preBuild
+
+      # Стрелки, Tab, Ctrl и Alt есть только в «*-extended» раскладках, а их
+      # gnome-shell берёт лишь для purpose = TERMINAL. Регистрируем те же
+      # раскладки под обычными именами — тогда extended работает везде.
+      cp ru-extended.json ru.json
+      cp ${usExtended}    us.json
 
       glib-compile-resources \
         --target=osk-layouts.gresource \

@@ -2,5 +2,8 @@
 <gresources>
   <gresource prefix="/org/gnome/shell/osk-layouts">
     <file>ru-extended.json</file>
+    <!-- ru.json и us.json — копии extended-раскладок, их делает buildPhase -->
+    <file>ru.json</file>
+    <file>us.json</file>
   </gresource>
 </gresources>
