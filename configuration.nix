@@ -92,7 +92,11 @@ in {
     # ./module/vault.nix
     # ./module/tor.nix
     ./module/attic.nix
+    ./module/chrome-password-manager.nix
   ];
+
+  # Пароли живут в KeePassXC (.kdbx), а не внутри Chrome.
+  programs.chrome-password-manager.enable = true;
 
   # ==========================================
   # Настройки Attic (взято из examples/attic)

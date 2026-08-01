@@ -146,7 +146,9 @@ in {
       # multipass
       pkgs-unstable.telegram-desktop
       # telegram-desktop
-      keepassxc
+      # keepassxc: переехал в module/chrome-password-manager.nix — приложение и
+      # keepassxc-proxy из native messaging host должны быть одним store-path,
+      # иначе интеграция с Chrome ломается при расхождении версий.
       proxychains
       # arion
       deadnix
