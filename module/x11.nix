@@ -100,6 +100,21 @@
   # gdm.wayland больше не поддерживается в GNOME 50 — Wayland по умолчанию
   services.desktopManager.gnome.enable = true;
 
+  # Модуль GNOME по умолчанию включает i18n.inputMethod (ibus). Нам он не нужен:
+  # раскладки us/ru идут через xkb (см. services.xserver.xkb выше), IME-движков
+  # с composition (CJK) нет — gsettings input-sources = [(xkb,us),(xkb,ru)].
+  #
+  # При этом ibus активно ВРЕДИЛ: он выставляет XMODIFIERS=@im=ibus, из-за чего
+  # XWayland-клиенты (Chrome с --ozone-platform=x11, Obsidian) ходят к ibus-x11
+  # по легаси-протоколу XIM. XIM синхронный, и Ctrl+V в Chrome залипал ~10с на
+  # каждой вставке. Замерено: сам буфер обмена ни при чём — XWayland-мост Mutter
+  # и kitty отвечают на все таргеты (TARGETS/text-plain/SAVE_TARGETS) за 12-17мс.
+  # Проверено: запуск Chrome с XMODIFIERS=@im=none убирает задержку полностью.
+  #
+  # Chrome держим на --ozone-platform=x11 намеренно — ради HW-композитинга,
+  # см. programs.google-chrome в module/users/bg/home.nix.
+  i18n.inputMethod.enable = false;
+
   # Отключаем файловый индексатор GNOME (localsearch/tinysparql, бывший tracker).
   # Он жрёт CPU, сканируя home. Нам не нужен.
   services.gnome.localsearch.enable = false;
