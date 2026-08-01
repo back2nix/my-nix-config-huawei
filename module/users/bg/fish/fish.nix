@@ -56,6 +56,23 @@
       set -g color_status_superuser_str yellow
       set -g VIRTUAL_ENV_DISABLE_PROMPT 1
 
+      # === Автодополнение для z (zoxide) ===
+      # Штатный `zoxide init fish` даёт для `z foo<TAB>` только обычное
+      # cd-дополнение подкаталогов текущей папки — база frecency в TAB не
+      # участвует (интерактивный fzf включается лишь когда последний токен
+      # пустой). Ниже — дополнение прямо из базы zoxide.
+      # Цепляемся к __zoxide_z (алиас z --wraps его же): zoxide в своём init
+      # делает `complete --erase --command z`, но __zoxide_z не трогает,
+      # поэтому порядок инициализации не важен.
+      function __zoxide_z_db_complete
+        set -l tok (commandline --current-token)
+        test -n "$tok"; or return
+        set -l q (string split " " -- (string trim (commandline -c)))
+        command zoxide query --list --exclude (pwd) -- $q[2..] 2>/dev/null
+      end
+      # -k — сохранить порядок zoxide (по frecency), а не сортировать по алфавиту
+      complete -k --command __zoxide_z --no-files --arguments '(__zoxide_z_db_complete)'
+
       # Ctrl-R отдан fzf (programs.fzf.enableFishIntegration) — история с
       # fuzzy-поиском и превью. Раньше здесь был bind \cr history-pager,
       # который перебивал fzf. Вернуть fish-pager: раскомментируй строку ниже.
