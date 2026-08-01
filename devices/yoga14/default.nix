@@ -151,8 +151,6 @@
     # Камера
     ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
 
-    ACTION=="add", SUBSYSTEM=="backlight", ATTR{brightness}="73"
-
     SUBSYSTEM=="net", KERNEL=="tun", GROUP="kvm", MODE="0660"
 
     KERNEL=="video[0-9]*", TAG+="uaccess"
