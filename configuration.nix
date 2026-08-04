@@ -374,6 +374,7 @@ in {
       dive # анализ слоёв docker-образов
       lazydocker # TUI для docker
       brave
+      ncdu
     ];
 
     etc."proxychains.conf".text = ''
