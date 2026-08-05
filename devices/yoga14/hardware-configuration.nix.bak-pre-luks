@@ -27,11 +27,6 @@
   ];
   boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
 
-  boot.initrd.luks.devices."cryptroot" = {
-    device = "/dev/disk/by-uuid/5341aa2e-442f-4c4a-a779-87ecc6574b63";
-    allowDiscards = true;
-  };
-
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/356953f7-8013-45c0-860b-718afd45bba6";
     fsType = "ext4";

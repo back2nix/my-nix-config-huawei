@@ -16,13 +16,16 @@ switch:
         *) echo "Неизвестный hostname: $(hostname). Используй: just switch-device <device>" >&2; exit 1 ;;
     esac
     echo "Пересборка .#${device} для hostname $(hostname)"
-    sudo nixos-rebuild switch --flake ".#${device}" \
+    # --sudo вместо `sudo nixos-rebuild`: eval/fetch флейка идёт от пользователя
+    # (нужен его ssh-ключ для приватного git+ssh инпута mutter-src),
+    # root используется только для активации.
+    nixos-rebuild switch --sudo --flake ".#${device}" \
         --option http2 false \
         --option substituters "https://cache.nixos.org"
 
 # Пересборка NixOS
 nix:
-    sudo nixos-rebuild switch --flake .#{{env_var('DEVICE')}}
+    nixos-rebuild switch --sudo --flake .#{{env_var('DEVICE')}}
 
 # Сборка VM для тестирования
 build:
@@ -51,7 +54,7 @@ update:
 
 # Переключение на конкретное устройство (переопределяет .env)
 switch-device device:
-    sudo nixos-rebuild switch --flake .#{{device}}
+    nixos-rebuild switch --sudo --flake .#{{device}}
 
 # Форматирование кода с помощью alejandra
 fmt-alejandra:
