@@ -93,6 +93,7 @@ in {
     # ./module/tor.nix
     ./module/attic.nix
     ./module/chrome-password-manager.nix
+    ./module/hard-poweroff.nix # Ctrl+Esc — мгновенное жёсткое выключение
   ];
 
   # Пароли живут в KeePassXC (.kdbx), а не внутри Chrome.

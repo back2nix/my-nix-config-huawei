@@ -15,6 +15,13 @@
       command = "kitty";
       name = "Open Terminal";
     };
+    # ВНИМАНИЕ: жёсткое выключение через sysrq, без sync и без systemd.
+    # Несохранённые данные теряются. См. module/hard-poweroff.nix
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+      binding = "<Primary>Escape";
+      command = "/run/wrappers/bin/sudo -n /run/current-system/sw/bin/hard-poweroff";
+      name = "Hard Power Off (instant)";
+    };
     "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
       binding = "<Primary><Alt>R";
       command = "toggle-flip";
