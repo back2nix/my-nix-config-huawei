@@ -94,6 +94,7 @@ in {
     ./module/attic.nix
     ./module/chrome-password-manager.nix
     ./module/hard-poweroff.nix # Ctrl+Esc — мгновенное жёсткое выключение
+    ./module/time.nix # chrony + NTS вместо systemd-timesyncd
   ];
 
   # Пароли живут в KeePassXC (.kdbx), а не внутри Chrome.
