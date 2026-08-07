@@ -85,7 +85,7 @@
             type = "ssh";
             tag = "ssh-out1";
             server = "${config.sops.placeholder."vpn1/ip"}";
-            server_port = 22;
+            server_port = 2222;
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
           }
@@ -101,7 +101,7 @@
             type = "ssh";
             tag = "ssh-out1-via-vpn3";
             server = "${config.sops.placeholder."vpn1/ip"}";
-            server_port = 22;
+            server_port = 2222;
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
             detour = "vpn3-proxy";
