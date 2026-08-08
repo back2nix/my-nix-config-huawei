@@ -6,9 +6,25 @@
 Никакого npm, package-lock.json, нативных tgz — просто `fetchurl` + `autoPatchelfHook`.
 Бинарник обычно уже есть в кэше [garnix.io](https://garnix.io), поэтому сборка занимает секунды.
 
-## 1. Получите манифест с хэшами
+## 1. Узнайте актуальную версию — ОБЯЗАТЕЛЬНО, не полагайтесь на память/предположения
 
-Замените `<VERSION>` на нужную версию:
+`stable` — не всегда самая свежая версия, есть ещё `latest`. Проверяйте оба и берите
+максимальный из них, сравнив с версией, установленной в `overlays/default.nix` сейчас:
+
+```bash
+curl -s --socks5-hostname 127.0.0.1:1082 \
+  "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/stable"
+curl -s --socks5-hostname 127.0.0.1:1082 \
+  "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest"
+```
+
+Никогда не говорите пользователю "уже последняя версия", не сверив оба этих значения
+с версией в `overlays/default.nix`. Если `latest`/`stable` больше текущей — версия
+устарела, нужно обновлять.
+
+## 2. Получите манифест с хэшами
+
+Замените `<VERSION>` на версию, полученную на шаге 1:
 
 ```bash
 curl -s --socks5-hostname 127.0.0.1:1082 \
@@ -18,7 +34,7 @@ curl -s --socks5-hostname 127.0.0.1:1082 \
 
 Из вывода берём поле `checksum` для `linux-x64`.
 
-## 2. Отредактируйте `overlays/default.nix`
+## 3. Отредактируйте `overlays/default.nix`
 
 Структура:
 
@@ -52,7 +68,7 @@ curl -s --socks5-hostname 127.0.0.1:1082 \
 # --- КОНЕЦ: Обновление claude-code до <VERSION> ---
 ```
 
-## 3. Соберите и проверьте
+## 4. Соберите и проверьте
 
 ```bash
 nix build .#nixosConfigurations.yoga14.pkgs.claude-code
