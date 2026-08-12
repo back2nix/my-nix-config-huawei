@@ -201,7 +201,7 @@ in {
       MUTTER_ALWAYS_ON_TOP_BY_TITLE = "$(cat ${config.sops.secrets."mutter/mutter_always_on_top_by_title".path})";
       MUTTER_FORCE_HIDE_CURSOR = 1;
       MUTTER_HIDE_ACTORS_BY_NAME="screencast-hide";
-      MUTTER_HIDE_ACTORS_BY_STYLE_CLASS="run-dialo";
+      MUTTER_HIDE_ACTORS_BY_STYLE_CLASS="run-dialog,switcher-popup,notification-banner";
     };
     shells = with pkgs; [fish];
 
