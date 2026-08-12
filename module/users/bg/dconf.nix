@@ -60,6 +60,10 @@
     };
     "org/gnome/shell" = {
       disable-user-extensions = false;
+      # В системе один пользователь, и GNOME в этом случае прячет «Выйти» —
+      # остаётся только перезагрузка. Расширения подхватываются лишь после
+      # ре-логина, так что кнопка нужна.
+      always-show-log-out = true;
       enabled-extensions = [
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
@@ -81,7 +85,7 @@
     # GNOME 51 проверь shell-version в metadata.json ДО switch — иначе тумблер
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
     "org/gnome/shell/extensions/custom-command-toggle" = {
-      numbuttons-setting = 1;
+      numbuttons-setting = 2;
       entryrow3-setting = "WinJoy VPN";
       entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
       entryrow1-setting = "systemctl start amneziawg-egg.service";
@@ -97,14 +101,35 @@
       initialtogglestate1-setting = 3; # не трогать юнит при логине
       showindicator1-setting = true;
       runcommandatboot1-setting = false;
+
+      # Кнопка 2: экранная клавиатура GNOME (OSK). Выключенная — не всплывает
+      # вообще, включённая — появляется в нужные моменты (ввод с тачскрина).
+      # Это ровно тот же ключ a11y, что задан ниже как значение по умолчанию;
+      # переключатель меняет его на лету через gsettings.
+      entryrow32-setting = "Экранная клавиатура";
+      entryrow42-setting = "input-keyboard-symbolic,input-keyboard-symbolic";
+      entryrow12-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true";
+      entryrow22-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false";
+      # Состояние читаем из самого gsettings, а не из памяти расширения:
+      # ключ могли поменять из Настроек или home-manager'ом при пересборке.
+      checkcommand2-setting = "gsettings get org.gnome.desktop.a11y.applications screen-keyboard-enabled";
+      checkregex2-setting = "true";
+      checkcommandsync2-setting = true;
+      checkcommandinterval2-setting = 10;
+      initialtogglestate2-setting = 3; # не трогать ключ при логине
+      showindicator2-setting = false;
+      runcommandatboot2-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;
     };
-    # Экранная клавиатура GNOME (всплывает при вводе с тачскрина)
-    "org/gnome/desktop/a11y/applications" = {
-      screen-keyboard-enabled = true;
-    };
+    # Экранная клавиатура GNOME (всплывает при вводе с тачскрина).
+    # Ключ НЕ фиксируем декларативно: им рулит тумблер «Экранная клавиатура»
+    # в Quick Settings (см. custom-command-toggle выше). Если прописать здесь
+    # значение, любая пересборка home-manager затирала бы выбор пользователя.
+    # "org/gnome/desktop/a11y/applications" = {
+    #   screen-keyboard-enabled = true;
+    # };
     # Настройки масштабирования (если нужны)
     # Раскомментируй и настрой под свои нужды:
     # "org/gnome/desktop/interface" = {
