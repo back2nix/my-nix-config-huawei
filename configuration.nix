@@ -307,6 +307,7 @@ in {
       appimage-run
       dbeaver-bin
       claude-code-china
+      codex-china
       kimi-code-china
       opencode
       # claude-code

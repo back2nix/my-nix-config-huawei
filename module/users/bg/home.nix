@@ -100,7 +100,7 @@ in {
 
     # --- Разрешён только *-china запуск claude / gemini / kimi ---
     # Единственные допустимые команды — claude-code-china, gemini-china,
-    # kimi-china
+    # kimi-china, codex-china
     # (ставятся в configuration.nix, ходят через China proxy). Любые другие
     # точки запуска должны отсутствовать:
     #   * нативный установщик Claude Code кладёт ~/.local/bin/claude ->
@@ -115,7 +115,8 @@ in {
         "$HOME/.local/bin/claude" \
         "$HOME/.local/bin/claude-code" \
         "$HOME/.local/bin/gemini" \
-        "$HOME/.local/bin/kimi"
+        "$HOME/.local/bin/kimi" \
+        "$HOME/.local/bin/codex"
       # Установщик code.kimi.com кладёт бинарь в ~/.kimi-code/bin и дописывает
       # его в PATH. Сносим только bin/ — сам ~/.kimi-code это ещё и дата-каталог
       # (config.toml, themes), его трогать нельзя.

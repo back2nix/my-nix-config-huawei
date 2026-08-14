@@ -205,6 +205,11 @@
       kimi-code = final.callPackage ../pkgs/kimi-code.nix {};
       # --- КОНЕЦ: kimi-code ---
 
+      # --- НАЧАЛО: codex ---
+      # OpenAI Codex CLI, релизный musl-бинарь с GitHub (последний стабильный).
+      codex = final.callPackage ../pkgs/codex.nix {};
+      # --- КОНЕЦ: codex ---
+
       # Обёртки через China proxy. Только *-china: generic-имена (claude,
       # gemini, kimi, gcloud), *-proxy, *-vpn2 и *-vpn3 намеренно не определяем,
       # чтобы не существовало точки запуска мимо china-прокси.
@@ -217,6 +222,11 @@
       claude-code-china = mkChinaWrapper {
         name = "claude-code-china";
         program = "${final.claude-code}/bin/claude";
+      };
+
+      codex-china = mkChinaWrapper {
+        name = "codex-china";
+        program = "${final.codex}/bin/codex";
       };
 
       kimi-code-china = mkChinaWrapper {
