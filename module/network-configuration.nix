@@ -86,6 +86,7 @@
             flags interval
             elements = {
               53, 67-68, 123, 500, 4500, 5353, 51820,
+              51821,   # личный VPN awg-pers (module/wireguard-personal.nix)
               8472,    # Cilium VXLAN
               51871    # Cilium Wireguard
             }

@@ -19,6 +19,8 @@
     # Если админ-доступ понадобится с другой машины — ей нужна СВОЯ пара ключей
     # и свой адрес (10.100.0.4/32) в casino-vps/modules/wireguard.nix.
     ../../module/wireguard-eggventure.nix
+    # Личный VPN до Windows-машины — к казино отношения не имеет, автостарта нет.
+    ../../module/wireguard-personal.nix
 
     # Подключаем наш новый модуль аудио-моста
     ./module/ai-audio.nix
