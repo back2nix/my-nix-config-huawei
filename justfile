@@ -109,3 +109,7 @@ vuln:
         || { echo "❌ не собралась система"; exit 1; }
     echo "система: $SYS"
     nix run nixpkgs#vulnix -- "$SYS"
+
+# Обновление claude-code до последней версии (правит overlays/default.nix)
+update-claude:
+    ./scripts/update-claude.sh
