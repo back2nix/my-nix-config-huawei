@@ -7,9 +7,11 @@
   lib,
   ...
 }: let
-  my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
-    edition = "stable";
-  };
+  # Yandex Browser отключён: доверяет гос. корню НУЦ Минцифры (Russian Trusted Root CA)
+  # по умолчанию, что даёт возможность незаметного MITM HTTPS-трафика. Не устанавливать.
+  # my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
+  #   edition = "stable";
+  # };
 
 in {
   nix = {
