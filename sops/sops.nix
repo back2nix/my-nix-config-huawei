@@ -53,6 +53,21 @@
       content = builtins.toJSON {
         log.level = "info";
 
+        # IPv4-only: у ssh-out1 нет IPv6-маршрута, любая AAAA-цель даёт
+        # "dial tcp [...]: connect: network is unreachable".
+        #
+        # DNS берём у локального dnscrypt-proxy (module/dnscrypt-proxy.nix):
+        # 127.0.0.1:5300 -> socks5 1082 -> ssh-out1 -> Quad9 DoH.
+        # Прямой 1.1.1.1:53 из этой сети отравляется и даёт NXDOMAIN.
+        dns.servers = [
+          {
+            tag = "dns-dnscrypt";
+            type = "udp";
+            server = "127.0.0.1";
+            server_port = 5300;
+          }
+        ];
+
         inbounds = [
           {
             type = "socks";
@@ -88,10 +103,18 @@
             server_port = 2222;
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
           }
           {
             type = "http";
             tag = "vpn3-proxy";
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
             # server = "192.168.43.1"; # mobile-china
             # server = "192.168.1.5"; # wifi-china
             server = "192.168.3.6"; # wifi-home
@@ -105,10 +128,29 @@
             user = "${config.sops.placeholder."vpn1/user"}";
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
             detour = "vpn3-proxy";
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
           }
         ];
 
         route.rules = [
+          # 1. Достаём домен из TLS SNI / HTTP Host.
+          {action = "sniff";}
+          # 2. Домен -> только A-записи.
+          {
+            action = "resolve";
+            server = "dns-dnscrypt";
+            strategy = "ipv4_only";
+          }
+          # 3. Клиент (Telegram) сам резолвит AAAA и отдаёт нам голый
+          #    IPv6-литерал — resolve тут бессилен, домена нет. Рвём соединение,
+          #    клиент по happy-eyeballs уходит на IPv4.
+          {
+            ip_version = 6;
+            action = "reject";
+          }
           {
             inbound = ["socks-usa" "http-usa"];
             outbound = "ssh-out1";
