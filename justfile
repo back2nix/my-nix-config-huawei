@@ -113,3 +113,7 @@ vuln:
 # Обновление claude-code до последней версии (правит overlays/default.nix)
 update-claude:
     ./scripts/update-claude.sh
+
+# Обновление gemini-cli до последней стабильной версии (правит overlays/default.nix)
+update-gemini:
+    ./scripts/update-gemini.sh

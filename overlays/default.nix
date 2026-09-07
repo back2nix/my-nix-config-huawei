@@ -113,13 +113,13 @@
       #     "$@"
       # '';
 
-      # --- НАЧАЛО: Обновление claude-code до 2.1.259 ---
+      # --- НАЧАЛО: Обновление claude-code до 2.1.263 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
-        version = "2.1.259";
+        version = "2.1.263";
         src = prev.fetchurl {
-          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.259/linux-x64/claude";
-          sha256 = "f7dd62ae415378018cd21dd950eb3bac174ab085830304d3b8b098146bfd47b6";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.263/linux-x64/claude";
+          sha256 = "26d020351e8112f4006790f3cfce43b4c9df0c1bb1d0e542364d64151b81d5ba";
         };
         dontUnpack = true;
         dontBuild = true;
@@ -139,9 +139,9 @@
         '';
         meta.mainProgram = "claude";
       };
-      # --- КОНЕЦ: Обновление claude-code до 2.1.259 ---
+      # --- КОНЕЦ: Обновление claude-code до 2.1.263 ---
 
-      # --- НАЧАЛО: Обновление gemini-cli до 0.49.0 ---
+      # --- НАЧАЛО: Обновление gemini-cli до 0.58.0 ---
       # База — свежая деривация из unstable (0.47.0). Начиная с ~0.45 nixpkgs
       # перешёл на сборку через `npmBuildScript = "bundle"` (esbuild) с новым
       # installPhase, поэтому старые postPatch/postInstall (правка scripts/build.js,
@@ -163,13 +163,13 @@
       # npmDepsFetcherVersion — локальный аргумент buildNpmPackage, overrideAttrs его
       # не видит; напрямую правим env.NIX_NPM_FETCHER_VERSION (база на structured-attrs).
       gemini-cli = final.unstable.gemini-cli.overrideAttrs (oldAttrs: rec {
-        version = "0.49.0";
+        version = "0.58.0";
 
         src = prev.fetchFromGitHub {
           owner = "google-gemini";
           repo = "gemini-cli";
           tag = "v${version}";
-          hash = "sha256-C47U5nTWB0Dq2iPRujRHMDjyyrU0d6xZ3Uv7URcIcg8=";
+          hash = "sha256-DOR857IMRHmM1g/rxTCCeD7lhYm+s+DtG39pMwFSv3c=";
         };
 
         env = (oldAttrs.env or {}) // {NIX_NPM_FETCHER_VERSION = 2;};
@@ -177,7 +177,7 @@
           inherit (oldAttrs) pname;
           inherit version src;
           fetcherVersion = 2;
-          hash = "sha256-e3gPyBJg2TPGywpR7iqpDtcRdq6AWlvY725kIGPJmCo=";
+          hash = "sha256-szgHGcasIy5R698siwlXcOBVl+jxygIUdioFFb2G8to=";
         };
 
         # Апстрим 0.49.0 рассинхронизирован: в package.json ряда workspace'ов
@@ -196,7 +196,7 @@
               --replace-quiet '"clipboardy": "5.2.0"' '"clipboardy": "5.2.1"'
           '';
       });
-      # --- КОНЕЦ: Обновление gemini-cli до 0.49.0 ---
+      # --- КОНЕЦ: Обновление gemini-cli до 0.58.0 ---
 
       # --- НАЧАЛО: kimi-code ---
       # Деривация повторяет то, что делает официальный install.sh
