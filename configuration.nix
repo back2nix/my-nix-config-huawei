@@ -370,6 +370,7 @@ in {
       lazydocker # TUI для docker
       brave
       ncdu
+      thunderbird
     ];
 
     etc."proxychains.conf".text = ''
