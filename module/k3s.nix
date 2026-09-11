@@ -32,6 +32,11 @@ in {
 
     extraFlags = toString ([
         "--kubelet-arg=fail-swap-on=false"
+        # Абсолютный порог вместо k3s-дефолта 5% + minimumReclaim 10%: на диске 1ТБ
+        # кратковременная просадка <50G (nix-сборка) защёлкивала DiskPressure до 151G свободных
+        # и блокировала шедулинг всего узла (helm pre-upgrade hook висел в Pending).
+        "--kubelet-arg=eviction-hard=nodefs.available<10Gi,imagefs.available<10Gi"
+        "--kubelet-arg=eviction-minimum-reclaim=nodefs.available=1Gi,imagefs.available=1Gi"
         "--node-ip 10.0.0.1"
         "--node-external-ip 10.0.0.1"
         "--advertise-address 10.0.0.1"
