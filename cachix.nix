@@ -49,7 +49,7 @@ in {
   };
 
   systemd.services.nix-daemon.serviceConfig = {
-    # Используем SOCKS5h-инбаунд sing-box (порт 1082 = USA, ssh-out1):
+    # Используем SOCKS5h-инбаунд sing-box (порт 1082 = Seoul через casino-VPS, ssh-out1-via-casino):
     # socks5h означает, что DNS-запросы также идут через прокси (удалённый резолв) —
     # это важно, т.к. локальный резолвер ненадёжен, а голый socks5 резолвит локально.
     Environment = [

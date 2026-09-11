@@ -57,7 +57,7 @@
         # "dial tcp [...]: connect: network is unreachable".
         #
         # DNS берём у локального dnscrypt-proxy (module/dnscrypt-proxy.nix):
-        # 127.0.0.1:5300 -> socks5 1082 -> ssh-out1 -> Quad9 DoH.
+        # 127.0.0.1:5300 -> socks5 1082 -> ssh-out1-via-casino -> Quad9 DoH.
         # Прямой 1.1.1.1:53 из этой сети отравляется и даёт NXDOMAIN.
         dns.servers = [
           {
@@ -69,15 +69,17 @@
         ];
 
         inbounds = [
+          # 1082/1083 — основной прокси: google-seoul через casino-VPS
+          # (awg-egg -> seoul-relay -> ssh до Сеула), см. outbound ssh-out1-via-casino.
           {
             type = "socks";
-            tag = "socks-usa";
+            tag = "socks-casino";
             listen = "0.0.0.0";
             listen_port = 1082;
           }
           {
             type = "http";
-            tag = "http-usa";
+            tag = "http-casino";
             listen = "0.0.0.0";
             listen_port = 1083;
           }
@@ -92,6 +94,20 @@
             tag = "http-china";
             listen = "0.0.0.0";
             listen_port = 1085;
+          }
+          # 1086/1087 — прежняя схема: прямой ssh до google-seoul (ssh-out1).
+          # Только localhost, наружу не светим.
+          {
+            type = "socks";
+            tag = "socks-usa";
+            listen = "127.0.0.1";
+            listen_port = 1086;
+          }
+          {
+            type = "http";
+            tag = "http-usa";
+            listen = "127.0.0.1";
+            listen_port = 1087;
           }
         ];
 
@@ -133,6 +149,33 @@
               strategy = "ipv4_only";
             };
           }
+          # Хоп 1: ssh до casino-VPS ТОЛЬКО через admin-VPN awg-egg
+          # (module/wireguard-eggventure.nix), публичного входа нет.
+          # Пользователь seoul-relay на сервере умеет лишь direct-tcpip на
+          # 35.212.30.39:2222 (casino-vps/modules/seoul-relay.nix).
+          {
+            type = "ssh";
+            tag = "ssh-casino-relay";
+            server = "10.100.0.1";
+            server_port = 22;
+            user = "seoul-relay";
+            private_key_path = "/home/bg/.ssh/id_ed25519_seoul_relay";
+            host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINoyAUaGwTNIW5pZZB+nHxRaH6QJDOkyCPSJ15iKXKYa"];
+            # Без этого клиент sing-box договаривается на ssh-rsa, сервер отдаёт
+            # RSA-ключ и пин ed25519 даёт "host key mismatch".
+            host_key_algorithms = ["ssh-ed25519"];
+          }
+          # Хоп 2: ssh до google-seoul поверх хопа 1. Ключ от Сеула не покидает
+          # ноутбук, casino видит только зашифрованный поток.
+          {
+            type = "ssh";
+            tag = "ssh-out1-via-casino";
+            server = "${config.sops.placeholder."vpn1/ip"}";
+            server_port = 2222;
+            user = "${config.sops.placeholder."vpn1/user"}";
+            private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
+            detour = "ssh-casino-relay";
+          }
         ];
 
         route.rules = [
@@ -158,6 +201,10 @@
           {
             inbound = ["socks-china" "http-china"];
             outbound = "ssh-out1-via-vpn3";
+          }
+          {
+            inbound = ["socks-casino" "http-casino"];
+            outbound = "ssh-out1-via-casino";
           }
         ];
       };

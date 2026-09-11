@@ -59,8 +59,8 @@
               6443,    # K3S API Server
               10250,   # K3S Kubelet
               6379,    # redis
-              1082,    # proxy usa (socks)
-              1083,    # proxy usa (http)
+              1082,    # proxy seoul via casino (socks)
+              1083,    # proxy seoul via casino (http)
               1084,    # proxy china (socks)
               1085,    # proxy china (http)
               5173,    # casino

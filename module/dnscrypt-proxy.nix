@@ -11,7 +11,7 @@
 #
 #   blocky (127.0.0.1:53)
 #     └─ strict, по порядку:
-#        1. 127.0.0.1:5300  → dnscrypt-proxy → socks5 1082 → ssh-out1 (Seoul) → Quad9 DoH
+#        1. 127.0.0.1:5300  → dnscrypt-proxy → socks5 1082 → casino-VPS → ssh-out1-via-casino (Seoul) → Quad9 DoH
 #        2. 9.9.9.9 / 149...  → plain напрямую (твой failover, остаётся как есть)
 #
 # Петли нет: Quad9 задан static-стампом с зашитым IP 9.9.9.9, поэтому
@@ -30,7 +30,7 @@
       server_names = ["quad9-doh-proxied"];
       ignore_system_dns = true;
 
-      # Весь исходящий трафик dnscrypt-proxy — через sing-box socks-usa (1082),
+      # Весь исходящий трафик dnscrypt-proxy — через sing-box socks-casino (1082),
       # т.е. SSH-тоннель на google-seoul напрямую, выход за GFW одним прыжком.
       proxy = "socks5://127.0.0.1:1082";
 

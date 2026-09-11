@@ -35,7 +35,7 @@
         init.strategy = "fast";
         groups = {
           default = [
-            # secure через proxy: dnscrypt-proxy → socks5 1082 → ssh-out1 → Quad9 DoH
+            # secure через proxy: dnscrypt-proxy → socks5 1082 → ssh-out1-via-casino → Quad9 DoH
             # (module/dnscrypt-proxy.nix). Обходит цензуру/отравление DNS под GFW.
             "127.0.0.1:5300"
             # если dnscrypt-proxy/тоннель недоступны — strict откатывается на plain.
