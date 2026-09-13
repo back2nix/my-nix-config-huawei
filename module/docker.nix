@@ -27,6 +27,11 @@
         daemon = {
           settings = {
             dns = ["9.9.9.9"];
+            log-driver = "json-file";
+            log-opts = {
+              max-size = "50m";
+              max-file = "3";
+            };
             insecure-registries = [
               "localhost:5000"
               "172.18.0.2:5000"
@@ -41,6 +46,11 @@
           # ip = "127.0.0.1";
           # dns = ["127.0.0.11" "8.8.8.8" "8.8.4.4" "1.1.1.1" "1.0.0.1"];
           dns = ["9.9.9.9"];
+          log-driver = "json-file";
+          log-opts = {
+            max-size = "50m";
+            max-file = "3";
+          };
           insecure-registries = [
             "localhost:5000"
             "172.18.0.2:5000"
