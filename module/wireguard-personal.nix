@@ -59,14 +59,8 @@ in {
     after = ["network-online.target" "sops-nix.service"];
     wants = ["network-online.target" "sops-nix.service"];
 
-    # ☢️ АВТОСТАРТА НЕТ — в отличие от admin-VPN. Это побочный проект, а не
-    # канал реагирования на алерты: держать лишний туннель поднятым постоянно
-    # незачем. Поднять перед заходом на Windows:
-    #   sudo systemctl start amneziawg-personal
-    #   ssh bagau
-    #   sudo systemctl stop amneziawg-personal
-    # Если понадобится постоянно — добавить wantedBy = ["multi-user.target"].
-    wantedBy = [];
+    # Автостарт включён: bagau-vpn нужен постоянно, а не по требованию.
+    wantedBy = ["multi-user.target"];
 
     path = with pkgs; [amneziawg-tools amneziawg-go iproute2 iptables];
 

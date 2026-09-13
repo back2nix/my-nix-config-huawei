@@ -85,7 +85,7 @@
     # GNOME 51 проверь shell-version в metadata.json ДО switch — иначе тумблер
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
     "org/gnome/shell/extensions/custom-command-toggle" = {
-      numbuttons-setting = 2;
+      numbuttons-setting = 3;
       entryrow3-setting = "WinJoy VPN";
       entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
       entryrow1-setting = "systemctl start amneziawg-egg.service";
@@ -119,6 +119,21 @@
       initialtogglestate2-setting = 3; # не трогать ключ при логине
       showindicator2-setting = false;
       runcommandatboot2-setting = false;
+
+      # Кнопка 3: личный VPN до Windows-машины (module/wireguard-personal.nix,
+      # awg-pers, юнит теперь стартует автоматически при загрузке — тумблер
+      # нужен в первую очередь как индикатор, как и у admin-VPN выше).
+      entryrow33-setting = "Personal VPN";
+      entryrow43-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
+      entryrow13-setting = "systemctl start amneziawg-personal.service";
+      entryrow23-setting = "systemctl stop amneziawg-personal.service";
+      checkcommand3-setting = "systemctl is-active --quiet amneziawg-personal.service && echo UP || echo DOWN";
+      checkregex3-setting = "UP";
+      checkcommandsync3-setting = true;
+      checkcommandinterval3-setting = 10;
+      initialtogglestate3-setting = 3; # не трогать юнит при логине
+      showindicator3-setting = true;
+      runcommandatboot3-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;
