@@ -5,6 +5,7 @@
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
       ];
     };
     "org/gnome/settings-daemon/plugins/power" = {
@@ -26,6 +27,14 @@
       binding = "<Primary><Alt>R";
       command = "toggle-flip";
       name = "Toggle Screen Flip";
+    };
+    # Режим портфеля: крышку можно закрыть, ноут продолжает работать
+    # (инхибитор logind). Тот же тумблер есть в Quick Settings ниже.
+    # См. module/bag-mode.nix
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3" = {
+      binding = "<Primary><Alt>B";
+      command = "bag-mode";
+      name = "Bag Mode (lid closable, no suspend)";
     };
     "org/gnome/desktop/peripherals/touchpad" = {
       natural-scroll = true;
@@ -85,7 +94,7 @@
     # GNOME 51 проверь shell-version в metadata.json ДО switch — иначе тумблер
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
     "org/gnome/shell/extensions/custom-command-toggle" = {
-      numbuttons-setting = 3;
+      numbuttons-setting = 4;
       entryrow3-setting = "WinJoy VPN";
       entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
       entryrow1-setting = "systemctl start amneziawg-egg.service";
@@ -134,6 +143,22 @@
       initialtogglestate3-setting = 3; # не трогать юнит при логине
       showindicator3-setting = true;
       runcommandatboot3-setting = false;
+
+      # Кнопка 4: режим портфеля — ноут работает с закрытой крышкой
+      # (инхибитор logind, см. module/bag-mode.nix). Индикатор в топ-баре
+      # включён намеренно: забытый включённым режим — это разряженная батарея
+      # в сумке.
+      entryrow34-setting = "Режим портфеля";
+      entryrow44-setting = "system-run-symbolic,system-suspend-symbolic";
+      entryrow14-setting = "bag-mode on";
+      entryrow24-setting = "bag-mode off";
+      checkcommand4-setting = "bag-mode status";
+      checkregex4-setting = "ON";
+      checkcommandsync4-setting = true;
+      checkcommandinterval4-setting = 10;
+      initialtogglestate4-setting = 3; # не трогать юнит при логине
+      showindicator4-setting = true;
+      runcommandatboot4-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;
