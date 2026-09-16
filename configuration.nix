@@ -81,6 +81,7 @@ in {
     ./module/osk-globe-cycle.nix # Глобус на экранной клавиатуре переключает раскладку
     # ./module/monitoring.nix
     ./module/sign-box.nix
+    ./module/proxy-mode.nix # Выбор маршрута для 1082/1083: seoul/casino/direct (тумблеры + CLI)
     # ./module/vault.nix
     # ./module/tor.nix
     ./module/attic.nix

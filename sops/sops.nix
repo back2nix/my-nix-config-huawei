@@ -53,6 +53,22 @@
       content = builtins.toJSON {
         log.level = "info";
 
+        # Clash-API — рулевое управление селектором usa-select на лету
+        # (см. module/proxy-mode.nix и тумблеры в module/users/bg/dconf.nix).
+        # Только 127.0.0.1: у API нет авторизации, наружу светить нельзя.
+        # cache_file + store_selected — выбор переживает рестарт sing-box
+        # и ребут, иначе после каждого падения юнита молча возвращался бы
+        # default, и это выглядело бы как «VPN опять отвалился».
+        experimental = {
+          clash_api.external_controller = "127.0.0.1:9090";
+          # Выбор selector'а sing-box сохраняет в cache.db сам, как только
+          # cache_file включён (отдельного store_selected с 1.13 уже нет).
+          cache_file = {
+            enabled = true;
+            path = "/var/lib/sing-box/cache.db";
+          };
+        };
+
         # IPv4-only: у ssh-out1 нет IPv6-маршрута, любая AAAA-цель даёт
         # "dial tcp [...]: connect: network is unreachable".
         #
@@ -69,8 +85,10 @@
         ];
 
         inbounds = [
-          # 1082/1083 — основной прокси: google-seoul через casino-VPS
-          # (awg-egg -> seoul-relay -> ssh до Сеула), см. outbound ssh-out1-via-casino.
+          # 1082/1083 — основной прокси. Маршрут не прибит гвоздями: правило
+          # ведёт на selector usa-select, переключаемый через proxy-mode
+          # (seoul | casino | vpn3 | direct). По умолчанию — прямой ssh до
+          # google-seoul (ssh-out1).
           {
             type = "socks";
             tag = "socks-usa";
@@ -176,6 +194,33 @@
             private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
             detour = "ssh-casino-relay";
           }
+          # Выход без проксирования: трафик уходит с самого ноутбука.
+          # Ради этого режима 1082/1083 и слушают 0.0.0.0 — телефон/планшет
+          # тогда ходят «как через мой компьютер», без VPN вообще.
+          {
+            type = "direct";
+            tag = "direct-out";
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
+          }
+          # Переключатель для 1082/1083. Менять на лету: proxy-mode <режим>
+          # или тумблеры в Quick Settings. interrupt_exist_connections —
+          # иначе уже открытые сессии продолжают висеть в старом тоннеле,
+          # и после переключения кажется, что ничего не изменилось.
+          {
+            type = "selector";
+            tag = "usa-select";
+            outbounds = [
+              "ssh-out1"
+              "ssh-out1-via-casino"
+              "ssh-out1-via-vpn3"
+              "direct-out"
+            ];
+            default = "ssh-out1";
+            interrupt_exist_connections = true;
+          }
         ];
 
         route.rules = [
@@ -196,7 +241,7 @@
           }
           {
             inbound = ["socks-usa" "http-usa"];
-            outbound = "ssh-out1";
+            outbound = "usa-select";
           }
           {
             inbound = ["socks-china" "http-china"];

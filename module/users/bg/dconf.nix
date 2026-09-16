@@ -77,6 +77,9 @@
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
         "custom-command-toggle@storageb.github.com"
+        # Плитка-список "Прокси 1082": через USA / через Casino / без VPN
+        # (module/proxy-mode.nix).
+        "proxy-mode@back2nix"
       ];
     };
 
@@ -159,6 +162,7 @@
       initialtogglestate4-setting = 3; # не трогать юнит при логине
       showindicator4-setting = true;
       runcommandatboot4-setting = false;
+
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;

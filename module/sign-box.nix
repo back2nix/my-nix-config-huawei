@@ -15,6 +15,10 @@
       ExecStart = "${pkgs-unstable.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
       Restart = "always";
       RestartSec = "5s";
+      # Под cache.db из experimental.cache_file (sops/sops.nix): в нём живёт
+      # выбранный режим selector'а usa-select, иначе после рестарта юнита
+      # маршрут молча откатывался бы к default. Каталог = /var/lib/sing-box.
+      StateDirectory = "sing-box";
     };
   };
 
