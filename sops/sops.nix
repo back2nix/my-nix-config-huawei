@@ -73,13 +73,13 @@
           # (awg-egg -> seoul-relay -> ssh до Сеула), см. outbound ssh-out1-via-casino.
           {
             type = "socks";
-            tag = "socks-casino";
+            tag = "socks-usa";
             listen = "0.0.0.0";
             listen_port = 1082;
           }
           {
             type = "http";
-            tag = "http-casino";
+            tag = "http-usa";
             listen = "0.0.0.0";
             listen_port = 1083;
           }
@@ -99,13 +99,13 @@
           # Только localhost, наружу не светим.
           {
             type = "socks";
-            tag = "socks-usa";
+            tag = "socks-casino";
             listen = "127.0.0.1";
             listen_port = 1086;
           }
           {
             type = "http";
-            tag = "http-usa";
+            tag = "http-casino";
             listen = "127.0.0.1";
             listen_port = 1087;
           }
