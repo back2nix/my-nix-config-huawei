@@ -225,6 +225,24 @@ in {
       lsof
       pciutils
 
+      # Стриминг видео на телевизор по DLNA (см. module/network-configuration.nix)
+      yt-dlp
+
+      # Зеркалирование экрана на телевизор.
+      # Miracast/Screen Mirroring:
+      gnome-network-displays
+      # Захват экрана на Wayland идёт через портал PipeWire, ему нужен
+      # полный GStreamer (в системе не было даже coreelements: queue/tee)
+      # и x264enc из plugins-ugly.
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-libav
+      # Управление порталом ScreenCast по D-Bus из скрипта захвата.
+      (python3.withPackages (ps: with ps; [ pygobject3 dbus-python ]))
+
       # Пакеты из unstable/master
       pkgs-master.serpl
       pkgs-master.transmission_4-qt

@@ -37,7 +37,8 @@
       127.0.0.1 host.docker.internal
       # Убедитесь, что IP актуален
 
-      10.0.0.1 vpn.local casino.local app.local grafana.local grafana.casino.local pyroscope.local prometheus.local postgres.local victoriametrics.casino.local pyroscope.casino.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local china.local grpc.china.local office.china.local landing.casino.local op-alpha.casino.local op-bravo.casino.local op-charlie.casino.local op-delta.casino.local game.local
+      192.0.2.1 geo3.casino.local
+      10.0.0.1 geo2.casino.local geo.casino.local vpn.local casino.local app.local grafana.local grafana.casino.local pyroscope.local prometheus.local postgres.local victoriametrics.casino.local pyroscope.casino.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local china.local grpc.china.local office.china.local landing.casino.local op-alpha.casino.local op-bravo.casino.local op-charlie.casino.local op-delta.casino.local game.local
       192.168.3.78 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
       # 10.0.0.1 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
       # 192.168.3.78 casino.remote grafana.remote grafana.casino.remote app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
@@ -131,6 +132,16 @@
             ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept
 
             udp dport 51413 accept comment "Torrent DHT/uTP"
+
+            # DLNA/UPnP: раздача видео на телевизор в локальной сети.
+            # Телевизор (Samsung DMR) сам подключается к нам за медиафайлом,
+            # поэтому нужен входящий доступ, но только из LAN — не наружу.
+            ip saddr 192.168.0.0/24 tcp dport { 8200, 8899 } accept comment "DLNA media -> LAN"
+            ip saddr 192.168.0.0/24 udp dport 1900 accept comment "SSDP discovery"
+            # Miracast/Screen Mirroring: RTSP-сессия, которую телевизор
+            # устанавливает к нам по Wi-Fi Direct.
+            ip saddr 192.168.0.0/24 tcp dport { 7236, 7250 } accept comment "Miracast RTSP"
+            iifname "p2p-*" accept comment "Wi-Fi Direct (Miracast)"
 
             ct state vmap {
               invalid : drop,
