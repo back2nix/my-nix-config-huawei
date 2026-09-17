@@ -3,7 +3,7 @@
 //
 // Почему своё расширение, а не custom-command-toggle (которым сделаны
 // WinJoy VPN, Personal VPN и режим портфеля): то расширение умеет только
-// QuickToggle — бинарную плитку. Вариантов здесь три, и раскладывать их
+// QuickToggle — бинарную плитку. Вариантов здесь несколько, и раскладывать их
 // по трём независимым тумблерам — врать глазу: состояния взаимоисключающие.
 // Нужен QuickMenuToggle, а его custom-command-toggle не предоставляет.
 //
@@ -31,6 +31,7 @@ const PROXY_MODE = '@proxyMode@';
 const MODES = [
     {id: 'seoul',  status: 'SEOUL',  label: 'Через USA',    icon: 'network-vpn-symbolic'},
     {id: 'casino', status: 'CASINO', label: 'Через Casino', icon: 'network-vpn-symbolic'},
+    {id: 'frankfurt', status: 'FRANKFURT', label: 'Через Frankfurt', icon: 'network-vpn-symbolic'},
     {id: 'direct', status: 'DIRECT', label: 'Без VPN',      icon: 'network-wired-symbolic'},
 ];
 

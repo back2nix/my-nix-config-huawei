@@ -167,6 +167,22 @@
               strategy = "ipv4_only";
             };
           }
+          # Выход через Франкфурт (winjoy-mivocloud-frankfurt): публичный ssh,
+          # без обходных путей и VPN — ходим напрямую.
+          {
+            type = "ssh";
+            tag = "ssh-frankfurt";
+            server = "5.252.179.162";
+            server_port = 22;
+            user = "root";
+            private_key_path = "/home/bg/.ssh/id_ed25519_eggventure_main";
+            host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE8XlR6wxvsc1d58OuiBU9IrYu/NZUozOjjKgUNBrRZ3"];
+            host_key_algorithms = ["ssh-ed25519"];
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
+          }
           # Хоп 1: ssh до casino-VPS ТОЛЬКО через admin-VPN awg-egg
           # (module/wireguard-eggventure.nix), публичного входа нет.
           # Пользователь seoul-relay на сервере умеет лишь direct-tcpip на
@@ -216,6 +232,7 @@
               "ssh-out1"
               "ssh-out1-via-casino"
               "ssh-out1-via-vpn3"
+              "ssh-frankfurt"
               "direct-out"
             ];
             default = "ssh-out1";

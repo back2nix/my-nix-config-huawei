@@ -77,7 +77,8 @@
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
         "custom-command-toggle@storageb.github.com"
-        # Плитка-список "Прокси 1082": через USA / через Casino / без VPN
+        # Плитка-список "Прокси 1082": через USA / через Casino /
+        # через Frankfurt / без VPN
         # (module/proxy-mode.nix).
         "proxy-mode@back2nix"
       ];

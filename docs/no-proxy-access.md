@@ -6,11 +6,12 @@
 proxy-mode            # что сейчас
 proxy-mode casino     # google-seoul через casino-VPS
 proxy-mode seoul      # прямой ssh до google-seoul (режим по умолчанию)
+proxy-mode frankfurt  # выход через Frankfurt (ssh-frankfurt)
 proxy-mode direct     # без проксирования, выход с самого ноутбука
 ```
 
 То же самое мышью — плитка «Прокси 1082» в Quick Settings, рядом с WinJoy VPN:
-клик раскрывает список «Через USA / Через Casino / Без VPN». sing-box при этом
+клик раскрывает список «Через USA / Через Casino / Через Frankfurt / Без VPN». sing-box при этом
 не перезапускается, выбор переживает ребут. Устройство: module/proxy-mode.nix
 (скрипт + расширение gnome-shell), selector `usa-select` в sops/sops.nix.
 

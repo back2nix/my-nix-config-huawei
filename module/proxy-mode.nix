@@ -16,12 +16,12 @@
 #
 # Управление:
 #   proxy-mode                 — показать текущий режим и список
-#   proxy-mode seoul|casino|vpn3|direct
-#   proxy-mode status          — машиночитаемо: SEOUL/CASINO/VPN3/DIRECT
+#   proxy-mode seoul|casino|frankfurt|vpn3|direct
+#   proxy-mode status          — машиночитаемо: SEOUL/CASINO/FRANKFURT/VPN3/DIRECT
 #   плитка-список "Прокси 1082" в Quick Settings — расширение
 #   gnome-extensions/proxy-mode, собирается здесь же (см. ниже).
 #
-# vpn3 доступен только из CLI: в меню оставлены три пункта, которыми
+# vpn3 доступен только из CLI: в меню оставлены четыре пункта, которыми
 # пользуются на практике.
 {pkgs, ...}: let
   proxyMode = pkgs.writeShellScriptBin "proxy-mode" ''
@@ -37,6 +37,7 @@
       case "$1" in
         seoul)  echo ssh-out1 ;;
         casino) echo ssh-out1-via-casino ;;
+        frankfurt) echo ssh-frankfurt ;;
         vpn3)   echo ssh-out1-via-vpn3 ;;
         direct) echo direct-out ;;
         *) return 1 ;;
@@ -46,6 +47,7 @@
       case "$1" in
         ssh-out1)             echo seoul ;;
         ssh-out1-via-casino)  echo casino ;;
+        ssh-frankfurt)        echo frankfurt ;;
         ssh-out1-via-vpn3)    echo vpn3 ;;
         direct-out)           echo direct ;;
         *) echo "$1" ;;
@@ -72,10 +74,10 @@
       show)
         now=$(current) || { echo "sing-box Clash-API недоступен ($API)" >&2; exit 1; }
         echo "текущий: $(to_name "$now")  ($now)"
-        echo "доступно: seoul casino vpn3 direct"
+        echo "доступно: seoul casino frankfurt vpn3 direct"
         exit 0
         ;;
-      seoul|casino|vpn3|direct)
+      seoul|casino|frankfurt|vpn3|direct)
         tag=$(to_tag "$1")
         api -X PUT "$API/proxies/$SEL" \
           -H 'Content-Type: application/json' \
@@ -88,7 +90,7 @@
         exit 0
         ;;
       *)
-        echo "usage: proxy-mode [show|status|seoul|casino|vpn3|direct]" >&2
+        echo "usage: proxy-mode [show|status|seoul|casino|frankfurt|vpn3|direct]" >&2
         exit 2
         ;;
     esac
@@ -97,7 +99,7 @@
   #
   # Почему отдельное расширение, а не ещё кнопки в custom-command-toggle
   # (которым сделаны WinJoy VPN, Personal VPN и режим портфеля): то
-  # расширение умеет только QuickToggle — бинарную плитку, а режимов три
+  # расширение умеет только QuickToggle — бинарную плитку, а режимов несколько
   # и они взаимоисключающие. Списком это QuickMenuToggle, которого там нет.
   uuid = "proxy-mode@back2nix";
 
