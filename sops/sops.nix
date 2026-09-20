@@ -113,6 +113,20 @@
             listen = "0.0.0.0";
             listen_port = 1085;
           }
+          # 1088/1089 — выделенный вход во Франкфурт (ssh-frankfurt), в обход
+          # селектора: 1082/1083 остаются переключаемыми, а тут маршрут прибит.
+          {
+            type = "socks";
+            tag = "socks-frankfurt";
+            listen = "0.0.0.0";
+            listen_port = 1088;
+          }
+          {
+            type = "http";
+            tag = "http-frankfurt";
+            listen = "0.0.0.0";
+            listen_port = 1089;
+          }
           # 1086/1087 — прежняя схема: прямой ssh до google-seoul (ssh-out1).
           # Только localhost, наружу не светим.
           {
@@ -263,6 +277,10 @@
           {
             inbound = ["socks-china" "http-china"];
             outbound = "ssh-out1-via-vpn3";
+          }
+          {
+            inbound = ["socks-frankfurt" "http-frankfurt"];
+            outbound = "ssh-frankfurt";
           }
           {
             inbound = ["socks-casino" "http-casino"];
