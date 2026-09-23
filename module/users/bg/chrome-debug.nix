@@ -82,9 +82,13 @@ in {
             # --remote-debugging-port=9222; мы задаём отдельный профиль и
             # перекрываем порт последним значением (дубликат → Chrome берёт
             # последний), чтобы не конфликтовать с chrome-mcp на 9222.
+            # --autoplay-policy: подключение chrome-devtools-mcp цепляется ко
+            # всем вкладкам и будит восстановленные фоновые YouTube — без
+            # жеста пользователя медиа не стартует.
             exec ${cfg.package}/bin/google-chrome-stable \
               --user-data-dir="$DEBUG_DIR" \
               --remote-debugging-port=${toString cfg.port} \
+              --autoplay-policy=user-gesture-required \
               "$@"
           '')
         ];
