@@ -18,6 +18,7 @@
 #   proxy-mode                 — показать текущий режим и список
 #   proxy-mode seoul|casino|frankfurt|vpn3|direct
 #   proxy-mode status          — машиночитаемо: SEOUL/CASINO/FRANKFURT/VPN3/DIRECT
+#   proxy-mode --1088 ...      — то же для 1088/1089 (selector frankfurt-select)
 #   плитка-список "Прокси 1082" в Quick Settings — расширение
 #   gnome-extensions/proxy-mode, собирается здесь же (см. ниже).
 #
@@ -29,6 +30,12 @@
     PATH=${pkgs.lib.makeBinPath [pkgs.curl pkgs.jq pkgs.libnotify]}:$PATH
     API=http://127.0.0.1:9090
     SEL=usa-select
+    PORTS=1082/1083
+    if [ "''${1:-}" = --1088 ]; then
+      SEL=frankfurt-select
+      PORTS=1088/1089
+      shift
+    fi
 
     api() { curl -fsS --max-time 3 "$@"; }
 
@@ -85,12 +92,12 @@
             echo "не удалось переключить: sing-box Clash-API недоступен ($API)" >&2
             exit 1
           }
-        notify-send -i network-vpn-symbolic "Прокси 1082/1083" "Режим: $1"
+        notify-send -i network-vpn-symbolic "Прокси $PORTS" "Режим: $1"
         echo "$1"
         exit 0
         ;;
       *)
-        echo "usage: proxy-mode [show|status|seoul|casino|frankfurt|vpn3|direct]" >&2
+        echo "usage: proxy-mode [--1088] [show|status|seoul|casino|frankfurt|vpn3|direct]" >&2
         exit 2
         ;;
     esac

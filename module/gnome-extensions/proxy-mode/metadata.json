@@ -1,7 +1,7 @@
 {
   "uuid": "proxy-mode@back2nix",
   "name": "Proxy Mode",
-  "description": "Плитка-список в Quick Settings: через что ходят порты 1082/1083 (sing-box selector usa-select) — через USA, через Casino, через Frankfurt или без VPN. Обёртка над CLI proxy-mode.",
+  "description": "Плитки-списки в Quick Settings: через что ходят порты 1082/1083 и 1088/1089 (sing-box selectors usa-select, frankfurt-select) — через USA, через Casino, через Frankfurt или без VPN. Обёртка над CLI proxy-mode.",
   "shell-version": ["48", "49", "50"],
   "session-modes": ["user"]
 }

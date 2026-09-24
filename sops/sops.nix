@@ -113,8 +113,9 @@
             listen = "0.0.0.0";
             listen_port = 1085;
           }
-          # 1088/1089 — выделенный вход во Франкфурт (ssh-frankfurt), в обход
-          # селектора: 1082/1083 остаются переключаемыми, а тут маршрут прибит.
+          # 1088/1089 — второй переключаемый вход, свой selector
+          # frankfurt-select (по умолчанию ssh-frankfurt), независимый от
+          # usa-select: proxy-mode --1088 <режим> или плитка «Прокси 1088».
           {
             type = "socks";
             tag = "socks-frankfurt";
@@ -252,6 +253,20 @@
             default = "ssh-out1";
             interrupt_exist_connections = true;
           }
+          # Переключатель для 1088/1089: тот же набор выходов, но свой выбор.
+          {
+            type = "selector";
+            tag = "frankfurt-select";
+            outbounds = [
+              "ssh-out1"
+              "ssh-out1-via-casino"
+              "ssh-out1-via-vpn3"
+              "ssh-frankfurt"
+              "direct-out"
+            ];
+            default = "ssh-frankfurt";
+            interrupt_exist_connections = true;
+          }
         ];
 
         route.rules = [
@@ -280,7 +295,7 @@
           }
           {
             inbound = ["socks-frankfurt" "http-frankfurt"];
-            outbound = "ssh-frankfurt";
+            outbound = "frankfurt-select";
           }
           {
             inbound = ["socks-casino" "http-casino"];

@@ -35,9 +35,13 @@ const MODES = [
     {id: 'direct', status: 'DIRECT', label: 'Без VPN',      icon: 'network-wired-symbolic'},
 ];
 
-// Режим по умолчанию: он же то, что показываем при недоступном sing-box,
-// и он же «нормальное» состояние, при котором индикатор в топ-баре молчит.
-const DEFAULT_MODE = MODES[0];
+// Плитки: по одной на каждый selector sing-box. `args` — префикс для CLI,
+// `defaultMode` — «нормальное» состояние, при котором индикатор в топ-баре
+// молчит.
+const PORTS = [
+    {title: 'Прокси 1082', ports: '1082/1083', args: [], defaultMode: 'seoul'},
+    {title: 'Прокси 1088', ports: '1088/1089', args: ['--1088'], defaultMode: 'frankfurt'},
+];
 
 const POLL_SECONDS = 10;
 
@@ -71,10 +75,12 @@ const ProxyModeToggle = GObject.registerClass({
     Signals: {'mode-changed': {}},
 },
 class ProxyModeToggle extends QuickMenuToggle {
-    _init() {
+    _init(port) {
+        this._port = port;
+        this._args = [PROXY_MODE, ...port.args];
         super._init({
-            title: 'Прокси 1082',
-            iconName: DEFAULT_MODE.icon,
+            title: port.title,
+            iconName: 'network-vpn-symbolic',
             // Плитка — не выключатель: любой из режимов «включён», просто
             // разный. Поэтому клик по всему телу плитки открывает список,
             // а не переключает что-то втихую.
@@ -86,8 +92,8 @@ class ProxyModeToggle extends QuickMenuToggle {
         // целиком про выбор, поэтому открываем список по любому клику.
         this.connect('clicked', () => this.menu.open());
 
-        this.menu.setHeader('network-vpn-symbolic', 'Прокси 1082/1083',
-            'Через что идёт трафик на портах 1082 и 1083');
+        this.menu.setHeader('network-vpn-symbolic', `Прокси ${port.ports}`,
+            `Через что идёт трафик на портах ${port.ports.replace('/', ' и ')}`);
 
         this._items = new Map();
         for (const mode of MODES) {
@@ -125,11 +131,11 @@ class ProxyModeToggle extends QuickMenuToggle {
         // подсвечивается только через секунду и кажется, что клик не прошёл.
         // Если переключение не удастся, ближайший опрос вернёт правду.
         this._apply(mode.id);
-        runAsync([PROXY_MODE, mode.id], () => this._refresh());
+        runAsync([...this._args, mode.id], () => this._refresh());
     }
 
     _refresh() {
-        runAsync([PROXY_MODE, 'status'], out => {
+        runAsync([...this._args, 'status'], out => {
             const mode = MODES.find(m => m.status === out);
             // UNKNOWN (sing-box недоступен) и любой неизвестный ответ —
             // не режим, а поломка: не врём галочкой, снимаем все.
@@ -166,21 +172,23 @@ class ProxyModeIndicator extends SystemIndicator {
     _init() {
         super._init();
 
-        this._toggle = new ProxyModeToggle();
-        this.quickSettingsItems.push(this._toggle);
+        this._toggles = PORTS.map(port => new ProxyModeToggle(port));
+        this.quickSettingsItems.push(...this._toggles);
 
         // Индикатор в топ-баре — ради режима «без VPN»: забытым он
         // означает трафик мимо тоннеля, о котором не знаешь. На дефолтном
         // маршруте не мозолим глаза и прячемся.
-        this._icon = this._addIndicator();
-        this._toggle.connect('mode-changed', () => this._sync());
-        this._sync();
+        this._icons = this._toggles.map(toggle => {
+            const icon = this._addIndicator();
+            toggle.connect('mode-changed', () => this._sync(toggle, icon));
+            this._sync(toggle, icon);
+            return icon;
+        });
     }
 
-    _sync() {
-        const mode = this._toggle.currentMode;
-        this._icon.icon_name = this._toggle.iconName;
-        this._icon.visible = mode !== DEFAULT_MODE.id;
+    _sync(toggle, icon) {
+        icon.icon_name = toggle.iconName;
+        icon.visible = toggle.currentMode !== toggle._port.defaultMode;
     }
 });
 
