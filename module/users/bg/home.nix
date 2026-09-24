@@ -400,6 +400,7 @@ in {
       settings = {
         core = {
           quotepath = false; # показывать кириллицу в именах файлов, а не \320\260
+          editor = "vim"; # иначе берётся $EDITOR=nano из NixOS-дефолта
         };
         user = {
           name = "back2nix";
