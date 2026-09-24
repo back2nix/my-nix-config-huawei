@@ -117,3 +117,7 @@ update-claude:
 # Обновление gemini-cli до последней стабильной версии (правит overlays/default.nix)
 update-gemini:
     ./scripts/update-gemini.sh
+
+# Обновление rtk до последнего релиза (правит pkgs/rtk.nix)
+update-rtk:
+    ./scripts/update-rtk.sh
