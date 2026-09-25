@@ -4,16 +4,13 @@
   lib,
   ...
 }: {
-  # Открываем порты в фаерволе для DNS
-  networking.firewall.allowedUDPPorts = [53];
-  networking.firewall.allowedTCPPorts = [53];
-
   services.blocky = {
     enable = true;
     settings = {
       ports = {
-        dns = 53;
-        http = 4000;
+        # Только loopback: резолвер и API (/api/blocking/disable) не видны из LAN.
+        dns = "127.0.0.1:53,[::1]:53";
+        http = "127.0.0.1:4000";
       };
 
       # bootstrapDns нужен, чтобы зарезолвить hostname'ы DoH/DoT upstream'ов.

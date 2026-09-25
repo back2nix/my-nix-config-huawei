@@ -92,25 +92,25 @@
           {
             type = "socks";
             tag = "socks-usa";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1082;
           }
           {
             type = "http";
             tag = "http-usa";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1083;
           }
           {
             type = "socks";
             tag = "socks-china";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1084;
           }
           {
             type = "http";
             tag = "http-china";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1085;
           }
           # 1088/1089 — второй переключаемый вход, свой selector
@@ -119,13 +119,13 @@
           {
             type = "socks";
             tag = "socks-frankfurt";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1088;
           }
           {
             type = "http";
             tag = "http-frankfurt";
-            listen = "0.0.0.0";
+            listen = "127.0.0.1";
             listen_port = 1089;
           }
           # 1086/1087 — прежняя схема: прямой ssh до google-seoul (ssh-out1).
@@ -226,7 +226,7 @@
             detour = "ssh-casino-relay";
           }
           # Выход без проксирования: трафик уходит с самого ноутбука.
-          # Ради этого режима 1082/1083 и слушают 0.0.0.0 — телефон/планшет
+          # Раньше ради этого режима 1082/1083 слушали 0.0.0.0 — телефон/планшет
           # тогда ходят «как через мой компьютер», без VPN вообще.
           {
             type = "direct";
