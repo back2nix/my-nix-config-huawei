@@ -53,7 +53,6 @@ in {
 
   imports = [
     ./cachix.nix
-    ./module/change.mac.nix
     ./module/users/users.nix
     # ./module/autossh.nix
     ./sops/sops.nix
@@ -451,12 +450,6 @@ in {
     lorri = {
       enable = true;
       package = pkgs-master.lorri;
-    };
-
-    change-mac = {
-      enable = false;
-      interface = "wlp0s20f3";
-      macAddress = "00:11:22:33:44:55";
     };
 
     dbus.packages = [pkgs.dconf];

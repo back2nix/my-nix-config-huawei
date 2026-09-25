@@ -20,7 +20,13 @@
   networking = {
     networkmanager = {
       enable = true;
-      wifi.backend = "wpa_supplicant";
+      wifi = {
+        backend = "wpa_supplicant";
+        # свой постоянный MAC для каждой сети (не связать между сетями, DHCP-аренда не теряется)
+        macAddress = "stable";
+        scanRandMacAddress = true;
+      };
+      ethernet.macAddress = "stable";
     };
 
     nat = {
