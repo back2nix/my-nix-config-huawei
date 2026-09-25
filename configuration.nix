@@ -162,6 +162,8 @@ in {
         Experimental = "true";
         Enable = "Source,Sink,Media,Socket";
         MultiProfile = "multiple";
+        # BLE: случайный resolvable-адрес вместо публичного (ротация ~15 мин)
+        Privacy = "device";
       };
       Policy = {
         AutoEnable = "true";

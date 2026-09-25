@@ -231,7 +231,8 @@
     serviceConfig = {
       ExecStart = [
         ""
-        "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf"
+        # hostname plugin перетирает Name из main.conf именем хоста
+        "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf --noplugin=hostname"
       ];
       ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.bluez}/bin/bluetoothctl power on'";
       RestartSec = "5";
