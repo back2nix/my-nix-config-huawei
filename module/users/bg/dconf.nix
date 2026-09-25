@@ -163,7 +163,6 @@
       initialtogglestate4-setting = 3; # не трогать юнит при логине
       showindicator4-setting = true;
       runcommandatboot4-setting = false;
-
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;

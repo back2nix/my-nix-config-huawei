@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
-    nixpkgs-23-11.url = "github:nixos/nixpkgs/nixos-23.11";
 
     flake-parts.url = "github:hercules-ci/flake-parts";
 
@@ -71,42 +70,9 @@
       # Указываем системы, которые поддерживаем
       systems = ["x86_64-linux"];
 
-      # Импортируем модули flake-parts (если будут)
-      imports = [
-        # Здесь можно импортировать дополнительные модули
-        # ./parts/packages.nix
-        # ./parts/overlays.nix
-      ];
-
       # perSystem - для вещей, специфичных для каждой системы
-      perSystem = {
-        config,
-        self',
-        inputs',
-        pkgs,
-        system,
-        ...
-      }: let
-        # Создаём дополнительные pkgs для unstable/master/23.11
-        pkgs-master = import inputs.nixpkgs-master {
-          inherit system;
-          config.allowUnfree = true;
-        };
-        pkgs-unstable = import inputs.nixpkgs-unstable {
-          inherit system;
-          config.allowUnfree = true;
-        };
-        pkgs-23-11 = import inputs.nixpkgs-23-11 {
-          inherit system;
-          config.allowUnfree = true;
-        };
-      in {
-        # Здесь можно определить packages, devShells и т.д. для каждой системы
-        # packages.default = pkgs.hello;
-        # devShells.default = pkgs.mkShell { ... };
-
-        # Можно добавить форматтер
-        # formatter = pkgs.alejandra;
+      perSystem = {pkgs, ...}: {
+        formatter = pkgs.alejandra;
       };
 
       # flake - для системно-независимых вещей
@@ -127,7 +93,6 @@
 
         pkgs-master = mkPkgs inputs.nixpkgs-master system;
         pkgs-unstable = mkPkgs inputs.nixpkgs-unstable system;
-        pkgs-23-11 = mkPkgs inputs.nixpkgs-23-11 system;
 
         # Общая функция для создания системы
         mkSystem = deviceName: extraModules:
@@ -138,7 +103,6 @@
                 inputs
                 pkgs-master
                 pkgs-unstable
-                pkgs-23-11
                 ;
               self = inputs.self;
             };
@@ -147,10 +111,8 @@
                 inputs.musnix.nixosModules.musnix
                 inputs.sops-nix.nixosModules.sops
                 ./configuration.nix
-                # --- НАЧАЛО ИЗМЕНЕНИЯ ---
                 # Применяем наш оверлей с исправленным mutter
                 ./overlays/default.nix
-                # --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
                 # Home Manager
                 inputs.home-manager.nixosModules.home-manager
@@ -161,7 +123,6 @@
                         inputs
                         pkgs-master
                         pkgs-unstable
-                        pkgs-23-11
                         ;
                       self = inputs.self;
                     };

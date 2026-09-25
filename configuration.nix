@@ -12,7 +12,6 @@
   # my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
   #   edition = "stable";
   # };
-
 in {
   nix = {
     # nixPath = [ "nixpkgs=flake:nixpkgs" ];
@@ -205,8 +204,8 @@ in {
       MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
       MUTTER_ALWAYS_ON_TOP_BY_TITLE = "$(cat ${config.sops.secrets."mutter/mutter_always_on_top_by_title".path})";
       MUTTER_FORCE_HIDE_CURSOR = 1;
-      MUTTER_HIDE_ACTORS_BY_NAME="screencast-hide";
-      MUTTER_HIDE_ACTORS_BY_STYLE_CLASS="run-dialog,switcher-popup,notification-banner";
+      MUTTER_HIDE_ACTORS_BY_NAME = "screencast-hide";
+      MUTTER_HIDE_ACTORS_BY_STYLE_CLASS = "run-dialog,switcher-popup,notification-banner";
     };
     shells = with pkgs; [fish];
 
@@ -241,7 +240,7 @@ in {
       gst_all_1.gst-plugins-ugly
       gst_all_1.gst-libav
       # Управление порталом ScreenCast по D-Bus из скрипта захвата.
-      (python3.withPackages (ps: with ps; [ pygobject3 dbus-python ]))
+      (python3.withPackages (ps: with ps; [pygobject3 dbus-python]))
 
       # Пакеты из unstable/master
       pkgs-master.serpl

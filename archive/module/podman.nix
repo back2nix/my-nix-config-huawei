@@ -3,7 +3,7 @@
   config,
   pkgs,
   pkgs-master,
-  pkgs-23-11,
+  pkgs-unstable,
   ...
 }: {
   virtualisation.docker.enable = false;
@@ -29,7 +29,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
-    pkgs-23-11.arion
+    pkgs-unstable.arion
     pkgs-master.podman-compose
     pkgs-master.podman-tui
     pkgs-master.docker-client

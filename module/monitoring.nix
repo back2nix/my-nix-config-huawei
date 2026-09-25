@@ -108,17 +108,20 @@ with lib; {
       ];
     };
 
+    sops.secrets."grafana/admin_password".owner = "grafana";
+
     # Grafana с PostgreSQL источником данных
     services.grafana = {
       enable = true;
       settings = {
         server = {
-          http_addr = "0.0.0.0";
+          http_addr = "127.0.0.1";
           http_port = config.services.monitoring-stack.grafana.port;
         };
         security = {
           admin_user = "admin";
-          admin_password = "admin";
+          # Секрет grafana/admin_password нужно добавить в secrets/secrets.yaml.
+          admin_password = "$__file{${config.sops.secrets."grafana/admin_password".path}}";
         };
         # Разрешаем небезопасный HTML для piechart панелей
         panels.disable_sanitize_html = true;

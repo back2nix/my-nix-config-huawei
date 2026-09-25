@@ -39,14 +39,15 @@ run-nographic:
 
 # Обновление nixvim
 update-nixvim:
-    nix flake lock --update-input nixvim
+    nix flake update nixvim
 
 # Обновление replacer
 update-replacer:
-    nix flake lock --update-input replacer
+    nix flake update replacer
 
-update-muuter:
-  nix flake update --update-input mutter-src
+# Обновление mutter
+update-mutter:
+    nix flake update mutter-src
 
 # Полное обновление flake
 update:
@@ -60,9 +61,21 @@ switch-device device:
 fmt-alejandra:
     alejandra .
 
-# Проверка форматирования
+# Проверка форматирования (без изменений файлов)
 fmt-check:
-    alejandra .
+    alejandra --check .
+
+# Проверка флейка
+check:
+    nix flake check --no-build
+
+# Быстрый коммит всех изменённых файлов и push
+push:
+    git add -u && git commit -m "just push" && git push || (git pull --rebase && git push)
+
+# Забрать конфиг из /etc/nixos
+sync:
+    rsync -avP --exclude='private' --exclude='presharedKeyFile' --exclude='.env' /etc/nixos/* .
 
 # Показать текущее устройство из .env
 show-device:

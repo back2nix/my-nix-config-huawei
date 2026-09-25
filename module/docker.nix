@@ -3,7 +3,6 @@
   config,
   pkgs,
   pkgs-master,
-  pkgs-23-11,
   ...
 }: {
   services.dockerRegistry = {
