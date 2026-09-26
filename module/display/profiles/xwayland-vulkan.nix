@@ -1,25 +1,39 @@
+# Профиль "xwayland-vulkan" — текущая рабочая конфигурация.
+# GNOME-сессия Wayland, Chrome через XWayland + ANGLE-Vulkan, Wacom через X11-драйвер.
 {
   config,
   lib,
   pkgs,
   ...
-}: {
-  programs.xwayland.enable = true;
-  environment.sessionVariables = {
-    # GDK_BACKEND = "wayland,x11";  # Fallback на x11
-    # NIXOS_OZONE_WL = "1";
-  };
+}:
+lib.mkIf (config.my.display.profile == "xwayland-vulkan") {
+  # GPU-композитинг на этом Intel Lunar Lake + Mesa:
+  #   - ANGLE-GL вообще не инициализируется → всё software.
+  #   - ANGLE-Vulkan даёт HW растеризацию/WebGL/видео, НО под нативным
+  #     --ozone-platform=wayland Chromium не умеет VK_KHR_wayland_surface
+  #     для display-композитора → "Compositing: Software only" (весь
+  #     backbuffer композитится на CPU, GPU-процесс жрёт ~30мс/кадр).
+  # Решение: Vulkan + --ozone-platform=x11 (XWayland) — там композитор
+  # использует VK_KHR_xcb_surface, который поддержан → "Compositing:
+  # Hardware accelerated" + WebGL без "reduced performance". Проверено на
+  # chrome://gpu. Размен: XWayland вместо нативного Wayland.
+  # См. brave/brave-browser#55345 (DefaultANGLEVulkan + Wayland = soft-composite).
+  # --disable-gpu-video-decode убран: на Vulkan-пути Video Decode встаёт на HW.
+  my.display.chrome.args = [
+    "--ozone-platform=x11"
+    # RawDraw / TreesInViz — экспериментальные GPU-фичи, держатся в ОДНОМ
+    # --enable-features (второй такой флаг затёр бы Vulkan-список → soft-compositing).
+    # Проверено chrome://gpu: "Raw Draw: Enabled" - не даёт запустить chrome, белый экран.
+    # Vulkan/WebGPU/Compositing остались Hardware accelerated.
+    "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE,WebRTCPipeWireCapturer,TreesInViz"
+    "--use-angle=vulkan"
+    "--ignore-gpu-blocklist"
+    "--enable-gpu-rasterization"
+    "--enable-zero-copy"
+  ];
+
   services.xserver = {
-    enable = true;
-    videoDrivers = ["modesetting"];
-
-    xkb = {
-      layout = "us,ru";
-      options = "grp:caps_toggle,grp_led:caps,compose:ralt";
-    };
-
     displayManager = {
-      # sessionCommands остается здесь, так как это относится к X-серверу
       sessionCommands = ''
         # Настройка автоповорота для X11 через GNOME DisplayConfig API
         ${pkgs.iio-sensor-proxy}/bin/monitor-sensor | while read line; do
@@ -75,8 +89,6 @@
       '';
     };
 
-    wacom.enable = true;
-
     inputClassSections = [
       ''
         Identifier "Wacom Touchscreen"
@@ -95,49 +107,11 @@
     ];
   };
 
-  # Эти опции действительно переехали в корень services
-  services.displayManager.gdm.enable = true;
-  # gdm.wayland больше не поддерживается в GNOME 50 — Wayland по умолчанию
-  services.desktopManager.gnome.enable = true;
-
-  # Модуль GNOME по умолчанию включает i18n.inputMethod (ibus). Нам он не нужен:
-  # раскладки us/ru идут через xkb (см. services.xserver.xkb выше), IME-движков
-  # с composition (CJK) нет — gsettings input-sources = [(xkb,us),(xkb,ru)].
-  #
-  # При этом ibus активно ВРЕДИЛ: он выставляет XMODIFIERS=@im=ibus, из-за чего
-  # XWayland-клиенты (Chrome с --ozone-platform=x11, Obsidian) ходят к ibus-x11
-  # по легаси-протоколу XIM. XIM синхронный, и Ctrl+V в Chrome залипал ~10с на
-  # каждой вставке. Замерено: сам буфер обмена ни при чём — XWayland-мост Mutter
-  # и kitty отвечают на все таргеты (TARGETS/text-plain/SAVE_TARGETS) за 12-17мс.
-  # Проверено: запуск Chrome с XMODIFIERS=@im=none убирает задержку полностью.
-  #
-  # Chrome держим на --ozone-platform=x11 намеренно — ради HW-композитинга,
-  # см. programs.google-chrome в module/users/bg/home.nix.
-  i18n.inputMethod.enable = false;
-
-  # Отключаем файловый индексатор GNOME (localsearch/tinysparql, бывший tracker).
-  # Он жрёт CPU, сканируя home. Нам не нужен.
-  services.gnome.localsearch.enable = false;
-  services.gnome.tinysparql.enable = false;
-
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      naturalScrolling = true;
-      tapping = true;
-      tappingDragLock = false;
-      middleEmulation = true;
-      disableWhileTyping = true;
-    };
-  };
-
   environment.systemPackages = with pkgs; [
     xf86_input_wacom
     xinput
     xf86-input-libinput
-    iio-sensor-proxy
     onboard
-    glib # для gdbus
 
     (pkgs.writeShellScriptBin "toggle-flip" ''
       export PATH="${
@@ -152,12 +126,7 @@
           pkgs.xset
         ]
       }:$PATH"
-      ${builtins.readFile ./toggle-flip.sh}
+      ${builtins.readFile ../toggle-flip-x11.sh}
     '')
   ];
-
-  hardware.sensor.iio.enable = true;
-  services.udev.extraRules = ''
-    SUBSYSTEM=="iio", ACTION=="add", ATTR{name}=="accel_3d", TAG+="systemd", ENV{SYSTEMD_WANTS}="iio-sensor-proxy.service"
-  '';
 }

@@ -5,6 +5,7 @@
   pkgs-master,
   pkgs-unstable,
   lib,
+  osConfig,
   ...
 }: let
   inherit (import ../../../variables.nix) mainUser;
@@ -459,47 +460,13 @@ in {
     ];
   };
 
-  # gpu wayland
-  # google-chrome --ozone-platform=wayland --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE --enable-gpu-rasterization --enable-zero-copy --ignore-gpu-blocklist --use-angle=vulkan --disable-gpu-video-decode
   programs.google-chrome = {
     enable = true;
     package = pkgs-master.google-chrome;
 
-    # GPU-композитинг на этом Intel Lunar Lake + Mesa:
-    #   - ANGLE-GL вообще не инициализируется → всё software.
-    #   - ANGLE-Vulkan даёт HW растеризацию/WebGL/видео, НО под нативным
-    #     --ozone-platform=wayland Chromium не умеет VK_KHR_wayland_surface
-    #     для display-композитора → "Compositing: Software only" (весь
-    #     backbuffer композитится на CPU, GPU-процесс жрёт ~30мс/кадр).
-    # Решение: Vulkan + --ozone-platform=x11 (XWayland) — там композитор
-    # использует VK_KHR_xcb_surface, который поддержан → "Compositing:
-    # Hardware accelerated" + WebGL без "reduced performance". Проверено на
-    # chrome://gpu. Размен: XWayland вместо нативного Wayland.
-    # См. brave/brave-browser#55345 (DefaultANGLEVulkan + Wayland = soft-composite).
-    # --disable-gpu-video-decode убран: на Vulkan-пути Video Decode встаёт на HW.
-    commandLineArgs = [
-      "--ozone-platform=x11"
-      # RawDraw / TreesInViz — экспериментальные GPU-фичи, держатся в ОДНОМ
-      # --enable-features (второй такой флаг затёр бы Vulkan-список → soft-compositing).
-      # Проверено chrome://gpu: , "TreesInViz: Enabled",  "Raw Draw: Enabled" - не дает запустить chrome белый экран
-      # Vulkan/WebGPU/Compositing остались Hardware accelerated.
-      "--enable-features=Vulkan,DefaultANGLEVulkan,VulkanFromANGLE,WebRTCPipeWireCapturer,TreesInViz"
-      "--use-angle=vulkan"
-      "--ignore-gpu-blocklist"
-      "--enable-gpu-rasterization"
-      "--enable-zero-copy"
-      "--disable-features=GlobalMediaControls"
-      # WebGPU: chrome://gpu показывал "WebGPU: Disabled". На Linux WebGPU
-      # за флагом — включается ОТДЕЛЬНЫМ switch'ем --enable-unsafe-webgpu,
-      # а НЕ вторым --enable-features=... . Прошлая попытка (ece7c8a) добавила
-      # webgpu вторым "--enable-features=SkiaGraphite,..." — Chrome берёт только
-      # ПОСЛЕДНИЙ --enable-features, из-за чего затирался Vulkan-список и падал
-      # композитинг → всё откатили (5a90d96). Отдельный switch не конфликтует.
-      # Проверено: chrome://gpu → "WebGPU: Hardware accelerated",
-      # navigator.gpu.requestAdapter() → Intel xe-2lpg, Vulkan/Compositing целы.
-      "--enable-unsafe-webgpu"
-      "--remote-debugging-port=9222"
-    ];
+    # Флаги (ozone/Vulkan и т.п.) задаёт профиль графики NixOS:
+    # module/display (my.display.profile).
+    commandLineArgs = osConfig.my.display.chrome.args;
   };
 
   # xdg.mimeApps = {
