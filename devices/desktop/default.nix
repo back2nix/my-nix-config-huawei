@@ -8,7 +8,15 @@
     ./hardware-configuration.nix
     # ./powersave.nix
     ./power-profiles.nix
+    # Admin-VPN до casino-VPS, как на yoga14, но свой пир: 10.100.0.5,
+    # ключ wireguard/eggventure_desktop_private (сервер: casino-vps/modules/wireguard.nix).
+    ../../module/wireguard-eggventure.nix
   ];
+
+  my.eggventureVpn = {
+    address = "10.100.0.5";
+    secret = "wireguard/eggventure_desktop_private";
+  };
 
   nix.settings = {
     substituters = lib.mkAfter [
