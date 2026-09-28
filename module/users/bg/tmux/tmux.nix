@@ -15,7 +15,8 @@
         if [ "$t" = root ]; then from="M-$l"; to="M-$c"; else from="$l"; to="$c"; fi
         # list-keys экранирует ; " ' ` \ { } ~ и пр. обратным слешем
         case "$l" in [a-zA-Z0-9,.\[\]\<\>]) esc="$from" ;; *) esc="''${from%?}\\$l" ;; esac
-        ${pkgs.gawk}/bin/awk -v k="$esc" -v n="$to" '{
+        K="$esc" N="$to" ${pkgs.gawk}/bin/awk '{
+          k = ENVIRON["K"]; n = ENVIRON["N"]
           for (i = 1; i < NF; i++) if ($i == "-T") break
           if ($(i + 2) != k) next
           if (index($0, " -T " $(i + 1) " ") == 0) next
