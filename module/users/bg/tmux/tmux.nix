@@ -1,4 +1,33 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  # Дублирует бинды латинских клавиш на соответствующие клавиши русской раскладки
+  # (ЙЦУКЕН), чтобы tmux работал без переключения языка.
+  # Таблицы prefix / copy-mode-vi: key -> cyr; root: M-key -> M-cyr.
+  ruLayoutBinds = pkgs.writeShellScript "tmux-ru-layout-binds" ''
+    lat='qwertyuiop[]asdfghjkl;'"'"'zxcvbnm,.`QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>~'
+    cyr='йцукенгшщзхъфывапролджэячсмитьбюёЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮЁ'
+    out=$(mktemp)
+    for t in prefix copy-mode-vi root; do
+      ${pkgs.tmux}/bin/tmux list-keys -T "$t" > "$out.$t" 2>/dev/null || continue
+    done
+    for i in $(seq 0 $((''${#lat} - 1))); do
+      l=''${lat:$i:1}; c=''${cyr:$i:1}
+      for t in prefix copy-mode-vi root; do
+        if [ "$t" = root ]; then from="M-$l"; to="M-$c"; else from="$l"; to="$c"; fi
+        # list-keys экранирует ; " ' ` \ { } ~ и пр. обратным слешем
+        case "$l" in [a-zA-Z0-9,.\[\]\<\>]) esc="$from" ;; *) esc="''${from%?}\\$l" ;; esac
+        ${pkgs.gawk}/bin/awk -v k="$esc" -v n="$to" '{
+          for (i = 1; i < NF; i++) if ($i == "-T") break
+          if ($(i + 2) != k) next
+          if (index($0, " -T " $(i + 1) " ") == 0) next
+          p = index($0, " " k " ")
+          print substr($0, 1, p) n substr($0, p + length(k) + 1)
+        }' "$out.$t"
+      done
+    done > "$out"
+    ${pkgs.tmux}/bin/tmux source-file "$out"
+    rm -f "$out" "$out".*
+  '';
+in {
   programs.tmux = {
     enable = true;
     keyMode = "vi";
@@ -160,6 +189,9 @@
 
         # Отключить C-a + Space (next-layout, менял расположение панелей)
         unbind Space
+
+        # Русская раскладка: зеркалим все бинды (должно быть последним)
+        run-shell ${ruLayoutBinds}
     '';
   };
 }
