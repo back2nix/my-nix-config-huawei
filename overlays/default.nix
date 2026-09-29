@@ -115,13 +115,13 @@
       #     "$@"
       # '';
 
-      # --- НАЧАЛО: Обновление claude-code до 2.1.283 ---
+      # --- НАЧАЛО: Обновление claude-code до 2.1.284 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
-        version = "2.1.283";
+        version = "2.1.284";
         src = prev.fetchurl {
-          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.283/linux-x64/claude";
-          sha256 = "1859583ce32920595c61ef868bee52e1b1594f7486db209935e01f1e5e804ae2";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.284/linux-x64/claude";
+          sha256 = "5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f";
         };
         dontUnpack = true;
         dontBuild = true;
@@ -141,7 +141,7 @@
         '';
         meta.mainProgram = "claude";
       };
-      # --- КОНЕЦ: Обновление claude-code до 2.1.283 ---
+      # --- КОНЕЦ: Обновление claude-code до 2.1.284 ---
 
       # --- НАЧАЛО: Обновление gemini-cli до 0.58.0 ---
       # База — свежая деривация из unstable (0.47.0). Начиная с ~0.45 nixpkgs
