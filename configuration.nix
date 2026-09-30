@@ -324,7 +324,11 @@ in {
       # Generic-имена (claude/gemini/kimi/gcloud), *-proxy, *-vpn2 и *-vpn3 не
       # определены в оверлее вовсе — чтобы не было точки запуска в обход
       # china-прокси. Так же оформлен gcloud-china ниже.
-      gemini-china
+      # gemini-china: отключён 2026-10-01 — upstream убрал Gemini CLI для
+      # unpaid/AI Pro/Ultra (заменён Antigravity CLI), nixpkgs помечает пакет
+      # как removal и eval сыплет warning. Оверлей gemini-cli/gemini-china
+      # оставлен на месте (ленивый, не вычисляется, пока не в пакетах).
+      # gemini-china
       appimage-run
       dbeaver-bin
       claude-code-china
