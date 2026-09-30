@@ -522,6 +522,16 @@ in {
     };
   };
 
+  # thd теряет /dev/input/event* после сна и сам их не переоткрывает —
+  # Power перестаёт вызывать toggle-flip. Перезапускаем после resume.
+  systemd.services.triggerhappy-resume = {
+    description = "Restart triggerhappy after resume";
+    after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    serviceConfig.Type = "oneshot";
+    script = "${pkgs.systemd}/bin/systemctl restart triggerhappy.service";
+  };
+
   nixpkgs.config.permittedInsecurePackages = [
     # "my-yandex-browser-stable-26.4.1.1110-1"
     "claude-code"
