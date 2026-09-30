@@ -68,6 +68,9 @@
         # version = "48.3.1-my";
         src = inputs.mutter-src;
 
+        # Патчи nixpkgs под upstream-версию уже есть в нашем форке — не применяем их
+        patches = [];
+
         # Добавляем патч, который копирует недостающий gvdb subproject
         postPatch =
           (oldAttrs.postPatch or "")

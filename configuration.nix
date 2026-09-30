@@ -244,7 +244,7 @@ in {
       # Пакеты из unstable/master
       pkgs-master.serpl
       pkgs-master.transmission_4-qt
-      pkgs-master.openvpn3
+      # pkgs-master.openvpn3
       # pkgs-master.gemini-cli
       mktorrent
 
@@ -406,7 +406,7 @@ in {
   };
 
   programs = {
-    openvpn3.enable = true;
+    # openvpn3.enable = true;
     fish.enable = true;
     ssh.setXAuthLocation = true;
     nix-ld = {

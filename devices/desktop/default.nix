@@ -45,7 +45,15 @@
     powerManagement.finegrained = false;
     open = false;
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # 595.71.05 из nixpkgs не собирается под ядро 7.2 (там удалён strncpy),
+    # см. https://github.com/NixOS/nixpkgs/issues/554125 — вернуть .stable, когда обновят
+    package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+      version = "595.99.02";
+      sha256_64bit = "sha256-6HR3lYv3YwcFSTJL1a1slI66btIQ5EAFs+/4SUD24ew=";
+      openSha256 = "sha256-T36x/jx8yQ8l3LFp1rZIrTfcSwbGy8YSAvXOUSptpb4=";
+      settingsSha256 = "sha256-GYCcnxfKPrTCrsmd25sMyzfC5cqJQJx0c31haooyTYM=";
+      persistencedSha256 = "sha256-VyKtF/HdHPQrHHK6opSO69M72LmnGZtauuchj9uuje8=";
+    };
   };
 
   boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
