@@ -8,25 +8,38 @@
 
 ```bash
 just update
-nix build .#nixosConfigurations.yoga14.config.system.build.toplevel
-git commit -am "update flake.lock" && git push   # ноутбуку нужен тот же flake.lock
+git commit -am "update flake.lock" && git push
+nix build --no-link .#nixosConfigurations.yoga14.config.system.build.toplevel
+```
+
+Собирать нужно **после** того, как репо на desktop приведено в итоговое состояние (последний коммит, никаких незакоммиченных правок). Любое изменение в конфиге, даже в не связанном с ноутбуком месте, меняет хеш системы. Тогда готовой системы на desktop не окажется, а `nix copy` упадёт с ошибкой:
+
+```
+error: path '/nix/store/…-nixos-system-yoga14-…' is required, but there is no substituter that can build it
+```
+
+Проверить, что хеши совпадают, можно так: выполни эту команду на обеих машинах, вывод должен быть одинаковым.
+
+```bash
+nix eval --raw .#nixosConfigurations.yoga14.config.system.build.toplevel.outPath
 ```
 
 ## 2. На ноутбуке
 
 ```bash
-git pull   # flake.lock должен совпадать до байта
-nix copy --from ssh-ng://desktop \
+git pull   # тот же коммит и flake.lock, что на desktop
+nix copy -s --no-check-sigs --from ssh-ng://desktop \
   $(nix eval --raw .#nixosConfigurations.yoga14.config.system.build.toplevel.outPath)
 just switch   # всё уже в store, компиляции нет
 ```
 
-## Условия
+Флаги:
+- `-s` (`--substitute-on-destination`): всё, что есть в cache.nixos.org, ноутбук скачивает оттуда, а с desktop копирует только собранное локально. Без флага весь closure (~35 GiB) идёт с desktop.
+- `--no-check-sigs`: пути, собранные на desktop, не подписаны, и без этого флага будет ошибка `lacks a signature by a trusted key`. Флаг работает только для trusted-пользователя (`nix.settings.trusted-users`) или через `sudo`.
+- Прогресс `[N/M copied (X/Y GiB)]` выводится сам, если запускать в терминале без pipe. `-v` печатает каждый путь. По ssh-ng счётчик байт обновляется только после того, как путь скопирован целиком, поэтому на больших пакетах (openusd и т.п.) он подолгу стоит на месте. Это нормально.
 
-- Одинаковый `flake.lock` на обеих машинах, иначе хеши разойдутся и начнётся локальная сборка.
-- Для `nix copy --from` пользователь ноутбука должен быть в `nix.settings.trusted-users`, или пути должны быть подписаны ключом desktop.
-- Обе машины x86_64-linux.
+Если `nix copy` не дошёл до конца, `just switch` всё равно можно запускать. Уже скопированное он возьмёт из store, остальное скачает из cache.nixos.org, а собранное только на desktop, но не скопированное, будет компилировать локально.
 
 ## Альтернатива: desktop как постоянный кеш
 
-На desktop поднять `nix-serve` или `harmonia` с ключом подписи. На ноутбуке добавить его в `substituters` и `trusted-public-keys`. Внимание: `just switch` сейчас явно задаёт `--option substituters "https://cache.nixos.org"`, так что desktop-кеш придётся дописать и туда.
+На desktop поднять `nix-serve` или `harmonia` и подписывать пути ключом. На ноутбуке добавить его в `substituters` и `trusted-public-keys`. Внимание: `just switch` сейчас явно задаёт `--option substituters "https://cache.nixos.org"`, так что desktop-кеш придётся дописать и туда.

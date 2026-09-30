@@ -58,7 +58,7 @@ in {
     ./sops/sops.nix
 
     # ./module/kvm.nix
-    ./module/virtualbox.nix
+    # ./module/virtualbox.nix
     ./module/k3s.nix
 
     # DNS настройки
@@ -377,7 +377,7 @@ in {
         ${builtins.readFile ./scripts/virt-switch.sh}
       '')
 
-      virtualbox
+      # virtualbox
       # pkgs-unstable.openclaw
 
       # pkgs-unstable.antigravity
