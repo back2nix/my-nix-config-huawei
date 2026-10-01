@@ -16,18 +16,26 @@
   ripgrep,
   git,
 }: let
-  version = "0.147.0";
+  version = "0.159.3";
 
   sources = {
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
-      hash = "sha256-Akbi53ODTgfw+1JJ7W660S5FkeYI+Me7l91qlpBUTDY=";
+      hash = "sha256-tIyhstaxv0K5ROAsPZN8iY4kZRkWaEzcNf3t8xspG8s=";
+
+      # Подставить hash из nix store prefetch-file.
+      codeModeHostHash = "sha256-D1jdmEjHFzguUiPjnB/I9DqPSoy+INevDA3uDvOr1Dg=";
     };
   };
 
   source =
     sources.${stdenvNoCC.hostPlatform.system}
     or (throw "codex: unsupported platform ${stdenvNoCC.hostPlatform.system}");
+
+  codeModeHostSrc = fetchurl {
+    url = "https://github.com/openai/codex/releases/download/rust-v${version}/codex-code-mode-host-${source.target}.tar.gz";
+    hash = source.codeModeHostHash;
+  };
 in
   stdenvNoCC.mkDerivation {
     pname = "codex";
@@ -47,9 +55,16 @@ in
 
     installPhase = ''
       runHook preInstall
+
       install -Dm755 codex-${source.target} $out/bin/codex
+
+      tar -xzf ${codeModeHostSrc}
+      install -Dm755 codex-code-mode-host-${source.target} \
+        $out/bin/codex-code-mode-host
+
       wrapProgram $out/bin/codex \
         --prefix PATH : ${lib.makeBinPath [ripgrep git]}
+
       runHook postInstall
     '';
 

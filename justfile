@@ -134,3 +134,6 @@ update-gemini:
 # Обновление rtk до последнего релиза (правит pkgs/rtk.nix)
 update-rtk:
     ./scripts/update-rtk.sh
+
+update-codex:
+      ./scripts/update-codex.sh
