@@ -22,7 +22,7 @@
     };
   };
 
-  # Watchdog: china каждые 15 секунд проверяет туннель, если мёртв — рестартует sing-box
+  # Watchdog: прокси каждые 15 секунд проверяет туннель, если мёртв — рестартует sing-box
   # systemd.services."sing-box-watchdog" = {
   #   description = "sing-box tunnel watchdog";
   #   serviceConfig = {

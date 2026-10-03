@@ -72,17 +72,46 @@
         # IPv4-only: у ssh-out1 нет IPv6-маршрута, любая AAAA-цель даёт
         # "dial tcp [...]: connect: network is unreachable".
         #
-        # DNS берём у локального dnscrypt-proxy (module/dnscrypt-proxy.nix):
-        # 127.0.0.1:5300 -> socks5 1082 -> ssh-out1-via-casino -> Quad9 DoH.
-        # Прямой 1.1.1.1:53 из этой сети отравляется и даёт NXDOMAIN.
-        dns.servers = [
-          {
-            tag = "dns-dnscrypt";
-            type = "udp";
-            server = "127.0.0.1";
-            server_port = 5300;
-          }
-        ];
+        # DNS целевых доменов идёт через тот же выход, что и входящая пара.
+        # IP Quad9 задан явно: bootstrap DNS и рекурсия через SOCKS не нужны.
+        dns = {
+          servers =
+            [
+              {
+                tag = "dns-dnscrypt";
+                type = "udp";
+                server = "127.0.0.1";
+                server_port = 5300;
+              }
+            ]
+            ++ map (entry: {
+              type = "https";
+              tag = entry.tag;
+              server = "9.9.9.9";
+              server_port = 443;
+              path = "/dns-query";
+              tls = {
+                enabled = true;
+                server_name = "dns.quad9.net";
+              };
+              detour = entry.outbound;
+            }) [
+              {
+                tag = "dns-1082";
+                outbound = "usa-select";
+              }
+              {
+                tag = "dns-1088";
+                outbound = "frankfurt-select";
+              }
+              {
+                tag = "dns-1090";
+                outbound = "astana-select";
+              }
+            ];
+          final = "dns-dnscrypt";
+          independent_cache = true;
+        };
 
         inbounds = [
           # 1082/1083 — основной прокси. Маршрут не прибит гвоздями: правило
@@ -103,13 +132,13 @@
           }
           {
             type = "socks";
-            tag = "socks-china";
+            tag = "socks-1084";
             listen = "127.0.0.1";
             listen_port = 1084;
           }
           {
             type = "http";
-            tag = "http-china";
+            tag = "http-1085";
             listen = "127.0.0.1";
             listen_port = 1085;
           }
@@ -177,8 +206,8 @@
               server = "dns-dnscrypt";
               strategy = "ipv4_only";
             };
-            # server = "192.168.43.1"; # mobile-china
-            # server = "192.168.1.5"; # wifi-china
+            # server = "192.168.43.1"; # mobile-proxy
+            # server = "192.168.1.5"; # wifi-proxy
             server = "192.168.3.6"; # wifi-home
             server_port = 8080;
           }
@@ -316,8 +345,32 @@
         route.rules = [
           # 1. Достаём домен из TLS SNI / HTTP Host.
           {action = "sniff";}
-          # 2. Домен -> только A-записи.
+          # 2. Resolve через соответствующий selector. Без кэша для этих
+          # пар: смена выхода не должна использовать ответы старого маршрута.
           {
+            inbound = ["socks-usa" "http-usa"];
+            action = "resolve";
+            server = "dns-1082";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
+          {
+            inbound = ["socks-frankfurt" "http-frankfurt"];
+            action = "resolve";
+            server = "dns-1088";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
+          {
+            inbound = ["socks-astana" "http-astana"];
+            action = "resolve";
+            server = "dns-1090";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
+          {
+            inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana"];
+            invert = true;
             action = "resolve";
             server = "dns-dnscrypt";
             strategy = "ipv4_only";
@@ -334,7 +387,7 @@
             outbound = "usa-select";
           }
           {
-            inbound = ["socks-china" "http-china"];
+            inbound = ["socks-1084" "http-1085"];
             outbound = "ssh-out1-via-vpn3";
           }
           {

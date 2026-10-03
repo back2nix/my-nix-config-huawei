@@ -29,21 +29,43 @@
     # Overlay 2: Use `final` and `prev` to express
     # the relationship between the new and the old
     (final: prev: let
-      # Единая обёртка «гонять CLI через China proxy».
-      # name — имя создаваемой команды, program — путь к реальному бинарю.
-      # Порт 1083 — http-china inbound из sops/sops.nix; задан здесь один раз,
-      # чтобы при его смене не править каждую обёртку по отдельности.
-      mkChinaWrapper = {
+      # Суффикс команды обозначает пару SOCKS/HTTP входов.
+      # HTTP используется для совместимости CLI: 1082→1083, 1088→1089, 1090→1091.
+      mkProxyWrapper = {
         name,
         program,
+        httpPort,
       }:
         prev.writeShellScriptBin name ''
-          export HTTP_PROXY="http://127.0.0.1:1083"
-          export HTTPS_PROXY="http://127.0.0.1:1083"
+          export HTTP_PROXY="http://127.0.0.1:${toString httpPort}"
+          export HTTPS_PROXY="$HTTP_PROXY"
+          export http_proxy="$HTTP_PROXY"
+          export https_proxy="$HTTPS_PROXY"
           export NO_PROXY="localhost,127.0.0.1,::1"
+          export no_proxy="$NO_PROXY"
+          export ALL_PROXY="$HTTP_PROXY"
+          export all_proxy="$ALL_PROXY"
 
           exec ${program} "$@"
         '';
+      proxyWrappers = lib.foldl' (
+        acc: port:
+          acc
+          // lib.mapAttrs' (
+            command: program:
+              lib.nameValuePair "${command}-${toString port}" (mkProxyWrapper {
+                name = "${command}-${toString port}";
+                inherit program;
+                httpPort = port + 1;
+              })
+          ) {
+            claude = "${final.claude-code}/bin/claude";
+            codex = "${final.codex}/bin/codex";
+            kimi = "${final.kimi-code}/bin/kimi";
+            gemini = "${final.gemini-cli}/bin/gemini";
+            gcloud = "${prev.google-cloud-sdk}/bin/gcloud";
+          }
+      ) {} [1082 1088 1090];
     in {
       # --- НАЧАЛО: Патч для gnome-screenshot ---
       # gnome-screenshot = prev.gnome-screenshot.overrideAttrs (oldAttrs: {
@@ -146,7 +168,6 @@
       };
       # --- КОНЕЦ: Обновление claude-code до 2.1.288 ---
 
-
       # --- НАЧАЛО: Обновление gemini-cli до 0.58.0 ---
       # База — свежая деривация из unstable (0.47.0). Начиная с ~0.45 nixpkgs
       # перешёл на сборку через `npmBuildScript = "bundle"` (esbuild) с новым
@@ -216,35 +237,6 @@
       codex = final.callPackage ../pkgs/codex.nix {};
       # --- КОНЕЦ: codex ---
 
-      # Обёртки через China proxy. Только *-china: generic-имена (claude,
-      # gemini, kimi, gcloud), *-proxy, *-vpn2 и *-vpn3 намеренно не определяем,
-      # чтобы не существовало точки запуска мимо china-прокси.
-      # gemini берём из final.gemini-cli (наш override), не из final.unstable.
-      gemini-china = mkChinaWrapper {
-        name = "gemini-china";
-        program = "${final.gemini-cli}/bin/gemini";
-      };
-
-      claude-code-china = mkChinaWrapper {
-        name = "claude-code-china";
-        program = "${final.claude-code}/bin/claude";
-      };
-
-      codex-china = mkChinaWrapper {
-        name = "codex-china";
-        program = "${final.codex}/bin/codex";
-      };
-
-      kimi-code-china = mkChinaWrapper {
-        name = "kimi-china";
-        program = "${final.kimi-code}/bin/kimi";
-      };
-
-      gcloud-china = mkChinaWrapper {
-        name = "gcloud-china";
-        program = "${prev.google-cloud-sdk}/bin/gcloud";
-      };
-
       rtk = final.callPackage ../pkgs/rtk.nix {};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
@@ -292,7 +284,7 @@
       #     hash = "";
       #   };
       # });
-    })
+    } // proxyWrappers)
 
     # Overlay 3: Define overlays in other files
     # The content of ./overlays/overlay3/default.nix is the same as above:

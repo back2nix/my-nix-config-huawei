@@ -320,20 +320,20 @@ in {
 
       # inputs.claude-desktop.packages.${system}.claude-desktop
       # claude-desktop-proxy
-      # Только *-china: единственные разрешённые обёртки, ходят через China proxy.
-      # Generic-имена (claude/gemini/kimi/gcloud), *-proxy, *-vpn2 и *-vpn3 не
-      # определены в оверлее вовсе — чтобы не было точки запуска в обход
-      # china-прокси. Так же оформлен gcloud-china ниже.
-      # gemini-china: отключён 2026-10-01 — upstream убрал Gemini CLI для
-      # unpaid/AI Pro/Ultra (заменён Antigravity CLI), nixpkgs помечает пакет
-      # как removal и eval сыплет warning. Оверлей gemini-cli/gemini-china
-      # оставлен на месте (ленивый, не вычисляется, пока не в пакетах).
-      # gemini-china
+      # CLI через переключаемые пары прокси; generic-команды не устанавливаем.
+      # Gemini пока отключён; обёртки в оверлее остаются ленивыми.
+      # gemini-1082 gemini-1088 gemini-1090
       appimage-run
       dbeaver-bin
-      claude-code-china
-      codex-china
-      kimi-code-china
+      claude-1082
+      claude-1088
+      claude-1090
+      codex-1082
+      codex-1088
+      codex-1090
+      kimi-1082
+      kimi-1088
+      kimi-1090
       opencode
       # claude-code
       xdotool
@@ -361,7 +361,9 @@ in {
       obsidian
 
       google-cloud-sdk
-      gcloud-china
+      gcloud-1082
+      gcloud-1088
+      gcloud-1090
       zip
 
       # scrcpy # genymobile , pronounced "screen copy"

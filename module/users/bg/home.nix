@@ -99,18 +99,11 @@ in {
     homeDirectory = "/home/${mainUser}";
     stateVersion = "23.11";
 
-    # --- Разрешён только *-china запуск claude / gemini / kimi ---
-    # Единственные допустимые команды — claude-code-china, gemini-china,
-    # kimi-china, codex-china
-    # (ставятся в configuration.nix, ходят через China proxy). Любые другие
-    # точки запуска должны отсутствовать:
-    #   * нативный установщик Claude Code кладёт ~/.local/bin/claude ->
-    #     ~/.local/share/claude/versions/*, который ходит в сеть НАПРЯМУЮ;
-    #   * ~/.local/bin в PATH стоит раньше /run/current-system/sw/bin, поэтому
-    #     любой бинарь оттуда перекрыл бы china-обёртки.
+    # CLI устанавливаются с суффиксами -1082, -1088, -1090 в configuration.nix.
+    # Нативные generic-команды могут запускаться без выбранного прокси.
     # На каждом home-manager switch вычищаем нативную установку и generic-имена
     # claude/claude-code/gemini из ~/.local/bin, ничего взамен не создаём.
-    activation.enforceAiChinaOnly = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    activation.enforceAiProxyOnly = lib.hm.dag.entryAfter ["writeBoundary"] ''
       run rm -rf $VERBOSE_ARG "$HOME/.local/share/claude"
       run rm -f $VERBOSE_ARG \
         "$HOME/.local/bin/claude" \

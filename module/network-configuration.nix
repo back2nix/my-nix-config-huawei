@@ -68,8 +68,8 @@
               6379,    # redis
               1082,    # proxy seoul via casino (socks)
               1083,    # proxy seoul via casino (http)
-              1084,    # proxy china (socks)
-              1085,    # proxy china (http)
+              1084,    # proxy 1084 (socks)
+              1085,    # proxy 1085 (http)
               1088,    # proxy frankfurt (socks)
               1089,    # proxy frankfurt (http)
               1090,    # proxy astana (socks)

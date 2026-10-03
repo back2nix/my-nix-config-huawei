@@ -5,7 +5,7 @@
 # зашифрованным в secrets/secrets.yaml под gcloud/winjoy_sa_key и
 # расшифровывается sops-nix в /run/secrets/gcloud/winjoy_sa_key (0400, bg).
 #
-# Команда gcloud-winjoy — единственная точка входа: ходит через china-прокси
+# Команда gcloud-winjoy — единственная точка входа: ходит через HTTP-прокси 1083
 # (http://127.0.0.1:1083, см. mkChinaWrapper в overlays/default.nix), держит
 # отдельный CLOUDSDK_CONFIG, чтобы не трогать личный ~/.config/gcloud
 # (back2nix@gmail.com), и всегда подставляет --project=winjoy-games.
