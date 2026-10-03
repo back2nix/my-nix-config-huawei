@@ -155,6 +155,53 @@
     ];
 
     functions = {
+      claude = {
+        description = "Claude через выбранную пару прокси (по умолчанию 1090/1091)";
+        body = ''
+          set -l selected 1090
+          if set -q claude_proxy_port
+            set selected $claude_proxy_port
+          end
+          switch "$selected"
+            case 1082
+              command ${pkgs.claude-1082}/bin/claude-1082 $argv
+            case 1088
+              command ${pkgs.claude-1088}/bin/claude-1088 $argv
+            case 1090
+              command ${pkgs.claude-1090}/bin/claude-1090 $argv
+            case '*'
+              echo 'Некорректный выбор прокси. Используй claude-proxy 1082, 1088 или 1090.' >&2
+              return 1
+          end
+        '';
+      };
+      claude-proxy = {
+        description = "Показать или сохранить пару прокси для команды claude";
+        body = ''
+          if test (count $argv) -gt 1
+            echo 'Использование: claude-proxy [1082|1083|1088|1089|1090|1091]' >&2
+            return 1
+          end
+          if test (count $argv) -eq 1
+            switch "$argv[1]"
+              case 1082 1083
+                set -U claude_proxy_port 1082
+              case 1088 1089
+                set -U claude_proxy_port 1088
+              case 1090 1091
+                set -U claude_proxy_port 1090
+              case '*'
+                echo 'Допустимые пары: 1082/1083, 1088/1089, 1090/1091.' >&2
+                return 1
+            end
+          end
+          set -l selected 1090
+          if set -q claude_proxy_port
+            set selected $claude_proxy_port
+          end
+          printf 'claude → claude-%s (HTTP %s)\n' "$selected" (math "$selected + 1")
+        '';
+      };
       # prompt_virtual_env = ''
       #   set envs
 

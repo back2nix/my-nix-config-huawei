@@ -108,12 +108,22 @@
                 tag = "dns-1090";
                 outbound = "astana-select";
               }
+              {
+                tag = "dns-claude-safe";
+                outbound = "ssh-out1";
+              }
             ];
           final = "dns-dnscrypt";
           independent_cache = true;
         };
 
         inbounds = [
+          {
+            type = "http";
+            tag = "http-claude-safe";
+            listen = "127.0.0.1";
+            listen_port = 1093;
+          }
           # 1082/1083 — основной прокси. Маршрут не прибит гвоздями: правило
           # ведёт на selector usa-select, переключаемый через proxy-mode
           # (seoul | casino | vpn3 | direct). По умолчанию — прямой ssh до
@@ -345,6 +355,13 @@
         route.rules = [
           # 1. Достаём домен из TLS SNI / HTTP Host.
           {action = "sniff";}
+          {
+            inbound = ["http-claude-safe"];
+            action = "resolve";
+            server = "dns-claude-safe";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
           # 2. Resolve через соответствующий selector. Без кэша для этих
           # пар: смена выхода не должна использовать ответы старого маршрута.
           {
@@ -369,7 +386,7 @@
             disable_cache = true;
           }
           {
-            inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana"];
+            inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe"];
             invert = true;
             action = "resolve";
             server = "dns-dnscrypt";
@@ -381,6 +398,10 @@
           {
             ip_version = 6;
             action = "reject";
+          }
+          {
+            inbound = ["http-claude-safe"];
+            outbound = "ssh-out1";
           }
           {
             inbound = ["socks-usa" "http-usa"];
