@@ -1,15 +1,50 @@
-{...}: let
+{pkgs, config, ...}: let
   mailApp = "thunderbird.desktop";
+  browser = "${config.programs.google-chrome.finalPackage}/bin/google-chrome-stable";
+  linkHandler = pkgs.writeScriptBin "open-browser-link" ''
+    #!${pkgs.python3}/bin/python3
+    import os
+    import sys
+    from urllib.parse import urlsplit
+
+    urls = []
+    for url in sys.argv[1:]:
+        try:
+            parsed = urlsplit(url)
+            host = (parsed.hostname or "").lower().rstrip(".")
+        except ValueError:
+            continue
+        # Match the hostname, rather than text in the path or query string.
+        if parsed.scheme.lower() in ("http", "https") and (
+            host == "claude.ai" or host.endswith(".claude.ai")
+        ):
+            continue
+        urls.append(url)
+
+    if urls:
+        os.execv("${browser}", ["${browser}", "--", *urls])
+  '';
 in {
+  home.packages = [linkHandler];
+  home.sessionVariables.BROWSER = "${linkHandler}/bin/open-browser-link";
+
   xdg = {
     enable = true;
+    desktopEntries.open-browser-link = {
+      name = "Chrome (filtered links)";
+      exec = "${linkHandler}/bin/open-browser-link %U";
+      icon = "google-chrome";
+      terminal = false;
+      noDisplay = true;
+      mimeType = ["x-scheme-handler/http" "x-scheme-handler/https"];
+    };
     mimeApps = {
       enable = true;
       defaultApplications = {
         "application/pdf" = ["org.gnome.Evince.desktop"];
         "text/html" = "google-chrome.desktop";
-        "x-scheme-handler/http" = "google-chrome.desktop";
-        "x-scheme-handler/https" = "google-chrome.desktop";
+        "x-scheme-handler/http" = "open-browser-link.desktop";
+        "x-scheme-handler/https" = "open-browser-link.desktop";
         "x-scheme-handler/about" = "google-chrome.desktop";
         "x-scheme-handler/unknown" = "google-chrome.desktop";
         "image/jpeg" = ["org.gnome.Loupe.desktop"];
