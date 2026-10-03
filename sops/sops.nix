@@ -112,12 +112,32 @@
                 tag = "dns-claude-safe";
                 outbound = "ssh-out1";
               }
+              {
+                tag = "dns-safe-1088";
+                outbound = "ssh-frankfurt";
+              }
+              {
+                tag = "dns-safe-1090";
+                outbound = "ssh-astana";
+              }
             ];
           final = "dns-dnscrypt";
           independent_cache = true;
         };
 
         inbounds = [
+          {
+            type = "http";
+            tag = "http-safe-1088";
+            listen = "127.0.0.1";
+            listen_port = 1095;
+          }
+          {
+            type = "http";
+            tag = "http-safe-1090";
+            listen = "127.0.0.1";
+            listen_port = 1097;
+          }
           {
             type = "http";
             tag = "http-claude-safe";
@@ -356,6 +376,20 @@
           # 1. Достаём домен из TLS SNI / HTTP Host.
           {action = "sniff";}
           {
+            inbound = ["http-safe-1088"];
+            action = "resolve";
+            server = "dns-safe-1088";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
+          {
+            inbound = ["http-safe-1090"];
+            action = "resolve";
+            server = "dns-safe-1090";
+            strategy = "ipv4_only";
+            disable_cache = true;
+          }
+          {
             inbound = ["http-claude-safe"];
             action = "resolve";
             server = "dns-claude-safe";
@@ -386,7 +420,7 @@
             disable_cache = true;
           }
           {
-            inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe"];
+            inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe" "http-safe-1088" "http-safe-1090"];
             invert = true;
             action = "resolve";
             server = "dns-dnscrypt";
@@ -402,6 +436,14 @@
           {
             inbound = ["http-claude-safe"];
             outbound = "ssh-out1";
+          }
+          {
+            inbound = ["http-safe-1088"];
+            outbound = "ssh-frankfurt";
+          }
+          {
+            inbound = ["http-safe-1090"];
+            outbound = "ssh-astana";
           }
           {
             inbound = ["socks-usa" "http-usa"];

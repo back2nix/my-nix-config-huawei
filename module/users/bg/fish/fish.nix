@@ -164,11 +164,11 @@
           end
           switch "$selected"
             case 1082
-              command ${pkgs.claude-1082}/bin/claude-1082 $argv
+              command ${pkgs.claude-1082-safe}/bin/claude-1082-safe $argv
             case 1088
-              command ${pkgs.claude-1088}/bin/claude-1088 $argv
+              command ${pkgs.claude-1088-safe}/bin/claude-1088-safe $argv
             case 1090
-              command ${pkgs.claude-1090}/bin/claude-1090 $argv
+              command ${pkgs.claude-1090-safe}/bin/claude-1090-safe $argv
             case '*'
               echo 'Некорректный выбор прокси. Используй claude-proxy 1082, 1088 или 1090.' >&2
               return 1
@@ -199,7 +199,7 @@
           if set -q claude_proxy_port
             set selected $claude_proxy_port
           end
-          printf 'claude → claude-%s (HTTP %s)\n' "$selected" (math "$selected + 1")
+          printf 'claude → claude-%s-safe (пара HTTP %s)\n' "$selected" (math "$selected + 1")
         '';
       };
       codex = {
@@ -211,11 +211,11 @@
           end
           switch "$selected"
             case 1082
-              command ${pkgs.codex-1082}/bin/codex-1082 $argv
+              command ${pkgs.codex-1082-safe}/bin/codex-1082-safe $argv
             case 1088
-              command ${pkgs.codex-1088}/bin/codex-1088 $argv
+              command ${pkgs.codex-1088-safe}/bin/codex-1088-safe $argv
             case 1090
-              command ${pkgs.codex-1090}/bin/codex-1090 $argv
+              command ${pkgs.codex-1090-safe}/bin/codex-1090-safe $argv
             case '*'
               echo 'Некорректный выбор прокси. Используй codex-proxy 1082, 1088 или 1090.' >&2
               return 1
@@ -246,7 +246,7 @@
           if set -q codex_proxy_port
             set selected $codex_proxy_port
           end
-          printf 'codex → codex-%s (HTTP %s)\n' "$selected" (math "$selected + 1")
+          printf 'codex → codex-%s-safe (пара HTTP %s)\n' "$selected" (math "$selected + 1")
         '';
       };
       # prompt_virtual_env = ''
