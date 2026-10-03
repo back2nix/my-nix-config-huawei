@@ -137,3 +137,7 @@ update-rtk:
 
 update-codex:
       ./scripts/update-codex.sh
+
+# Обновление Dolphin Anty до последней версии (правит хэш в pkgs/dolphin-anty.nix)
+update-dolphin-anty:
+    bash ./scripts/update-dolphin-anty.sh

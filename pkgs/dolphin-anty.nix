@@ -1,13 +1,16 @@
 {
   stdenv,
   lib,
+  fetchurl,
   appimageTools,
 }: let
   pname = "dolphin-anty";
   version = "latest";
 
-  # Используем локальный файл вместо fetchurl
-  src = ./dolphin-anty-linux-x86_64-latest.AppImage;
+  src = fetchurl {
+    url = "https://dolphin-anty-cdn.com/anty-app/dolphin-anty-linux-x86_64-latest.AppImage";
+    hash = "sha256-bRyJ+wn0FO5JzG1FNa7D0FN5yOA+59cjyJRhwIFRZHw=";
+  };
 
   appimageContents = appimageTools.extractType2 {inherit pname version src;};
 in
@@ -15,7 +18,9 @@ in
     inherit pname version src;
 
     extraInstallCommands = ''
-      mv $out/bin/${pname}-${version} $out/bin/${pname}
+      if [ -e $out/bin/${pname}-${version} ]; then
+        mv $out/bin/${pname}-${version} $out/bin/${pname}
+      fi
 
       # Попробуем найти desktop файл и иконку
       if [ -f ${appimageContents}/*.desktop ]; then

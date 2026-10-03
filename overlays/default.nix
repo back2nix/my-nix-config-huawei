@@ -238,6 +238,7 @@
       # --- КОНЕЦ: codex ---
 
       rtk = final.callPackage ../pkgs/rtk.nix {};
+      dolphin-anty = final.callPackage ../pkgs/dolphin-anty.nix {};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
       #   export HTTP_PROXY="http://127.0.0.1:1083"
