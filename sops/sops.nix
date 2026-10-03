@@ -5,6 +5,14 @@
 }: let
   consumers = import ../module/proxy-routes-data.nix;
   consumerInbounds = lib.concatMap (r: ["http-${r.name}"] ++ lib.optional (r ? socksPort) "socks-${r.name}") consumers.routes;
+  agentInbounds = ["http-claude" "http-codex" "http-claude-safe" "http-safe-1088" "http-safe-1090"];
+  # Keep exact aliases in sync with extraHosts; do not bypass all *.local names.
+  localServiceDomains = lib.unique (lib.concatMap (line: let
+    fields = lib.filter (field: field != "") (lib.splitString " " (lib.replaceStrings ["\t"] [" "] (builtins.head (lib.splitString "#" line))));
+  in
+    if fields != [] && builtins.head fields == "10.0.0.1"
+    then builtins.tail fields
+    else []) (lib.splitString "\n" config.networking.extraHosts));
 in {
   sops = {
     defaultSopsFile = ../secrets/secrets.yaml;
@@ -412,6 +420,23 @@ in {
 
         route.rules =
           [
+            # Local web services remain reachable through the agent's proxy.
+            # Route before sniff/remote DNS, preserving HTTP Host and TLS SNI.
+            {
+              inbound = agentInbounds;
+              ip_cidr = ["10.0.0.1/32"];
+              action = "route";
+              outbound = "direct-out";
+            }
+          ]
+          ++ lib.optional (localServiceDomains != []) {
+            inbound = agentInbounds;
+            domain = localServiceDomains;
+            action = "route";
+            outbound = "direct-out";
+            override_address = "10.0.0.1";
+          }
+          ++ [
             # 1. Достаём домен из TLS SNI / HTTP Host.
             {action = "sniff";}
           ]

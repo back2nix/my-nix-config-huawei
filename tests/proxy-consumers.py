@@ -38,8 +38,11 @@ def fixture(label):
 
         def do_GET(self):
             self.send_response(200)
+            self.send_header('Content-Length', str(len(label.encode())))
+            self.send_header('Connection', 'close')
             self.end_headers()
             self.wfile.write(label.encode())
+            self.close_connection = True
 
         def log_message(self, *args):
             pass
@@ -52,6 +55,22 @@ def fixture(label):
 def main():
     config = json.loads(Path(sys.argv[1]).read_text())
     fixtures = {name: fixture(name) for name in ('usa', 'casino', 'fra', 'kz', 'direct')}
+    local_rules = [rule for rule in config['route']['rules']
+                   if rule.get('outbound') == 'direct-out'
+                   and 'http-claude' in rule.get('inbound', [])]
+    assert len(local_rules) == 2, local_rules
+    ip_rule, domain_rule = local_rules
+    assert ip_rule['ip_cidr'] == ['10.0.0.1/32']
+    assert domain_rule['override_address'] == '10.0.0.1'
+    assert 'casino.local' in domain_rule['domain']
+    assert 'domain_suffix' not in domain_rule
+    assert all(config['route']['rules'].index(rule) < next(
+        i for i, item in enumerate(config['route']['rules']) if item.get('action') == 'resolve')
+        for rule in local_rules)
+    # Exercise the real routing rules with a loopback fixture instead of requiring
+    # production services or adding 10.0.0.1 to the test host.
+    for rule in local_rules:
+        rule['override_address'] = '127.0.0.1'
     api_port = free_port()
     ports = {}
     for inbound in config['inbounds']:
@@ -89,11 +108,12 @@ def main():
         assert (result.returncode == 0) == success, (args, result.stderr)
         return result.stdout.strip()
 
-    def expect(inbound, label):
+    def expect(inbound, label, url=None, tunnel=False):
         scheme = 'socks5h' if inbound.startswith('socks-') else 'http'
         output = subprocess.check_output([
             'curl', '-fsS', '--noproxy', '', '--max-time', '4',
-            '--proxy', f'{scheme}://127.0.0.1:{ports[inbound]}', target], text=True)
+            '--proxy', f'{scheme}://127.0.0.1:{ports[inbound]}',
+            *(['--proxytunnel'] if tunnel else []), url or target], text=True)
         assert output == label, (inbound, output, label)
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -115,6 +135,10 @@ def main():
             # Defaults and independent browser profiles.
             expect('http-claude', 'kz')
             expect('http-codex', 'usa')
+            for inbound in ip_rule['inbound']:
+                for host in ('10.0.0.1', 'casino.local', 'grafana.casino.local'):
+                    expect(inbound, 'direct', f'http://{host}:{fixtures["direct"].server_port}/')
+                    expect(inbound, 'direct', f'http://{host}:{fixtures["direct"].server_port}/', tunnel=True)
             expect('socks-nix', 'usa')
             for route in ('usa', 'casino', 'fra', 'kz'):
                 expect('socks-browser-' + route, route)
@@ -134,6 +158,8 @@ def main():
             expect('socks-nix', 'usa')
             api('codex-select', 'ssh-astana')
             expect('http-codex', 'kz')
+            for inbound in ('http-claude', 'http-codex'):
+                expect(inbound, 'direct', f'http://casino.local:{fixtures["direct"].server_port}/')
             expect('http-claude', 'fra')
             for mode, tag in [('casino', 'ssh-out1-via-casino'), ('fra', 'ssh-frankfurt'), ('kz', 'ssh-astana'),
                               ('direct', 'direct-out'), ('usa', 'ssh-out1')]:
@@ -169,7 +195,7 @@ def main():
             expect('http-claude', 'fra')
             expect('http-codex', 'kz')
             expect('socks-nix', 'usa')
-            print('PASS: independent routes, CLI, agent direct rejection and persisted selectors')
+            print('PASS: local services, independent routes, CLI, agent direct rejection and persisted selectors')
         finally:
             process.terminate()
             process.communicate(timeout=5)
