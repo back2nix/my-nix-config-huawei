@@ -72,6 +72,8 @@
               1085,    # proxy china (http)
               1088,    # proxy frankfurt (socks)
               1089,    # proxy frankfurt (http)
+              1090,    # proxy astana (socks)
+              1091,    # proxy astana (http)
               5173,    # casino
               8080,    # Gateway
               8081,    # Landing

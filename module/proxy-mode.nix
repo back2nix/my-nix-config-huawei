@@ -16,9 +16,10 @@
 #
 # Управление:
 #   proxy-mode                 — показать текущий режим и список
-#   proxy-mode seoul|casino|frankfurt|vpn3|direct
+#   proxy-mode seoul|casino|frankfurt|astana|vpn3|direct
 #   proxy-mode status          — машиночитаемо: SEOUL/CASINO/FRANKFURT/VPN3/DIRECT
 #   proxy-mode --1088 ...      — то же для 1088/1089 (selector frankfurt-select)
+#   proxy-mode --1090 ...      — то же для 1090/1091 (selector astana-select)
 #   плитка-список "Прокси 1082" в Quick Settings — расширение
 #   gnome-extensions/proxy-mode, собирается здесь же (см. ниже).
 #
@@ -35,6 +36,10 @@
       SEL=frankfurt-select
       PORTS=1088/1089
       shift
+    elif [ "''${1:-}" = --1090 ]; then
+      SEL=astana-select
+      PORTS=1090/1091
+      shift
     fi
 
     api() { curl -fsS --max-time 3 "$@"; }
@@ -45,6 +50,7 @@
         seoul)  echo ssh-out1 ;;
         casino) echo ssh-out1-via-casino ;;
         frankfurt) echo ssh-frankfurt ;;
+        astana) echo ssh-astana ;;
         vpn3)   echo ssh-out1-via-vpn3 ;;
         direct) echo direct-out ;;
         *) return 1 ;;
@@ -56,6 +62,7 @@
         ssh-out1-via-casino)  echo casino ;;
         ssh-frankfurt)        echo frankfurt ;;
         ssh-out1-via-vpn3)    echo vpn3 ;;
+        ssh-astana)           echo astana ;;
         direct-out)           echo direct ;;
         *) echo "$1" ;;
       esac
@@ -81,10 +88,10 @@
       show)
         now=$(current) || { echo "sing-box Clash-API недоступен ($API)" >&2; exit 1; }
         echo "текущий: $(to_name "$now")  ($now)"
-        echo "доступно: seoul casino frankfurt vpn3 direct"
+        echo "доступно: seoul casino frankfurt astana vpn3 direct"
         exit 0
         ;;
-      seoul|casino|frankfurt|vpn3|direct)
+      seoul|casino|frankfurt|astana|vpn3|direct)
         tag=$(to_tag "$1")
         api -X PUT "$API/proxies/$SEL" \
           -H 'Content-Type: application/json' \
@@ -97,7 +104,7 @@
         exit 0
         ;;
       *)
-        echo "usage: proxy-mode [--1088] [show|status|seoul|casino|frankfurt|vpn3|direct]" >&2
+        echo "usage: proxy-mode [--1088|--1090] [show|status|seoul|casino|frankfurt|astana|vpn3|direct]" >&2
         exit 2
         ;;
     esac

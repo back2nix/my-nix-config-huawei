@@ -32,6 +32,7 @@ const MODES = [
     {id: 'seoul',  status: 'SEOUL',  label: 'Через USA',    icon: 'network-vpn-symbolic'},
     {id: 'casino', status: 'CASINO', label: 'Через Casino', icon: 'network-vpn-symbolic'},
     {id: 'frankfurt', status: 'FRANKFURT', label: 'Через Frankfurt', icon: 'network-vpn-symbolic'},
+    {id: 'astana', status: 'ASTANA', label: 'Через Astana', icon: 'network-vpn-symbolic'},
     {id: 'direct', status: 'DIRECT', label: 'Без VPN',      icon: 'network-wired-symbolic'},
 ];
 
@@ -41,6 +42,7 @@ const MODES = [
 const PORTS = [
     {title: 'Прокси 1082', ports: '1082/1083', args: [], defaultMode: 'seoul'},
     {title: 'Прокси 1088', ports: '1088/1089', args: ['--1088'], defaultMode: 'frankfurt'},
+    {title: 'Прокси 1090', ports: '1090/1091', args: ['--1090'], defaultMode: 'astana'},
 ];
 
 const POLL_SECONDS = 10;

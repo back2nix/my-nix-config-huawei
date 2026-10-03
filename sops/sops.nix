@@ -128,6 +128,19 @@
             listen = "127.0.0.1";
             listen_port = 1089;
           }
+          # Astana: прямой SSH по ключу, независимый выбор маршрута.
+          {
+            type = "socks";
+            tag = "socks-astana";
+            listen = "127.0.0.1";
+            listen_port = 1090;
+          }
+          {
+            type = "http";
+            tag = "http-astana";
+            listen = "127.0.0.1";
+            listen_port = 1091;
+          }
           # 1086/1087 — прежняя схема: прямой ssh до google-seoul (ssh-out1).
           # Только localhost, наружу не светим.
           {
@@ -198,6 +211,21 @@
               strategy = "ipv4_only";
             };
           }
+          # kz-astana: без промежуточных хопов, только SSH с ключом.
+          {
+            type = "ssh";
+            tag = "ssh-astana";
+            server = "89.126.194.91";
+            server_port = 22;
+            user = "root";
+            private_key_path = "/home/bg/.ssh/id_ed25519_kz_astana";
+            host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFTgmCxYZ/QB3mXySwKA0666IzFfNFxi/3+3x6Kt+ciM"];
+            host_key_algorithms = ["ssh-ed25519"];
+            domain_resolver = {
+              server = "dns-dnscrypt";
+              strategy = "ipv4_only";
+            };
+          }
           # Хоп 1: ssh до casino-VPS ТОЛЬКО через admin-VPN awg-egg
           # (module/wireguard-eggventure.nix), публичного входа нет.
           # Пользователь seoul-relay на сервере умеет лишь direct-tcpip на
@@ -248,6 +276,7 @@
               "ssh-out1-via-casino"
               "ssh-out1-via-vpn3"
               "ssh-frankfurt"
+              "ssh-astana"
               "direct-out"
             ];
             default = "ssh-out1";
@@ -262,9 +291,24 @@
               "ssh-out1-via-casino"
               "ssh-out1-via-vpn3"
               "ssh-frankfurt"
+              "ssh-astana"
               "direct-out"
             ];
             default = "ssh-frankfurt";
+            interrupt_exist_connections = true;
+          }
+          {
+            type = "selector";
+            tag = "astana-select";
+            outbounds = [
+              "ssh-out1"
+              "ssh-out1-via-casino"
+              "ssh-out1-via-vpn3"
+              "ssh-frankfurt"
+              "ssh-astana"
+              "direct-out"
+            ];
+            default = "ssh-astana";
             interrupt_exist_connections = true;
           }
         ];
@@ -296,6 +340,10 @@
           {
             inbound = ["socks-frankfurt" "http-frankfurt"];
             outbound = "frankfurt-select";
+          }
+          {
+            inbound = ["socks-astana" "http-astana"];
+            outbound = "astana-select";
           }
           {
             inbound = ["socks-casino" "http-casino"];
