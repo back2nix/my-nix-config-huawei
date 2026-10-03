@@ -202,6 +202,53 @@
           printf 'claude → claude-%s (HTTP %s)\n' "$selected" (math "$selected + 1")
         '';
       };
+      codex = {
+        description = "Codex через выбранную пару прокси (по умолчанию 1082/1083)";
+        body = ''
+          set -l selected 1082
+          if set -q codex_proxy_port
+            set selected $codex_proxy_port
+          end
+          switch "$selected"
+            case 1082
+              command ${pkgs.codex-1082}/bin/codex-1082 $argv
+            case 1088
+              command ${pkgs.codex-1088}/bin/codex-1088 $argv
+            case 1090
+              command ${pkgs.codex-1090}/bin/codex-1090 $argv
+            case '*'
+              echo 'Некорректный выбор прокси. Используй codex-proxy 1082, 1088 или 1090.' >&2
+              return 1
+          end
+        '';
+      };
+      codex-proxy = {
+        description = "Показать или сохранить пару прокси для команды codex";
+        body = ''
+          if test (count $argv) -gt 1
+            echo 'Использование: codex-proxy [1082|1083|1088|1089|1090|1091]' >&2
+            return 1
+          end
+          if test (count $argv) -eq 1
+            switch "$argv[1]"
+              case 1082 1083
+                set -U codex_proxy_port 1082
+              case 1088 1089
+                set -U codex_proxy_port 1088
+              case 1090 1091
+                set -U codex_proxy_port 1090
+              case '*'
+                echo 'Допустимые пары: 1082/1083, 1088/1089, 1090/1091.' >&2
+                return 1
+            end
+          end
+          set -l selected 1082
+          if set -q codex_proxy_port
+            set selected $codex_proxy_port
+          end
+          printf 'codex → codex-%s (HTTP %s)\n' "$selected" (math "$selected + 1")
+        '';
+      };
       # prompt_virtual_env = ''
       #   set envs
 
