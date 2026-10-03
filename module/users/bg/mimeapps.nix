@@ -16,7 +16,7 @@
             continue
         # Match the hostname, rather than text in the path or query string.
         if parsed.scheme.lower() in ("http", "https") and (
-            host == "claude.ai" or host.endswith(".claude.ai")
+            host == "claude.com" or host.endswith(".claude.com")
         ):
             continue
         urls.append(url)
