@@ -48,15 +48,17 @@ in {
     ];
   };
 
-  systemd.services.nix-daemon.serviceConfig = {
-    # Используем SOCKS5h-инбаунд sing-box (порт 1082 = Seoul через casino-VPS, ssh-out1-via-casino):
-    # socks5h означает, что DNS-запросы также идут через прокси (удалённый резолв) —
-    # это важно, т.к. локальный резолвер ненадёжен, а голый socks5 резолвит локально.
-    Environment = [
-      "HTTP_PROXY=socks5h://127.0.0.1:1082"
-      "HTTPS_PROXY=socks5h://127.0.0.1:1082"
-      "ALL_PROXY=socks5h://127.0.0.1:1082"
-      "NO_PROXY=localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8"
-    ];
+  # Dedicated selector: changing an agent/browser route never affects caches.
+  # Direct means direct-out in sing-box, with no daemon restart required.
+  systemd.services.nix-daemon.environment = {
+    HTTP_PROXY = "socks5h://127.0.0.1:1104";
+    HTTPS_PROXY = "socks5h://127.0.0.1:1104";
+    ALL_PROXY = "socks5h://127.0.0.1:1104";
+    http_proxy = "socks5h://127.0.0.1:1104";
+    https_proxy = "socks5h://127.0.0.1:1104";
+    all_proxy = "socks5h://127.0.0.1:1104";
+    NO_PROXY = "localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8";
+    no_proxy = "localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8";
   };
+  systemd.services.nix-daemon.after = ["sing-box.service"];
 }

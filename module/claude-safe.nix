@@ -63,13 +63,15 @@
       fi
       ${lib.optionalString noDaemon ''
         # Never hand this session to a shared daemon outside the namespace.
-        args=()
+        daemon_args=(--no-daemon)
         for arg in "$@"; do
-          if [ "$arg" != --no-daemon ]; then
-            args+=("$arg")
+          if [ "$arg" = -- ]; then break; fi
+          if [ "$arg" = --no-daemon ]; then
+            daemon_args=()
+            break
           fi
         done
-        set -- --no-daemon "''${args[@]}"
+        set -- "''${daemon_args[@]}" "$@"
       ''}
       ${program} "$@"
     '';
@@ -145,9 +147,32 @@ in {
               proxyPort = 1097;
             }
           ]
-      ) ["claude" "codex"]))
+      ) ["claude" "codex"])
+      // {
+        claude-safe = mkSafe {
+          name = "claude-safe";
+          program = "${final.claude-code}/bin/claude";
+          proxyPort = 1101;
+        };
+        codex-safe = mkSafe {
+          name = "codex-safe";
+          program = "${final.codex}/bin/codex";
+          proxyPort = 1103;
+          noDaemon = true;
+        };
+        claude = prev.writeShellScriptBin "claude" ''
+          exec ${final.claude-safe}/bin/claude-safe "$@"
+        '';
+        codex-routed = prev.writeShellScriptBin "codex" ''
+          exec ${final.codex-safe}/bin/codex-safe "$@"
+        '';
+      })
   ];
   environment.systemPackages = map (name: pkgs.${name}) [
+    "claude-safe"
+    "codex-safe"
+    "claude"
+    "codex-routed"
     "claude-1082-safe"
     "claude-1088-safe"
     "claude-1090-safe"

@@ -109,12 +109,8 @@
         ;;
     esac
   '';
-  # GUI к тому же скрипту: плитка со списком режимов в Quick Settings.
-  #
-  # Почему отдельное расширение, а не ещё кнопки в custom-command-toggle
-  # (которым сделаны WinJoy VPN, Personal VPN и режим портфеля): то
-  # расширение умеет только QuickToggle — бинарную плитку, а режимов несколько
-  # и они взаимоисключающие. Списком это QuickMenuToggle, которого там нет.
+  # Dedicated panel menu: application selectors, host VPNs
+  # and the legacy shared port selectors for other programs.
   uuid = "proxy-mode@back2nix";
 
   extension = pkgs.stdenvNoCC.mkDerivation {
@@ -128,7 +124,10 @@
     buildPhase = ''
       runHook preBuild
       substituteInPlace extension.js \
-        --replace-fail "@proxyMode@" "${proxyMode}/bin/proxy-mode"
+        --replace-fail "@proxyMode@" "${proxyMode}/bin/proxy-mode" \
+        --replace-fail "@vpnRoute@" "${pkgs.vpn-route}/bin/vpn-route" \
+        --replace-fail "@systemctl@" "${pkgs.systemd}/bin/systemctl"
+
       runHook postBuild
     '';
 

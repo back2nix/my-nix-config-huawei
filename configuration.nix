@@ -79,6 +79,7 @@ in {
     ./module/sign-box.nix
     ./module/proxy-mode.nix # Выбор маршрута для 1082/1083: seoul/casino/frankfurt/direct (тумблеры + CLI)
     ./module/claude-safe.nix # claude-1082-safe: отдельная сеть, фиксированный прокси и локальный k3s
+    ./module/vpn-routing.nix # Независимые маршруты Claude, Codex и Nix/Cachix
     # ./module/vault.nix
     # ./module/tor.nix
     ./module/attic.nix

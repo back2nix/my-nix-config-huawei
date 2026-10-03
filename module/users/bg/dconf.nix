@@ -77,14 +77,13 @@
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
         "custom-command-toggle@storageb.github.com"
-        # Плитка-список "Прокси 1082": через USA / через Casino /
-        # через Frankfurt / без VPN
+        # Отдельное меню VPN и маршрутов приложений.
         # (module/proxy-mode.nix).
         "proxy-mode@back2nix"
       ];
     };
 
-    # Тумблер admin-VPN до прод-сервера в Quick Settings + индикатор в топ-баре.
+    # Переключатель admin-VPN находится в отдельном меню VPN Routes.
     # NetworkManager AmneziaWG не понимает (обфусцированный форк WireGuard — см.
     # module/wireguard-eggventure.nix), поэтому штатного VPN-переключателя нет и
     # быть не может; этот дёргает systemd-юнит напрямую. Право на start/stop без
@@ -97,72 +96,42 @@
     # ⚠️ Расширения GNOME ломаются на каждом мажоре шелла. При переезде на
     # GNOME 51 проверь shell-version в metadata.json ДО switch — иначе тумблер
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
+    # VPN switches live in the dedicated VPN Routes panel menu.
     "org/gnome/shell/extensions/custom-command-toggle" = {
-      numbuttons-setting = 4;
-      entryrow3-setting = "WinJoy VPN";
-      entryrow4-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
-      entryrow1-setting = "systemctl start amneziawg-egg.service";
-      entryrow2-setting = "systemctl stop amneziawg-egg.service";
-      # Состояние берём из systemd, а не из памяти расширения: иначе после
-      # ребута или падения юнита тумблер показывал бы неправду.
-      # UP/DOWN, а не сырой вывод is-active: сверка внутри расширения — поиск по
-      # границе слова, и `active` совпало бы с `inactive`.
-      checkcommand1-setting = "systemctl is-active --quiet amneziawg-egg.service && echo UP || echo DOWN";
-      checkregex1-setting = "UP";
-      checkcommandsync1-setting = true;
-      checkcommandinterval1-setting = 10;
-      initialtogglestate1-setting = 3; # не трогать юнит при логине
-      showindicator1-setting = true;
-      runcommandatboot1-setting = false;
-
-      # Кнопка 2: экранная клавиатура GNOME (OSK). Выключенная — не всплывает
+      numbuttons-setting = 2;
+      # Кнопка 1: экранная клавиатура GNOME (OSK). Выключенная — не всплывает
       # вообще, включённая — появляется в нужные моменты (ввод с тачскрина).
       # Это ровно тот же ключ a11y, что задан ниже как значение по умолчанию;
       # переключатель меняет его на лету через gsettings.
-      entryrow32-setting = "Экранная клавиатура";
-      entryrow42-setting = "input-keyboard-symbolic,input-keyboard-symbolic";
-      entryrow12-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true";
-      entryrow22-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false";
+      entryrow3-setting = "Экранная клавиатура";
+      entryrow4-setting = "input-keyboard-symbolic,input-keyboard-symbolic";
+      entryrow1-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true";
+      entryrow2-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false";
       # Состояние читаем из самого gsettings, а не из памяти расширения:
       # ключ могли поменять из Настроек или home-manager'ом при пересборке.
-      checkcommand2-setting = "gsettings get org.gnome.desktop.a11y.applications screen-keyboard-enabled";
-      checkregex2-setting = "true";
-      checkcommandsync2-setting = true;
-      checkcommandinterval2-setting = 10;
-      initialtogglestate2-setting = 3; # не трогать ключ при логине
-      showindicator2-setting = false;
-      runcommandatboot2-setting = false;
+      checkcommand1-setting = "gsettings get org.gnome.desktop.a11y.applications screen-keyboard-enabled";
+      checkregex1-setting = "true";
+      checkcommandsync1-setting = true;
+      checkcommandinterval1-setting = 10;
+      initialtogglestate1-setting = 3; # не трогать ключ при логине
+      showindicator1-setting = false;
+      runcommandatboot1-setting = false;
 
-      # Кнопка 3: личный VPN до Windows-машины (module/wireguard-personal.nix,
-      # awg-pers, юнит теперь стартует автоматически при загрузке — тумблер
-      # нужен в первую очередь как индикатор, как и у admin-VPN выше).
-      entryrow33-setting = "Personal VPN";
-      entryrow43-setting = "network-vpn-symbolic,network-vpn-disabled-symbolic";
-      entryrow13-setting = "systemctl start amneziawg-personal.service";
-      entryrow23-setting = "systemctl stop amneziawg-personal.service";
-      checkcommand3-setting = "systemctl is-active --quiet amneziawg-personal.service && echo UP || echo DOWN";
-      checkregex3-setting = "UP";
-      checkcommandsync3-setting = true;
-      checkcommandinterval3-setting = 10;
-      initialtogglestate3-setting = 3; # не трогать юнит при логине
-      showindicator3-setting = true;
-      runcommandatboot3-setting = false;
-
-      # Кнопка 4: режим портфеля — ноут работает с закрытой крышкой
+      # Кнопка 2: режим портфеля — ноут работает с закрытой крышкой
       # (инхибитор logind, см. module/bag-mode.nix). Индикатор в топ-баре
       # включён намеренно: забытый включённым режим — это разряженная батарея
       # в сумке.
-      entryrow34-setting = "Режим портфеля";
-      entryrow44-setting = "system-run-symbolic,system-suspend-symbolic";
-      entryrow14-setting = "bag-mode on";
-      entryrow24-setting = "bag-mode off";
-      checkcommand4-setting = "bag-mode status";
-      checkregex4-setting = "ON";
-      checkcommandsync4-setting = true;
-      checkcommandinterval4-setting = 10;
-      initialtogglestate4-setting = 3; # не трогать юнит при логине
-      showindicator4-setting = true;
-      runcommandatboot4-setting = false;
+      entryrow32-setting = "Режим портфеля";
+      entryrow42-setting = "system-run-symbolic,system-suspend-symbolic";
+      entryrow12-setting = "bag-mode on";
+      entryrow22-setting = "bag-mode off";
+      checkcommand2-setting = "bag-mode status";
+      checkregex2-setting = "ON";
+      checkcommandsync2-setting = true;
+      checkcommandinterval2-setting = 10;
+      initialtogglestate2-setting = 3; # не трогать юнит при логине
+      showindicator2-setting = true;
+      runcommandatboot2-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;

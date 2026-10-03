@@ -1,7 +1,7 @@
 {
   "uuid": "proxy-mode@back2nix",
-  "name": "Proxy Mode",
-  "description": "Плитки-списки в Quick Settings для 1082/1083, 1088/1089 и 1090/1091: USA, Casino, Frankfurt, Astana или без VPN. Обёртка над CLI proxy-mode.",
+  "name": "VPN Routes",
+  "description": "Отдельное меню VPN: независимые маршруты Claude, Codex, Nix/Cachix и WinJoy/Personal VPN.",
   "shell-version": [
     "48",
     "49",
