@@ -81,11 +81,9 @@
       # });
       # --- КОНЕЦ: Патч для gnome-screenshot ---
 
-      # mutter — используем стандартный из nixpkgs.
-      # Чтобы вернуть кастомную сборку (mutter-src + gvdb subproject из glib),
-      # раскомментируй блок ниже:
-
-      mutter = prev.mutter.overrideAttrs (oldAttrs: {
+      # Закомментируй input mutter-src в flake.nix для стандартного Mutter.
+      # При наличии input включаем кастомную сборку с gvdb из glib.
+      mutter = if inputs ? mutter-src then prev.mutter.overrideAttrs (oldAttrs: {
         # Указываем на исправленные исходники
         # version = "48.3.1-my";
         src = inputs.mutter-src;
@@ -108,7 +106,7 @@
             rm -rf $glib_unpacked_src
             echo "Successfully copied gvdb subproject."
           '';
-      });
+      }) else prev.mutter;
 
       # claude-code-proxy = prev.writeShellScriptBin "claude" ''
       # export HTTP_PROXY="http://127.0.0.1:1083"
