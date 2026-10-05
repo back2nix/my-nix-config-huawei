@@ -41,10 +41,8 @@ current="$(
   exit 1
 }
 
-tag="$(
-  fetch "$API" |
-    python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])'
-)"
+release_json="$(fetch "$API")"
+tag="$(python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])' <<< "$release_json")"
 
 case "$tag" in
   rust-v*) target="${tag#rust-v}" ;;
@@ -61,43 +59,58 @@ esac
 
 echo "current=$current latest=$target"
 
-if ! ver_gt "$target" "$current"; then
-  echo "Уже актуальная версия ($current), обновление не требуется."
+if ver_gt "$current" "$target"; then
+  echo "Локальная версия ($current) новее последнего релиза ($target)."
   exit 0
 fi
 
-url="https://github.com/openai/codex/releases/download/$tag/codex-$TARGET.tar.gz"
-
 tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
-archive="$tmp_dir/codex.tar.gz"
+package_changed=0
+cleanup() {
+  status=$?
+  if [ "$status" -ne 0 ] && [ "$package_changed" -eq 1 ]; then
+    cp "$tmp_dir/codex.nix" "$PACKAGE"
+    echo "Обновление не прошло проверку; прежний pkgs/codex.nix восстановлен." >&2
+  fi
+  rm -rf "$tmp_dir"
+}
+trap cleanup EXIT
 
-echo "Скачиваю $url"
-fetch "$url" -o "$archive"
-
-expected_file="codex-$TARGET"
-if ! tar -tzf "$archive" | sed 's#^\./##' | grep -Fxq "$expected_file"; then
-  echo "В архиве отсутствует ожидаемый файл: $expected_file" >&2
-  exit 1
-fi
-
-hash="$(nix hash file --type sha256 "$archive")"
-
-[[ "$hash" == sha256-* ]] || {
-  echo "Некорректный хеш: $hash" >&2
-  exit 1
+archive_hash() {
+  local name="$1" archive="$tmp_dir/$1.tar.gz"
+  local url="https://github.com/openai/codex/releases/download/$tag/$name.tar.gz"
+  echo "Скачиваю $url" >&2
+  fetch "$url" -o "$archive" || return 1
+  tar -tzf "$archive" > "$tmp_dir/contents" || return 1
+  if ! sed 's#^\./##' "$tmp_dir/contents" | grep -Fxq "$name"; then
+    echo "В архиве отсутствует ожидаемый файл: $name" >&2
+    return 1
+  fi
+  nix hash file --type sha256 "$archive"
 }
 
-echo "Обновляю $current -> $target"
-echo "hash=$hash"
+hash="$(archive_hash "codex-$TARGET")"
+code_mode_host_hash="$(archive_hash "codex-code-mode-host-$TARGET")"
 
-python3 - "$PACKAGE" "$current" "$target" "$hash" <<'PY'
+for value in "$hash" "$code_mode_host_hash"; do
+  [[ "$value" == sha256-* ]] || {
+    echo "Некорректный хеш: $value" >&2
+    exit 1
+  }
+done
+
+echo "Проверяю обновление $current -> $target"
+echo "hash=$hash"
+echo "codeModeHostHash=$code_mode_host_hash"
+cp "$PACKAGE" "$tmp_dir/codex.nix"
+
+python3 - "$PACKAGE" "$current" "$target" "$hash" "$code_mode_host_hash" <<'PY'
 import re
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1])
-current, target, new_hash = sys.argv[2:5]
+current, target, new_hash, host_hash = sys.argv[2:6]
 text = path.read_text()
 
 text, version_count = re.subn(
@@ -107,24 +120,23 @@ text, version_count = re.subn(
     count=1,
 )
 
-hash_pattern = re.compile(
-    r'(x86_64-linux\s*=\s*\{.*?^\s+hash\s*=\s*")[^"]+(";\s*$)',
-    re.MULTILINE | re.DOTALL,
-)
-text, hash_count = hash_pattern.subn(
-    lambda match: match.group(1) + new_hash + match.group(2),
-    text,
-    count=1,
-)
+for field, value in (("hash", new_hash), ("codeModeHostHash", host_hash)):
+    pattern = re.compile(
+        rf'(x86_64-linux\s*=\s*\{{[^}}]*?^\s+{field}\s*=\s*")[^"]+(";\s*$)',
+        re.MULTILINE | re.DOTALL,
+    )
+    text, count = pattern.subn(
+        lambda match: match.group(1) + value + match.group(2), text, count=1
+    )
+    if count != 1:
+        raise SystemExit(f"Не удалось однозначно заменить {field} для x86_64-linux")
 
 if version_count != 1:
     raise SystemExit("Не удалось однозначно заменить version")
 
-if hash_count != 1:
-    raise SystemExit("Не удалось однозначно заменить hash для x86_64-linux")
-
 path.write_text(text)
 PY
+package_changed=1
 
 device="${DEVICE:-$(
   case "$(hostname)" in
