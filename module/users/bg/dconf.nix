@@ -74,6 +74,7 @@
       # ре-логина, так что кнопка нужна.
       always-show-log-out = true;
       enabled-extensions = [
+        "dual-clock@back2nix"
         "window-calls@domandoman.xyz"
         "osk-globe-cycle@back2nix"
         "custom-command-toggle@storageb.github.com"

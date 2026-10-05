@@ -46,6 +46,11 @@ in {
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
   };
 
+  xdg.dataFile."gnome-shell/extensions/dual-clock@back2nix" = {
+    source = ./gnome-extensions/dual-clock;
+    recursive = true;
+  };
+
   # services.xremap = {
   #   config = {
   #     keymap = [
