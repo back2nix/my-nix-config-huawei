@@ -3,6 +3,18 @@
   lib,
   ...
 }: let
+  # Fixed SSH destinations reachable from the host network, never a general proxy.
+  sshEndpoints = [
+    { name = "bagau"; aliases = "bagau"; address = "192.168.0.102"; }
+    { name = "bagau-vpn"; aliases = "bagau-vpn"; address = "10.101.0.3"; }
+    { name = "desktop"; aliases = "desktop"; address = "192.168.0.171"; }
+    { name = "kz-astana"; aliases = "kz-astana"; address = "89.126.194.91"; }
+    { name = "winjoy-beget"; aliases = "winjoy-beget"; address = "159.194.224.13"; }
+    { name = "winjoy-frankfurt"; aliases = "winjoy-frankfurt winjoy-mivocloud-frankfurt"; address = "5.252.179.162"; }
+  ];
+  safeSsh = pkgs.writeShellScriptBin "ssh" ''
+    exec ${pkgs.openssh}/bin/ssh -F "$CLAUDE_SAFE_SSH_CONFIG" "$@"
+  '';
   mkSafe = {
     name,
     program,
@@ -40,6 +52,8 @@
         echo 'claude-safe: local relays did not start' >&2
         exit 1
       fi
+      export CLAUDE_SAFE_SSH_CONFIG="$relay_dir/ssh-config"
+      export PATH=${safeSsh}/bin:$PATH
       export HTTP_PROXY=http://127.0.0.1:1083
       export HTTPS_PROXY=$HTTP_PROXY ALL_PROXY=$HTTP_PROXY
       export http_proxy=$HTTP_PROXY https_proxy=$HTTP_PROXY all_proxy=$HTTP_PROXY
@@ -94,9 +108,22 @@
         relay_pids+=("$!")
         setsid socat "UNIX-LISTEN:$relay_dir/k3s,fork,mode=0600" TCP4:127.0.0.1:6443 &
         relay_pids+=("$!")
+        # Expose only port 22 of explicitly allowed hosts via Unix sockets.
+        ${lib.concatMapStringsSep "\n" (endpoint: ''
+          setsid socat "UNIX-LISTEN:$relay_dir/ssh-${endpoint.name},fork,mode=0600" TCP4:${endpoint.address}:22 &
+          relay_pids+=("$!")
+        '') sshEndpoints}
+        cat > "$relay_dir/ssh-config" <<EOF
+        ${lib.concatMapStringsSep "\n" (endpoint: ''
+        Host ${endpoint.aliases}
+          ProxyCommand ${pkgs.socat}/bin/socat STDIO UNIX-CONNECT:$relay_dir/ssh-${endpoint.name}
+        '') sshEndpoints}
+        Host *
+          Include "$HOME/.ssh/config"
+        EOF
         ready=0
         for _ in {1..100}; do
-          if [ -S "$relay_dir/proxy" ] && [ -S "$relay_dir/k3s" ]; then
+          if [ -S "$relay_dir/proxy" ] && [ -S "$relay_dir/k3s" ] ${lib.concatMapStrings (endpoint: "&& [ -S \"$relay_dir/ssh-${endpoint.name}\" ] ") sshEndpoints}; then
             ready=1
             break
           fi
