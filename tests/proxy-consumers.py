@@ -6,6 +6,7 @@ No production service or remote server is used.
 import http.server
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -53,8 +54,14 @@ def fixture(label):
 
 
 def main():
-    config = json.loads(Path(sys.argv[1]).read_text())
-    fixtures = {name: fixture(name) for name in ('usa', 'casino', 'fra', 'kz', 'direct')}
+    template = Path(sys.argv[1]).read_text()
+    # Numeric SOPS placeholders are unquoted until activation renders secrets.
+    template = re.sub(r'"server_port":<SOPS:[^>]+>', '"server_port":1', template)
+    config = json.loads(template)
+    isp = next(o for o in config['outbounds'] if o['tag'] == 'isp-kazakhstan')
+    assert isp['type'] == 'socks' and isp['version'] == '5'
+    assert isp['detour'] == 'ssh-astana'
+    fixtures = {name: fixture(name) for name in ('usa', 'casino', 'fra', 'kz', 'isp-kz', 'direct')}
     local_rules = [rule for rule in config['route']['rules']
                    if rule.get('outbound') == 'direct-out'
                    and 'http-claude' in rule.get('inbound', [])]
@@ -76,11 +83,11 @@ def main():
     for inbound in config['inbounds']:
         inbound['listen_port'] = free_port()
         ports[inbound['tag']] = inbound['listen_port']
-    tags = {'ssh-out1': 'usa', 'ssh-out1-via-casino': 'casino', 'ssh-frankfurt': 'fra', 'ssh-astana': 'kz'}
+    tags = {'ssh-out1': 'usa', 'ssh-out1-via-casino': 'casino', 'ssh-frankfurt': 'fra', 'ssh-astana': 'kz', 'isp-kazakhstan': 'isp-kz'}
     config['outbounds'] = [
         {'type': 'http', 'tag': outbound['tag'], 'server': '127.0.0.1',
          'server_port': fixtures[tags.get(outbound['tag'], 'usa')].server_port}
-        if outbound['type'] == 'ssh' else outbound
+        if outbound['type'] == 'ssh' or outbound['tag'] in tags else outbound
         for outbound in config['outbounds']
     ]
     config['experimental']['clash_api']['external_controller'] = f'127.0.0.1:{api_port}'
@@ -152,6 +159,14 @@ def main():
                 for agent in ('claude', 'codex'):
                     cli(agent, 'direct', success=False)
                 cli('unknown', 'usa', success=False)
+            for agent, other, other_route in [('claude', 'codex', 'usa'), ('codex', 'claude', 'isp-kz')]:
+                api(agent + '-select', 'isp-kazakhstan')
+                expect('http-' + agent, 'isp-kz')
+                expect('http-' + other, other_route)
+                if len(sys.argv) >= 4:
+                    assert cli(agent) == 'isp-kz'
+                    cli(agent, 'isp-kz')
+            api('codex-select', 'ssh-out1')
             api('claude-select', 'ssh-frankfurt')
             expect('http-claude', 'fra')
             expect('http-codex', 'usa')

@@ -11,7 +11,7 @@
       group=''${1:-}
       case "$group" in
         claude|codex|nix) ;;
-        *) echo 'Usage: vpn-route claude|codex|nix [usa|casino|fra|kz|direct|status]' >&2; exit 2 ;;
+        *) echo 'Usage: vpn-route claude|codex|nix [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -26,6 +26,7 @@
             ssh-out1-via-casino) echo casino ;;
             ssh-frankfurt) echo fra ;;
             ssh-astana) echo kz ;;
+            isp-kazakhstan) echo isp-kz ;;
             direct-out) echo direct ;;
             *) echo "Unknown route: $current" >&2; exit 1 ;;
           esac
@@ -36,6 +37,13 @@
             casino|usa-casino) tag=ssh-out1-via-casino ;;
             fra|frankfurt|1088|1089) tag=ssh-frankfurt ;;
             kz|kz-astana|astana|1090|1091) tag=ssh-astana ;;
+            isp-kz|isp-kazakhstan)
+              if [ "$group" = nix ]; then
+                echo 'ISP Kazakhstan is available only for Claude and Codex.' >&2
+                exit 2
+              fi
+              tag=isp-kazakhstan
+              ;;
             direct)
               if [ "$group" != nix ]; then
                 echo 'Direct is available only for Nix; agents must use a tunnel.' >&2

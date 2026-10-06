@@ -6,12 +6,12 @@ in {
     {
       name = "claude";
       default = "ssh-astana";
-      outbounds = tunnels;
+      outbounds = tunnels ++ ["isp-kazakhstan"];
     }
     {
       name = "codex";
       default = "ssh-out1";
-      outbounds = tunnels;
+      outbounds = tunnels ++ ["isp-kazakhstan"];
     }
     {
       name = "nix";

@@ -30,6 +30,11 @@ in {
       "vpn2/user" = {};
       "vpn2/private_key_path" = {};
 
+      "isp_kazakhstan/server" = {};
+      "isp_kazakhstan/port" = {};
+      "isp_kazakhstan/username" = {};
+      "isp_kazakhstan/password" = {};
+
       "vault/root_token" = {};
       "autossh/ip" = {};
 
@@ -66,7 +71,11 @@ in {
     # sops/sops.nix - templates."sing-box-config.json"
     templates."sing-box-config.json" = {
       restartUnits = ["sing-box.service"];
-      content = builtins.toJSON {
+      # Render the encrypted port as a JSON number, rather than a string.
+      content = lib.replaceStrings
+        [ (builtins.toJSON config.sops.placeholder."isp_kazakhstan/port") ]
+        [ config.sops.placeholder."isp_kazakhstan/port" ]
+        (builtins.toJSON {
         log.level = "info";
 
         # Clash-API — рулевое управление селектором usa-select на лету
@@ -309,6 +318,17 @@ in {
                 strategy = "ipv4_only";
               };
             }
+            {
+              type = "socks";
+              tag = "isp-kazakhstan";
+              # The ISP only accepts connections originating from kz-astana.
+              detour = "ssh-astana";
+              version = "5";
+              server = config.sops.placeholder."isp_kazakhstan/server";
+              server_port = config.sops.placeholder."isp_kazakhstan/port";
+              username = config.sops.placeholder."isp_kazakhstan/username";
+              password = config.sops.placeholder."isp_kazakhstan/password";
+            }
             # kz-astana: без промежуточных хопов, только SSH с ключом.
             {
               type = "ssh";
@@ -545,7 +565,7 @@ in {
             outbound = r.outbound;
           })
           consumers.routes;
-      };
+      });
     };
   };
 }
