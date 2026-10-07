@@ -23,6 +23,21 @@ in {
       default = "ssh-out1";
       outbounds = tunnels ++ ["direct-out"];
     }
+    {
+      name = "browser-usa";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
+      name = "browser-fra";
+      default = "ssh-frankfurt";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
+      name = "browser-kz";
+      default = "ssh-astana";
+      outbounds = tunnels ++ ["direct-out"];
+    }
   ];
   routes = [
     {
@@ -51,7 +66,7 @@ in {
       name = "browser-usa";
       httpPort = 1111;
       socksPort = 1110;
-      outbound = "ssh-out1";
+      outbound = "browser-usa-select";
     }
     {
       name = "browser-casino";
@@ -63,13 +78,13 @@ in {
       name = "browser-fra";
       httpPort = 1113;
       socksPort = 1112;
-      outbound = "ssh-frankfurt";
+      outbound = "browser-fra-select";
     }
     {
       name = "browser-kz";
       httpPort = 1115;
       socksPort = 1114;
-      outbound = "ssh-astana";
+      outbound = "browser-kz-select";
     }
   ];
 }

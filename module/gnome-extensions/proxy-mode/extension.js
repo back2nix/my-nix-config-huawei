@@ -62,6 +62,9 @@ class VpnMenu extends PanelMenu.Button {
             {id: 'codex', label: 'Codex', direct: false},
             {id: 'telegram', label: 'Telegram', direct: false},
             {id: 'nix', label: 'Nix / Cachix', direct: true},
+            {id: 'browser-usa', label: 'Браузер USA (1110/1111)', direct: true},
+            {id: 'browser-fra', label: 'Браузер FRA (1112/1113)', direct: true},
+            {id: 'browser-kz', label: 'Браузер KZ (1114/1115)', direct: true},
         ]) {
             const modes = group.direct ? [...MODES, {id: 'direct', label: 'Direct'}] : [...MODES, {id: 'isp-kz', label: 'ISP Казахстан'}];
             this._addRoute(group.label, [ROUTE, group.id], modes, false);

@@ -170,6 +170,22 @@ def main():
                     assert cli('telegram') == tag
                     cli('telegram', tag)
             cli('telegram', 'direct', success=False)
+            for browser, default in [('usa', 'usa'), ('fra', 'fra'), ('kz', 'kz')]:
+                for mode, tag in [('casino', 'ssh-out1-via-casino'), ('fra', 'ssh-frankfurt'),
+                                  ('kz', 'ssh-astana'), ('direct', 'direct-out'), ('usa', 'ssh-out1')]:
+                    api('browser-' + browser + '-select', tag)
+                    expect('socks-browser-' + browser, mode)
+                    expect('http-browser-' + browser, mode)
+                    expect('http-codex', 'usa')
+                    expect('socks-telegram', 'isp-kz')
+                    for other in ('usa', 'fra', 'kz'):
+                        if other != browser:
+                            expect('socks-browser-' + other, other)
+                    if len(sys.argv) >= 4:
+                        assert cli('browser-' + browser) == mode
+                        cli('browser-' + browser, mode)
+                api('browser-' + browser + '-select', {'usa': 'ssh-out1', 'fra': 'ssh-frankfurt', 'kz': 'ssh-astana'}[default])
+                cli('browser-' + browser, 'isp-kz', success=False)
             for agent, other, other_route in [('claude', 'codex', 'usa'), ('codex', 'claude', 'isp-kz')]:
                 api(agent + '-select', 'isp-kazakhstan')
                 expect('http-' + agent, 'isp-kz')
@@ -206,6 +222,7 @@ def main():
                     pass
                 else:
                     raise AssertionError('Agent selector accepted direct-out')
+            api('browser-usa-select', 'ssh-frankfurt')
             process.terminate()
             process.communicate(timeout=5)
             process = subprocess.Popen([sys.argv[2], 'run', '-c', str(path)],
@@ -222,6 +239,10 @@ def main():
             expect('http-codex', 'kz')
             expect('socks-nix', 'usa')
             expect('socks-telegram', 'isp-kz')
+            expect('socks-browser-usa', 'fra')
+            expect('http-browser-usa', 'fra')
+            expect('socks-browser-fra', 'fra')
+            expect('socks-browser-kz', 'kz')
             print('PASS: local services, independent routes, CLI, agent direct rejection and persisted selectors')
         finally:
             process.terminate()

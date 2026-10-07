@@ -22,7 +22,7 @@ class Panel {
     add_child() {}
     destroy() { this.destroyed = true; }
 }
-const state = {claude: 'kz', codex: 'usa', telegram: 'kz', nix: 'usa'};
+const state = {claude: 'kz', codex: 'usa', telegram: 'kz', nix: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
 const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive'};
 const calls = [], errors = [], removed = [];
 let failNext = false;
@@ -70,7 +70,7 @@ const extension = new sandbox.TestExtension();
 extension.enable();
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 await settle();
-assert.equal(registered._routes.length, 7);
+assert.equal(registered._routes.length, 10);
 for (const route of registered._routes) {
     assert.ok(registered.menu.items.includes(route.item), 'Each route must appear directly in the panel menu');
 }
@@ -103,6 +103,16 @@ assert.equal(state.telegram, 'fra');
 assert.equal(state.claude, 'isp-kz');
 assert.equal(state.codex, 'usa');
 assert.equal(telegram.choices.get('fra').ornament, 'check');
+for (const group of ['browser-usa', 'browser-fra', 'browser-kz']) {
+    const browser = registered._routes.find(r => r.command[1] === group);
+    assert.ok(browser.choices.has('direct'));
+    await browser.choices.get('casino').activate();
+    await settle();
+    assert.equal(state[group], 'casino');
+    assert.equal(browser.choices.get('casino').ornament, 'check');
+    assert.equal(state.claude, 'isp-kz');
+    assert.equal(state.telegram, 'fra');
+}
 failNext = true;
 await codex.choices.get('fra').activate();
 await settle();
