@@ -4,8 +4,8 @@
 set -euo pipefail
 
 BASE="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
-# По умолчанию используем маршрут Git из меню VPN Routes (SOCKS5 1118).
-PROXY="${CLAUDE_UPDATE_PROXY-127.0.0.1:1118}"
+# По умолчанию используем отдельный маршрут обновления Claude из меню VPN Routes (SOCKS5 1122).
+PROXY="${CLAUDE_UPDATE_PROXY-127.0.0.1:1122}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OVERLAY="$REPO_ROOT/overlays/default.nix"
 

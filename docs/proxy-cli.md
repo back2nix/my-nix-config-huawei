@@ -166,7 +166,11 @@ node tests/proxy-menu.mjs
 Тест меню использует mock-объекты GNOME и проверяет действия, ошибки и cleanup;
 он не заменяет визуальную проверку в живой графической сессии.
 
-Скрипты `just update-codex` и `just update-claude` используют SOCKS5
-`127.0.0.1:1118`, поэтому следуют маршруту **Git** в меню VPN Routes.
+Скрипты `just update-codex` и `just update-claude` используют отдельные
+маршруты **Обновление Codex** и **Обновление Claude** в меню VPN Routes.
+Codex: SOCKS5 `127.0.0.1:1120`, HTTP `127.0.0.1:1121`.
+Claude: SOCKS5 `127.0.0.1:1122`, HTTP `127.0.0.1:1123`.
+По умолчанию оба используют USA; выбор независим от Git и самих приложений.
+CLI: `vpn-route codex-update fra`, `vpn-route claude-update usa`.
 Переопределение: `CODEX_UPDATE_PROXY` / `CLAUDE_UPDATE_PROXY`; пустое значение
 отключает явный прокси.

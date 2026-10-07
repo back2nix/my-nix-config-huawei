@@ -19,8 +19,8 @@ just update-claude
 Если версия уже актуальная — выходит без изменений.
 
 Переменные:
-- `CLAUDE_UPDATE_PROXY` — socks5-прокси для curl (по умолчанию `127.0.0.1:1118`,
-  маршрут выбирается в пункте Git меню VPN Routes; пустое значение = без прокси).
+- `CLAUDE_UPDATE_PROXY` — socks5-прокси для curl (по умолчанию `127.0.0.1:1122`,
+  маршрут выбирается в пункте «Обновление Claude» меню VPN Routes; пустое значение = без прокси).
 - `DEVICE` — цель для проверочной сборки (по умолчанию определяется по hostname).
 
 Ручной flow ниже нужен только для отладки, если скрипт сломался.
@@ -31,9 +31,9 @@ just update-claude
 максимальный из них, сравнив с версией, установленной в `overlays/default.nix` сейчас:
 
 ```bash
-curl -s --socks5-hostname 127.0.0.1:1118 \
+curl -s --socks5-hostname 127.0.0.1:1122 \
   "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/stable"
-curl -s --socks5-hostname 127.0.0.1:1118 \
+curl -s --socks5-hostname 127.0.0.1:1122 \
   "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/latest"
 ```
 
@@ -46,7 +46,7 @@ curl -s --socks5-hostname 127.0.0.1:1118 \
 Замените `<VERSION>` на версию, полученную на шаге 1:
 
 ```bash
-curl -s --socks5-hostname 127.0.0.1:1118 \
+curl -s --socks5-hostname 127.0.0.1:1122 \
   "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/<VERSION>/manifest.json" \
   | python3 -m json.tool
 ```

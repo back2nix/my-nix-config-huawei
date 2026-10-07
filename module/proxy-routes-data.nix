@@ -19,6 +19,16 @@ in {
       outbounds = tunnels ++ ["isp-kazakhstan"];
     }
     {
+      name = "codex-update";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
+      name = "claude-update";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
       name = "git";
       default = "ssh-out1";
       outbounds = tunnels ++ ["direct-out"];
@@ -60,6 +70,18 @@ in {
       httpPort = 1107;
       socksPort = 1106;
       outbound = "telegram-select";
+    }
+    {
+      name = "codex-update";
+      httpPort = 1121;
+      socksPort = 1120;
+      outbound = "codex-update-select";
+    }
+    {
+      name = "claude-update";
+      httpPort = 1123;
+      socksPort = 1122;
+      outbound = "claude-update-select";
     }
     {
       name = "git";
