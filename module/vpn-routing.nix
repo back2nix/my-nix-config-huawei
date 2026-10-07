@@ -10,8 +10,8 @@
       api=''${VPN_ROUTE_API:-http://127.0.0.1:9090}
       group=''${1:-}
       case "$group" in
-        claude|codex|nix) ;;
-        *) echo 'Usage: vpn-route claude|codex|nix [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
+        claude|codex|telegram|nix) ;;
+        *) echo 'Usage: vpn-route claude|codex|telegram|nix [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -39,7 +39,7 @@
             kz|kz-astana|astana|1090|1091) tag=ssh-astana ;;
             isp-kz|isp-kazakhstan)
               if [ "$group" = nix ]; then
-                echo 'ISP Kazakhstan is available only for Claude and Codex.' >&2
+                echo 'ISP Kazakhstan is available only for Claude, Codex and Telegram.' >&2
                 exit 2
               fi
               tag=isp-kazakhstan

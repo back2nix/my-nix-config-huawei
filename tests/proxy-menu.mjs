@@ -22,7 +22,7 @@ class Panel {
     add_child() {}
     destroy() { this.destroyed = true; }
 }
-const state = {claude: 'kz', codex: 'usa', nix: 'usa'};
+const state = {claude: 'kz', codex: 'usa', telegram: 'kz', nix: 'usa'};
 const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive'};
 const calls = [], errors = [], removed = [];
 let failNext = false;
@@ -70,7 +70,7 @@ const extension = new sandbox.TestExtension();
 extension.enable();
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 await settle();
-assert.equal(registered._routes.length, 6);
+assert.equal(registered._routes.length, 7);
 for (const route of registered._routes) {
     assert.ok(registered.menu.items.includes(route.item), 'Each route must appear directly in the panel menu');
 }
@@ -94,6 +94,15 @@ assert.equal(state.claude, 'isp-kz');
 assert.equal(state.codex, 'usa');
 assert.equal(claude.choices.get('isp-kz').ornament, 'check');
 assert.equal(registered._routes.find(r => r.label === 'Nix / Cachix').choices.has('isp-kz'), false);
+const telegram = registered._routes.find(r => r.label === 'Telegram');
+assert.equal(telegram.item.label.text, 'Telegram: KZ (Astana)');
+assert.equal(telegram.choices.has('direct'), false);
+await telegram.choices.get('fra').activate();
+await settle();
+assert.equal(state.telegram, 'fra');
+assert.equal(state.claude, 'isp-kz');
+assert.equal(state.codex, 'usa');
+assert.equal(telegram.choices.get('fra').ornament, 'check');
 failNext = true;
 await codex.choices.get('fra').activate();
 await settle();

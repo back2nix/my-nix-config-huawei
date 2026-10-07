@@ -60,6 +60,7 @@ class VpnMenu extends PanelMenu.Button {
         for (const group of [
             {id: 'claude', label: 'Claude', direct: false},
             {id: 'codex', label: 'Codex', direct: false},
+            {id: 'telegram', label: 'Telegram', direct: false},
             {id: 'nix', label: 'Nix / Cachix', direct: true},
         ]) {
             const modes = group.direct ? [...MODES, {id: 'direct', label: 'Direct'}] : [...MODES, {id: 'isp-kz', label: 'ISP Казахстан'}];

@@ -142,6 +142,8 @@ def main():
             # Defaults and independent browser profiles.
             expect('http-claude', 'kz')
             expect('http-codex', 'usa')
+            expect('socks-telegram', 'kz')
+            expect('http-telegram', 'kz')
             for inbound in ip_rule['inbound']:
                 for host in ('10.0.0.1', 'casino.local', 'grafana.casino.local'):
                     expect(inbound, 'direct', f'http://{host}:{fixtures["direct"].server_port}/')
@@ -159,6 +161,15 @@ def main():
                 for agent in ('claude', 'codex'):
                     cli(agent, 'direct', success=False)
                 cli('unknown', 'usa', success=False)
+            for mode, tag in tags.items():
+                api('telegram-select', mode)
+                expect('socks-telegram', tag)
+                expect('http-telegram', tag)
+                expect('http-codex', 'usa')
+                if len(sys.argv) >= 4:
+                    assert cli('telegram') == tag
+                    cli('telegram', tag)
+            cli('telegram', 'direct', success=False)
             for agent, other, other_route in [('claude', 'codex', 'usa'), ('codex', 'claude', 'isp-kz')]:
                 api(agent + '-select', 'isp-kazakhstan')
                 expect('http-' + agent, 'isp-kz')
@@ -210,6 +221,7 @@ def main():
             expect('http-claude', 'fra')
             expect('http-codex', 'kz')
             expect('socks-nix', 'usa')
+            expect('socks-telegram', 'isp-kz')
             print('PASS: local services, independent routes, CLI, agent direct rejection and persisted selectors')
         finally:
             process.terminate()

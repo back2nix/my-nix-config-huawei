@@ -1,13 +1,13 @@
 # Маршруты по приложениям
 
-Claude, Codex, браузеры и Nix/Cachix используют отдельные входы sing-box.
+Claude, Codex, Telegram, браузеры и Nix/Cachix используют отдельные входы sing-box.
 Изменение маршрута одной программы не меняет остальные и не переключает
 общие порты 1082/1088/1090.
 
 В верхней панели GNOME есть отдельный значок **VPN Routes**. В его меню:
 
 - WinJoy VPN и Personal VPN — состояние и включение/выключение;
-- Claude и Codex — независимый выбор USA, USA через Casino, FRA, KZ или ISP Казахстан;
+- Claude, Codex и Telegram — независимый выбор USA, USA через Casino, FRA, KZ или ISP Казахстан;
 - Nix / Cachix — те же маршруты плюс Direct;
 - общие прокси для других программ — три пункта в основном меню, без вложенных подменю.
 
@@ -54,6 +54,7 @@ CLI из любой оболочки:
 vpn-route claude kz
 vpn-route codex usa-casino
 vpn-route claude isp-kz       # ISP Казахстан, SOCKS5-прокси с авторизацией
+vpn-route telegram fra
 vpn-route nix direct
 vpn-route nix status
 ```
@@ -67,6 +68,15 @@ Codex сохранены как явные **фиксированные** мар
 переключателям приложений. Все safe-команды поддерживают `--check`.
 Обычные `claude-1082`, `codex-1090` и другие команды без `safe` используют
 только proxy-переменные и допускают обход через `--noproxy`.
+
+## Telegram
+
+В настройках Telegram добавь и включи SOCKS5-прокси: сервер `127.0.0.1`,
+порт `1106`, без логина и пароля. После этого пункт **Telegram** в меню VPN
+переключает только его маршрут. По умолчанию используется KZ (Astana);
+доступны те же выходы, что у Claude, включая ISP Казахстан.
+Из терминала: `vpn-route telegram fra` или `vpn-route telegram status`.
+Если Telegram настроен на старый порт 1082/1088/1090, замени его на 1106.
 
 ## Браузеры
 
@@ -100,6 +110,7 @@ DNS каждой группы идёт по DoH через тот же selector 
 | --- | --- | --- | --- |
 | Claude safe | — | 1101 | KZ, свой selector |
 | Codex safe | — | 1103 | USA, свой selector |
+| Telegram | 1106 | 1107 | KZ, свой selector |
 | Nix/Cachix | 1104 | 1105 | USA, свой selector |
 | Браузер USA | 1110 | 1111 | фиксированный Сеул |
 | Браузер FRA | 1112 | 1113 | фиксированный Франкфурт |

@@ -14,6 +14,11 @@ in {
       outbounds = tunnels ++ ["isp-kazakhstan"];
     }
     {
+      name = "telegram";
+      default = "ssh-astana";
+      outbounds = tunnels ++ ["isp-kazakhstan"];
+    }
+    {
       name = "nix";
       default = "ssh-out1";
       outbounds = tunnels ++ ["direct-out"];
@@ -29,6 +34,12 @@ in {
       name = "codex";
       httpPort = 1103;
       outbound = "codex-select";
+    }
+    {
+      name = "telegram";
+      httpPort = 1107;
+      socksPort = 1106;
+      outbound = "telegram-select";
     }
     {
       name = "nix";
