@@ -1,8 +1,78 @@
 {
   lib,
-  config,
+  pkgs,
   ...
-}: {
+}: let
+  # Separate tables survive reloads of the main firewall (flushRuleset=false).
+  mkBlock = name: rules: {
+    description = "WebRTC: ${name}";
+    after = ["nftables.service"];
+    wants = ["nftables.service"];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.nftables}/bin/nft -f ${pkgs.writeText "${name}.nft" rules}";
+      ExecStop = "${pkgs.nftables}/bin/nft delete table inet ${name}";
+    };
+  };
+in {
+  systemd.services.webrtc-google-block =
+    (mkBlock "webrtc_google" ''
+      table inet webrtc_google {
+            set google_stun_ipv4 {
+              type ipv4_addr
+              flags interval
+              elements = { 142.250.0.0/15, 172.217.0.0/16, 216.58.192.0/19, 74.125.0.0/16 }
+            }
+
+            set google_stun_ipv6 {
+              type ipv6_addr
+              flags interval
+              elements = { 2607:f8b0::/32, 2800:3f0::/32, 2a00:1450::/32, 2404:6800::/32 }
+            }
+
+
+        chain output {
+          type filter hook output priority -10; policy accept;
+              # Google STUN Block
+              ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
+              ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
+              ip daddr @google_stun_ipv4 udp dport 3478 drop
+              ip6 daddr @google_stun_ipv6 udp dport 3478 drop
+              ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
+              ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
+        }
+      }
+    '')
+    // {wantedBy = ["multi-user.target"];};
+
+  # Broad UDP restriction for bg, not protocol detection. DNS and loopback
+  # remain available; root-owned WireGuard/Amnezia transports are unaffected.
+  systemd.services.webrtc-udp-block = mkBlock "webrtc_udp" ''
+    table inet webrtc_udp {
+      chain output {
+        type filter hook output priority -10; policy accept;
+        oifname "lo" accept
+        meta skuid "bg" udp dport 53 accept
+        meta skuid "bg" meta l4proto udp reject
+      }
+    }
+  '';
+
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          (action.lookup("unit") == "webrtc-google-block.service" ||
+           action.lookup("unit") == "webrtc-udp-block.service") &&
+          (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
+          subject.user == "bg" && subject.local && subject.active) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
+  networking.nftables.flushRuleset = false;
+
   # Отключаем systemd.network при использовании NetworkManager
   systemd.network.enable = lib.mkForce false;
 
@@ -103,18 +173,6 @@
             }
           }
 
-          set google_stun_ipv4 {
-            type ipv4_addr
-            flags interval
-            elements = { 142.250.0.0/15, 172.217.0.0/16, 216.58.192.0/19, 74.125.0.0/16 }
-          }
-
-          set google_stun_ipv6 {
-            type ipv6_addr
-            flags interval
-            elements = { 2607:f8b0::/32, 2800:3f0::/32, 2a00:1450::/32, 2404:6800::/32 }
-          }
-
           chain input {
             type filter hook input priority filter; policy drop;
 
@@ -174,13 +232,7 @@
 
             udp dport @system_udp accept
 
-            # Google STUN Block
-            ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
-            ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
-            ip daddr @google_stun_ipv4 udp dport 3478 drop
-            ip6 daddr @google_stun_ipv6 udp dport 3478 drop
-            ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
-            ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
+
           }
 
           chain forward {

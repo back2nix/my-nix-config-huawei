@@ -23,7 +23,7 @@ class Panel {
     destroy() { this.destroyed = true; }
 }
 const state = {'codex-update': 'usa', 'claude-update': 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
-const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive'};
+const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive', 'webrtc-google-block.service': 'active', 'webrtc-udp-block.service': 'inactive'};
 const calls = [], errors = [], removed = [];
 let failNext = false;
 class Process {
@@ -142,6 +142,18 @@ const vpn = registered._vpns[1];
 vpn.item.signals.get('toggled')(vpn.item, true);
 await settle();
 assert.equal(units[vpn.unit], 'active');
+const google = registered._vpns.find(v => v.unit === 'webrtc-google-block.service');
+const udp = registered._vpns.find(v => v.unit === 'webrtc-udp-block.service');
+assert.equal(google.item.state, true);
+assert.equal(udp.item.state, false);
+udp.item.signals.get('toggled')(udp.item, true);
+await settle();
+assert.equal(units[udp.unit], 'active');
+assert.equal(units[google.unit], 'active');
+google.item.signals.get('toggled')(google.item, false);
+await settle();
+assert.equal(units[google.unit], 'inactive');
+assert.equal(units[udp.unit], 'active');
 extension.disable();
 assert.equal(registered.destroyed, true);
 assert.equal(registered._cancellable.cancelled, true);

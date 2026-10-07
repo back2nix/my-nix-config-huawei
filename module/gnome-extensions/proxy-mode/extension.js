@@ -20,6 +20,8 @@ const MODES = [
 const VPNS = [
     {label: 'WinJoy VPN', unit: 'amneziawg-egg.service'},
     {label: 'Personal VPN', unit: 'amneziawg-personal.service'},
+    {label: 'WebRTC: блокировать Google STUN', unit: 'webrtc-google-block.service'},
+    {label: 'WebRTC: запретить UDP (bg, кроме DNS)', unit: 'webrtc-udp-block.service'},
 ];
 
 
@@ -49,7 +51,7 @@ class VpnMenu extends PanelMenu.Button {
                             return;
                         entry.changing = false;
                         if (!result.ok)
-                            Main.notifyError(vpn.label, result.stderr || 'Не удалось переключить VPN');
+                            Main.notifyError(vpn.label, result.stderr || 'Не удалось переключить режим');
                         this._refresh();
                     });
             });
