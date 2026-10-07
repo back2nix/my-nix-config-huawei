@@ -19,6 +19,11 @@ in {
       outbounds = tunnels ++ ["isp-kazakhstan"];
     }
     {
+      name = "git";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
       name = "nix";
       default = "ssh-out1";
       outbounds = tunnels ++ ["direct-out"];
@@ -55,6 +60,12 @@ in {
       httpPort = 1107;
       socksPort = 1106;
       outbound = "telegram-select";
+    }
+    {
+      name = "git";
+      httpPort = 1119;
+      socksPort = 1118;
+      outbound = "git-select";
     }
     {
       name = "nix";

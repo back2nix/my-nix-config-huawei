@@ -148,6 +148,8 @@ def main():
                 for host in ('10.0.0.1', 'casino.local', 'grafana.casino.local'):
                     expect(inbound, 'direct', f'http://{host}:{fixtures["direct"].server_port}/')
                     expect(inbound, 'direct', f'http://{host}:{fixtures["direct"].server_port}/', tunnel=True)
+            expect('socks-git', 'usa')
+            expect('http-git', 'usa')
             expect('socks-nix', 'usa')
             for route in ('usa', 'casino', 'fra', 'kz'):
                 expect('socks-browser-' + route, route)
@@ -197,6 +199,8 @@ def main():
             api('claude-select', 'ssh-frankfurt')
             expect('http-claude', 'fra')
             expect('http-codex', 'usa')
+            expect('socks-git', 'usa')
+            expect('http-git', 'usa')
             expect('socks-nix', 'usa')
             api('codex-select', 'ssh-astana')
             expect('http-codex', 'kz')
@@ -209,9 +213,20 @@ def main():
                 expect('socks-nix', mode)
                 expect('http-claude', 'fra')
                 expect('http-codex', 'kz')
+            for mode, tag in [('casino', 'ssh-out1-via-casino'), ('fra', 'ssh-frankfurt'),
+                              ('kz', 'ssh-astana'), ('direct', 'direct-out'), ('usa', 'ssh-out1')]:
+                cli('git', mode)
+                api('git-select', tag)
+                expect('socks-git', mode)
+                expect('http-git', mode)
+                expect('socks-nix', 'usa')
+                expect('http-codex', 'kz')
+            cli('git', 'isp-kz', success=False)
             api('usa-select', 'direct-out')
             expect('http-claude', 'fra')
             expect('http-codex', 'kz')
+            expect('socks-git', 'usa')
+            expect('http-git', 'usa')
             expect('socks-nix', 'usa')
             for route in ('usa', 'casino', 'fra', 'kz'):
                 expect('socks-browser-' + route, route)
@@ -223,6 +238,7 @@ def main():
                 else:
                     raise AssertionError('Agent selector accepted direct-out')
             api('browser-usa-select', 'ssh-frankfurt')
+            api('git-select', 'ssh-frankfurt')
             process.terminate()
             process.communicate(timeout=5)
             process = subprocess.Popen([sys.argv[2], 'run', '-c', str(path)],
@@ -237,6 +253,8 @@ def main():
                 raise RuntimeError('Test sing-box did not restart')
             expect('http-claude', 'fra')
             expect('http-codex', 'kz')
+            expect('socks-git', 'fra')
+            expect('http-git', 'fra')
             expect('socks-nix', 'usa')
             expect('socks-telegram', 'isp-kz')
             expect('socks-browser-usa', 'fra')

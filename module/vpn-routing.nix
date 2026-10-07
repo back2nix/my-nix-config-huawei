@@ -10,8 +10,8 @@
       api=''${VPN_ROUTE_API:-http://127.0.0.1:9090}
       group=''${1:-}
       case "$group" in
-        claude|codex|telegram|nix|browser-usa|browser-fra|browser-kz) ;;
-        *) echo 'Usage: vpn-route claude|codex|telegram|nix|browser-usa|browser-fra|browser-kz [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
+        claude|codex|telegram|git|nix|browser-usa|browser-fra|browser-kz) ;;
+        *) echo 'Usage: vpn-route claude|codex|telegram|git|nix|browser-usa|browser-fra|browser-kz [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -38,15 +38,15 @@
             fra|frankfurt|1088|1089) tag=ssh-frankfurt ;;
             kz|kz-astana|astana|1090|1091) tag=ssh-astana ;;
             isp-kz|isp-kazakhstan)
-              if [[ "$group" = nix || "$group" = browser-* ]]; then
+              if [[ "$group" = git || "$group" = nix || "$group" = browser-* ]]; then
                 echo 'ISP Kazakhstan is available only for Claude, Codex and Telegram.' >&2
                 exit 2
               fi
               tag=isp-kazakhstan
               ;;
             direct)
-              if [[ "$group" != nix && "$group" != browser-* ]]; then
-                echo 'Direct is available only for Nix and browsers.' >&2
+              if [[ "$group" != git && "$group" != nix && "$group" != browser-* ]]; then
+                echo 'Direct is available only for Git, Nix and browsers.' >&2
                 exit 2
               fi
               tag=direct-out

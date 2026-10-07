@@ -9,6 +9,9 @@
   ...
 }: let
   inherit (import ../../../variables.nix) mainUser;
+  gitSsh = pkgs.writeShellScript "git-ssh" ''
+    exec ${pkgs.openssh}/bin/ssh -o "ProxyCommand=${pkgs.libressl.nc}/bin/nc -X 5 -x 127.0.0.1:1118 %h %p" "$@"
+  '';
 in {
   imports = [
     # inputs.nix-colors.homeManagerModules.default
@@ -318,7 +321,12 @@ in {
       # ".screenrc".source = dotfiles/screenrc;
 
       # ".tmux.conf".source = ./tmux/tmux.conf;
-      ".gitconfig".source = ./gitconfig.txt;
+      ".gitconfig".text = builtins.readFile ./gitconfig.txt + ''
+        [core]
+          sshCommand = ${gitSsh}
+        [http]
+          proxy = http://127.0.0.1:1119
+      '';
       ".cargo/config".source = ./cargoconfig.txt;
       ".gdbinit".source = ./gdbinit.txt;
       ".gdbinit.d/init".source = ./gdbinit.d_init.txt;

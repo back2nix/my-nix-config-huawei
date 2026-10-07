@@ -1,6 +1,6 @@
 # Маршруты по приложениям
 
-Claude, Codex, Telegram, браузеры и Nix/Cachix используют отдельные входы sing-box.
+Claude, Codex, Telegram, Git, браузеры и Nix/Cachix используют отдельные входы sing-box.
 Изменение маршрута одной программы не меняет остальные и не переключает
 общие порты 1082/1088/1090.
 
@@ -8,7 +8,7 @@ Claude, Codex, Telegram, браузеры и Nix/Cachix используют о�
 
 - WinJoy VPN и Personal VPN — состояние и включение/выключение;
 - Claude, Codex и Telegram — независимый выбор USA, USA через Casino, FRA, KZ или ISP Казахстан;
-- Nix / Cachix и три браузерных прокси (USA, FRA, KZ) — USA, Casino, FRA, KZ и Direct;
+- Git, Nix / Cachix и три браузерных прокси (USA, FRA, KZ) — USA, Casino, FRA, KZ и Direct;
 - общие прокси для других программ — три пункта в основном меню, без вложенных подменю.
 
 Выбор маршрута хранится в sing-box и переживает перезапуск службы/компьютера.
@@ -78,6 +78,19 @@ Codex сохранены как явные **фиксированные** мар
 Из терминала: `vpn-route telegram fra` или `vpn-route telegram status`.
 Если Telegram настроен на старый порт 1082/1088/1090, замени его на 1106.
 
+## Git
+
+Пункт **Git** независимо переключает USA, Casino, FRA, KZ и Direct.
+Git по SSH использует SOCKS5 на `127.0.0.1:1118`, Git по HTTP/HTTPS —
+HTTP-прокси на `127.0.0.1:1119`. Настройки задаются глобально через Home Manager.
+По умолчанию выбран USA (Сеул). CLI: `vpn-route git fra` или `vpn-route git status`.
+
+Локальный `core.sshCommand` в `.git/config` перекрывает глобальный маршрут.
+Для этого репозитория временную настройку на порт 1082 нужно удалить после
+применения конфигурации: `git config --local --unset core.sshCommand`.
+Переменные `GIT_SSH_COMMAND` и собственные настройки отдельных репозиториев
+также имеют приоритет. Direct означает прямой выход через sing-box.
+
 ## Браузеры
 
 Для браузера выделены отдельные порты на `127.0.0.1`.
@@ -116,6 +129,7 @@ DNS каждой группы идёт по DoH через тот же selector 
 | Claude safe | — | 1101 | KZ, свой selector |
 | Codex safe | — | 1103 | USA, свой selector |
 | Telegram | 1106 | 1107 | KZ, свой selector |
+| Git | 1118 | 1119 | USA, свой selector |
 | Nix/Cachix | 1104 | 1105 | USA, свой selector |
 | Браузер USA | 1110 | 1111 | USA, свой selector |
 | Браузер FRA | 1112 | 1113 | FRA, свой selector |
