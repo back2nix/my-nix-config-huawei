@@ -60,7 +60,7 @@ class VpnMenu extends PanelMenu.Button {
         for (const group of [
             {id: 'claude', label: 'Claude', direct: false},
             {id: 'codex', label: 'Codex', direct: false},
-            {id: 'telegram', label: 'Telegram', direct: false},
+            {id: 'telegram', label: 'Telegram (SOCKS5: 1106)', direct: false},
             {id: 'git', label: 'Git', direct: true},
             {id: 'nix', label: 'Nix / Cachix', direct: true},
             {id: 'browser-usa', label: 'Браузер USA (1110/1111)', direct: true},

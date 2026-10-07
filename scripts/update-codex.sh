@@ -3,7 +3,8 @@
 set -euo pipefail
 
 API="https://api.github.com/repos/openai/codex/releases/latest"
-PROXY="${CODEX_UPDATE_PROXY-127.0.0.1:1082}"
+# По умолчанию используем маршрут Git из меню VPN Routes (SOCKS5 1118).
+PROXY="${CODEX_UPDATE_PROXY-127.0.0.1:1118}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE="$REPO_ROOT/pkgs/codex.nix"
