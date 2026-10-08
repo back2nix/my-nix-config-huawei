@@ -237,6 +237,7 @@
 
       rtk = final.callPackage ../pkgs/rtk.nix {};
       photocraft = final.callPackage ../pkgs/photocraft.nix {};
+      effectcraft = final.callPackage ../pkgs/effectcraft.nix {};
       dolphin-anty = final.callPackage ../pkgs/dolphin-anty.nix {};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
