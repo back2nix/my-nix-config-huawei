@@ -11,7 +11,7 @@
       group=''${1:-}
       case "$group" in
         claude|codex|telegram|git|nix|browser-usa|browser-fra|browser-kz) ;;
-        *) echo 'Usage: vpn-route claude|codex|telegram|git|nix|browser-usa|browser-fra|browser-kz [usa|casino|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
+        *) echo 'Usage: vpn-route claude|codex|telegram|git|nix|browser-usa|browser-fra|browser-kz [usa|casino|ps-kz|fra|kz|isp-kz|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -24,6 +24,7 @@
           case "$current" in
             ssh-out1) echo usa ;;
             ssh-out1-via-casino) echo casino ;;
+            ssh-ps-kz-via-casino) echo ps-kz ;;
             ssh-frankfurt) echo fra ;;
             ssh-astana) echo kz ;;
             isp-kazakhstan) echo isp-kz ;;
@@ -35,6 +36,7 @@
           case "$mode" in
             usa|seoul|1082|1083) tag=ssh-out1 ;;
             casino|usa-casino) tag=ssh-out1-via-casino ;;
+            ps-kz|kz-casino) tag=ssh-ps-kz-via-casino ;;
             fra|frankfurt|1088|1089) tag=ssh-frankfurt ;;
             kz|kz-astana|astana|1090|1091) tag=ssh-astana ;;
             isp-kz|isp-kazakhstan)

@@ -160,7 +160,7 @@
         body = "command ${pkgs.claude-safe}/bin/claude-safe $argv";
       };
       claude-proxy = {
-        description = "Маршрут только Claude: usa, casino, fra, kz";
+        description = "Маршрут только Claude: usa, casino, ps-kz, fra, kz";
         body = "command ${pkgs.vpn-route}/bin/vpn-route claude $argv";
       };
       codex = {
@@ -168,11 +168,11 @@
         body = "command ${pkgs.codex-safe}/bin/codex-safe $argv";
       };
       codex-proxy = {
-        description = "Маршрут только Codex: usa, casino, fra, kz";
+        description = "Маршрут только Codex: usa, casino, ps-kz, fra, kz";
         body = "command ${pkgs.vpn-route}/bin/vpn-route codex $argv";
       };
       nix-proxy = {
-        description = "Маршрут Nix/Cachix: direct, usa, casino, fra, kz";
+        description = "Маршрут Nix/Cachix: direct, usa, casino, ps-kz, fra, kz";
         body = "command ${pkgs.vpn-route}/bin/vpn-route nix $argv";
       };
       # prompt_virtual_env = ''

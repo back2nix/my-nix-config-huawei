@@ -61,7 +61,7 @@ def main():
     isp = next(o for o in config['outbounds'] if o['tag'] == 'isp-kazakhstan')
     assert isp['type'] == 'socks' and isp['version'] == '5'
     assert isp['detour'] == 'ssh-astana'
-    fixtures = {name: fixture(name) for name in ('usa', 'casino', 'fra', 'kz', 'isp-kz', 'direct')}
+    fixtures = {name: fixture(name) for name in ('usa', 'casino', 'ps-kz', 'fra', 'kz', 'isp-kz', 'direct')}
     local_rules = [rule for rule in config['route']['rules']
                    if rule.get('outbound') == 'direct-out'
                    and 'http-claude' in rule.get('inbound', [])]
@@ -83,7 +83,7 @@ def main():
     for inbound in config['inbounds']:
         inbound['listen_port'] = free_port()
         ports[inbound['tag']] = inbound['listen_port']
-    tags = {'ssh-out1': 'usa', 'ssh-out1-via-casino': 'casino', 'ssh-frankfurt': 'fra', 'ssh-astana': 'kz', 'isp-kazakhstan': 'isp-kz'}
+    tags = {'ssh-out1': 'usa', 'ssh-out1-via-casino': 'casino', 'ssh-ps-kz-via-casino': 'ps-kz', 'ssh-frankfurt': 'fra', 'ssh-astana': 'kz', 'isp-kazakhstan': 'isp-kz'}
     config['outbounds'] = [
         {'type': 'http', 'tag': outbound['tag'], 'server': '127.0.0.1',
          'server_port': fixtures[tags.get(outbound['tag'], 'usa')].server_port}
@@ -157,6 +157,10 @@ def main():
             if len(sys.argv) >= 4:
                 assert cli('claude') == 'kz'
                 assert cli('codex') == 'usa'
+                cli('claude', 'ps-kz')
+                assert cli('claude') == 'ps-kz'
+                expect('http-claude', 'ps-kz')
+                expect('http-codex', 'usa')
                 cli('claude', 'usa-casino')
                 expect('http-claude', 'casino')
                 expect('http-codex', 'usa')

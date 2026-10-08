@@ -7,8 +7,8 @@ Claude, Codex, Telegram, Git, браузеры и Nix/Cachix использую�
 В верхней панели GNOME есть отдельный значок **VPN Routes**. В его меню:
 
 - WinJoy VPN и Personal VPN — состояние и включение/выключение;
-- Claude, Codex и Telegram — независимый выбор USA, USA через Casino, FRA, KZ или ISP Казахстан;
-- Git, Nix / Cachix и три браузерных прокси (USA, FRA, KZ) — USA, Casino, FRA, KZ и Direct;
+- Claude, Codex и Telegram — независимый выбор USA, USA через Casino, KZ (ps-kz) через Casino, FRA, KZ или ISP Казахстан;
+- Git, Nix / Cachix и три браузерных прокси (USA, FRA, KZ) — USA, Casino, ps-kz через Casino, FRA, KZ и Direct;
 - общие прокси для других программ — три пункта в основном меню, без вложенных подменю.
 
 Выбор маршрута хранится в sing-box и переживает перезапуск службы/компьютера.
@@ -16,7 +16,7 @@ Claude, Codex, Telegram, Git, браузеры и Nix/Cachix использую�
 оборвать текущие соединения соответствующей группы; новое соединение
 использует выбранный выход.
 
-USA через Casino требует включённого WinJoy VPN: это транспорт до
+USA и ps-kz через Casino требуют включённого WinJoy VPN: это транспорт до
 промежуточного сервера. Выключение этого VPN делает Casino-маршрут недоступным
 для всех выбравших его программ, но не меняет их сохранённый выбор.
 
@@ -53,6 +53,7 @@ CLI из любой оболочки:
 ```sh
 vpn-route claude kz
 vpn-route codex usa-casino
+vpn-route codex ps-kz        # 91.147.105.59:22 через Casino
 vpn-route claude isp-kz       # ISP Казахстан, SOCKS5-прокси с авторизацией
 vpn-route telegram fra
 vpn-route nix direct
@@ -172,3 +173,31 @@ node tests/proxy-menu.mjs
 CLI: `vpn-route codex fra`, `vpn-route claude usa`.
 Переопределение: `CODEX_UPDATE_PROXY` / `CLAUDE_UPDATE_PROXY` (URL прокси,
 например `socks5h://127.0.0.1:1082`); пустое значение отключает явный прокси.
+
+## Новый сервер ps-kz через Casino
+
+Маршрут `ps-kz` (`kz-casino`) использует цепочку
+`ноутбук → SSH seoul-relay@10.100.0.1 → SSH ubuntu@91.147.105.59:22`.
+Ключ назначения `/home/bg/.ssh/id_ed25519_kz_astana` остаётся на ноутбуке.
+На Casino разрешены обе пары USA и ps-kz в `PermitOpen`, `authorized_keys`
+и `host-egress`; новые публичные порты не открываются.
+
+После применения конфигурации VPS и `just switch` на ноутбуке включи
+WinJoy VPN и выбери **KZ (ps-kz) через Casino** в меню нужного приложения.
+Для общих портов: `proxy-mode ps-kz`, `proxy-mode --1088 ps-kz`
+или `proxy-mode --1090 ps-kz`.
+
+Для обычного SSH добавь блок **перед** общим `Host *`, если в нём задан
+`ProxyCommand none` (SSH использует первое значение):
+
+```sshconfig
+Host ps-kz
+    HostName 91.147.105.59
+    User ubuntu
+    IdentityFile ~/.ssh/id_ed25519_kz_astana
+    IdentitiesOnly yes
+    ProxyCommand ssh -o IdentitiesOnly=yes -i ~/.ssh/id_ed25519_seoul_relay -W %h:%p seoul-relay@10.100.0.1
+```
+
+На ps-kz образ Ubuntu запрещает пересылку для root-ключа и требует вход
+под `ubuntu`; поэтому outbound и SSH-алиас используют `ubuntu`.

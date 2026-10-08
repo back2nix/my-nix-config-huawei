@@ -346,8 +346,8 @@ in {
             }
             # Хоп 1: ssh до casino-VPS ТОЛЬКО через admin-VPN awg-egg
             # (module/wireguard-eggventure.nix), публичного входа нет.
-            # Пользователь seoul-relay на сервере умеет лишь direct-tcpip на
-            # 35.212.30.39:2222 (casino-vps/modules/seoul-relay.nix).
+            # Пользователь seoul-relay разрешает direct-tcpip только к USA и ps-kz:
+            # 35.212.30.39:2222 и 91.147.105.59:22 (casino-vps/modules/seoul-relay.nix).
             {
               type = "ssh";
               tag = "ssh-casino-relay";
@@ -371,6 +371,18 @@ in {
               private_key_path = "${config.sops.placeholder."vpn1/private_key_path"}";
               detour = "ssh-casino-relay";
             }
+            # ps-kz: end-to-end SSH through the same restricted Casino relay.
+            {
+              type = "ssh";
+              tag = "ssh-ps-kz-via-casino";
+              server = "91.147.105.59";
+              server_port = 22;
+              user = "ubuntu";
+              private_key_path = "/home/bg/.ssh/id_ed25519_kz_astana";
+              host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID79o+sZFPQQeE28XTWI/6qs+kljTJW3Uhv4R8+SPj7i"];
+              host_key_algorithms = ["ssh-ed25519"];
+              detour = "ssh-casino-relay";
+            }
             # Выход без проксирования: трафик уходит с самого ноутбука.
             # Раньше ради этого режима 1082/1083 слушали 0.0.0.0 — телефон/планшет
             # тогда ходят «как через мой компьютер», без VPN вообще.
@@ -392,6 +404,7 @@ in {
               outbounds = [
                 "ssh-out1"
                 "ssh-out1-via-casino"
+                "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
                 "ssh-astana"
@@ -407,6 +420,7 @@ in {
               outbounds = [
                 "ssh-out1"
                 "ssh-out1-via-casino"
+                "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
                 "ssh-astana"
@@ -421,6 +435,7 @@ in {
               outbounds = [
                 "ssh-out1"
                 "ssh-out1-via-casino"
+                "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
                 "ssh-astana"
