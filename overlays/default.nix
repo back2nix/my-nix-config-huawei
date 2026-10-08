@@ -236,6 +236,7 @@
       # --- КОНЕЦ: codex ---
 
       rtk = final.callPackage ../pkgs/rtk.nix {};
+      photocraft = final.callPackage ../pkgs/photocraft.nix {};
       dolphin-anty = final.callPackage ../pkgs/dolphin-anty.nix {};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''

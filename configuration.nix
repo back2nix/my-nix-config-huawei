@@ -392,6 +392,7 @@ in {
 
       # pkgs-unstable.antigravity
       rtk
+      photocraft
 
       # Security / контейнерный анализ
       trivy # сканер уязвимостей образов и FS
