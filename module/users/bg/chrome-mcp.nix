@@ -36,6 +36,8 @@ in {
             mkdir -p "$USER_DATA_DIR"
 
             exec ${cfg.package}/bin/google-chrome-stable \
+              --lang=en-US \
+              --accept-lang=en-US,en \
               --remote-debugging-port=${toString cfg.port} \
               --user-data-dir="$USER_DATA_DIR" \
               --no-first-run \

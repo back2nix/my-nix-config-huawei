@@ -33,6 +33,8 @@ in {
             chmod 600 "$KEYLOG_FILE"
             export SSLKEYLOGFILE="$KEYLOG_FILE"
             exec ${cfg.package}/bin/google-chrome-stable \
+              --lang=en-US \
+              --accept-lang=en-US,en \
               --ssl-key-log-file="$SSLKEYLOGFILE" \
               "$@"
           '')

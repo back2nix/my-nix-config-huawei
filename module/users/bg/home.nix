@@ -472,7 +472,11 @@ in {
 
     # Флаги (ozone/Vulkan и т.п.) задаёт профиль графики NixOS:
     # module/display (my.display.profile).
-    commandLineArgs = osConfig.my.display.chrome.args;
+    commandLineArgs = osConfig.my.display.chrome.args ++ [
+      "--lang=en-US"
+      # Override profile languages for Accept-Language and navigator.languages.
+      "--accept-lang=en-US,en"
+    ];
   };
 
   # xdg.mimeApps = {
