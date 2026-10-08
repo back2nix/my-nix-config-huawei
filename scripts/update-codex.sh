@@ -3,8 +3,8 @@
 set -euo pipefail
 
 API="https://api.github.com/repos/openai/codex/releases/latest"
-# По умолчанию используем отдельный маршрут обновления Codex из меню VPN Routes (SOCKS5 1120).
-PROXY="${CODEX_UPDATE_PROXY-127.0.0.1:1120}"
+# Используем тот же HTTP-прокси и маршрут VPN Routes, что и Codex.
+PROXY="${CODEX_UPDATE_PROXY-http://127.0.0.1:1103}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE="$REPO_ROOT/pkgs/codex.nix"
@@ -14,7 +14,7 @@ TARGET="x86_64-unknown-linux-musl"
 fetch() {
   if [ -n "$PROXY" ]; then
     curl -fsSL \
-      --socks5-hostname "$PROXY" \
+      --proxy "$PROXY" \
       -H "Accept: application/vnd.github+json" \
       -H "User-Agent: update-codex.sh" \
       "$@"

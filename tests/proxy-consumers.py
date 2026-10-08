@@ -221,19 +221,6 @@ def main():
                 expect('http-git', mode)
                 expect('socks-nix', 'usa')
                 expect('http-codex', 'kz')
-            for updater in ('codex-update', 'claude-update'):
-                expect('socks-' + updater, 'usa')
-                expect('http-' + updater, 'usa')
-                for mode, tag in [('fra', 'ssh-frankfurt'), ('direct', 'direct-out'),
-                                  ('usa', 'ssh-out1')]:
-                    cli(updater, mode)
-                    api(updater + '-select', tag)
-                    expect('socks-' + updater, mode)
-                    expect('http-' + updater, mode)
-                    expect('socks-git', 'usa')
-                    expect('http-codex', 'kz')
-                    expect('http-claude', 'fra')
-                cli(updater, 'isp-kz', success=False)
             cli('git', 'isp-kz', success=False)
             api('usa-select', 'direct-out')
             expect('http-claude', 'fra')

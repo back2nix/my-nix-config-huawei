@@ -4,14 +4,14 @@
 set -euo pipefail
 
 BASE="https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
-# По умолчанию используем отдельный маршрут обновления Claude из меню VPN Routes (SOCKS5 1122).
-PROXY="${CLAUDE_UPDATE_PROXY-127.0.0.1:1122}"
+# Используем тот же HTTP-прокси и маршрут VPN Routes, что и Claude.
+PROXY="${CLAUDE_UPDATE_PROXY-http://127.0.0.1:1101}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OVERLAY="$REPO_ROOT/overlays/default.nix"
 
 fetch() {
   if [ -n "$PROXY" ]; then
-    curl -fsS --socks5-hostname "$PROXY" "$1"
+    curl -fsS --proxy "$PROXY" "$1"
   else
     curl -fsS "$1"
   fi

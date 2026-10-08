@@ -84,6 +84,7 @@ in {
     # ./module/tor.nix
     ./module/attic.nix
     ./module/chrome-password-manager.nix
+    ./module/chrome-location-privacy.nix
     ./module/hard-poweroff.nix # Ctrl+Esc — мгновенное жёсткое выключение
     ./module/bag-mode.nix # Режим портфеля: работа с закрытой крышкой (тумблер + Ctrl+Alt+B)
     ./module/time.nix # chrony + NTS вместо systemd-timesyncd

@@ -63,8 +63,6 @@ class VpnMenu extends PanelMenu.Button {
             {id: 'claude', label: 'Claude', direct: false},
             {id: 'codex', label: 'Codex', direct: false},
             {id: 'telegram', label: 'Telegram (SOCKS5: 1106)', direct: false},
-            {id: 'codex-update', label: 'Обновление Codex (1120/1121)', direct: true},
-            {id: 'claude-update', label: 'Обновление Claude (1122/1123)', direct: true},
             {id: 'git', label: 'Git', direct: true},
             {id: 'nix', label: 'Nix / Cachix', direct: true},
             {id: 'browser-usa', label: 'Браузер USA (1110/1111)', direct: true},

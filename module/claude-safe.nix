@@ -3,6 +3,10 @@
   lib,
   ...
 }: let
+  consumers = import ./proxy-routes-data.nix;
+  agentProxyPort = agent:
+    (lib.findFirst (route: route.name == agent)
+      (throw "Missing dedicated proxy route for ${agent}") consumers.routes).httpPort;
   # Fixed SSH destinations reachable from the host network, never a general proxy.
   sshEndpoints = [
     { name = "bagau"; aliases = "bagau"; address = "192.168.0.102"; }
@@ -24,7 +28,8 @@
     inside = pkgs.writeShellScript "${name}-inside" ''
       set -euo pipefail
       relay_dir=$1
-      shift
+      relay_log_dir=$2
+      shift 2
       relay_pids=()
       cleanup() {
         for relay_pid in "''${relay_pids[@]}"; do
@@ -32,16 +37,16 @@
         done
       }
       trap cleanup EXIT
-      ${pkgs.socat}/bin/socat TCP4-LISTEN:1083,bind=127.0.0.1,reuseaddr,fork \
-        "UNIX-CONNECT:$relay_dir/proxy" &
+      ${pkgs.socat}/bin/socat -lp ${name}-proxy-inside TCP4-LISTEN:${toString proxyPort},bind=127.0.0.1,reuseaddr,fork \
+        "UNIX-CONNECT:$relay_dir/proxy" 2>>"$relay_log_dir/proxy-inside.log" &
       relay_pids+=("$!")
-      ${pkgs.socat}/bin/socat TCP4-LISTEN:6443,bind=127.0.0.1,reuseaddr,fork \
-        "UNIX-CONNECT:$relay_dir/k3s" &
+      ${pkgs.socat}/bin/socat -lp ${name}-k3s-inside TCP4-LISTEN:6443,bind=127.0.0.1,reuseaddr,fork \
+        "UNIX-CONNECT:$relay_dir/k3s" 2>>"$relay_log_dir/k3s-inside.log" &
       relay_pids+=("$!")
       # Wait for both listeners, without requiring k3s to be running.
       ready=0
       for _ in {1..100}; do
-        if [ -n "$(${pkgs.iproute2}/bin/ss -H -ltn 'sport = :1083')" ] && \
+        if [ -n "$(${pkgs.iproute2}/bin/ss -H -ltn 'sport = :${toString proxyPort}')" ] && \
            [ -n "$(${pkgs.iproute2}/bin/ss -H -ltn 'sport = :6443')" ]; then
           ready=1
           break
@@ -54,7 +59,7 @@
       fi
       export CLAUDE_SAFE_SSH_CONFIG="$relay_dir/ssh-config"
       export PATH=${safeSsh}/bin:$PATH
-      export HTTP_PROXY=http://127.0.0.1:1083
+      export HTTP_PROXY=http://127.0.0.1:${toString proxyPort}
       export HTTPS_PROXY=$HTTP_PROXY ALL_PROXY=$HTTP_PROXY
       export http_proxy=$HTTP_PROXY https_proxy=$HTTP_PROXY all_proxy=$HTTP_PROXY
       export NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1
@@ -94,6 +99,9 @@
       runtimeInputs = [pkgs.coreutils pkgs.util-linux pkgs.socat pkgs.bubblewrap];
       text = ''
         umask 077
+        relay_log_root="''${XDG_STATE_HOME:-$HOME/.local/state}/${name}/relays"
+        mkdir -p -- "$relay_log_root"
+        relay_log_dir=$(mktemp -d "$relay_log_root/session.XXXXXXXX")
         relay_dir=$(mktemp -d /tmp/claude-safe.XXXXXXXX)
         relay_pids=()
         cleanup() {
@@ -101,16 +109,28 @@
             kill -- "-$relay_pid" 2>/dev/null || true
           done
           rm -rf -- "$relay_dir"
+          relay_errors=0
+          for relay_log in "$relay_log_dir"/*.log; do
+            if [ -s "$relay_log" ]; then
+              relay_errors=1
+              break
+            fi
+          done
+          if [ "$relay_errors" = 1 ]; then
+            echo "${name}: relay reported errors; logs: $relay_log_dir" >&2
+          else
+            rm -rf -- "$relay_log_dir"
+          fi
         }
         trap cleanup EXIT
         # Each host-side relay has exactly one fixed TCP destination.
-        setsid socat "UNIX-LISTEN:$relay_dir/proxy,fork,mode=0600" TCP4:127.0.0.1:${toString proxyPort} &
+        setsid socat -lp ${name}-proxy-host "UNIX-LISTEN:$relay_dir/proxy,fork,mode=0600" TCP4:127.0.0.1:${toString proxyPort} 2>>"$relay_log_dir/proxy-host.log" &
         relay_pids+=("$!")
-        setsid socat "UNIX-LISTEN:$relay_dir/k3s,fork,mode=0600" TCP4:127.0.0.1:6443 &
+        setsid socat -lp ${name}-k3s-host "UNIX-LISTEN:$relay_dir/k3s,fork,mode=0600" TCP4:127.0.0.1:6443 2>>"$relay_log_dir/k3s-host.log" &
         relay_pids+=("$!")
         # Expose only port 22 of explicitly allowed hosts via Unix sockets.
         ${lib.concatMapStringsSep "\n" (endpoint: ''
-          setsid socat "UNIX-LISTEN:$relay_dir/ssh-${endpoint.name},fork,mode=0600" TCP4:${endpoint.address}:22 &
+          setsid socat -lp ${name}-ssh-${endpoint.name}-host "UNIX-LISTEN:$relay_dir/ssh-${endpoint.name},fork,mode=0600" TCP4:${endpoint.address}:22 2>>"$relay_log_dir/ssh-${endpoint.name}-host.log" &
           relay_pids+=("$!")
         '') sshEndpoints}
         cat > "$relay_dir/ssh-config" <<EOF
@@ -137,7 +157,7 @@
         bwrap --unshare-user --unshare-net --unshare-pid \
           --disable-userns --assert-userns-disabled --cap-drop ALL \
           --die-with-parent --bind / / --dev-bind /dev /dev --proc /proc \
-          --chdir "$PWD" ${inside} "$relay_dir" "$@"
+          --chdir "$PWD" ${inside} "$relay_dir" "$relay_log_dir" "$@"
       '';
     };
   in
@@ -179,12 +199,12 @@ in {
         claude-safe = mkSafe {
           name = "claude-safe";
           program = "${final.claude-code}/bin/claude";
-          proxyPort = 1101;
+          proxyPort = agentProxyPort "claude";
         };
         codex-safe = mkSafe {
           name = "codex-safe";
           program = "${final.codex}/bin/codex";
-          proxyPort = 1103;
+          proxyPort = agentProxyPort "codex";
           noDaemon = true;
         };
         claude = prev.writeShellScriptBin "claude" ''
