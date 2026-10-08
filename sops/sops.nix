@@ -100,6 +100,9 @@ in {
         # DNS целевых доменов идёт через тот же выход, что и входящая пара.
         # IP Quad9 задан явно: bootstrap DNS и рекурсия через SOCKS не нужны.
         dns = {
+          # Fail promptly on an unavailable selected tunnel. The SSH outbound
+          # is patched in module/sign-box.nix to honor this cancellation.
+          timeout = "5s";
           servers =
             [
               {
@@ -124,6 +127,14 @@ in {
                 {
                   tag = "dns-1082";
                   outbound = "usa-select";
+                }
+                {
+                  tag = "dns-1084";
+                  outbound = "ssh-out1-via-vpn3";
+                }
+                {
+                  tag = "dns-1086";
+                  outbound = "ssh-out1-via-casino";
                 }
                 {
                   tag = "dns-1088";
@@ -522,6 +533,20 @@ in {
               disable_cache = true;
             }
             {
+              inbound = ["socks-1084" "http-1085"];
+              action = "resolve";
+              server = "dns-1084";
+              strategy = "ipv4_only";
+              disable_cache = true;
+            }
+            {
+              inbound = ["socks-casino" "http-casino"];
+              action = "resolve";
+              server = "dns-1086";
+              strategy = "ipv4_only";
+              disable_cache = true;
+            }
+            {
               inbound = ["socks-astana" "http-astana"];
               action = "resolve";
               server = "dns-1090";
@@ -529,7 +554,7 @@ in {
               disable_cache = true;
             }
             {
-              inbound = ["socks-usa" "http-usa" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe" "http-safe-1088" "http-safe-1090"] ++ consumerInbounds;
+              inbound = ["socks-usa" "http-usa" "socks-1084" "http-1085" "socks-casino" "http-casino" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe" "http-safe-1088" "http-safe-1090"] ++ consumerInbounds;
               invert = true;
               action = "resolve";
               server = "dns-dnscrypt";

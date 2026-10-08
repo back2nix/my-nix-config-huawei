@@ -4,7 +4,20 @@
   pkgs,
   pkgs-unstable,
   ...
-}: {
+}: let
+  # SSH channel opens must honor DNS cancellation too. In sing-box 1.14.1,
+  # client.Dial ignores ctx and can block until sshd's TCP timeout (~2 min).
+  # No NaiveProxy outbounds are configured; avoid its Cronet/LLVM toolchain.
+  singBox = (pkgs-unstable.sing-box.override {
+    withNaiveOutbound = false;
+  }).overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace protocol/ssh/outbound.go \
+        --replace-fail 'client.Dial(network, destination.String())' \
+                       'client.DialContext(ctx, network, destination.String())'
+    '';
+  });
+in {
   systemd.services."sing-box" = {
     enable = true;
     description = "sing-box proxy";
@@ -12,7 +25,7 @@
     wants = ["network-online.target"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {
-      ExecStart = "${pkgs-unstable.sing-box}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
+      ExecStart = "${singBox}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
       Restart = "always";
       RestartSec = "5s";
       # Под cache.db из experimental.cache_file (sops/sops.nix): в нём живёт

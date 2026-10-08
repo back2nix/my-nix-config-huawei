@@ -58,6 +58,22 @@ def main():
     # Numeric SOPS placeholders are unquoted until activation renders secrets.
     template = re.sub(r'"server_port":<SOPS:[^>]+>', '"server_port":1', template)
     config = json.loads(template)
+    # Every proxy listener must resolve through its own traffic outbound,
+    # including fixed legacy ports. Local routes with explicit IP overrides
+    # intentionally skip DNS and are not the default route for the listener.
+    dns_servers = {server['tag']: server for server in config['dns']['servers']}
+    for inbound in config['inbounds']:
+        tag = inbound['tag']
+        traffic = [rule for rule in config['route']['rules']
+                   if tag in rule.get('inbound', []) and 'outbound' in rule
+                   and not any(key in rule for key in ('domain', 'ip_cidr', 'override_address'))]
+        assert len(traffic) == 1, (tag, traffic)
+        resolves = [rule for rule in config['route']['rules']
+                    if rule.get('action') == 'resolve' and not rule.get('invert')
+                    and tag in rule.get('inbound', [])]
+        assert len(resolves) == 1, (tag, 'missing dedicated DNS route', resolves)
+        dns = dns_servers[resolves[0]['server']]
+        assert dns.get('detour') == traffic[0]['outbound'], (tag, dns, traffic)
     isp = next(o for o in config['outbounds'] if o['tag'] == 'isp-kazakhstan')
     assert isp['type'] == 'socks' and isp['version'] == '5'
     assert isp['detour'] == 'ssh-astana'
@@ -139,6 +155,16 @@ def main():
                     time.sleep(0.02)
             else:
                 raise RuntimeError('Test sing-box did not start')
+            # Fixed and legacy listeners must still use their declared exits.
+            for inbound, label in {
+                'http-claude-safe': 'usa', 'http-safe-1088': 'fra',
+                'http-safe-1090': 'kz', 'socks-usa': 'usa', 'http-usa': 'usa',
+                'socks-1084': 'usa', 'http-1085': 'usa',
+                'socks-casino': 'casino', 'http-casino': 'casino',
+                'socks-frankfurt': 'fra', 'http-frankfurt': 'fra',
+                'socks-astana': 'kz', 'http-astana': 'kz',
+            }.items():
+                expect(inbound, label)
             # Defaults and independent browser profiles.
             expect('http-claude', 'kz')
             expect('http-codex', 'usa')
@@ -265,7 +291,7 @@ def main():
             expect('http-browser-usa', 'fra')
             expect('socks-browser-fra', 'fra')
             expect('socks-browser-kz', 'kz')
-            print('PASS: local services, independent routes, CLI, agent direct rejection and persisted selectors')
+            print('PASS: DNS/traffic outbound equality for every listener, legacy ports, local services, independent routes, CLI, agent direct rejection and persisted selectors')
         finally:
             process.terminate()
             process.communicate(timeout=5)
