@@ -151,9 +151,7 @@
           huawei = mkSystem "huawei-rlef-x" [];
           yoga14 = mkSystem "yoga14" [
             inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
-            # CachyOS-оверлей (даёт pkgs.linuxPackages_cachyos, кеш nyx.chaotic.cx).
-            # Включать вместе с kernelPackages = pkgs.linuxPackages_cachyos:
-            # inputs.chaotic.nixosModules.default
+            inputs.chaotic.nixosModules.default
           ];
           desktop = mkSystem "desktop" [];
         };

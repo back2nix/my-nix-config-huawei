@@ -20,8 +20,7 @@ switch:
     # (нужен его ssh-ключ для приватного git+ssh инпута mutter-src),
     # root используется только для активации.
     nixos-rebuild switch --sudo --flake ".#${device}" \
-        --option http2 false \
-        --option substituters "https://cache.nixos.org"
+        --option http2 false
 
 # Пересборка NixOS
 nix:

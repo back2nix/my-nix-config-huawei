@@ -15,6 +15,12 @@ in {
     # "Less than 1 byte/sec"); curl работает по HTTP/1.1. См. NixOS/nix#11352.
     http2 = false;
 
+    # Chaotic-Nyx binary cache, in addition to the existing caches below.
+    extra-substituters = ["https://nyx-cache.chaotic.cx"];
+    extra-trusted-public-keys = [
+      "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
+    ];
+
     substituters = [
       "https://cache.nixos.org/"
       # "https://cache.flox.dev"

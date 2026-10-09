@@ -29,12 +29,7 @@
   networking.hostName = "yoga14";
 
   boot = {
-    # kernelPackages = pkgs.linuxPackages_zen;
-    # CachyOS-ядро (BORE + LTO + O3) — включать отдельно, т.к. смена ядра
-    # тянет полную пересборку модулей/initrd:
-    #   kernelPackages = pkgs.linuxPackages_cachyos;
-    # (требует inputs.chaotic.nixosModules.default в flake.nix для yoga14)
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_cachyos;
 
     kernelModules = [
       "kvm-intel"
