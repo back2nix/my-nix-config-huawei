@@ -1,5 +1,16 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  wallpaper = ../../../assets/wallpapers/nix-wallpaper-binary-black-2880x1800.png;
+in {
   dconf.settings = {
+    "org/gnome/desktop/background" = {
+      picture-uri = "file://${wallpaper}";
+      picture-uri-dark = "file://${wallpaper}";
+      picture-options = "zoom";
+    };
+    "org/gnome/desktop/screensaver" = {
+      picture-uri = "file://${wallpaper}";
+      picture-options = "zoom";
+    };
     "org/gnome/settings-daemon/plugins/media-keys" = {
       custom-keybindings = [
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
