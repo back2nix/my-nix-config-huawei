@@ -154,6 +154,9 @@
   # latency/десктоп; на ноутбуке экономит и энергию.
   services.scx = {
     enable = true;
+    # Как в cachy-модуле librephoenix: scx_lavd входит в Rust-планировщики,
+    # поэтому полный набор scx.full здесь не требуется.
+    package = pkgs.scx.rustscheds;
     scheduler = "scx_lavd";
   };
 
