@@ -138,6 +138,8 @@
       #     "$@"
       # '';
 
+      antigravity-cli = prev.callPackage ../pkgs/antigravity-cli.nix {};
+
       # --- НАЧАЛО: Обновление claude-code до 2.1.295 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";

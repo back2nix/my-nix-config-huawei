@@ -135,6 +135,7 @@ SSH-канала: оно учитывает отмену запроса, вме�
 
 | Потребитель | SOCKS | HTTP | Выход по умолчанию |
 | --- | --- | --- | --- |
+| Antigravity CLI safe | — | 1121 | USA, свой selector |
 | Claude safe | — | 1101 | KZ, свой selector |
 | Codex safe | — | 1103 | USA, свой selector |
 | Telegram | 1106 | 1107 | KZ, свой selector |
@@ -209,3 +210,18 @@ Host ps-kz
 
 На ps-kz образ Ubuntu запрещает пересылку для root-ключа и требует вход
 под `ubuntu`; поэтому outbound и SSH-алиас используют `ubuntu`.
+
+## Antigravity CLI
+
+Официальный CLI запускается через `agy` или `antigravity-cli`. Обе команды
+используют изолированную сеть и прокси `127.0.0.1:1121`. Маршрут выбирается
+в меню VPN → Antigravity CLI независимо от Claude и Codex, либо командой
+`antigravity-proxy fra` / `vpn-route antigravity fra`.
+
+`agy --check` проверяет доступность прокси и локальных сервисов.
+`just update-antigravity` обновляет версию, URL и SHA512 официального архива
+в `pkgs/antigravity-cli.nix` и проверяет сборку для текущего устройства.
+После обновления выполни `just switch`. До первого применения можно обновить
+через существующий прокси: `ANTIGRAVITY_UPDATE_PROXY=http://127.0.0.1:1101 just update-antigravity`.
+`ANTIGRAVITY_UPDATE_PROXY=''` разрешает прямую загрузку обновления.
+Исходный установщик: https://antigravity.google/cli/install.sh.

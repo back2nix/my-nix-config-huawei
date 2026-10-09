@@ -196,6 +196,17 @@ in {
           ]
       ) ["claude" "codex"])
       // {
+        antigravity-safe = mkSafe {
+          name = "antigravity-safe";
+          program = "${final.antigravity-cli}/bin/agy";
+          proxyPort = agentProxyPort "antigravity";
+        };
+        agy = prev.writeShellScriptBin "agy" ''
+          exec ${final.antigravity-safe}/bin/antigravity-safe "$@"
+        '';
+        antigravity-routed = prev.writeShellScriptBin "antigravity-cli" ''
+          exec ${final.antigravity-safe}/bin/antigravity-safe "$@"
+        '';
         claude-safe = mkSafe {
           name = "claude-safe";
           program = "${final.claude-code}/bin/claude";
@@ -216,6 +227,9 @@ in {
       })
   ];
   environment.systemPackages = map (name: pkgs.${name}) [
+    "antigravity-safe"
+    "agy"
+    "antigravity-routed"
     "claude-safe"
     "codex-safe"
     "claude"

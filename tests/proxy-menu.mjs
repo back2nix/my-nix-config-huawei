@@ -22,7 +22,7 @@ class Panel {
     add_child() {}
     destroy() { this.destroyed = true; }
 }
-const state = {claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
+const state = {antigravity: 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
 const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive', 'webrtc-google-block.service': 'active', 'webrtc-udp-block.service': 'inactive'};
 const calls = [], errors = [], removed = [];
 let failNext = false;
@@ -70,7 +70,7 @@ const extension = new sandbox.TestExtension();
 extension.enable();
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 await settle();
-assert.equal(registered._routes.length, 11);
+assert.equal(registered._routes.length, 12);
 for (const route of registered._routes) {
     assert.ok(registered.menu.items.includes(route.item), 'Each route must appear directly in the panel menu');
 }
@@ -78,6 +78,15 @@ assert.equal(registered._vpns[0].item.state, true);
 assert.equal(registered._vpns[1].item.state, false);
 assert.equal(calls.filter(a => a[0] === '@systemctl@' && a.includes('start')).length, 0,
              'Refresh must not change a VPN service');
+const antigravity = registered._routes.find(r => r.label === 'Antigravity CLI');
+assert.equal(antigravity.choices.has('direct'), false);
+assert.equal(antigravity.choices.has('isp-kz'), true);
+await antigravity.choices.get('fra').activate();
+await settle();
+assert.equal(state.antigravity, 'fra');
+assert.equal(state.claude, 'kz');
+assert.equal(state.codex, 'usa');
+assert.equal(antigravity.choices.get('fra').ornament, 'check');
 const claude = registered._routes.find(r => r.label === 'Claude');
 const codex = registered._routes.find(r => r.label === 'Codex');
 assert.equal(claude.choices.has('direct'), false);

@@ -155,6 +155,17 @@
     ];
 
     functions = {
+      agy = {
+        description = "Antigravity с изолированной сетью и собственным маршрутом";
+        body = "command ${pkgs.antigravity-safe}/bin/antigravity-safe $argv";
+      };
+      antigravity-cli = {
+        body = "command ${pkgs.antigravity-safe}/bin/antigravity-safe $argv";
+      };
+      antigravity-proxy = {
+        description = "Маршрут только Antigravity CLI";
+        body = "command ${pkgs.vpn-route}/bin/vpn-route antigravity $argv";
+      };
       claude = {
         description = "Claude с изолированной сетью и собственным маршрутом";
         body = "command ${pkgs.claude-safe}/bin/claude-safe $argv";

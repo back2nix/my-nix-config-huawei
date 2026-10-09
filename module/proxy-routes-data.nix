@@ -4,6 +4,11 @@ let
 in {
   selectors = [
     {
+      name = "antigravity";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["isp-kazakhstan"];
+    }
+    {
       name = "claude";
       default = "ssh-astana";
       outbounds = tunnels ++ ["isp-kazakhstan"];
@@ -45,6 +50,11 @@ in {
     }
   ];
   routes = [
+    {
+      name = "antigravity";
+      httpPort = 1121;
+      outbound = "antigravity-select";
+    }
     {
       name = "claude";
       httpPort = 1101;

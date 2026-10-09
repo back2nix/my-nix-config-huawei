@@ -141,3 +141,7 @@ update-codex:
 # Обновление Dolphin Anty до последней версии (правит хэш в pkgs/dolphin-anty.nix)
 update-dolphin-anty:
     bash ./scripts/update-dolphin-anty.sh
+
+# Обновление официального Antigravity CLI
+update-antigravity:
+    ./scripts/update-antigravity.sh

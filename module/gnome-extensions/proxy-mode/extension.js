@@ -61,6 +61,7 @@ class VpnMenu extends PanelMenu.Button {
         }
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         for (const group of [
+            {id: 'antigravity', label: 'Antigravity CLI', direct: false},
             {id: 'claude', label: 'Claude', direct: false},
             {id: 'codex', label: 'Codex', direct: false},
             {id: 'telegram', label: 'Telegram (SOCKS5: 1106)', direct: false},

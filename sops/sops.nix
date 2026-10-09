@@ -5,7 +5,7 @@
 }: let
   consumers = import ../module/proxy-routes-data.nix;
   consumerInbounds = lib.concatMap (r: ["http-${r.name}"] ++ lib.optional (r ? socksPort) "socks-${r.name}") consumers.routes;
-  agentInbounds = ["http-claude" "http-codex" "http-claude-safe" "http-safe-1088" "http-safe-1090"];
+  agentInbounds = ["http-antigravity" "http-claude" "http-codex" "http-claude-safe" "http-safe-1088" "http-safe-1090"];
   # Keep exact aliases in sync with extraHosts; do not bypass all *.local names.
   localServiceDomains = lib.unique (lib.concatMap (line: let
     fields = lib.filter (field: field != "") (lib.splitString " " (lib.replaceStrings ["\t"] [" "] (builtins.head (lib.splitString "#" line))));

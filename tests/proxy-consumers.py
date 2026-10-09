@@ -166,6 +166,16 @@ def main():
             }.items():
                 expect(inbound, label)
             # Defaults and independent browser profiles.
+            expect('http-antigravity', 'usa')
+            for mode, label in tags.items():
+                api('antigravity-select', mode)
+                expect('http-antigravity', label)
+                expect('http-claude', 'kz')
+                expect('http-codex', 'usa')
+                if len(sys.argv) >= 4:
+                    assert cli('antigravity') == label
+                    cli('antigravity', label)
+            api('antigravity-select', 'ssh-out1')
             expect('http-claude', 'kz')
             expect('http-codex', 'usa')
             expect('socks-telegram', 'kz')
@@ -190,7 +200,7 @@ def main():
                 cli('claude', 'usa-casino')
                 expect('http-claude', 'casino')
                 expect('http-codex', 'usa')
-                for agent in ('claude', 'codex'):
+                for agent in ('antigravity', 'claude', 'codex'):
                     cli(agent, 'direct', success=False)
                 cli('unknown', 'usa', success=False)
             for mode, tag in tags.items():
@@ -260,7 +270,7 @@ def main():
             expect('socks-nix', 'usa')
             for route in ('usa', 'casino', 'fra', 'kz'):
                 expect('socks-browser-' + route, route)
-            for agent in ('claude', 'codex'):
+            for agent in ('antigravity', 'claude', 'codex'):
                 try:
                     api(agent + '-select', 'direct-out')
                 except urllib.error.HTTPError:
