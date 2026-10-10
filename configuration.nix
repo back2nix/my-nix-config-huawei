@@ -172,7 +172,8 @@ in {
     };
   };
 
-  time.timeZone = "Asia/Almaty";
+  # Eastern Time: Вашингтон (DC) и Ашберн (Virginia), с переходом на летнее время.
+  time.timeZone = "America/New_York";
 
   i18n = {
     defaultLocale = "en_US.UTF-8";
