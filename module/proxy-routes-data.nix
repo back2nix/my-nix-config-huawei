@@ -1,6 +1,6 @@
 # Dedicated consumers. Legacy 1082/1088/1090 selectors remain independent.
 let
-  tunnels = ["ssh-out1" "ssh-out1-via-casino" "ssh-ps-kz-via-casino" "ssh-frankfurt" "ssh-astana"];
+  tunnels = ["ssh-out1" "ssh-out1-via-casino" "ssh-ps-kz-via-casino" "ssh-frankfurt" "ssh-frankfurt-via-casino" "ssh-astana"];
 in {
   selectors = [
     {

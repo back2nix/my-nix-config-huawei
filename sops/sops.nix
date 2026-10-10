@@ -329,6 +329,18 @@ in {
                 strategy = "ipv4_only";
               };
             }
+            # FRA через Beget: end-to-end SSH поверх ограниченного релея.
+            {
+              type = "ssh";
+              tag = "ssh-frankfurt-via-casino";
+              server = "5.252.179.162";
+              server_port = 22;
+              user = "root";
+              private_key_path = "/home/bg/.ssh/id_ed25519_eggventure_main";
+              host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE8XlR6wxvsc1d58OuiBU9IrYu/NZUozOjjKgUNBrRZ3"];
+              host_key_algorithms = ["ssh-ed25519"];
+              detour = "ssh-casino-relay";
+            }
             {
               type = "socks";
               tag = "isp-kazakhstan";
@@ -357,8 +369,8 @@ in {
             }
             # Хоп 1: ssh до casino-VPS ТОЛЬКО через admin-VPN awg-egg
             # (module/wireguard-eggventure.nix), публичного входа нет.
-            # Пользователь seoul-relay разрешает direct-tcpip только к USA и ps-kz:
-            # 35.212.30.39:2222 и 91.147.105.59:22 (casino-vps/modules/seoul-relay.nix).
+            # Пользователь seoul-relay разрешает direct-tcpip только к USA, ps-kz и FRA:
+            # 35.212.30.39:2222, 91.147.105.59:22 и 5.252.179.162:22 (casino-vps/modules/seoul-relay.nix).
             {
               type = "ssh";
               tag = "ssh-casino-relay";
@@ -418,6 +430,7 @@ in {
                 "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
+                "ssh-frankfurt-via-casino"
                 "ssh-astana"
                 "direct-out"
               ];
@@ -434,6 +447,7 @@ in {
                 "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
+                "ssh-frankfurt-via-casino"
                 "ssh-astana"
                 "direct-out"
               ];
@@ -449,6 +463,7 @@ in {
                 "ssh-ps-kz-via-casino"
                 "ssh-out1-via-vpn3"
                 "ssh-frankfurt"
+                "ssh-frankfurt-via-casino"
                 "ssh-astana"
                 "direct-out"
               ];

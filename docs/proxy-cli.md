@@ -232,3 +232,19 @@ Host ps-kz
 через существующий прокси: `ANTIGRAVITY_UPDATE_PROXY=http://127.0.0.1:1101 just update-antigravity`.
 `ANTIGRAVITY_UPDATE_PROXY=''` разрешает прямую загрузку обновления.
 Исходный установщик: https://antigravity.google/cli/install.sh.
+
+## FRA через RU (Beget)
+
+В меню VPN доступен «FRA через RU (Beget)». Маршрут: ноутбук → admin-VPN
+awg-egg → seoul-relay@10.100.0.1 → SSH 5.252.179.162:22 → интернет.
+WinJoy VPN должен быть включён. Ключ FRA остаётся на ноутбуке.
+
+```bash
+vpn-route browser-fra fra-casino
+vpn-route telegram fra-casino
+proxy-mode --1088 fra-casino
+```
+
+Outbound: `ssh-frankfurt-via-casino`, detour: `ssh-casino-relay`.
+До использования применить изменения casino-vps на Beget (`just deploy`),
+затем пересобрать ноутбук из этой конфигурации.

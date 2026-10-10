@@ -14,6 +14,7 @@ const SYSTEMCTL = '@systemctl@';
 const MODES = [
     {id: 'usa', label: 'USA (Сеул)'},
     {id: 'casino', label: 'USA через Casino'},
+    {id: 'fra-casino', label: 'FRA через RU (Beget)'},
     {id: 'ps-kz', label: 'KZ (ps-kz) через Casino'},
     {id: 'fra', label: 'FRA (Франкфурт)'},
     {id: 'kz', label: 'KZ (Astana)'},
@@ -82,6 +83,7 @@ class VpnMenu extends PanelMenu.Button {
             {id: 'frankfurt', label: 'FRA (Франкфурт)'},
             {id: 'astana', label: 'KZ (Astana)'},
             {id: 'casino', label: 'USA через Casino'},
+            {id: 'fra-casino', label: 'FRA через RU (Beget)'},
             {id: 'ps-kz', label: 'KZ (ps-kz) через Casino'},
             {id: 'direct', label: 'Direct'},
         ];
