@@ -100,9 +100,10 @@ in {
         # DNS целевых доменов идёт через тот же выход, что и входящая пара.
         # IP Quad9 задан явно: bootstrap DNS и рекурсия через SOCKS не нужны.
         dns = {
-          # Fail promptly on an unavailable selected tunnel. The SSH outbound
-          # is patched in module/sign-box.nix to honor this cancellation.
-          timeout = "5s";
+          # Quad9 DoH through Frankfurt measured 1.9–7.7s: a 5s limit
+          # cancels working queries. Keep a bounded wait with room for jitter.
+          # The SSH patch in module/sign-box.nix honors this cancellation.
+          timeout = "15s";
           servers =
             [
               {
