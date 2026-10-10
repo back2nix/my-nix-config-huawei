@@ -185,6 +185,12 @@
   };
 
   services.udev.extraRules = ''
+    # Обход возможного сбоя runtime PM тачпада ELAN06FA (04F3:327E).
+    # После периодических отказов журнал содержит incomplete report и -121.
+    # Держим его I2C-контроллер активным; системный suspend остаётся доступен.
+    ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:15.0", ATTR{vendor}=="0x8086", ATTR{device}=="0xa878", TEST=="power/control", ATTR{power/control}="on"
+    ACTION=="add|change", SUBSYSTEM=="i2c", KERNEL=="i2c-ELAN06FA:00", TEST=="power/control", ATTR{power/control}="on"
+
     # Предотвращение автосуспенда Intel AX211
     ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0033", ATTR{power/autosuspend}="-1"
 

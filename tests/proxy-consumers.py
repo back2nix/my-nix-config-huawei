@@ -8,6 +8,8 @@ import json
 import os
 import re
 import socket
+import socketserver
+import struct
 import subprocess
 import sys
 import tempfile
@@ -78,6 +80,28 @@ def main():
     assert isp['type'] == 'socks' and isp['version'] == '5'
     assert isp['detour'] == 'ssh-astana'
     fixtures = {name: fixture(name) for name in ('usa', 'casino', 'ps-kz', 'fra', 'kz', 'isp-kz', 'direct')}
+    # Real DNS queries against a local fixture: repeated requests must hit the
+    # cache, and changing a selector through its API must invalidate answers.
+    dns_queries = []
+
+    class DNSHandler(socketserver.BaseRequestHandler):
+        def handle(self):
+            packet, sock = self.request
+            dns_queries.append(packet)
+            answer = (packet[:2] + struct.pack('!HHHHH', 0x8180, 1, 1, 0, 0)
+                      + packet[12:] + b'\xc0\x0c'
+                      + struct.pack('!HHIH', 1, 1, 120, 4)
+                      + socket.inet_aton('127.0.0.1'))
+            sock.sendto(answer, self.client_address)
+
+    dns_fixture = socketserver.ThreadingUDPServer(('127.0.0.1', 0), DNSHandler)
+    threading.Thread(target=dns_fixture.serve_forever, daemon=True).start()
+    # Preserve each transport tag, so independent_cache still separates exits.
+    config['dns']['servers'] = [
+        {'tag': tag, 'type': 'udp', 'server': '127.0.0.1',
+         'server_port': dns_fixture.server_address[1]}
+        for tag in dns_servers
+    ]
     local_rules = [rule for rule in config['route']['rules']
                    if rule.get('outbound') == 'direct-out'
                    and 'http-claude' in rule.get('inbound', [])]
@@ -155,6 +179,20 @@ def main():
                     time.sleep(0.02)
             else:
                 raise RuntimeError('Test sing-box did not start')
+            cached_url = f'http://cache-check.example:{fixtures["direct"].server_port}/'
+            expect('socks-usa', 'usa', cached_url)
+            expect('socks-usa', 'usa', cached_url)
+            expect('http-usa', 'usa', cached_url)
+            assert len(dns_queries) == 1, ('DNS cache not used', len(dns_queries))
+            api('usa-select', 'ssh-frankfurt')
+            expect('socks-usa', 'fra', cached_url)
+            assert len(dns_queries) == 2, ('selector retained stale DNS', len(dns_queries))
+            api('usa-select', 'ssh-frankfurt')
+            expect('socks-usa', 'fra', cached_url)
+            assert len(dns_queries) == 2, ('unchanged selector flushed DNS', len(dns_queries))
+            api('usa-select', 'ssh-out1')
+            expect('socks-usa', 'usa', cached_url)
+            assert len(dns_queries) == 3, ('return to old exit retained DNS', len(dns_queries))
             # Fixed and legacy listeners must still use their declared exits.
             for inbound, label in {
                 'http-claude-safe': 'usa', 'http-safe-1088': 'fra',
@@ -301,10 +339,12 @@ def main():
             expect('http-browser-usa', 'fra')
             expect('socks-browser-fra', 'fra')
             expect('socks-browser-kz', 'kz')
-            print('PASS: DNS/traffic outbound equality for every listener, legacy ports, local services, independent routes, CLI, agent direct rejection and persisted selectors')
+            print('PASS: DNS caching and selector invalidation, DNS/traffic outbound equality for every listener, legacy ports, local services, independent routes, CLI, agent direct rejection and persisted selectors')
         finally:
             process.terminate()
             process.communicate(timeout=5)
+            dns_fixture.shutdown()
+            dns_fixture.server_close()
             for server in fixtures.values():
                 server.shutdown()
                 server.server_close()

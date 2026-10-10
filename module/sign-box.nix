@@ -8,15 +8,23 @@
   # SSH channel opens must honor DNS cancellation too. In sing-box 1.14.1,
   # client.Dial ignores ctx and can block until sshd's TCP timeout (~2 min).
   # No NaiveProxy outbounds are configured; avoid its Cronet/LLVM toolchain.
-  singBox = (pkgs-unstable.sing-box.override {
-    withNaiveOutbound = false;
-  }).overrideAttrs (old: {
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace protocol/ssh/outbound.go \
-        --replace-fail 'client.Dial(network, destination.String())' \
-                       'client.DialContext(ctx, network, destination.String())'
-    '';
-  });
+  singBox =
+    (pkgs-unstable.sing-box.override {
+      withNaiveOutbound = false;
+    }).overrideAttrs (old: {
+      postPatch =
+        (old.postPatch or "")
+        + ''
+          substituteInPlace protocol/ssh/outbound.go \
+            --replace-fail 'client.Dial(network, destination.String())' \
+                           'client.DialContext(ctx, network, destination.String())'
+          # Cached answers belong to the selected exit. Flush on every selector
+          # change (including GUI/API changes), before opening new connections.
+          substituteInPlace protocol/group/selector.go \
+            --replace-fail 's.interruptGroup.Interrupt(s.interruptExternalConnections)' \
+              'if dnsRouter := service.FromContext[adapter.DNSRouter](s.ctx); dnsRouter != nil { dnsRouter.ClearCache() }; s.interruptGroup.Interrupt(s.interruptExternalConnections)'
+        '';
+    });
 in {
   systemd.services."sing-box" = {
     enable = true;
@@ -34,6 +42,24 @@ in {
       StateDirectory = "sing-box";
     };
   };
+
+  # A new Wi-Fi/Ethernet connection can keep the interface name while changing
+  # its address/gateway. Drop old SSH and DoH sessions once connectivity returns.
+  networking.networkmanager.dispatcherScripts = [
+    {
+      source = pkgs.writeShellScript "sing-box-network-up" ''
+        case "''${1:-}" in
+          wl*|en*|eth*) ;;
+          *) exit 0 ;;
+        esac
+        case "''${2:-}" in
+          up)
+            ${pkgs.systemd}/bin/systemctl --no-block try-restart sing-box.service
+            ;;
+        esac
+      '';
+    }
+  ];
 
   # Watchdog: прокси каждые 15 секунд проверяет туннель, если мёртв — рестартует sing-box
   # systemd.services."sing-box-watchdog" = {

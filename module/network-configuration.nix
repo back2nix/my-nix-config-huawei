@@ -92,6 +92,7 @@ in {
       enable = true;
       wifi = {
         backend = "wpa_supplicant";
+        powersave = false;
         # свой постоянный MAC для каждой сети (не связать между сетями, DHCP-аренда не теряется)
         macAddress = "stable";
         scanRandMacAddress = true;

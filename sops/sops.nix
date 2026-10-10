@@ -491,7 +491,7 @@ in {
             action = "resolve";
             server = "dns-${r.name}";
             strategy = "ipv4_only";
-            disable_cache = true;
+            disable_cache = false;
           })
           consumers.routes
           ++ [
@@ -500,58 +500,58 @@ in {
               action = "resolve";
               server = "dns-safe-1088";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["http-safe-1090"];
               action = "resolve";
               server = "dns-safe-1090";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["http-claude-safe"];
               action = "resolve";
               server = "dns-claude-safe";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
-            # 2. Resolve через соответствующий selector. Без кэша для этих
-            # пар: смена выхода не должна использовать ответы старого маршрута.
+            # 2. Resolve через соответствующий selector, с кэшем по DNS-серверу.
+            # Патч selector в module/sign-box.nix сбрасывает кэш при смене выхода.
             {
               inbound = ["socks-usa" "http-usa"];
               action = "resolve";
               server = "dns-1082";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["socks-frankfurt" "http-frankfurt"];
               action = "resolve";
               server = "dns-1088";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["socks-1084" "http-1085"];
               action = "resolve";
               server = "dns-1084";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["socks-casino" "http-casino"];
               action = "resolve";
               server = "dns-1086";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["socks-astana" "http-astana"];
               action = "resolve";
               server = "dns-1090";
               strategy = "ipv4_only";
-              disable_cache = true;
+              disable_cache = false;
             }
             {
               inbound = ["socks-usa" "http-usa" "socks-1084" "http-1085" "socks-casino" "http-casino" "socks-frankfurt" "http-frankfurt" "socks-astana" "http-astana" "http-claude-safe" "http-safe-1088" "http-safe-1090"] ++ consumerInbounds;
