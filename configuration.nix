@@ -1,0 +1,747 @@
+{
+  inputs,
+  config,
+  pkgs,
+  pkgs-master,
+  pkgs-unstable,
+  lib,
+  ...
+}: let
+  # Yandex Browser отключён: доверяет гос. корню НУЦ Минцифры (Russian Trusted Root CA)
+  # по умолчанию, что даёт возможность незаметного MITM HTTPS-трафика. Не устанавливать.
+  # my-yandex-browser-stable = pkgs.callPackage ./pkgs/yandex-browser-updates.nix {
+  #   edition = "stable";
+  # };
+in {
+  nix = {
+    # nixPath = [ "nixpkgs=flake:nixpkgs" ];
+    # registry.nixpkgs = {
+    #   from = {
+    #     id = "nixpkgs";
+    #     type = "indirect";
+    #   };
+    #   to = {
+    #     type = "github";
+    #     owner = "NixOS";
+    #     repo = "nixpkgs";
+    #     ref = "nixos-25.05";
+    #   };
+    # };
+    package = pkgs.nixVersions.stable;
+    extraOptions = lib.optionalString (
+      config.nix.package == pkgs.nixVersions.stable
+    ) "experimental-features = nix-command flakes";
+  };
+
+  nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.cudaSupport = true;
+  nixpkgs.config.allowUnfreePredicate = p:
+    builtins.all (
+      license:
+        license.free
+        || builtins.elem license.shortName [
+          "CUDA EULA"
+          "cuDNN EULA"
+          "cuTENSOR EULA"
+          "NVidia OptiX EULA"
+        ]
+    ) (
+      if builtins.isList p.meta.license
+      then p.meta.license
+      else [p.meta.license]
+    );
+
+  imports = [
+    ./cachix.nix
+    ./module/users/users.nix
+    # ./module/autossh.nix
+    ./sops/sops.nix
+
+    # ./module/kvm.nix
+    # ./module/virtualbox.nix
+    ./module/k3s.nix
+
+    # DNS настройки
+    # ./module/dns-dot-tls.nix
+    # ./module/dns-doh-https.nix
+    # ./module/dns-blocky.nix
+    ./module/blocky/default.nix
+    ./module/dnscrypt-proxy.nix
+
+    # Сеть и контейнеры
+    ./module/network-configuration.nix
+    ./module/docker.nix
+    ./module/wireshark.nix
+
+    ./module/display # GNOME + Wayland/XWayland + флаги Chrome; профиль: my.display.profile
+    ./module/osk-globe-cycle.nix # Глобус на экранной клавиатуре переключает раскладку
+    # ./module/monitoring.nix
+    ./module/sign-box.nix
+    ./module/proxy-mode.nix # Выбор маршрута для 1082/1083: seoul/casino/frankfurt/direct (тумблеры + CLI)
+    ./module/claude-safe.nix # claude-1082-safe: отдельная сеть, фиксированный прокси и локальный k3s
+    ./module/vpn-routing.nix # Независимые маршруты Claude, Codex и Nix/Cachix
+    # ./module/vault.nix
+    # ./module/tor.nix
+    ./module/attic.nix
+    ./module/chrome-password-manager.nix
+    ./module/chrome-location-privacy.nix
+    ./module/hard-poweroff.nix # Ctrl+Esc — мгновенное жёсткое выключение
+    ./module/bag-mode.nix # Режим портфеля: работа с закрытой крышкой (тумблер + Ctrl+Alt+B)
+    ./module/time.nix # chrony + NTS вместо systemd-timesyncd
+    ./module/gcloud-winjoy.nix # gcloud-winjoy: GCE проекта winjoy-games, SA-ключ из sops
+  ];
+
+  # Пароли живут в KeePassXC (.kdbx), а не внутри Chrome.
+  programs.chrome-password-manager.enable = true;
+
+  # ==========================================
+  # Настройки Attic (взято из examples/attic)
+  # ==========================================
+  # services.attic = {
+  #   enable = true;
+
+  #   settings = {
+  #     listen = "[::]:8080";
+  #     database.url = "sqlite:///var/lib/atticd/server.db?mode=rwc";
+
+  #     # УДАЛЯЕМ блок jwt.signing отсюда.
+  #     # Он будет подтянут автоматически из переменной окружения.
+
+  #     storage = {
+  #       type = "local";
+  #       path = "/var/lib/atticd/storage";
+  #     };
+
+  #     chunking = {
+  #       nar-size-threshold = 64 * 1024;
+  #       min-size = 16 * 1024;
+  #       avg-size = 64 * 1024;
+  #       max-size = 256 * 1024;
+  #     };
+  #   };
+  # };
+
+  # Подключаем файл с секретами к сервису atticd
+  # Сервис в systemd называется "atticd", даже если модуль называется "services.attic"
+  systemd.services.atticd.serviceConfig.EnvironmentFile = config.sops.secrets."attic/env".path;
+
+  # services.monitoring-stack.enable = true;
+
+  boot = {
+    binfmt.emulatedSystems = ["aarch64-linux"];
+    # asus специфичные настройки
+    # extraModprobeConfig = ''
+    #   options bluetooth disable_ertm=1
+    #   options snd-hda-intel model=asus-zenbook
+    # '';
+    # loader.grub.extraFiles = {
+    #   "ssdt-csc3551.aml" = "${./ssdt-csc3551.aml}";
+    # };
+    # loader.grub.extraConfig = ''
+    #   acpi /ssdt-csc3551.aml
+    # '';
+
+    loader.systemd-boot.enable = true;
+    supportedFilesystems = ["ntfs"];
+
+    kernel.sysctl = {
+      "net.ipv4.ip_forward" = "1";
+      "net.ipv6.conf.all.forwarding" = "1";
+      "net.ipv4.conf.all.send_redirects" = "0";
+    };
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    package = pkgs.bluez;
+    settings = {
+      General = {
+        Name = "Computer";
+        ControllerMode = "dual";
+        FastConnectable = "true";
+        Experimental = "true";
+        Enable = "Source,Sink,Media,Socket";
+        MultiProfile = "multiple";
+        # BLE: случайный resolvable-адрес вместо публичного (ротация ~15 мин)
+        Privacy = "device";
+      };
+      Policy = {
+        AutoEnable = "true";
+      };
+    };
+  };
+
+  # Eastern Time: Вашингтон (DC) и Ашберн (Virginia), с переходом на летнее время.
+  time.timeZone = "America/New_York";
+
+  i18n = {
+    defaultLocale = "en_US.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS = "ru_RU.UTF-8";
+      LC_IDENTIFICATION = "ru_RU.UTF-8";
+      LC_MEASUREMENT = "ru_RU.UTF-8";
+      LC_MONETARY = "ru_RU.UTF-8";
+      LC_NAME = "ru_RU.UTF-8";
+      LC_NUMERIC = "ru_RU.UTF-8";
+      LC_PAPER = "ru_RU.UTF-8";
+      LC_TELEPHONE = "ru_RU.UTF-8";
+      LC_TIME = "ru_RU.UTF-8";
+    };
+  };
+
+  security.rtkit.enable = true;
+  security.apparmor.enable = true;
+
+  security.sudo.extraConfig = ''
+    bg ALL=(ALL) NOPASSWD: ${pkgs.colmena}/bin/colmena
+  '';
+
+  environment = {
+    # Добавляет ~/.local/bin в PATH для всех шеллов (fish/zsh/bash),
+    # сюда uv кладёт python и uv tool install бинарники.
+    localBinInPath = true;
+
+    # home.sessionVariables.EDITOR не доходит до fish: перебиваем NixOS-дефолт nano.
+    variables = {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
+
+    sessionVariables = rec {
+      GTK_THEME = "Adwaita:dark";
+      MUTTER_HIDE_WINDOWS_BY_TITLE = "$(cat ${config.sops.secrets."mutter/hide_keywords_list".path})";
+      MUTTER_ALWAYS_ON_TOP_BY_TITLE = "$(cat ${config.sops.secrets."mutter/mutter_always_on_top_by_title".path})";
+      MUTTER_FORCE_HIDE_CURSOR = 1;
+      MUTTER_HIDE_ACTORS_BY_NAME = "screencast-hide";
+      MUTTER_HIDE_ACTORS_BY_STYLE_CLASS = "run-dialog,switcher-popup,notification-banner";
+      # Claude Code: без телеметрии и отчётов об ошибках для всех обёрток (claude-safe ставит то же самое сам)
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = 1;
+      DISABLE_TELEMETRY = 1;
+      DISABLE_ERROR_REPORTING = 1;
+    };
+    shells = with pkgs; [fish];
+
+    systemPackages = with pkgs; [
+      dolphin-anty
+      # Базовые системные утилиты
+      direnv
+      tcpdump
+      tshark
+      pavucontrol
+      xclip
+      sops
+      sshs
+      libcap
+      docker-compose
+      git
+      lsof
+      pciutils
+
+      # Стриминг видео на телевизор по DLNA (см. module/network-configuration.nix)
+      yt-dlp
+
+      # Зеркалирование экрана на телевизор.
+      # Miracast/Screen Mirroring:
+      gnome-network-displays
+      # Захват экрана на Wayland идёт через портал PipeWire, ему нужен
+      # полный GStreamer (в системе не было даже coreelements: queue/tee)
+      # и x264enc из plugins-ugly.
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-libav
+      # Управление порталом ScreenCast по D-Bus из скрипта захвата.
+      (python3.withPackages (ps: with ps; [pygobject3 dbus-python]))
+
+      # Пакеты из unstable/master
+      pkgs-master.serpl
+      pkgs-master.transmission_4-qt
+      # pkgs-master.openvpn3
+      # pkgs-master.gemini-cli
+      mktorrent
+
+      # Контейнеры и кластеры
+      docker
+      minikube
+      kubectl
+      kubernetes-helm
+      k9s
+      buildah
+      skopeo
+
+      # Виртуализация
+      virt-manager
+      qemu
+      OVMF
+      swtpm
+
+      # Bluetooth
+      bluez
+      bluez-tools
+
+      # Утилиты системы
+      nixos-generators
+      usbutils
+      # gnome-settings-daemon
+      # my-yandex-browser-stable
+      age
+
+      # Мультимедиа
+      gst_all_1.gstreamer
+      gst_all_1.gst-plugins-base
+      gst_all_1.gst-plugins-good
+      gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
+      gst_all_1.gst-vaapi
+      gst_all_1.gst-libav
+      libva
+      libva-utils
+      intel-media-driver
+      mesa
+      vlc
+      mpv
+
+      # Кодеки
+      x264
+      x265
+      libvpx
+      libaom
+      dav1d
+      rav1e
+      svt-av1
+      libdvdcss
+      libdvdread
+      libdvdnav
+
+      iw
+      # iptables
+      nettools
+      dnsutils
+      nmap
+      colmena
+      # vault
+
+      gnirehtet
+
+      # (pkgs.writeShellScriptBin "claude-desktop-proxy" ''
+      # export HTTP_PROXY="http://127.0.0.1:1083"
+      # export HTTPS_PROXY="http://127.0.0.1:1083"
+      # export NO_PROXY="localhost,127.0.0.1,::1"
+      # exec ${inputs.claude-desktop.packages.${system}.claude-desktop}/bin/claude-desktop "$@"
+      # '')
+
+      # inputs.claude-desktop.packages.${system}.claude-desktop
+      # claude-desktop-proxy
+      # CLI через переключаемые пары прокси; generic-команды не устанавливаем.
+      # Gemini пока отключён; обёртки в оверлее остаются ленивыми.
+      # gemini-1082 gemini-1088 gemini-1090
+      appimage-run
+      dbeaver-bin
+      claude-1082
+      claude-1088
+      claude-1090
+      codex-1082
+      codex-1088
+      codex-1090
+      kimi-1082
+      kimi-1088
+      kimi-1090
+      opencode
+      # claude-code
+      xdotool
+      xwininfo
+      gnome-screenshot
+
+      gnome-shell
+      gnome-shell-extensions
+      gnomeExtensions.always-indicator
+
+      iotop
+      sysstat
+      iftop
+      mtr
+
+      stdenv.cc.cc.lib
+      zlib
+      gcc
+
+      uv
+      attic-client
+      gpu-screen-recorder
+      openssl
+
+      obsidian
+
+      google-cloud-sdk
+      gcloud-1082
+      gcloud-1088
+      gcloud-1090
+      zip
+
+      # scrcpy # genymobile , pronounced "screen copy"
+
+      (writeShellScriptBin "virt-switch" ''
+        # ЖЕСТКО ЗАДАЕМ PATH, ЧТОБЫ КОМАНДЫ БЫЛИ ВИДНЫ
+        export PATH="${lib.makeBinPath [
+          kmod # modprobe, lsmod, rmmod
+          procps # pkill
+          gnugrep # grep
+          systemd # systemctl
+          coreutils # echo, sleep и т.д.
+          util-linux # на всякий случай
+        ]}:$PATH"
+
+        # Теперь вставляем код из файла
+        ${builtins.readFile ./scripts/virt-switch.sh}
+      '')
+
+      # virtualbox
+      # pkgs-unstable.openclaw
+
+      # pkgs-unstable.antigravity
+      rtk
+      # photocraft
+      # effectcraft
+      valgrind
+
+      # Security / контейнерный анализ
+      trivy # сканер уязвимостей образов и FS
+      dive # анализ слоёв docker-образов
+      lazydocker # TUI для docker
+      brave
+      ncdu
+      thunderbird
+    ];
+
+    etc."proxychains.conf".text = ''
+      strict_chain
+      proxy_dns
+      remote_dns_subnet 224
+      tcp_read_time_out 15000
+      tcp_connect_time_out 8000
+      localnet 127.0.0.0/255.0.0.0
+
+      [ProxyList]
+        socks5 127.0.0.1 1082
+    '';
+  };
+
+  programs = {
+    # openvpn3.enable = true;
+    fish.enable = true;
+    ssh.setXAuthLocation = true;
+    nix-ld = {
+      # Дефолтный nixpkgs nix-ld (2.x, та же rust-реализация).
+      # Кастомный inputs.nix-ld-rs больше не собирался на новом rustc и
+      # подсовывал исходники без бинаря -> битый /lib64/ld-linux.
+      enable = true;
+      libraries = with pkgs; [
+        gcc
+        icu
+        libcxx
+        stdenv.cc.cc.lib
+        zlib
+      ];
+    };
+    dconf.enable = true;
+  };
+
+  users.defaultUserShell = pkgs.fish;
+
+  systemd = {
+    services = {
+      "getty@tty1".enable = false;
+      "autovt@tty1".enable = false;
+      NetworkManager-wait-online.enable = false;
+    };
+
+    tmpfiles.rules = [
+      "d /var/lib/bluetooth 700 root root - -"
+    ];
+    targets."bluetooth".after = ["systemd-tmpfiles-setup.service"];
+    user.services.pipewire-pulse.path = [pkgs.pulseaudio];
+  };
+
+  services = {
+    # transmission = {
+    #   enable = true;
+    #   package = pkgs-master.transmission_4;
+    # };
+
+    lorri = {
+      enable = true;
+      package = pkgs-master.lorri;
+    };
+
+    dbus.packages = [pkgs.dconf];
+    udev.packages = [pkgs.gnome-settings-daemon];
+
+    udev = {
+      extraRules = ''
+        KERNEL=="event*", SUBSYSTEM=="input", MODE="0664", GROUP="input"
+        ACTION=="add|change", KERNEL=="event*", ATTRS{name}=="*keyboard*", GROUP="input", MODE="0664"
+
+        SUBSYSTEM=="usbmon", GROUP="wireshark", MODE="0640"
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="*", ATTRS{idProduct}=="*", MODE="0660", GROUP="wireshark"
+
+        SUBSYSTEM=="usb", ATTR{idVendor}=="04e8", MODE="0666", GROUP="adbusers"
+        SUBSYSTEM=="usb", ATTR{idVendor}=="18d1", MODE="0666", GROUP="adbusers"
+      '';
+    };
+
+    printing.enable = true;
+
+    openssh = {
+      enable = true;
+      settings = {
+        X11Forwarding = true;
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = "no";
+      };
+    };
+
+    fail2ban = {
+      enable = true;
+      maxretry = 5;
+      bantime = "1h";
+    };
+
+    flatpak.enable = true;
+    blueman.enable = true;
+
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      pulse.enable = true;
+      wireplumber.enable = true;
+      alsa.support32Bit = true;
+      jack.enable = true;
+    };
+
+    physlock.enable = false;
+
+    logind = {
+      # Custom config moved to settings.Login to avoid deprecation warnings
+      settings.Login = {
+        HandlePowerKey = "ignore";
+        HandleLidSwitch = "suspend";
+        HandleLidSwitchExternalPower = "suspend";
+      };
+    };
+
+    triggerhappy = {
+      enable = true;
+      user = "bg";
+      bindings = [
+        {
+          keys = ["POWER"];
+          event = "press";
+          cmd = "/run/current-system/sw/bin/toggle-flip";
+        }
+      ];
+    };
+  };
+
+  # thd теряет /dev/input/event* после сна и сам их не переоткрывает —
+  # Power перестаёт вызывать toggle-flip. Перезапускаем после resume.
+  systemd.services.triggerhappy-resume = {
+    description = "Restart triggerhappy after resume";
+    after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    serviceConfig.Type = "oneshot";
+    # Сразу после resume input-устройства ещё переподключаются — thd
+    # открывает старые fd и молчит. Даём ядру время.
+    script = ''
+      sleep 3
+      ${pkgs.systemd}/bin/systemctl restart triggerhappy.service
+    '';
+  };
+
+  nixpkgs.config.permittedInsecurePackages = [
+    # "my-yandex-browser-stable-26.4.1.1110-1"
+    "claude-code"
+    "mbedtls-2.28.10"
+    # "openclaw-2026.3.12"
+  ];
+
+  users.users.bg.extraGroups = ["input" "docker" "k3s"];
+
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16 * 1024;
+    }
+  ];
+
+  # Защита от зависания при нехватке памяти: по умолчанию oomd запущен,
+  # но не следит ни за одним cgroup. Пороги стандартные (мягкие):
+  # своп > 90% или memory pressure > 60% дольше 30 с — убить худший cgroup.
+  systemd.oomd = {
+    enable = true;
+    enableRootSlice = true;
+    enableUserSlices = true;
+    enableSystemSlice = true;
+  };
+
+  fonts.packages = with pkgs; [
+    times-newer-roman
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+    jetbrains-mono
+  ];
+
+  fonts.fontconfig = {
+    defaultFonts = {
+      sansSerif = ["Noto Sans" "Noto Sans CJK SC"];
+      serif = ["Noto Serif" "Noto Serif CJK SC"];
+      monospace = ["JetBrains Mono" "Noto Sans Mono" "Noto Sans Mono CJK SC"];
+    };
+  };
+
+  nix = {
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    settings.trusted-users = [
+      "root"
+      "bg"
+    ];
+  };
+
+  # blocky = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   enableMonitoring = false;
+  # # serviceDomain = "stop-pub.${config.homelab.domain}";
+  # };
+
+  # services.dns-setup = {
+  #   enable = false;
+  #   mode = "dot"; # Можно легко переключить на "doh" или "plain" "dot-doh"
+  #   extendedFiltering = true;
+  #   customWhitelist = ''
+  #     github.com
+  #     mixpanel.com
+  #     cdn.mxpnl.com
+  #     api-js.mixpanel.com
+  #   '';
+  # };
+
+  system.stateVersion = "23.11";
+
+  # services.vault-secrets = {
+  #   enable = true;
+  #   address = "http://127.0.0.1:8200";
+
+  #   # Используем правильное имя секрета, которое соответствует пути в YAML
+  #   tokenPath = config.sops.secrets."vault/root_token".path;
+
+  #   secrets = {
+  #     "/run/secrets/my-api-key" = {
+  #       path = "secret/data/apps/my-app";
+  #       key = "api-key";
+  #       owner = "bg";
+  #       group = "users";
+  #       mode = "0400";
+  #     };
+  #   };
+  # };
+
+  # services.vault = {
+  #   enable = true;
+  #   package = pkgs.vault;
+  #   address = "127.0.0.1:8200";
+  #   dev = false;
+  #   # devRootTokenID = config.sops.placeholder."vault/root_token";
+
+  #   extraConfig = ''
+  #   api_addr = "http://127.0.0.1:8200"
+
+  #   storage "file" {
+  #     path = "/var/lib/vault/data"
+  #   }
+
+  #   listener "tcp" {
+  #     address = "127.0.0.1:8200"
+  #     tls_disable = true
+  #   }
+
+  #   '';
+  # };
+
+  programs.obs-studio = {
+    enable = true;
+
+    plugins = with pkgs.obs-studio-plugins; [
+      wlrobs
+      obs-backgroundremoval
+      obs-pipewire-audio-capture
+      obs-gstreamer
+      obs-vkcapture
+
+      # Для эффектов плохой картинки:
+      obs-shaderfilter # Кастомные шейдеры и эффекты
+      obs-composite-blur # Дополнительные эффекты размытия
+    ];
+  };
+
+  xdg.portal = {
+    enable = true;
+
+    # ВАЖНО: Убираем extraPortals.
+    # NixOS модуль `desktopManager.gnome` САМ добавит xdg-desktop-portal-gnome.
+    # Добавление сюда gtk портала ломает логику выбора.
+    # extraPortals = [ ];
+
+    # Жестко задаем конфигурацию (генерирует portals.conf)
+    config = {
+      common = {
+        # Говорим системе: "Что бы ни случилось, используй GNOME-портал"
+        default = ["gnome"];
+        # Для секретов (связка ключей) тоже явно укажем
+        "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+      };
+    };
+
+    # Это помогает открывать ссылки правильно
+    xdgOpenUsePortal = true;
+  };
+
+  security.wrappers.gsr-kms-server = {
+    owner = "root";
+    group = "root";
+    capabilities = "cap_sys_admin+ep";
+    source = "${pkgs.gpu-screen-recorder}/bin/gsr-kms-server";
+  };
+
+  # security.pam.loginLimits = [
+  #   {
+  #     domain = "*";
+  #     type = "soft";
+  #     item = "nofile";
+  #     value = "unlimited";
+  #   }
+  #   {
+  #     domain = "*";
+  #     type = "hard";
+  #     item = "nofile";
+  #     value = "unlimited";
+  #   }
+  # ];
+
+  documentation.enable = false;
+  documentation = {
+    man.enable = false;
+    man.cache.enable = false;
+    doc.enable = false;
+    info.enable = false;
+    nixos.enable = false;
+  };
+}

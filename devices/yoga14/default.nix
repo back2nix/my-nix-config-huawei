@@ -1,0 +1,315 @@
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
+  imports = [
+    inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+
+    (modulesPath + "/installer/scan/not-detected.nix")
+    ./hardware-configuration.nix
+
+    # Admin-VPN до casino-VPS. Импорт ЗДЕСЬ, а не в общем configuration.nix,
+    # намеренно: peer 10.100.0.2 на сервере один, и подключение второй машины с
+    # тем же ключом и адресом ломало бы туннель обеим (WireGuard привязывает
+    # endpoint к публичному ключу — последний рукопожавшийся перетягивает сессию).
+    # Если админ-доступ понадобится с другой машины — ей нужна СВОЯ пара ключей
+    # и свой адрес (10.100.0.4/32) в casino-vps/modules/wireguard.nix.
+    ../../module/wireguard-eggventure.nix
+    # Личный VPN до Windows-машины — к казино отношения не имеет, автостарта нет.
+    ../../module/wireguard-personal.nix
+
+    # Подключаем наш новый модуль аудио-моста
+    ./module/ai-audio.nix
+  ];
+
+  networking.hostName = "yoga14";
+
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+
+    kernelModules = [
+      "kvm-intel"
+      "hid_multitouch"
+      "wacom"
+      "i2c_hid"
+      "i2c_hid_acpi"
+      "hid_sensor_hub"
+      "bluetooth"
+      "btusb"
+      "btintel"
+      "tun"
+      "tap"
+      "akvcam"
+    ];
+
+    initrd.kernelModules = [
+      "hid_multitouch"
+      "wacom"
+      "i2c_hid"
+      "i2c_hid_acpi"
+      "hid_sensor_hub"
+
+      # DPKK
+      "vfio-pci"
+      "uio_pci_generic"
+    ];
+
+    extraModulePackages = [config.boot.kernelPackages.akvcam];
+
+    # ПРАВИЛЬНЫЕ параметры ядра для Lunar Lake
+    kernelParams = [
+      "systemd.unified_cgroup_hierarchy=1"
+      "cgroup_enable=cpuset"
+      "cgroup_enable=memory"
+      "cgroup_memory=1"
+      # Lunar Lake специфичные параметры
+      "intel_pstate=active"
+      "intel_iommu=on"
+      "iommu=pt"
+
+      # Без NMI-watchdog: лишние прерывания и расход батареи.
+      "nmi_watchdog=0"
+    ];
+
+    extraModprobeConfig = ''
+      # Bluetooth настройки
+      options btusb reset=1 enable_autosuspend=0
+      options bluetooth disable_ertm=1
+
+      # ИСПРАВЛЕНИЯ ДЛЯ INTEL AX211 WIFI
+      options iwlwifi power_save=0 disable_11ax=0 disable_11ac=0 11n_disable=0
+      options iwlmvm power_scheme=1
+      options iwlwifi swcrypto=0 led_mode=1
+    '';
+  };
+
+  # Intel GPU (driver=xe, vaapiDriver=intel-media-driver) и базовые пакеты
+  # графики уже настраивает модуль nixos-hardware lenovo-yoga-7-14ILL10
+  # (common/gpu/intel/lunar-lake), поэтому здесь только дополнения.
+  # sched-ext: BPF-планировщик, lavd оптимизирован под отзывчивость
+  # интерактивных задач и гибридные (P/E) ядра.
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
+
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-vaapi-driver
+      libva-vdpau-driver
+      libvdpau-va-gl
+      mesa
+      libva
+      libva-utils
+    ];
+  };
+
+  # zram-своп для отзывчивости (физического свопа на диске нет)
+  zramSwap.enable = true;
+
+  # fwupd — чтобы видеть версии прошивок (BIOS/EC/SSD/Thunderbolt) и проверять,
+  # выкладывает ли Lenovo капсулы для 83JQ на LVFS. Сама прошивка BIOS у
+  # потребительских Yoga на LVFS обычно отсутствует (там только Think-линейка),
+  # но ME/SSD/дисковые прошивки через него обновляются.
+  services.fwupd.enable = true;
+
+  # Wacom-дигитайзер (I2C) после s2idle иногда перестаёт слать события пера:
+  # устройство есть, но evdev молчит. Лечится переподключением i2c_hid.
+  systemd.services.wacom-resume-rebind = {
+    description = "Rebind Wacom I2C digitizer after resume";
+    after = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    wantedBy = ["suspend.target" "hibernate.target" "hybrid-sleep.target"];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      dev=i2c-WACF220053FD:00
+      drv=/sys/bus/i2c/drivers/i2c_hid_acpi
+      [ -e "$drv/$dev" ] && echo "$dev" > "$drv/unbind"
+      sleep 1
+      echo "$dev" > "$drv/bind"
+    '';
+  };
+
+  # ananicy-cpp — авто-приоритеты (nice/ioclass) для процессов, аналог того,
+  # что в CachyOS даёт cachyos-settings.
+  services.ananicy = {
+    enable = true;
+    package = pkgs.ananicy-cpp;
+  };
+
+  # sysctl-тюнинг из 99-cachyos-settings.conf.
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 100; # агрессивнее используем zram (сжатый своп в RAM)
+    "vm.vfs_cache_pressure" = 50; # дольше держим dentry/inode кеш
+    "kernel.sched_cfs_bandwidth_slice_us" = 3000;
+  };
+
+  # thermald — управление троттлингом для Intel Core Ultra (Lunar Lake)
+  services.thermald.enable = true;
+
+  # Переменные среды для стабильной работы графики
+  environment.variables = {
+    LIBVA_DRIVER_NAME = "iHD";
+    MOZ_DISABLE_RDD_SANDBOX = "1";
+    MOZ_X11_EGL = "1";
+  };
+
+  services.udev.extraRules = ''
+    # Обход возможного сбоя runtime PM тачпада ELAN06FA (04F3:327E).
+    # После периодических отказов журнал содержит incomplete report и -121.
+    # Держим его I2C-контроллер активным; системный suspend остаётся доступен.
+    ACTION=="add|change", SUBSYSTEM=="pci", KERNEL=="0000:00:15.0", ATTR{vendor}=="0x8086", ATTR{device}=="0xa878", TEST=="power/control", ATTR{power/control}="on"
+    ACTION=="add|change", SUBSYSTEM=="i2c", KERNEL=="i2c-ELAN06FA:00", TEST=="power/control", ATTR{power/control}="on"
+
+    # Предотвращение автосуспенда Intel AX211
+    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0033", ATTR{power/autosuspend}="-1"
+
+    # Отключение power management после подключения
+    ACTION=="add", SUBSYSTEM=="ieee80211", KERNEL=="phy*", RUN+="${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.iw}/bin/iw dev wlp0s20f3 set power_save off'"
+
+    # Правила для Intel Bluetooth
+    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", TAG+="systemd", ENV{SYSTEMD_WANTS}="bluetooth.service"
+    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0037", RUN+="${pkgs.bluez}/bin/bluetoothctl power on"
+
+    # Камера
+    ACTION=="add", SUBSYSTEM=="video4linux", ATTR{name}=="*Camera*", TAG+="systemd", ENV{SYSTEMD_WANTS}="howdy.service"
+
+    SUBSYSTEM=="net", KERNEL=="tun", GROUP="kvm", MODE="0660"
+
+    KERNEL=="video[0-9]*", TAG+="uaccess"
+  '';
+
+  systemd.services.iwlwifi-reload = {
+    description = "Reload iwlwifi module after suspend";
+    after = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+    ];
+    wantedBy = [
+      "suspend.target"
+      "hibernate.target"
+      "hybrid-sleep.target"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStartPre = "${pkgs.bash}/bin/bash -c '${pkgs.kmod}/bin/rmmod iwlmvm iwlwifi || true'";
+      ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 3 && ${pkgs.kmod}/bin/modprobe iwlwifi'";
+      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.iw}/bin/iw dev wlp0s20f3 set power_save off || true'";
+      RemainAfterExit = true;
+    };
+  };
+
+  # Bluetooth конфигурация для Yoga14
+  systemd.services.bluetooth = {
+    serviceConfig = {
+      ExecStart = [
+        ""
+        # hostname plugin перетирает Name из main.conf именем хоста
+        "${pkgs.bluez}/libexec/bluetooth/bluetoothd -f /etc/bluetooth/main.conf --noplugin=hostname"
+      ];
+      ExecStartPost = "${pkgs.bash}/bin/bash -c 'sleep 2 && ${pkgs.bluez}/bin/bluetoothctl power on'";
+      RestartSec = "5";
+      Restart = "on-failure";
+    };
+    wantedBy = ["bluetooth.target"];
+  };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/bluetooth 0755 root root - -"
+  ];
+
+  # Включаем поддержку IIO сенсоров для автоповорота
+  hardware.sensor.iio.enable = true;
+  services.autorandr.enable = true;
+  hardware.enableAllFirmware = true;
+
+  # Диагностические пакеты для Yoga14
+  environment.systemPackages = with pkgs; [
+    alsa-utils
+    alsa-tools
+    alsa-ucm-conf
+    pamixer
+    pulseaudio
+    bluez
+    bluez-tools
+    blueman
+    usbutils
+    pciutils
+    lshw
+    v4l-utils
+    iwd # ВАЖНО: для лучшей работы с Intel AX211
+    nvtopPackages.intel
+    mesa-demos
+    vulkan-tools
+    intel-gpu-tools
+  ];
+
+  networking.useDHCP = lib.mkDefault true;
+  networking.nat.externalInterface = "wlp0s20f3";
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  # Audio конфигурация
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+    wireplumber.enable = true;
+  };
+
+  # Bluetooth audio конфигурация для wireplumber
+  environment.etc."wireplumber/bluetooth.lua.d/51-bluez-config.lua".text = ''
+    bluez_monitor.properties = {
+      ["bluez5.enable-sbc-xq"] = true,
+      ["bluez5.enable-msbc"] = true,
+      ["bluez5.enable-hw-volume"] = true,
+      ["bluez5.headset-roles"] = "[ hsp_hs hsp_ag hfp_hf hfp_ag ]"
+    }
+
+    bluez_monitor.rules = {
+      {
+        matches = {
+          {
+            { "device.name", "matches", "bluez_card.*" },
+          },
+        },
+        apply_properties = {
+          ["bluez5.reconnect-profiles"] = "[ hfp_hf hsp_hs a2dp_sink ]",
+          ["bluez5.msbc-support"] = true,
+          ["bluez5.sbc-xq-support"] = true,
+        },
+      },
+      {
+        matches = {
+          {
+            { "node.name", "matches", "bluez_input.*" },
+          },
+        },
+        apply_properties = {
+          ["node.pause-on-idle"] = false,
+        },
+      },
+      {
+        matches = {
+          {
+            { "node.name", "matches", "bluez_output.*" },
+          },
+        },
+        apply_properties = {
+          ["node.pause-on-idle"] = false,
+        },
+      },
+    }
+  '';
+
+  # hardware.cpu.intel.updateMicrocode уже задаётся модулем nixos-hardware.
+}

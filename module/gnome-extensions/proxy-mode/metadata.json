@@ -1,0 +1,13 @@
+{
+  "uuid": "proxy-mode@back2nix",
+  "name": "VPN Routes",
+  "description": "Отдельное меню VPN: независимые маршруты Claude, Codex, Nix/Cachix и WinJoy/Personal VPN.",
+  "shell-version": [
+    "48",
+    "49",
+    "50"
+  ],
+  "session-modes": [
+    "user"
+  ]
+}

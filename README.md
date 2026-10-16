@@ -1,0 +1,107 @@
+# Mutter
+
+Mutter is a Wayland display server and X11 window manager and compositor library.
+
+When used as a Wayland display server, it runs on top of KMS and libinput. It
+implements the compositor side of the Wayland core protocol as well as various
+protocol extensions. It also has functionality related to running X11
+applications using Xwayland.
+
+When used on top of Xorg it acts as a X11 window manager and compositing manager.
+
+It contains functionality related to, among other things, window management,
+window compositing, focus tracking, workspace management, keybindings and
+monitor configuration.
+
+Internally it uses a fork of Cogl, a hardware acceleration abstraction library
+used to simplify usage of OpenGL pipelines, as well as a fork of Clutter, a
+scene graph and user interface toolkit.
+
+Mutter is used by, for example, GNOME Shell, the GNOME core user interface, and
+by  Gala, elementary OS's window manager. It can also be run standalone, using
+the  command "mutter", but just running plain mutter is only intended for
+debugging purposes.
+
+## Contributing
+
+To contribute, open merge requests at https://gitlab.gnome.org/GNOME/mutter.
+
+It can be useful to first look at the
+[GNOME Handbook](https://handbook.gnome.org/development.html) and the
+documentation and API references below first.
+
+## Documentation
+
+- [Coding style and conventions](doc/coding-style.md)
+- [Git conventions](doc/git-conventions.md)
+- [Code overview](doc/code-overview.md)
+- [Building and Running](doc/building-and-running.md)
+- [Debugging](doc/debugging.md)
+- [Monitor configuration](doc/monitor-configuration.md)
+- [Multi-GPU](doc/multi-gpu.md)
+
+## API Reference
+
+- Meta: <https://mutter.gnome.org/meta/>
+- Clutter: <https://mutter.gnome.org/clutter/>
+- Cogl: <https://mutter.gnome.org/cogl/>
+- Mtk: <https://mutter.gnome.org/mtk/>
+
+## Meetings
+
+There are [recurring meetings](https://hedgedoc.gnome.org/s/ymP_L5MUs) to
+discuss development of GNOME Shell, mutter and related components.
+
+## License
+
+Mutter is distributed under the terms of the GNU General Public License,
+version 2 or later. See the [COPYING][license] file for detalis.
+
+[bug-tracker]: https://gitlab.gnome.org/GNOME/mutter/issues
+[license]: COPYING
+
+
+
+### Proxy
+
+```
+sudo http_proxy=http://10.90.49.196:8080 https_proxy=http://10.90.49.196:8080 \
+      nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 \
+      --option substituters "https://cache.nixos.org"
+
+
+sudo http_proxy=http://192.168.43.1:8080 https_proxy=http://192.168.43.1:8080 \
+      nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 \
+      --option substituters "https://cache.nixos.org"
+
+
+sudo nixos-rebuild switch --flake ~/Documents/code/github.com/back2nix/nix/my-nix-config-huawei#yoga14 --option substituters "https://cache.nixos.org"
+
+
+ssh -4 -v -o ProxyCommand="nc -X connect -x 192.168.43.1:8080 %h %p" \
+        -D 127.0.0.1:1092 -N google-seoul
+
+
+curl --socks5-hostname 127.0.0.1:1084 https://ifconfig.me
+
+
+time curl --socks5-hostname 127.0.0.1:1084 https://ifconfig.me
+```
+
+
+В меню VPN в панели GNOME доступны два независимых переключателя WebRTC:
+
+- «Блокировать Google STUN» — прежние ограничения UDP к адресам Google.
+- «Запретить UDP (bg, кроме DNS)» — запрещает исходящий UDP приложений пользователя
+  `bg`, кроме DNS на порту 53 и loopback. Включает ограничения и для IPv4, и для
+  IPv6. Затрагивает также QUIC, игры и другие UDP-приложения. Системные VPN,
+  запущенные от root, не ограничивает. Это позволяет WebRTC использовать TURN
+  через TCP/TLS, если такой транспорт настроен на стороне сервиса; успешное
+  соединение не гарантируется. После переключения нужно переподключить звонок.
+
+Чтобы снять оба ограничения, выключите оба переключателя. Это не полное
+отключение WebRTC: соединения через TCP остаются доступны. Полное отключение
+требует настройки конкретного браузера/приложения. После перезагрузки Google STUN
+снова заблокирован, а общий запрет UDP выключен. Переключатели управляют юнитами
+`webrtc-google-block.service` и `webrtc-udp-block.service`; локальный активный
+пользователь `bg` может запускать и останавливать только эти юниты без пароля.

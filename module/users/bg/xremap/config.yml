@@ -1,0 +1,13 @@
+modmap:
+  - name: main remaps
+  #
+
+keymap:
+  - name: general keybindings
+    remap:
+      super-d:
+        remap:
+          t:
+            launch: [ "telegram-desktop" ]
+          f:
+            launch: [ "firefox" ]

@@ -1,0 +1,259 @@
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  # Separate tables survive reloads of the main firewall (flushRuleset=false).
+  mkBlock = name: rules: {
+    description = "WebRTC: ${name}";
+    after = ["nftables.service"];
+    wants = ["nftables.service"];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.nftables}/bin/nft -f ${pkgs.writeText "${name}.nft" rules}";
+      ExecStop = "${pkgs.nftables}/bin/nft delete table inet ${name}";
+    };
+  };
+in {
+  systemd.services.webrtc-google-block =
+    (mkBlock "webrtc_google" ''
+      table inet webrtc_google {
+            set google_stun_ipv4 {
+              type ipv4_addr
+              flags interval
+              elements = { 142.250.0.0/15, 172.217.0.0/16, 216.58.192.0/19, 74.125.0.0/16 }
+            }
+
+            set google_stun_ipv6 {
+              type ipv6_addr
+              flags interval
+              elements = { 2607:f8b0::/32, 2800:3f0::/32, 2a00:1450::/32, 2404:6800::/32 }
+            }
+
+
+        chain output {
+          type filter hook output priority -10; policy accept;
+              # Google STUN Block
+              ip daddr @google_stun_ipv4 udp dport 19302-19309 drop
+              ip6 daddr @google_stun_ipv6 udp dport 19302-19309 drop
+              ip daddr @google_stun_ipv4 udp dport 3478 drop
+              ip6 daddr @google_stun_ipv6 udp dport 3478 drop
+              ip daddr @google_stun_ipv4 udp dport 49152-65535 drop
+              ip6 daddr @google_stun_ipv6 udp dport 49152-65535 drop
+        }
+      }
+    '')
+    // {wantedBy = ["multi-user.target"];};
+
+  # Broad UDP restriction for bg, not protocol detection. DNS and loopback
+  # remain available; root-owned WireGuard/Amnezia transports are unaffected.
+  systemd.services.webrtc-udp-block = mkBlock "webrtc_udp" ''
+    table inet webrtc_udp {
+      chain output {
+        type filter hook output priority -10; policy accept;
+        oifname "lo" accept
+        meta skuid "bg" udp dport 53 accept
+        meta skuid "bg" meta l4proto udp reject
+      }
+    }
+  '';
+
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          (action.lookup("unit") == "webrtc-google-block.service" ||
+           action.lookup("unit") == "webrtc-udp-block.service") &&
+          (action.lookup("verb") == "start" || action.lookup("verb") == "stop") &&
+          subject.user == "bg" && subject.local && subject.active) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
+  networking.nftables.flushRuleset = false;
+
+  # Отключаем systemd.network при использовании NetworkManager
+  systemd.network.enable = lib.mkForce false;
+
+  # resolv.conf управляется вручную ниже, поэтому resolvconf отключаем
+  # (иначе ассерт-конфликт с environment.etc."resolv.conf")
+  networking.resolvconf.enable = lib.mkForce false;
+
+  environment.etc."resolv.conf".text = ''
+    nameserver 127.0.0.1
+    nameserver 8.8.8.8
+    nameserver 1.1.1.1
+    options edns0 trust-ad timeout:1 attempts:1
+  '';
+
+  networking = {
+    networkmanager = {
+      enable = true;
+      wifi = {
+        backend = "wpa_supplicant";
+        powersave = false;
+        # свой постоянный MAC для каждой сети (не связать между сетями, DHCP-аренда не теряется)
+        macAddress = "stable";
+        scanRandMacAddress = true;
+      };
+      ethernet.macAddress = "stable";
+    };
+
+    nat = {
+      enable = true;
+      # Добавляем интерфейсы cilium и lxc в доверенные для NAT
+      internalInterfaces = ["ve-+" "cilium_+" "lxc+"];
+      enableIPv6 = true;
+    };
+
+    extraHosts = ''
+      127.0.0.1 kafka
+      127.0.0.1 localhost
+      # 127.0.0.1 livekit.devready.work
+      127.0.0.1 host.docker.internal
+      # Убедитесь, что IP актуален
+
+      192.0.2.1 geo3.casino.local
+      10.0.0.1 geo2.casino.local geo.casino.local vpn.local casino.local app.local grafana.local grafana.casino.local pyroscope.local prometheus.local postgres.local victoriametrics.casino.local pyroscope.casino.local auth.local grpc.app.local grpc.casino.local redis.local livekit.local china.local grpc.china.local office.china.local landing.casino.local op-alpha.casino.local op-bravo.casino.local op-charlie.casino.local op-delta.casino.local game.local
+      192.168.3.78 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
+      # 10.0.0.1 vpn.remote casino.remote app.remote grafana.remote grafana.casino.remote pyroscope.remote prometheus.remote postgres.remote victoriametrics.casino.remote pyroscope.casino.remote auth.remote grpc.app.remote grpc.casino.remote redis.remote livekit.remote china.remote grpc.china.remote office.china.remote
+      # 192.168.3.78 casino.remote grafana.remote grafana.casino.remote app.remote grafana.remote pyroscope.remote prometheus.remote postgres.remote auth.remote grpc.app.remote redis.remote livekit.remote
+    '';
+
+    nftables = {
+      enable = true;
+      ruleset = ''
+        table inet filter {
+          set allowed_tcp {
+            type inet_service
+            flags interval
+            elements = {
+              22,      # SSH
+              80,      # HTTP
+              853,     # DNS over TLS
+              443,     # HTTPS/gRPC-TLS
+              5555,    # Camera streaming
+              6443,    # K3S API Server
+              10250,   # K3S Kubelet
+              6379,    # redis
+              1082,    # proxy seoul via casino (socks)
+              1083,    # proxy seoul via casino (http)
+              1084,    # proxy 1084 (socks)
+              1085,    # proxy 1085 (http)
+              1088,    # proxy frankfurt (socks)
+              1089,    # proxy frankfurt (http)
+              1090,    # proxy astana (socks)
+              1091,    # proxy astana (http)
+              5173,    # casino
+              8080,    # Gateway
+              8081,    # Landing
+              8082,    # Chat
+              8085,    # Notification
+              8098,    # lobby
+              9002,    # Shell
+              9901,    # Envoy metrics
+              4240,    # Cilium Health
+              4244,    # Cilium Hubble Server
+              4245,    # Cilium Hubble Relay
+              5432,    # postgres
+              6443,    # k3s
+              50051,    # auth
+              51413    # Torrent TCP
+            }
+          }
+
+          set system_udp {
+            type inet_service
+            flags interval
+            elements = {
+              53, 67-68, 123, 500, 4500, 5353, 51820,
+              51821,   # личный VPN awg-pers (module/wireguard-personal.nix)
+              8472,    # Cilium VXLAN
+              51871    # Cilium Wireguard
+            }
+          }
+
+          chain input {
+            type filter hook input priority filter; policy drop;
+
+            iif "lo" accept comment "Allow loopback"
+
+            # ВАЖНО: Разрешаем трафик от интерфейсов контейнеров
+            iifname "cilium_*" accept comment "Allow Cilium interfaces"
+            iifname "lxc*" accept comment "Allow LXC interfaces"
+            iifname "docker0" accept comment "Allow Docker bridge"
+            iifname "virbr*" accept comment "Allow Libvirt"
+
+            # Docker подсети
+            ip saddr 172.16.0.0/12 accept
+            ip saddr 172.17.0.0/16 accept
+            ip saddr 172.27.0.0/16 accept
+
+            # K3s/Cilium подсети
+            ip saddr 10.42.0.0/16 accept
+            ip saddr 10.43.0.0/16 accept
+
+            udp dport 8472 accept comment "Allow Cilium VXLAN"
+            tcp dport 4240 accept comment "Allow Cilium Health"
+
+            # Разрешаем доступ к сервисам с localhost
+            ip saddr 127.0.0.0/8 tcp dport { 8080, 8081, 8082, 8085, 9002, 9901 } accept
+
+            udp dport 51413 accept comment "Torrent DHT/uTP"
+
+            # DLNA/UPnP: раздача видео на телевизор в локальной сети.
+            # Телевизор (Samsung DMR) сам подключается к нам за медиафайлом,
+            # поэтому нужен входящий доступ, но только из LAN — не наружу.
+            ip saddr 192.168.0.0/24 tcp dport { 8200, 8899 } accept comment "DLNA media -> LAN"
+            ip saddr 192.168.0.0/24 udp dport 1900 accept comment "SSDP discovery"
+            # Miracast/Screen Mirroring: RTSP-сессия, которую телевизор
+            # устанавливает к нам по Wi-Fi Direct.
+            ip saddr 192.168.0.0/24 tcp dport { 7236, 7250 } accept comment "Miracast RTSP"
+            iifname "p2p-*" accept comment "Wi-Fi Direct (Miracast)"
+
+            ct state vmap {
+              invalid : drop,
+              established : accept,
+              related : accept
+            }
+
+            ip protocol icmp accept
+            ip6 nexthdr ipv6-icmp accept
+
+            tcp dport @allowed_tcp accept
+            udp dport @system_udp accept
+          }
+
+          chain output {
+            type filter hook output priority filter; policy accept;
+
+            tcp dport 853 accept comment "Allow DNS over TLS"
+            udp dport 853 accept comment "Allow DNS over TLS (UDP)"
+
+            udp dport @system_udp accept
+
+
+          }
+
+          chain forward {
+            type filter hook forward priority filter; policy accept;
+
+            # Разрешаем форвардинг для контейнеров
+            iifname "cilium_*" accept
+            oifname "cilium_*" accept
+            iifname "lxc*" accept
+            oifname "lxc*" accept
+            iifname "docker0" accept
+            oifname "docker0" accept
+
+            ip saddr 10.42.0.0/16 accept
+            ip daddr 10.42.0.0/16 accept
+          }
+        }
+      '';
+    };
+
+    firewall.enable = false;
+  };
+}

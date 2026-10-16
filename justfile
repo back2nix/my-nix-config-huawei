@@ -1,0 +1,146 @@
+# Загружаем переменные из .env
+set dotenv-load
+
+# Основная команда для пересборки системы (автоопределение устройства по hostname)
+default: switch
+
+# Пересборка текущей системы: сам определяет цель flake по hostname
+switch:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "$(hostname)" in
+        huawei-rlef-x) device=huawei ;;
+        yoga14)        device=yoga14 ;;
+        desktop)       device=desktop ;;
+        asus-ux3405m)  device=asus ;;
+        *) echo "Неизвестный hostname: $(hostname). Используй: just switch-device <device>" >&2; exit 1 ;;
+    esac
+    echo "Пересборка .#${device} для hostname $(hostname)"
+    # --sudo вместо `sudo nixos-rebuild`: eval/fetch флейка идёт от пользователя
+    # (нужен его ssh-ключ для приватного git+ssh инпута mutter-src),
+    # root используется только для активации.
+    nixos-rebuild switch --sudo --flake ".#${device}" \
+        --option http2 false
+
+# Пересборка NixOS
+nix:
+    nixos-rebuild switch --sudo --flake .#{{env_var('DEVICE')}}
+
+# Сборка VM для тестирования
+build:
+    nix build .#nixosConfigurations.{{env_var('DEVICE')}}.config.system.build.vm
+
+# Запуск VM без графики
+run-nographic:
+    #!/usr/bin/env bash
+    QEMU_KERNEL_PARAMS=console=ttyS0 ./result/bin/run-nixos-vm -nographic
+    reset
+
+# Обновление nixvim
+update-nixvim:
+    nix flake update nixvim
+
+# Обновление replacer
+update-replacer:
+    nix flake update replacer
+
+# Обновление mutter
+update-mutter:
+    nix flake update mutter-src
+
+# Полное обновление flake
+update:
+    nix flake update
+
+# Переключение на конкретное устройство (переопределяет .env)
+switch-device device:
+    nixos-rebuild switch --sudo --flake .#{{device}}
+
+# Форматирование кода с помощью alejandra
+fmt-alejandra:
+    alejandra .
+
+# Проверка форматирования (без изменений файлов)
+fmt-check:
+    alejandra --check .
+
+# Проверка флейка
+check:
+    nix flake check --no-build
+
+# Быстрый коммит всех изменённых файлов и push
+push:
+    git add -u && git commit -m "just push" && git push || (git pull --rebase && git push)
+
+# Забрать конфиг из /etc/nixos
+sync:
+    rsync -avP --exclude='private' --exclude='presharedKeyFile' --exclude='.env' /etc/nixos/* .
+
+# Показать текущее устройство из .env
+show-device:
+    @echo "Текущее устройство: {{env_var('DEVICE')}}"
+
+# ☢️ Проверка НОУТБУКА на известные уязвимости в системном замыкании.
+#
+# Повод: 2026-07-31 на прод-сервере нашёлся Roundcube 1.6.9 при актуальном
+# 1.6.17 — с SQL-инъекцией ДО аутентификации. Нашли случайно; механизма
+# проверки не было ни там, ни здесь. Ноутбук в этом смысле не безопаснее:
+# на нём браузер, ssh-ключи к проду, приватный ключ admin-VPN в sops и
+# kubeconfig'и. Компрометация ноутбука = компрометация всего остального.
+#
+# vulnix сверяет замыкание nix-store с базой NVD. Проверяем ВСЮ систему —
+# ядро, openssl, браузер, всё, что реально установлено этим флейком.
+#
+# ⚠️ Находок будет МНОГО, и это нормально: vulnix не знает, достижим ли
+# уязвимый код. Читать сверху вниз, приоритет — тому, что обрабатывает
+# недоверенный ввод (браузер, curl, openssl, архиваторы), а не библиотеке
+# внутри утилиты, которую вы никогда не запускаете. Списка исключений
+# (--whitelist) намеренно нет: принятые находки должны оставаться видимыми,
+# иначе через полгода никто не вспомнит, что именно принято и почему.
+#
+# Хост определяется по hostname, как в `just switch`, — чтобы на другой машине
+# из этого же репозитория не проверить чужую систему и не успокоиться зря.
+#
+# Проверить систему ноутбука на известные CVE (vulnix по nix-замыканию)
+vuln:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    HOSTNAME_NOW=$(hostname)
+    case "$HOSTNAME_NOW" in
+      huawei-rlef-x) DEVICE=huawei ;;
+      yoga14)        DEVICE=yoga14 ;;
+      asus*)         DEVICE=asus ;;
+      desktop)       DEVICE=desktop ;;
+      *) echo "❌ неизвестный хост '$HOSTNAME_NOW' — добавьте его в этот case" >&2; exit 1 ;;
+    esac
+    echo "══════════ замыкание системы $DEVICE (vulnix) ══════════"
+    # Собираем ту же систему, что ставится через `just switch`, и проверяем её.
+    SYS=$(nix build --no-link --print-out-paths \
+            ".#nixosConfigurations.$DEVICE.config.system.build.toplevel" \
+            --option http2 false) \
+        || { echo "❌ не собралась система"; exit 1; }
+    echo "система: $SYS"
+    nix run nixpkgs#vulnix -- "$SYS"
+
+# Обновление claude-code до последней версии (правит overlays/default.nix)
+update-claude:
+    ./scripts/update-claude.sh
+
+# Обновление gemini-cli до последней стабильной версии (правит overlays/default.nix)
+update-gemini:
+    ./scripts/update-gemini.sh
+
+# Обновление rtk до последнего релиза (правит pkgs/rtk.nix)
+update-rtk:
+    ./scripts/update-rtk.sh
+
+update-codex:
+      ./scripts/update-codex.sh
+
+# Обновление Dolphin Anty до последней версии (правит хэш в pkgs/dolphin-anty.nix)
+update-dolphin-anty:
+    bash ./scripts/update-dolphin-anty.sh
+
+# Обновление официального Antigravity CLI
+update-antigravity:
+    ./scripts/update-antigravity.sh

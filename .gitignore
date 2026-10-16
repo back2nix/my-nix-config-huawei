@@ -1,0 +1,19 @@
+my-astronvim-config
+private
+presharedKeyFile
+vpn.conf
+shadowsocks.json
+shadowsocks*.json
+# hardware-configuration.nix
+*.qcow2
+.null-ls*
+/data/
+.claude/
+result
+docs/security-audit-*.md
+docs/fable.md
+docs/yoga14-handover.md
+module/gnome-extensions/osk-globe-cycle/helpers/__pycache__/
+experiments/
+.env
+docs/claude-proxy.md

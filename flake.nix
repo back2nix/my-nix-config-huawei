@@ -1,0 +1,159 @@
+{
+  description = "A multi-device NixOS flake with flake-parts";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixvim = {
+      url = "github:back2nix/nixvim";
+    };
+
+    musnix = {
+      url = "github:musnix/musnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-ld-rs = {
+      url = "github:nix-community/nix-ld-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-index-database = {
+      url = "github:Mic92/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    replacer = {
+      url = "github:back2nix/replacer";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    claude-desktop = {
+      url = "github:k3d3/claude-desktop-linux-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # mutter-src = {
+    #   # url = "path:./mutter-50.2";
+    #   # type = "git";
+    #   url = "git+ssh://git@github.com/back2nix/mutter.git?ref=50.2-test";
+    #   # ref = "50.2";
+    #   # rev = "7298e5305a3ed62f0adfb85bda2d5f322811f096";
+    #   flake = false;
+    # };
+  };
+
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      # Указываем системы, которые поддерживаем
+      systems = ["x86_64-linux"];
+
+      # perSystem - для вещей, специфичных для каждой системы
+      perSystem = {pkgs, ...}: {
+        formatter = pkgs.alejandra;
+      };
+
+      # flake - для системно-независимых вещей
+      flake = let
+        system = "x86_64-linux";
+
+        # Создаём pkgs для использования в nixosConfigurations
+        mkPkgs = nixpkgs: system:
+          import nixpkgs {
+            inherit system;
+            config = {
+              allowUnfree = true;
+              permittedInsecurePackages = [
+                # "openclaw-2026.3.12"
+              ];
+            };
+          };
+
+        pkgs-master = mkPkgs inputs.nixpkgs-master system;
+        pkgs-unstable = mkPkgs inputs.nixpkgs-unstable system;
+
+        # Общая функция для создания системы
+        mkSystem = deviceName: extraModules:
+          inputs.nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = {
+              inherit
+                inputs
+                pkgs-master
+                pkgs-unstable
+                ;
+              self = inputs.self;
+            };
+            modules =
+              [
+                inputs.musnix.nixosModules.musnix
+                inputs.sops-nix.nixosModules.sops
+                ./configuration.nix
+                # Применяем наш оверлей с исправленным mutter
+                ./overlays/default.nix
+
+                # Home Manager
+                inputs.home-manager.nixosModules.home-manager
+                {
+                  home-manager = {
+                    extraSpecialArgs = {
+                      inherit
+                        inputs
+                        pkgs-master
+                        pkgs-unstable
+                        ;
+                      self = inputs.self;
+                    };
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
+                    users."bg" = import ./module/users/bg/home.nix;
+                  };
+                }
+
+                # Конфигурация конкретного устройства
+                ./devices/${deviceName}
+              ]
+              ++ extraModules;
+          };
+      in {
+        # NixOS конфигурации
+        nixosConfigurations = {
+          asus = mkSystem "asus-ux3405m" [
+            # Точного модуля для Zenbook UX3405MA (Intel Core Ultra / Meteor Lake)
+            # в nixos-hardware нет, поэтому используем generic common-модули.
+            inputs.nixos-hardware.nixosModules.common-cpu-intel
+            inputs.nixos-hardware.nixosModules.common-gpu-intel
+            inputs.nixos-hardware.nixosModules.common-pc-laptop
+            inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
+          ];
+          huawei = mkSystem "huawei-rlef-x" [];
+          yoga14 = mkSystem "yoga14" [
+            inputs.nixos-hardware.nixosModules.lenovo-yoga-7-14ILL10
+          ];
+          desktop = mkSystem "desktop" [];
+        };
+
+        # Можно также экспортировать модули для повторного использования
+        # nixosModules.myModule = import ./modules/my-module.nix;
+
+        # Или оверлеи
+        # overlays.default = final: prev: { ... };
+      };
+    };
+}
