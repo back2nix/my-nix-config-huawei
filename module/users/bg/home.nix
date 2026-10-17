@@ -348,6 +348,7 @@ in {
     };
     sessionVariables = {
       EDITOR = "nvim";
+      VISUAL = "nvim";
       GTK_THEME = "Adwaita:dark";
     };
   };
@@ -407,7 +408,7 @@ in {
       settings = {
         core = {
           quotepath = false; # показывать кириллицу в именах файлов, а не \320\260
-          editor = "vim"; # иначе берётся $EDITOR=nano из NixOS-дефолта
+          editor = "nvim";
         };
         user = {
           name = "back2nix";

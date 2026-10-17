@@ -7,16 +7,16 @@
 }:
 rustPlatform.buildRustPackage rec {
   pname = "rtk";
-  version = "0.51.0";
+  version = "1.0.1";
 
   src = fetchFromGitHub {
     owner = "rtk-ai";
     repo = pname;
     rev = "v${version}";
-    sha256 = "1igj459n1s4d0s2v7s1cqgl4zkgnjpgclpq9ra78sr5prpwf7h18";
+    sha256 = "0nfgjrly7zh53gcdfc6w7q555ffz8cvyvzd7m479mfl6ljmzcxzj";
   };
 
-  cargoHash = "sha256-tc3bHU6cgod1K6uqWEjDQc8IEgCrPRR1WAHP+ofelw0=";
+  cargoHash = "sha256-WoBuQ+Meml4wXSp8bQTckjvjriKsSOs0vSijWo0frq8=";
 
   doCheck = false;
 

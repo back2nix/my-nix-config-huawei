@@ -147,6 +147,7 @@ in {
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;
+      clock-show-seconds = true;
     };
     # Экранная клавиатура GNOME (всплывает при вводе с тачскрина).
     # Ключ НЕ фиксируем декларативно: им рулит тумблер «Экранная клавиатура»

@@ -49,6 +49,8 @@
     proxyPort,
     noDaemon ? false,
     chromeDevtools ? false,
+    # Ports of dev servers started inside, published on host 127.0.0.1 (same port).
+    devPorts ? [],
     # Extra $HOME-relative paths hidden from this agent (e.g. other agents' state).
     hide ? [],
   }: let
@@ -75,6 +77,11 @@
           "UNIX-CONNECT:$relay_dir/chrome" 2>>"$relay_log_dir/chrome-inside.log" &
         relay_pids+=("$!")
       ''}
+      for dev_port in ${toString devPorts}; do
+        ${pkgs.socat}/bin/socat -lp ${name}-dev-"$dev_port"-inside "UNIX-LISTEN:$relay_dir/dev-$dev_port,fork,mode=0600" \
+          "TCP4:127.0.0.1:$dev_port" 2>>"$relay_log_dir/dev-$dev_port-inside.log" &
+        relay_pids+=("$!")
+      done
       # Wait for listeners, without requiring their destinations to be running.
       ready=0
       for _ in {1..100}; do
@@ -176,6 +183,12 @@
           setsid socat -lp ${name}-chrome-host "UNIX-LISTEN:$relay_dir/chrome,fork,mode=0600" TCP4:127.0.0.1:9333 2>>"$relay_log_dir/chrome-host.log" &
           relay_pids+=("$!")
         ''}
+        # Dev servers inside the sandbox: host loopback only, one fixed port each.
+        for dev_port in ${toString devPorts}; do
+          setsid socat -lp ${name}-dev-"$dev_port"-host TCP4-LISTEN:"$dev_port",bind=127.0.0.1,reuseaddr,fork \
+            "UNIX-CONNECT:$relay_dir/dev-$dev_port" 2>>"$relay_log_dir/dev-$dev_port-host.log" &
+          relay_pids+=("$!")
+        done
         # Expose only port 22 of explicitly allowed hosts via Unix sockets.
         ssh_endpoints=()
         : > "$relay_dir/ssh-config"
@@ -337,6 +350,7 @@ in {
           hide = codexState;
           proxyPort = agentProxyPort "claude";
           chromeDevtools = true;
+          devPorts = [3917 3918 3919];
         };
         codex-safe = mkSafe {
           name = "codex-safe";

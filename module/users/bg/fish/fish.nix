@@ -344,6 +344,9 @@
     };
 
     shellInit = ''
+      # сессия GNOME может унаследовать старый EDITOR=nano — принудительно nvim
+      set -gx EDITOR nvim
+      set -gx VISUAL nvim
       # if command -q nix-your-shell
       #   nix-your-shell fish | source
       # end

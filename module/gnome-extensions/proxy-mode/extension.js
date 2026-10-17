@@ -30,10 +30,11 @@ class VpnMenu extends PanelMenu.Button {
                 this._refresh();
             }
         });
-        this._pollId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
-            this._refresh();
-            return GLib.SOURCE_CONTINUE;
-        });
+        // Фонового опроса нет намеренно: состояние видно только в открытом меню,
+        // а оно обновляется при открытии и после каждого переключения. Опрос раз
+        // в 10с запускал ~13 процессов из gnome-shell разом и подвешивал главный
+        // поток композитора — Wayland-клиенты не получали key release вовремя,
+        // и клавиши «залипали» (в журнале: «Key repeat discarded…» с шагом 10с).
         this._refresh();
     }
 
@@ -190,9 +191,6 @@ class VpnMenu extends PanelMenu.Button {
 
     destroy() {
         this._alive = false;
-        if (this._pollId)
-            GLib.Source.remove(this._pollId);
-        this._pollId = null;
         this._cancellable.cancel();
         for (const proc of this._processes)
             proc.force_exit();
