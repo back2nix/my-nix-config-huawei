@@ -27,6 +27,12 @@ in {
   ];
 
   options.my.display = {
+    desktop = lib.mkOption {
+      type = lib.types.enum ["gnome" "cosmic"];
+      default = "gnome";
+      description = "Окружение рабочего стола: GNOME (gdm) или COSMIC (cosmic-greeter).";
+    };
+
     profile = lib.mkOption {
       type = lib.types.enum ["xwayland-vulkan" "wayland-native"];
       default = "xwayland-vulkan";
@@ -64,9 +70,18 @@ in {
       wacom.enable = true;
     };
 
-    services.displayManager.gdm.enable = true;
     # gdm.wayland больше не поддерживается в GNOME 50 — Wayland по умолчанию
-    services.desktopManager.gnome.enable = true;
+    services.displayManager.gdm.enable = cfg.desktop == "gnome";
+    services.desktopManager.gnome.enable = cfg.desktop == "gnome";
+
+    # COSMIC (https://wiki.nixos.org/wiki/COSMIC). Настройки пользователя —
+    # RON-файлы в ~/.config/cosmic/, декларативных опций нет.
+    services.displayManager.cosmic-greeter.enable = cfg.desktop == "cosmic";
+    services.desktopManager.cosmic.enable = cfg.desktop == "cosmic";
+    # Рекомендация вики: планировщик System76 даёт небольшой прирост отзывчивости.
+    services.system76-scheduler.enable = lib.mkIf (cfg.desktop == "cosmic") true;
+    # Keyring без GNOME никто не поднимет, а портал Secret завязан на него.
+    services.gnome.gnome-keyring.enable = lib.mkIf (cfg.desktop == "cosmic") true;
     programs.xwayland.enable = true;
 
     # Модуль GNOME по умолчанию включает i18n.inputMethod (ibus). Нам он не нужен:

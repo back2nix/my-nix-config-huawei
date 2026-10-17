@@ -9,6 +9,9 @@
 
   networking.hostName = "asus-ux3405m";
 
+  # Чтобы попробовать COSMIC вместо GNOME, раскомментировать (см. module/display/default.nix).
+  # my.display.desktop = "cosmic";
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
 

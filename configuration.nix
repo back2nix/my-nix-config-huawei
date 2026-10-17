@@ -704,7 +704,10 @@ in {
     config = {
       common = {
         # Говорим системе: "Что бы ни случилось, используй GNOME-портал"
-        default = ["gnome"];
+        default =
+          if config.my.display.desktop == "cosmic"
+          then ["cosmic" "gtk"]
+          else ["gnome"];
         # Для секретов (связка ключей) тоже явно укажем
         "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
       };
