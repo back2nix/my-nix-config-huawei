@@ -79,6 +79,12 @@
     fsType = "ext4";
   };
 
+  # Корень зашифрован in-place (docs/LUKS-MIGRATION.md); ext4 UUID внутри не изменился.
+  boot.initrd.luks.devices."cryptroot" = {
+    device = "/dev/disk/by-uuid/3fc531bf-5b47-4f32-95d9-322a6957beff";
+    allowDiscards = true;
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/6B62-26C3";
     fsType = "vfat";
@@ -88,7 +94,13 @@
     ];
   };
 
-  swapDevices = [{device = "/dev/disk/by-uuid/e2c52285-0430-4b2d-9a09-ce90c536311f";}];
+  # Swap шифруется случайным ключом при каждой загрузке (без гибернации).
+  swapDevices = [
+    {
+      device = "/dev/disk/by-partuuid/457656af-841c-42d8-addf-d932b0e123e1";
+      randomEncryption.enable = true;
+    }
+  ];
 
   networking.useDHCP = lib.mkDefault true;
   networking.nat.externalInterface = "wlo1";

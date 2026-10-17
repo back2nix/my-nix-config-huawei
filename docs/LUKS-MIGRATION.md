@@ -23,6 +23,9 @@
 >
 > Актуальные UUID этой машины — в `devices/yoga14/hardware-configuration.nix`.
 
+> **Нет флешки?** Фазы 1–2 заменяются загрузкой в RAM через kexec по Wi-Fi —
+> см. раздел 5 (`scripts/luks-kexec/`).
+
 > **Читай целиком до начала.** Операция необратима в середине процесса.
 > Шаги 3.3–3.5 нельзя прерывать «на подумать» — только доводить до конца
 > или откатывать по процедуре из раздела 8.
@@ -379,6 +382,140 @@ findmnt -no SOURCE,UUID /   # должно быть /dev/mapper/cryptroot, UUID 
 ```
 
 Данные на месте, домашний каталог цел, система работает как раньше.
+
+---
+
+## 5. Вариант без флешки: kexec по сети (asus и huawei, 2026-10-16)
+
+Вместо фаз 1–2 машина перезагружается в NixOS прямо из RAM, используется тот же механизм,
+что у nixos-anywhere (`nixos-images` → `kexec-installer`). Диск при этом не смонтирован,
+дальше всё делается по SSH. Все файлы лежат в `scripts/luks-kexec/`:
+
+| Файл | Что это |
+|---|---|
+| `flake.nix` | kexec-образ: модуль `kexec-installer` + Wi-Fi + `cryptsetup` + root-ключ |
+| `wifi-psk` | пароль Wi-Fi (в `.gitignore`, создать вручную: `printf '%s' ПАРОЛЬ > wifi-psk`) |
+| `authorized_key.pub` | ключ, которым пускают root в образ |
+| `enc.sh` | фаза 3 целиком (e2fsck → resize2fs → reencrypt → open → resize2fs → бэкап заголовка) |
+| `finalize.sh` | фазы 3.6–5: UUID, заголовок к себе, `nix copy` системы, `nixos-install` |
+
+### 5.1. Грабли, на которые уже наступили
+
+- **Wi-Fi после kexec не поднимается** (`iwlwifi ... probe failed with error -110`):
+  CNVi-карта Intel остаётся включённой после старого ядра. Лечение: **перед `kexec -e`
+  выгрузить `iwlmvm iwlwifi`** на старой системе (см. 5.3). В образе есть запасной сервис
+  `iwlwifi-kexec-reset` (PCI remove/rescan), но основное средство — выгрузка заранее.
+  Стандартный образ nixos-anywhere восстанавливает только проводную сеть, поэтому нужен
+  свой образ с `networking.wireless` и статическим адресом машины.
+- **fail2ban** (`maxretry = 5`). `PermitRootLogin = "no"` на живой системе, поэтому
+  каждая попытка `root@` до kexec — это неудачный вход, а за 5 попыток адрес банят на час,
+  и бан сохраняется после перезагрузки (снимается через `sudo fail2ban-client unban --all`).
+  Признак того, что kexec прошёл, проверять **по портам**, а не логином root:
+  22 открыт, 6443 (k3s) закрыт.
+- **`systemd-run` без `PATH`**: в юните пустой PATH, и скрипт падает с `env: 'bash'`.
+  Всегда передавать `--setenv=PATH=/run/current-system/sw/bin`.
+- **`sudo` по SSH**: пароль на каждый вызов через `echo ПАРОЛЬ | sudo -S ...`,
+  кэш sudo между вызовами не держится.
+- **`.197` — это yoga14**, не путать адреса. Адреса ноутов: asus `.117`, huawei `.159`.
+- **Swap-раздел** шифруется случайным ключом (`randomEncryption.enable = true`). Его
+  UUID после этого каждый раз новый, поэтому ссылаться нужно на `by-partuuid`.
+
+### 5.1a. Desktop (NVIDIA, два NVMe): дополнительные грабли
+
+- **Паника старого ядра на `kexec -e`**: проприетарный `nvidia` падает в `nv_pci_shutdown`
+  (`drm_framebuffer_free` → `list_del corruption`), машина сбрасывается в старую систему.
+  Перед kexec остановить `display-manager`, `k3s`, `docker`, завершить сессию bg и выгрузить
+  `nvidia_drm nvidia_modeset nvidia_uvm nvidia`. Модули подгружаются обратно сами, поэтому
+  сначала запретить их через `/run/modprobe.d` (`install nvidia /bin/false`). Если они
+  не выгрузились, kexec не запускать. Всё это делается одним юнитом (`loginctl terminate-user bg`
+  рвёт и ssh-сессию).
+- **Экрана нет**: в образе `nomodeset` и blacklist `nouveau`, поэтому монитор гаснет.
+  Это нормально. Образ desktop сам пишет диагностику на ESP (`/boot/kexec-diag.txt`, каждые 5 с),
+  при панике уходит в EFI pstore с `panic=10`, а если к нему не подключились по ssh за 120 с,
+  перезагружается в старую систему. Ждать и жать reset не нужно: служба `diag` после входа
+  останавливается вручную (`systemctl stop diag`).
+- **Образ поднимал Wi-Fi, но на чужом адресе.** `restore-network` из kexec-installer пишет
+  `00-<старое имя>.network` с DHCP и матчит по MAC. На desktop NetworkManager даёт карте
+  `macAddress = "stable"`, этот MAC в образе выставлен тот же, и роутер по DHCP выдал **.172**
+  (у networkd другой client-id). Статический адрес задаётся файлом `00-wlan`, он
+  по алфавиту раньше `00-wlp5s0`.
+- **Имена NVMe меняются местами** в образе (корень `nvme1n1p2` → `nvme0n1p2`). Разделы
+  указывать только через `by-partuuid`: `enc.sh` и `finalize.sh` принимают `D=` и `BOOT=`.
+- **`//` в Nix сливает атрибуты поверхностно**: два набора с `boot`/`systemd` затирают друг друга.
+  Дополнительные модули образа передаются через `imports`.
+
+### 5.2. Подготовка (на yoga14)
+
+```bash
+cd scripts/luks-kexec
+nix build "path:$PWD#asus"   -o result-asus     # статический IP 192.168.0.117
+nix build "path:$PWD#huawei" -o result-huawei   # статический IP 192.168.0.159
+```
+
+Именно `path:`: каталог не целиком в git (`wifi-psk`), а `git+file` его не увидит.
+
+Конфиг целевой машины правится **заранее**, а UUID LUKS выбирается заранее и потом
+присваивается контейнеру. Так систему можно собрать, пока идёт шифрование:
+
+```bash
+U=$(cat /proc/sys/kernel/random/uuid)     # запомнить
+# devices/<host>/default.nix:
+#   boot.initrd.luks.devices."cryptroot" = { device = "/dev/disk/by-uuid/$U"; allowDiscards = true; };
+#   swapDevices = [{ device = "/dev/disk/by-partuuid/<PARTUUID p3>"; randomEncryption.enable = true; }];
+nix build --no-link --print-out-paths .#nixosConfigurations.<asus|huawei>.config.system.build.toplevel
+```
+
+### 5.3. Kexec
+
+```bash
+IP=192.168.0.117 R=result-asus
+ssh bg@$IP 'rm -rf /tmp/kxi; mkdir -p /tmp/kxi'
+cat $R/*.tar.gz | ssh bg@$IP 'cd /tmp/kxi && tar xzf -'
+ssh bg@$IP 'bash -c "echo ПАРОЛЬ | sudo -S systemd-run --unit=kx --setenv=PATH=/run/current-system/sw/bin \
+  bash -c \"/tmp/kxi/kexec/run; sleep 1; modprobe -r iwlmvm iwlwifi; sleep 60\""'
+```
+
+Для desktop вместо последней команды: залить `scripts/luks-kexec/kx-desktop.sh` в `/tmp/kx.sh` (выгрузка NVIDIA и iwlwifi,
+затем `kexec/run`, затем `sleep 60`; см. 5.1a) и запустить его через
+`sudo systemd-run --unit=kx --setenv=PATH=/run/current-system/sw/bin bash /tmp/kx.sh`.
+`sleep 60` в юните обязателен: `kexec/run` запускает `kexec -e` фоном, и при завершении
+юнита systemd убивает его вместе с ним.
+
+`kexec/run` (из nixos-images) делает `kexec --load --kexec-syscall-auto` и через 6 секунд
+запускает в фоне `kexec -e`; за это время успевает выгрузиться `iwlwifi`. Примерно через
+минуту проверить с другой машины: `22` открыт, `6443` закрыт, затем
+`ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$IP`.
+
+Если машина не вернулась в сеть, диск не тронут, и обычная перезагрузка кнопкой
+возвращает старую систему.
+
+### 5.4. Шифрование (не зависит от связи)
+
+```bash
+# scp через claude-safe не работает, поэтому через cat:
+cat enc.sh | ssh root@$IP 'cat > /root/enc.sh'
+ssh root@$IP 'systemd-run --unit=enc --setenv=PATH=/run/current-system/sw/bin \
+  --setenv=ROOT_FS_UUID=<ext4 UUID> --setenv=TEMP_PASS=<временный> --setenv=NAME=<host> \
+  /run/current-system/sw/bin/bash /root/enc.sh'
+```
+
+Это юнит на самой машине, поэтому обрыв SSH или Wi-Fi ему не мешает. Лог в `/root/enc.log`,
+в конце строка `ENC_DONE`. Прогресс reencrypt виден в `cryptsetup luksDump` (сегменты),
+скорость ≈250 МБ/с на NVMe (920 ГБ — около часа).
+
+### 5.5. Завершение
+
+```bash
+./finalize.sh 192.168.0.117 asus "$U" /nix/store/...-nixos-system-asus-ux3405m-...
+```
+
+Скрипт присваивает контейнеру UUID `$U`, снимает бэкап заголовка в `~/luks-headers/`,
+монтирует `/mnt`, копирует систему (`nix copy --to "ssh://root@IP?remote-store=local?root=/mnt"`,
+как это делает nixos-anywhere) и выполняет `nixos-install --system ...`, который ставит
+systemd-boot (EFI-переменные в kexec-образе доступны). Затем `ssh root@$IP reboot`.
+
+После первой загрузки с паролем: `sudo cryptsetup luksChangeKey /dev/nvme0n1p2`
+(временный → свой), и скопировать `~/luks-headers/*.img` во второе место.
 
 ---
 

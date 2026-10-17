@@ -29,6 +29,17 @@
   codexState = [".codex"];
   # Codex: no product analytics and no feedback uploads.
   codexBin = codex: "${codex}/bin/codex -c analytics.enabled=false -c feedback.enabled=false -c otel.exporter=none -c otel.metrics_exporter=none -c otel.trace_exporter=none -c otel.log_user_prompt=false";
+  # Host side of the LAN SSH relay: first line is the target, then raw stream.
+  # Only 192.168.0.0/16, only port 22.
+  lanSshRelay = pkgs.writeShellScript "claude-safe-lan-ssh" ''
+    IFS= read -r host || exit 1
+    if [[ ! "$host" =~ ^192\.168\.([0-9]{1,3})\.([0-9]{1,3})$ ]] \
+      || ((BASH_REMATCH[1] > 255 || BASH_REMATCH[2] > 255)); then
+      echo "claude-safe: LAN ssh target rejected: $host" >&2
+      exit 1
+    fi
+    exec ${pkgs.socat}/bin/socat STDIO "TCP4:$host:22,connect-timeout=10"
+  '';
   safeSsh = pkgs.writeShellScriptBin "ssh" ''
     exec ${pkgs.openssh}/bin/ssh -F "$CLAUDE_SAFE_SSH_CONFIG" "$@"
   '';
@@ -178,7 +189,14 @@
               "$ep_name $ep_address $ep_aliases" "$relay_dir/ssh-$ep_name" >> "$relay_dir/ssh-config"
           done < ${sshEndpointsFile}
         fi
+        # Any 192.168.*.* host, port 22 only (validated on the host side).
+        setsid socat -lp ${name}-ssh-lan-host "UNIX-LISTEN:$relay_dir/ssh-lan,fork,mode=0600" EXEC:${lanSshRelay} 2>>"$relay_log_dir/ssh-lan-host.log" &
+        relay_pids+=("$!")
+        ssh_endpoints+=(lan)
         cat >> "$relay_dir/ssh-config" <<EOF
+        Host 192.168.*.*
+          ProxyCommand sh -c 'printf "%%s\\n" "\$0"; exec cat' %h | ${pkgs.socat}/bin/socat - UNIX-CONNECT:$relay_dir/ssh-lan
+
         Host *
           # Private keys are hidden: always sign via the agent (first match wins).
           IdentityAgent ''${SSH_AUTH_SOCK:-none}

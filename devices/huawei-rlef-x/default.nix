@@ -40,6 +40,12 @@
     fsType = "ext4";
   };
 
+  # Корень зашифрован in-place (docs/LUKS-MIGRATION.md); ext4 UUID внутри не изменился.
+  boot.initrd.luks.devices."cryptroot" = {
+    device = "/dev/disk/by-uuid/147792bf-43b0-4af3-bc2a-ece050eb5fc7";
+    allowDiscards = true;
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/2E62-5274";
     fsType = "vfat";
@@ -51,7 +57,13 @@
 
   # Только swap-раздел. mkForce отменяет 16 GB swapfile из общего
   # configuration.nix — иначе на huawei было бы двойное перекрытие свопа.
-  swapDevices = lib.mkForce [{device = "/dev/disk/by-uuid/61e8160b-42b0-428f-8aef-1b993654838d";}];
+  # Swap шифруется случайным ключом при каждой загрузке (без гибернации).
+  swapDevices = lib.mkForce [
+    {
+      device = "/dev/disk/by-partuuid/4e0ce2bb-1893-4cf1-8303-5c7e6d846dc5";
+      randomEncryption.enable = true;
+    }
+  ];
 
   # zram — быстрый сжатый своп в RAM для отзывчивости (как у yoga14).
   zramSwap.enable = true;

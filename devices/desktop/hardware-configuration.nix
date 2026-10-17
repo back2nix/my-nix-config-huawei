@@ -22,13 +22,25 @@
     fsType = "ext4";
   };
 
+  # Корень зашифрован in-place (docs/LUKS-MIGRATION.md); ext4 UUID внутри не изменился.
+  boot.initrd.luks.devices."cryptroot" = {
+    device = "/dev/disk/by-uuid/70a85a4d-950d-4aab-bb8c-0ef64a450c6e";
+    allowDiscards = true;
+  };
+
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/213C-0DAE";
     fsType = "vfat";
     options = ["fmask=0077" "dmask=0077"];
   };
 
-  swapDevices = [];
+  # Swap шифруется случайным ключом при каждой загрузке (без гибернации).
+  swapDevices = [
+    {
+      device = "/dev/disk/by-partuuid/b628e795-1e42-47e3-b901-b13423c2881f";
+      randomEncryption.enable = true;
+    }
+  ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
