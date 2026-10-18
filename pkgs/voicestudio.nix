@@ -60,6 +60,12 @@ in
       # в runtime/project и удаляет прошлую копию; копии наследуют r-x из
       # store, и rm падает с EACCES. Возвращаем права на запись.
       chmod -R u+w "\''${XDG_CONFIG_HOME:-\$HOME/.config}/VoiceStudio/runtime/project" 2>/dev/null
+      # Режим auto освобождает VRAM перед генерацией только при нехватке RAM,
+      # на 8 ГБ GPU (RTX 2060 SUPER) Whisper/NLLB остаются в памяти рядом с TTS
+      # и генерация падает с CUDA OOM.
+      export OMNIVOICE_FREE_VRAM_BEFORE_GENERATE=always
+      export OMNIVOICE_UNLOAD_NLLB=1
+      export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
     ''
     + lib.optionalString (proxyPort != null) ''
       # Electron берёт прокси из флага, Python-бэкенд (uv, huggingface) — из env.

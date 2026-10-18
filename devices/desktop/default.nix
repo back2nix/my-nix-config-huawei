@@ -76,6 +76,8 @@
   environment.systemPackages = with pkgs; [
     cudaPackages.cudatoolkit
     voicestudio
+    nvtopPackages.nvidia
+    nvitop
   ];
 
   # --- K3s standalone server ---
