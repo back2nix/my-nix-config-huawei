@@ -1,9 +1,11 @@
 {pkgs, config, ...}: let
   mailApp = "thunderbird.desktop";
   browser = "${config.programs.google-chrome.finalPackage}/bin/google-chrome-stable";
+  debugDir = "${config.home.homeDirectory}/${config.programs.chrome-debug.userDataDir}";
   linkHandler = pkgs.writeScriptBin "open-browser-link" ''
     #!${pkgs.python3}/bin/python3
     import os
+    import socket
     import sys
     from urllib.parse import urlsplit
 
@@ -21,8 +23,23 @@
             continue
         urls.append(url)
 
+    def debug_chrome_running():
+        # SingletonLock -> "<hostname>-<pid>" пока живёт google-chrome-stable-debug.
+        try:
+            host, _, pid = os.readlink("${debugDir}/SingletonLock").rpartition("-")
+            if host != socket.gethostname():
+                return False
+            os.kill(int(pid), 0)
+            return True
+        except (OSError, ValueError):
+            return False
+
+    # Chrome отдаёт ссылку уже открытому окну только при том же --user-data-dir,
+    # поэтому если запущен debug-профиль — открываем в нём.
+    extra = ["--user-data-dir=${debugDir}"] if debug_chrome_running() else []
+
     if urls:
-        os.execv("${browser}", ["${browser}", "--", *urls])
+        os.execv("${browser}", ["${browser}", *extra, "--", *urls])
   '';
 in {
   home.packages = [linkHandler];
