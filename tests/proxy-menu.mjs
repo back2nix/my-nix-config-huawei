@@ -22,7 +22,7 @@ class Panel {
     add_child() {}
     destroy() { this.destroyed = true; }
 }
-const state = {antigravity: 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
+const state = {antigravity: 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', voicestudio: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
 const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive', 'webrtc-google-block.service': 'active', 'webrtc-udp-block.service': 'inactive'};
 const calls = [], errors = [], removed = [];
 let failNext = false;

@@ -173,6 +173,7 @@
       {id = "telegram"; label = "Telegram (SOCKS5: 1106)"; direct = false;}
       {id = "git"; label = "Git"; direct = true;}
       {id = "nix"; label = "Nix / Cachix"; direct = true;}
+      {id = "voicestudio"; label = "VoiceStudio (1122/1123)"; direct = true;}
       {id = "browser-usa"; label = "Браузер USA (1110/1111)"; direct = true;}
       {id = "browser-fra"; label = "Браузер FRA (1112/1113)"; direct = true;}
       {id = "browser-kz"; label = "Браузер KZ (1114/1115)"; direct = true;}

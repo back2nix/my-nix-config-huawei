@@ -241,7 +241,7 @@
       photocraft = final.callPackage ../pkgs/photocraft.nix {};
       effectcraft = final.callPackage ../pkgs/effectcraft.nix {};
       dolphin-anty = final.callPackage ../pkgs/dolphin-anty.nix {};
-      voicestudio = final.callPackage ../pkgs/voicestudio.nix {};
+      voicestudio = final.callPackage ../pkgs/voicestudio.nix {proxyPort = 1123;};
 
       # kilocode-cli-proxy = prev.writeShellScriptBin "kilocode-cli" ''
       #   export HTTP_PROXY="http://127.0.0.1:1083"

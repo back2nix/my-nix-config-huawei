@@ -156,6 +156,7 @@ sing-box; сохранённые selector остаются выбранными.
 | Telegram | 1106 | 1107 | KZ, свой selector |
 | Git | 1118 | 1119 | USA, свой selector |
 | Nix/Cachix | 1104 | 1105 | USA, свой selector |
+| VoiceStudio | 1122 | 1123 | USA, свой selector; обёртка `voicestudio` |
 | Браузер USA | 1110 | 1111 | USA, свой selector |
 | Браузер FRA | 1112 | 1113 | FRA, свой selector |
 | Браузер KZ | 1114 | 1115 | KZ, свой selector |

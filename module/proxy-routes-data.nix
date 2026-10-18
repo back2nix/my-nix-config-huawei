@@ -34,6 +34,11 @@ in {
       outbounds = tunnels ++ ["direct-out"];
     }
     {
+      name = "voicestudio";
+      default = "ssh-out1";
+      outbounds = tunnels ++ ["direct-out"];
+    }
+    {
       name = "browser-usa";
       default = "ssh-out1";
       outbounds = tunnels ++ ["direct-out"];
@@ -82,6 +87,12 @@ in {
       httpPort = 1105;
       socksPort = 1104;
       outbound = "nix-select";
+    }
+    {
+      name = "voicestudio";
+      httpPort = 1123;
+      socksPort = 1122;
+      outbound = "voicestudio-select";
     }
     {
       name = "browser-usa";

@@ -2,6 +2,9 @@
   lib,
   appimageTools,
   fetchurl,
+  # Порт HTTP-входа sing-box (группа voicestudio в module/proxy-routes-data.nix).
+  # null — без прокси.
+  proxyPort ? null,
 }: let
   pname = "voicestudio";
   version = "0.5.6";
@@ -31,7 +34,20 @@ in
         sox
       ];
 
-    extraInstallCommands = ''
+    extraInstallCommands =
+      lib.optionalString (proxyPort != null) ''
+        # Electron берёт прокси из флага, Python-бэкенд (uv, huggingface) — из env.
+        mv $out/bin/${pname} $out/bin/.${pname}-unwrapped
+        cat > $out/bin/${pname} <<EOF
+        #!/bin/sh
+        export HTTP_PROXY=http://127.0.0.1:${toString proxyPort}
+        export HTTPS_PROXY=\$HTTP_PROXY http_proxy=\$HTTP_PROXY https_proxy=\$HTTP_PROXY
+        export NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1
+        exec $out/bin/.${pname}-unwrapped --proxy-server=\$HTTP_PROXY "\$@"
+        EOF
+        chmod +x $out/bin/${pname}
+      ''
+      + ''
       install -Dm644 ${appimageContents}/VoiceStudio.desktop \
         $out/share/applications/voicestudio.desktop
       substituteInPlace $out/share/applications/voicestudio.desktop \
