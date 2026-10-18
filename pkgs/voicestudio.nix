@@ -29,6 +29,12 @@
     chmodTree='process.getBuiltinModule("node:child_process").spawnSync("chmod", ["-R", "u+w", project]);'
     substituteInPlace app/out/main/index.js \
       --replace-fail '	for (const name of SOURCES) {' "	for (const name of SOURCES) { $chmodTree"
+    # create_voice_clone_prompt, в отличие от generate, не под inference_mode,
+    # а бэкенд вызывает его отдельно (предрасчёт промпта). Кодирование
+    # референса с autograd съедает >5 ГБ и на 8 ГБ GPU падает с CUDA OOM.
+    substituteInPlace $out/resources/omnivoice/models/omnivoice.py \
+      --replace-fail '    def create_voice_clone_prompt(' '    @torch.inference_mode()
+        def create_voice_clone_prompt('
     rm $out/resources/app.asar
     asar pack app $out/resources/app.asar
   '';
