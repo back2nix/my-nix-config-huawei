@@ -115,7 +115,7 @@ in {
 
         # SSH check
         if-shell 'test -n "$SSH_CLIENT"' \
-          'source-file /etc/nixos/module/users/bg/tmux/tmux.remote.conf'
+          'source-file ${./tmux.remote.conf}'
 
         # Toggle prefix key and status bar (латинские буквы)
         bind -T root M-m \
