@@ -75,6 +75,7 @@
   # --- Desktop-specific packages ---
   environment.systemPackages = with pkgs; [
     cudaPackages.cudatoolkit
+    voicestudio
   ];
 
   # --- K3s standalone server ---
