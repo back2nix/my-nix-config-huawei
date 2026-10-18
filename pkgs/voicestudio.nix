@@ -2,6 +2,8 @@
   lib,
   appimageTools,
   fetchurl,
+  runCommand,
+  asar,
   # Порт HTTP-входа sing-box (группа voicestudio в module/proxy-routes-data.nix).
   # null — без прокси.
   proxyPort ? null,
@@ -15,11 +17,27 @@
   };
 
   appimageContents = appimageTools.extract {inherit pname version src;};
+
+  # stageRuntimeSources копирует backend/omnivoice из /nix/store через fs.cp,
+  # копии наследуют r-x, и следующий rm (в том числе сразу после установки)
+  # падает с EACCES. Перед каждым шагом возвращаем права на запись всему project.
+  patched = runCommand "${pname}-${version}-patched" {nativeBuildInputs = [asar];} ''
+    cp -r --no-preserve=mode ${appimageContents} $out
+    chmod +x $out/AppRun $out/voicestudio-electron $out/chrome_crashpad_handler \
+      $out/resources/tools/* $out/resources/native/voicestudio-desktop-bridge
+    asar extract ${appimageContents}/resources/app.asar app
+    chmodTree='process.getBuiltinModule("node:child_process").spawnSync("chmod", ["-R", "u+w", project]);'
+    substituteInPlace app/out/main/index.js \
+      --replace-fail '	for (const name of SOURCES) {' "	for (const name of SOURCES) { $chmodTree"
+    rm $out/resources/app.asar
+    asar pack app $out/resources/app.asar
+  '';
 in
   # FHS-обёртка: встроенный uv при первом запуске сам качает Python и колёса
   # (torch и т.п.), им нужны обычные /lib-библиотеки.
-  appimageTools.wrapType2 {
-    inherit pname version src;
+  appimageTools.wrapAppImage {
+    inherit pname version;
+    src = patched;
 
     extraPkgs = pkgs:
       with pkgs; [
@@ -55,11 +73,11 @@ in
       EOF
       chmod +x $out/bin/${pname}
 
-      install -Dm644 ${appimageContents}/VoiceStudio.desktop \
+      install -Dm644 ${patched}/VoiceStudio.desktop \
         $out/share/applications/voicestudio.desktop
       substituteInPlace $out/share/applications/voicestudio.desktop \
         --replace-fail 'Exec=AppRun' 'Exec=${pname}'
-      install -Dm644 ${appimageContents}/usr/share/icons/hicolor/512x512/apps/voicestudio-electron.png \
+      install -Dm644 ${patched}/usr/share/icons/hicolor/512x512/apps/voicestudio-electron.png \
         $out/share/icons/hicolor/512x512/apps/voicestudio-electron.png
     '';
 
