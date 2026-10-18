@@ -87,9 +87,33 @@ STRASSE могут иметь разные транскрипции. При пе
 (`omnivoice/models/omnivoice.py`, `_NONVERBAL_PATTERN`) — кнопка ⊕ Insert в углу
 поля Script показывает их все:
 
-`[laughter]` `[sigh]` `[confirmation-en]` `[question-en]` `[question-ah]`
-`[question-oh]` `[question-ei]` `[question-yi]` `[surprise-ah]`
-`[surprise-oh]` `[surprise-wa]` `[surprise-yo]` `[dissatisfaction-hnn]`
+```
+[laughter] — [смех]
+
+[sigh] — [вздох]
+
+[confirmation-en] — [подтверждение: «эм» / «угу»] (звук согласия)
+
+[question-en] — [вопрос: «м-м?» / «а?»] (вопросительное подталкивание)
+
+[question-ah] — [вопрос: «а?»]
+
+[question-oh] — [вопрос: «о?»]
+
+[question-ei] — [вопрос: «эй?» / «э?»]
+
+[question-yi] — [вопрос: «и?» / «гм?»]
+
+[surprise-ah] — [удивление: «а!»]
+
+[surprise-oh] — [удивление: «о!»]
+
+[surprise-wa] — [удивление: «вау!» / «ва!»]
+
+[surprise-yo] — [удивление: «ого!» / «йо!»]
+
+[dissatisfaction-hnn] — [недовольство: «хмм...» / «гм-м»] (звук недовольства или сомнения)
+```
 
 Честные ожидания: по-настоящему полезны `[laughter]` и `[sigh]`; большинство
 вариантов междометий (`-ah`, `-yi`, `-hnn`) заточены под речь с китайским
