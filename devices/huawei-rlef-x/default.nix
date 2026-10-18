@@ -5,7 +5,22 @@
   modulesPath,
   ...
 }: {
-  imports = [(modulesPath + "/installer/scan/not-detected.nix")];
+  imports = [
+    (modulesPath + "/installer/scan/not-detected.nix")
+    # Личный VPN до Windows и других машин bg (10.101.0.0/24).
+    ../../module/wireguard-personal-peer.nix
+    # Admin-VPN до casino-VPS, как на yoga14, но свой пир: 10.100.0.6,
+    # ключ wireguard/eggventure_huawei_private (сервер: casino-vps/modules/wireguard.nix).
+    # Через него же ходит sing-box (socks-nix: ssh на 10.100.0.1).
+    ../../module/wireguard-eggventure.nix
+  ];
+
+  my.eggventureVpn = {
+    address = "10.100.0.6";
+    secret = "wireguard/eggventure_huawei_private";
+  };
+
+  my.personalVpn.address = "10.101.0.7";
 
   networking.hostName = "huawei-rlef-x";
 
