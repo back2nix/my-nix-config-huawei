@@ -408,6 +408,20 @@ in {
               # RSA-ключ и пин ed25519 даёт "host key mismatch".
               host_key_algorithms = ["ssh-ed25519"];
             }
+            # RU-выход: IP самого beget. Только через личный VPN awg-pers
+            # (10.101.0.1), пользователь ru-exit пускает direct-tcpip лишь на
+            # 80/443 (casino-vps/modules/ru-exit.nix). Без поднятого
+            # «Personal VPN» этот выход не работает.
+            {
+              type = "ssh";
+              tag = "ssh-ru-beget";
+              server = "10.101.0.1";
+              server_port = 22;
+              user = "ru-exit";
+              private_key_path = "/home/bg/.ssh/id_ed25519_ru_exit";
+              host_key = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINoyAUaGwTNIW5pZZB+nHxRaH6QJDOkyCPSJ15iKXKYa"];
+              host_key_algorithms = ["ssh-ed25519"];
+            }
             # Хоп 2: ssh до google-seoul поверх хопа 1. Ключ от Сеула не покидает
             # ноутбук, casino видит только зашифрованный поток.
             {
@@ -469,6 +483,7 @@ in {
                 "ssh-frankfurt"
                 "ssh-frankfurt-via-casino"
                 "ssh-astana"
+                "ssh-ru-beget"
                 "direct-out"
               ];
               default = "ssh-out1";
@@ -488,6 +503,7 @@ in {
                 "ssh-frankfurt"
                 "ssh-frankfurt-via-casino"
                 "ssh-astana"
+                "ssh-ru-beget"
                 "direct-out"
               ];
               default = "ssh-frankfurt";
@@ -506,6 +522,7 @@ in {
                 "ssh-frankfurt"
                 "ssh-frankfurt-via-casino"
                 "ssh-astana"
+                "ssh-ru-beget"
                 "direct-out"
               ];
               default = "ssh-astana";

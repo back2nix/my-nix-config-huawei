@@ -88,7 +88,7 @@ class VpnMenu extends PanelMenu.Button {
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         for (const group of config.groups) {
             const extra = group.direct ? {id: 'direct', label: 'Direct'} : {id: 'isp-kz', label: 'ISP Казахстан'};
-            this._addRoute(group.label, [config.vpnRoute, group.id], [...config.modes, extra], false, group.only);
+            this._addRoute(group.label, [config.vpnRoute, group.id], [...config.modes, ...(group.extraModes || []), extra], false, group.only);
         }
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this.menu.addMenuItem(new PopupMenu.PopupMenuItem('Общие прокси — другие программы', {reactive: false}));

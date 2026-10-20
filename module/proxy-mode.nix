@@ -16,7 +16,7 @@
 #
 # Управление:
 #   proxy-mode                 — показать текущий режим и список
-#   proxy-mode seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|vpn3|direct
+#   proxy-mode seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|ru|vpn3|direct
 #   proxy-mode status          — машиночитаемо: SEOUL/CASINO/FRANKFURT/VPN3/DIRECT
 #   proxy-mode --1088 ...      — то же для 1088/1089 (selector frankfurt-select)
 #   proxy-mode --1090 ...      — то же для 1090/1091 (selector astana-select)
@@ -55,6 +55,7 @@
         fra-casino|fra-ru) echo ssh-frankfurt-via-casino ;;
         frankfurt) echo ssh-frankfurt ;;
         astana) echo ssh-astana ;;
+        ru)     echo ssh-ru-beget ;;
         vpn3)   echo ssh-out1-via-vpn3 ;;
         direct) echo direct-out ;;
         *) return 1 ;;
@@ -71,6 +72,7 @@
         ssh-frankfurt-via-casino) echo fra-casino ;;
         ssh-out1-via-vpn3)    echo vpn3 ;;
         ssh-astana)           echo astana ;;
+        ssh-ru-beget)         echo ru ;;
         direct-out)           echo direct ;;
         *) echo "$1" ;;
       esac
@@ -96,10 +98,10 @@
       show)
         now=$(current) || { echo "sing-box Clash-API недоступен ($API)" >&2; exit 1; }
         echo "текущий: $(to_name "$now")  ($now)"
-        echo "доступно: seoul usa-2 usa-2-casino casino ps-kz fra-casino frankfurt astana vpn3 direct"
+        echo "доступно: seoul usa-2 usa-2-casino casino ps-kz fra-casino frankfurt astana ru vpn3 direct"
         exit 0
         ;;
-      seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|vpn3|direct)
+      seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|ru|vpn3|direct)
         tag=$(to_tag "$1")
         api -X PUT "$API/proxies/$SEL" \
           -H 'Content-Type: application/json' \
@@ -112,7 +114,7 @@
         exit 0
         ;;
       *)
-        echo "usage: proxy-mode [--1088|--1090] [show|status|seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|vpn3|direct]" >&2
+        echo "usage: proxy-mode [--1088|--1090] [show|status|seoul|usa-2|usa-2-casino|casino|ps-kz|fra-casino|fra-ru|frankfurt|astana|ru|vpn3|direct]" >&2
         exit 2
         ;;
     esac
@@ -152,6 +154,7 @@
     {id = "ps-kz"; label = "KZ (ps-kz) через Casino";}
     {id = "fra"; label = "FRA (Франкфурт)";}
     {id = "kz"; label = "KZ (Astana)";}
+    {id = "ru"; label = "RU (Beget, Personal VPN)";}
   ];
   menu = {
     proxyMode = "${proxyMode}/bin/proxy-mode";
@@ -177,6 +180,8 @@
       {id = "browser-usa"; label = "Браузер USA (1110/1111)"; direct = true;}
       {id = "browser-fra"; label = "Браузер FRA (1112/1113)"; direct = true;}
       {id = "browser-kz"; label = "Браузер KZ (1114/1115)"; direct = true;}
+      # ssh/деплой Франкфурта: ~/.ssh/config ведёт winjoy-frankfurt через 1124.
+      {id = "fra-deploy"; label = "Франкфурт ssh/деплой (1124)"; direct = true; only = ["direct" "beget-relay" "usa" "usa-2" "kz"]; extraModes = [{id = "beget-relay"; label = "Через Beget (seoul-relay, admin-VPN)";}];}
     ];
     legacyModes = [
       {id = "seoul"; label = "USA (Сеул)";}
@@ -187,6 +192,7 @@
       {id = "usa-2-casino"; label = "USA 2 через Casino";}
       {id = "fra-casino"; label = "FRA через RU (Beget)";}
       {id = "ps-kz"; label = "KZ (ps-kz) через Casino";}
+      {id = "ru"; label = "RU (Beget, Personal VPN)";}
       {id = "direct"; label = "Direct";}
     ];
     legacyPorts = [1082 1088 1090];

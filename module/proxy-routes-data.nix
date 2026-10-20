@@ -1,8 +1,17 @@
 # Dedicated consumers. Legacy 1082/1088/1090 selectors remain independent.
 let
-  tunnels = ["ssh-out1" "ssh-usa-2" "ssh-usa-2-via-casino" "ssh-out1-via-casino" "ssh-ps-kz-via-casino" "ssh-frankfurt" "ssh-frankfurt-via-casino" "ssh-astana"];
+  tunnels = ["ssh-out1" "ssh-usa-2" "ssh-usa-2-via-casino" "ssh-out1-via-casino" "ssh-ps-kz-via-casino" "ssh-frankfurt" "ssh-frankfurt-via-casino" "ssh-astana" "ssh-ru-beget"];
 in {
   selectors = [
+    # ssh/деплой на Франкфурт (~/.ssh/config: ProxyCommand nc -x 127.0.0.1:1124).
+    # Без ssh-ru-beget (ru-exit пускает только 80/443) и ssh-frankfurt*
+    # (петля через сам Франкфурт). ssh-casino-relay: seoul-relay на beget
+    # разрешает direct-tcpip ровно на 5.252.179.162:22.
+    {
+      name = "fra-deploy";
+      default = "direct-out";
+      outbounds = ["direct-out" "ssh-casino-relay" "ssh-out1" "ssh-usa-2" "ssh-astana"];
+    }
     {
       name = "antigravity";
       default = "ssh-out1";
@@ -55,6 +64,12 @@ in {
     }
   ];
   routes = [
+    {
+      name = "fra-deploy";
+      httpPort = 1125;
+      socksPort = 1124;
+      outbound = "fra-deploy-select";
+    }
     {
       name = "antigravity";
       httpPort = 1121;

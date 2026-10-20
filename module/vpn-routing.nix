@@ -10,8 +10,8 @@
       api=''${VPN_ROUTE_API:-http://127.0.0.1:9090}
       group=''${1:-}
       case "$group" in
-        antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|browser-kz) ;;
-        *) echo 'Usage: vpn-route antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|browser-kz [usa|usa-2|usa-2-casino|casino|ps-kz|fra|fra-casino|kz|isp-kz|direct|status]' >&2; exit 2 ;;
+        antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|browser-kz|fra-deploy) ;;
+        *) echo 'Usage: vpn-route antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|browser-kz|fra-deploy [usa|usa-2|usa-2-casino|casino|ps-kz|fra|fra-casino|kz|ru|beget-relay|isp-kz|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -30,6 +30,8 @@
             ssh-frankfurt) echo fra ;;
             ssh-frankfurt-via-casino) echo fra-casino ;;
             ssh-astana) echo kz ;;
+            ssh-ru-beget) echo ru ;;
+            ssh-casino-relay) echo beget-relay ;;
             isp-kazakhstan) echo isp-kz ;;
             direct-out) echo direct ;;
             *) echo "Unknown route: $current" >&2; exit 1 ;;
@@ -45,16 +47,24 @@
             fra-casino|fra-ru) tag=ssh-frankfurt-via-casino ;;
             fra|frankfurt|1088|1089) tag=ssh-frankfurt ;;
             kz|kz-astana|astana|1090|1091) tag=ssh-astana ;;
+            ru|ru-beget) tag=ssh-ru-beget ;;
+            beget-relay)
+              if [[ "$group" != fra-deploy ]]; then
+                echo 'beget-relay is available only for fra-deploy (seoul-relay permits only fixed ssh targets).' >&2
+                exit 2
+              fi
+              tag=ssh-casino-relay
+              ;;
             isp-kz|isp-kazakhstan)
-              if [[ "$group" = git || "$group" = nix || "$group" = browser-* ]]; then
+              if [[ "$group" = git || "$group" = nix || "$group" = browser-* || "$group" = fra-deploy ]]; then
                 echo 'ISP Kazakhstan is available only for Antigravity, Claude, Codex and Telegram.' >&2
                 exit 2
               fi
               tag=isp-kazakhstan
               ;;
             direct)
-              if [[ "$group" != git && "$group" != nix && "$group" != browser-* ]]; then
-                echo 'Direct is available only for Git, Nix and browsers.' >&2
+              if [[ "$group" != git && "$group" != nix && "$group" != browser-* && "$group" != fra-deploy ]]; then
+                echo 'Direct is available only for Git, Nix, browsers and fra-deploy.' >&2
                 exit 2
               fi
               tag=direct-out
