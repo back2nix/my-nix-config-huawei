@@ -33,7 +33,23 @@ in {
     wants = ["network-online.target"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {
-      ExecStart = "${singBox}/bin/sing-box run -c ${config.sops.templates."sing-box-config.json".path}";
+      # Защита: outbound с отсутствующим private_key_path (ключ не скопирован
+      # на эту машину) валит весь sing-box FATAL'ом, и вместе с ним git/nix.
+      # Перед стартом выкидываем такие outbound'ы (и зависящие от них через
+      # detour), чистим их из selector/urltest и route.rules.
+      ExecStartPre = pkgs.writeShellScript "sing-box-prune-missing-keys" ''
+        set -eu
+        src=${config.sops.templates."sing-box-config.json".path}
+        dst=/run/sing-box/config.json
+        missing=$(${pkgs.jq}/bin/jq -r '.outbounds[] | select(.private_key_path) | "\(.tag)\t\(.private_key_path)"' "$src" \
+          | while IFS=$'\t' read -r tag key; do [ -r "$key" ] || { echo "WARN: $tag: нет ключа $key, outbound отключён" >&2; echo "$tag"; }; done \
+          | ${pkgs.jq}/bin/jq -Rsc 'split("\n") | map(select(length > 0))')
+        ${pkgs.jq}/bin/jq --argjson bad "$missing" -f ${./sing-box/prune-missing-keys.jq} "$src" > "$dst.tmp" \
+          || cp "$src" "$dst.tmp"
+        mv "$dst.tmp" "$dst"
+      '';
+      RuntimeDirectory = "sing-box";
+      ExecStart = "${singBox}/bin/sing-box run -c /run/sing-box/config.json";
       Restart = "always";
       RestartSec = "5s";
       # Под cache.db из experimental.cache_file (sops/sops.nix): в нём живёт
