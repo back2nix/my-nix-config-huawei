@@ -4,13 +4,13 @@ let
 in {
   selectors = [
     # ssh/деплой на Франкфурт (~/.ssh/config: ProxyCommand nc -x 127.0.0.1:1124).
-    # Без ssh-ru-beget (ru-exit пускает только 80/443) и ssh-frankfurt*
-    # (петля через сам Франкфурт). ssh-casino-relay: seoul-relay на beget
-    # разрешает direct-tcpip ровно на 5.252.179.162:22.
+    # Без ssh-frankfurt* (петля через сам Франкфурт). Выход с IP beget —
+    # двумя путями: ssh-casino-relay (seoul-relay, admin-VPN) и ssh-ru-beget
+    # (ru-exit, Personal VPN); оба пускают direct-tcpip на 5.252.179.162:22.
     {
       name = "fra-deploy";
       default = "direct-out";
-      outbounds = ["direct-out" "ssh-casino-relay" "ssh-out1" "ssh-usa-2" "ssh-astana"];
+      outbounds = ["direct-out" "ssh-casino-relay" "ssh-ru-beget" "ssh-out1-via-casino" "ssh-usa-2-via-casino" "ssh-ps-kz-via-casino" "ssh-out1" "ssh-usa-2" "ssh-astana"];
     }
     {
       name = "antigravity";

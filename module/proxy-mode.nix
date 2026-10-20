@@ -155,7 +155,18 @@
     {id = "fra"; label = "FRA (Франкфурт)";}
     {id = "kz"; label = "KZ (Astana)";}
     {id = "ru"; label = "RU (Beget, Personal VPN)";}
+    # Только для fra-deploy: seoul-relay пускает лишь фиксированные ssh-цели.
+    {id = "beget-relay"; label = "Beget (WinJoy VPN, seoul-relay)";}
   ];
+  # Режимы, которые не должны появляться у групп без явного only.
+  groupOnlyModes = ["beget-relay"];
+  # Группа без only получает все общие режимы — меню остаётся данными в /etc,
+  # extension.js не меняется (фильтр only применяется и к Direct/ISP).
+  withDefaultOnly = g:
+    g
+    // {
+      only = g.only or (map (m: m.id) (builtins.filter (m: !(builtins.elem m.id groupOnlyModes)) modes) ++ ["direct" "isp-kz"]);
+    };
   menu = {
     proxyMode = "${proxyMode}/bin/proxy-mode";
     vpnRoute = "${pkgs.vpn-route}/bin/vpn-route";
@@ -169,7 +180,12 @@
     ];
     # direct = true добавляет режим Direct, иначе ISP Казахстан.
     # only ограничивает выбор в меню (статус показывается любой).
-    groups = [
+    # ☢️ Новый пункт/режим/группа меню — ТОЛЬКО данными здесь (modes, groups,
+    # only, groupOnlyModes), НЕ правкой extension.js: menu.json перечитывается
+    # при открытии меню, а JS требует перелогина. Режим для одной группы —
+    # в modes + groupOnlyModes + её only (так сделан beget-relay для fra-deploy).
+    # Ошибка 2026-10-20: под fra-deploy добавлялось поле extraModes в JS.
+    groups = map withDefaultOnly [
       {id = "antigravity"; label = "Antigravity CLI"; direct = false;}
       {id = "claude"; label = "Claude"; direct = false; only = ["usa-2" "usa-2-casino"];}
       {id = "codex"; label = "Codex"; direct = false;}
@@ -181,7 +197,7 @@
       {id = "browser-fra"; label = "Браузер FRA (1112/1113)"; direct = true;}
       {id = "browser-kz"; label = "Браузер KZ (1114/1115)"; direct = true;}
       # ssh/деплой Франкфурта: ~/.ssh/config ведёт winjoy-frankfurt через 1124.
-      {id = "fra-deploy"; label = "Франкфурт ssh/деплой (1124)"; direct = true; only = ["direct" "beget-relay" "usa" "usa-2" "kz"]; extraModes = [{id = "beget-relay"; label = "Через Beget (seoul-relay, admin-VPN)";}];}
+      {id = "fra-deploy"; label = "Франкфурт ssh/деплой (1124)"; direct = true; only = ["direct" "beget-relay" "ru" "casino" "usa-2-casino" "ps-kz" "usa" "usa-2" "kz"];}
     ];
     legacyModes = [
       {id = "seoul"; label = "USA (Сеул)";}
