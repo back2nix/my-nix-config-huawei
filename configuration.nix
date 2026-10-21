@@ -191,6 +191,12 @@ in {
   };
 
   security.rtkit.enable = true;
+  # Компрометация промежуточных УЦ eMudhra/emSign (уведомление 2026-10-21):
+  # снимаем доверие к корням до обновления cacert в nixpkgs.
+  security.pki.caCertificateBlacklist = [
+    "emSign ECC Root CA - G3"
+    "Comodo AAA Services root"
+  ];
   security.apparmor.enable = true;
 
   security.sudo.extraConfig = ''
