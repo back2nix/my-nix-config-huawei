@@ -60,6 +60,11 @@ esac
 
 echo "current=$current latest=$target"
 
+if [ "$current" = "$target" ]; then
+  echo "Уже последняя версия ($current)."
+  exit 0
+fi
+
 if ver_gt "$current" "$target"; then
   echo "Локальная версия ($current) новее последнего релиза ($target)."
   exit 0
