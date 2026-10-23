@@ -140,13 +140,13 @@
 
       antigravity-cli = prev.callPackage ../pkgs/antigravity-cli.nix {};
 
-      # --- НАЧАЛО: Обновление claude-code до 2.1.308 ---
+      # --- НАЧАЛО: Обновление claude-code до 2.1.309 ---
       claude-code = prev.stdenvNoCC.mkDerivation {
         pname = "claude-code";
-        version = "2.1.308";
+        version = "2.1.309";
         src = prev.fetchurl {
-          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.308/linux-x64/claude";
-          sha256 = "356733f185fa988e6bf3aa9a555269fdd167982a2e2a80d3c8a78037bb92ad58";
+          url = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.309/linux-x64/claude";
+          sha256 = "4d704a8aecbe038affa3000f498ae17c1b4f753add8facb8764120affc99b658";
         };
         dontUnpack = true;
         dontBuild = true;
@@ -166,7 +166,7 @@
         '';
         meta.mainProgram = "claude";
       };
-      # --- КОНЕЦ: Обновление claude-code до 2.1.308 ---
+      # --- КОНЕЦ: Обновление claude-code до 2.1.309 ---
 
       # --- НАЧАЛО: Обновление gemini-cli до 0.58.0 ---
       # База — свежая деривация из unstable (0.47.0). Начиная с ~0.45 nixpkgs
