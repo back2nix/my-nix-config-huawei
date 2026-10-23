@@ -89,6 +89,7 @@ in {
     ./module/bag-mode.nix # Режим портфеля: работа с закрытой крышкой (тумблер + Ctrl+Alt+B)
     ./module/time.nix # chrony + NTS вместо systemd-timesyncd
     ./module/gcloud-winjoy.nix # gcloud-winjoy: GCE проекта winjoy-games, SA-ключ из sops
+    ./module/local-dev-ca.nix # Свой УЦ для доверенного https://*.local (casino-k3s gateway)
   ];
 
   # Пароли живут в KeePassXC (.kdbx), а не внутри Chrome.
