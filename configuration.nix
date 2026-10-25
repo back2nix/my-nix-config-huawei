@@ -421,6 +421,7 @@ in {
       brave
       ncdu
       thunderbird
+      gdb
     ];
 
     etc."proxychains.conf".text = ''
