@@ -76,18 +76,18 @@
   environment.systemPackages = with pkgs; [
     cudaPackages.cudatoolkit
     voicestudio
-    neuralnote
+    # neuralnote
     nvtopPackages.nvidia
     nvitop
   ];
 
   # Модель MuScriptor large для NeuralNote: приложение ищет её в
   # ~/.config/NeuralNote/models и проверяет только имя и размер.
-  systemd.tmpfiles.rules = [
-    "d /home/bg/.config/NeuralNote 0755 bg users -"
-    "d /home/bg/.config/NeuralNote/models 0755 bg users -"
-    "L+ /home/bg/.config/NeuralNote/models/muscriptor-large-f16.gguf - - - - ${pkgs.neuralnote.modelLarge}"
-  ];
+  # systemd.tmpfiles.rules = [
+  #   "d /home/bg/.config/NeuralNote 0755 bg users -"
+  #   "d /home/bg/.config/NeuralNote/models 0755 bg users -"
+  #   "L+ /home/bg/.config/NeuralNote/models/muscriptor-large-f16.gguf - - - - ${pkgs.neuralnote.modelLarge}"
+  # ];
 
   # --- K3s standalone server ---
   services.k3s = {
