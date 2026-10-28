@@ -171,6 +171,24 @@
     proxyMode = "${proxyMode}/bin/proxy-mode";
     vpnRoute = "${pkgs.vpn-route}/bin/vpn-route";
     systemctl = "${pkgs.systemd}/bin/systemctl";
+    # One Clash API snapshot replaces a shell/curl/jq pipeline per row.
+    statusCommand = ["${pkgs.curl}/bin/curl" "--noproxy" "*" "-fsS" "--max-time" "3" "http://127.0.0.1:9090/proxies"];
+    outboundModes = {
+      ssh-out1 = "usa";
+      ssh-usa-2 = "usa-2";
+      ssh-usa-2-via-casino = "usa-2-casino";
+      ssh-out1-via-casino = "casino";
+      ssh-ps-kz-via-casino = "ps-kz";
+      ssh-frankfurt = "fra";
+      ssh-frankfurt-via-casino = "fra-casino";
+      ssh-astana = "kz";
+      ssh-ru-beget = "ru";
+      ssh-casino-relay = "beget-relay";
+      isp-kazakhstan = "isp-kz";
+      direct-out = "direct";
+    };
+    legacyAliases = {usa = "seoul"; fra = "frankfurt"; kz = "astana";};
+    legacySelectors = {"1082" = "usa-select"; "1088" = "frankfurt-select"; "1090" = "astana-select";};
     inherit modes;
     vpns = [
       {label = "WinJoy VPN"; unit = "amneziawg-egg.service";}

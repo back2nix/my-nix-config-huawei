@@ -2,9 +2,25 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {execFileSync} from 'node:child_process';
+
+// Evaluate the real menu data without evaluating or building the whole system.
+const config = JSON.parse(JSON.parse(execFileSync('nix', ['eval', '--impure', '--json', '--expr', `
+    (import ./module/proxy-mode.nix { pkgs = {
+        writeShellScriptBin = name: text: "@proxyMode@";
+        vpn-route = "@vpnRoute@"; systemd = "@systemctl@"; curl = "@curl@";
+    }; }).environment.etc."proxy-mode/menu.json".text
+`], {encoding: 'utf8'})));
+config.proxyMode = '@proxyMode@';
+config.vpnRoute = '@vpnRoute@';
+config.systemctl = '@systemctl@';
+config.statusCommand[0] = '@curl@';
+// The behavior tests exercise every mode independently of the production allowlist.
+config.groups.find(g => g.id === 'claude').only = null;
 
 class Menu {
     constructor() { this.items = []; this.signals = new Map(); }
+    removeAll() { this.items = []; }
     addMenuItem(item) { this.items.push(item); }
     connect(name, callback) { this.signals.set(name, callback); }
 }
@@ -22,15 +38,22 @@ class Panel {
     add_child() {}
     destroy() { this.destroyed = true; }
 }
-const state = {antigravity: 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', voicestudio: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz'};
+const state = {antigravity: 'usa', claude: 'kz', codex: 'usa', telegram: 'kz', git: 'usa', nix: 'usa', voicestudio: 'usa', 'browser-usa': 'usa', 'browser-fra': 'fra', 'browser-kz': 'kz', 'fra-deploy': 'direct'};
 const units = {'amneziawg-egg.service': 'active', 'amneziawg-personal.service': 'inactive', 'webrtc-google-block.service': 'active', 'webrtc-udp-block.service': 'inactive'};
 const calls = [], errors = [], removed = [];
-let failNext = false;
+let scheduled, now = 1000000, configReads = 0, fileId = 1;
+let failNext = false, apiFailure = false, invalidJson = false;
 class Process {
     static new(argv) { calls.push(argv); return new Process(argv); }
     constructor(argv) {
         this.stdout = ''; this.stderr = ''; this.ok = true;
-        if (argv[0] === '@vpnRoute@') {
+        if (argv[0] === '@curl@') {
+            const tags = Object.fromEntries(Object.entries(config.outboundModes).map(([tag, id]) => [id, tag]));
+            const proxies = Object.fromEntries(Object.entries(state).map(([group, mode]) => [`${group}-select`, {now: tags[mode]}]));
+            for (const selector of Object.values(config.legacySelectors)) proxies[selector] = {now: tags.usa};
+            this.stdout = invalidJson ? '{' : JSON.stringify({proxies});
+            this.ok = !apiFailure;
+        } else if (argv[0] === '@vpnRoute@') {
             const [, group, mode] = argv;
             if (mode === 'status') this.stdout = state[group];
             else if (failNext) { failNext = false; this.ok = false; this.stderr = 'test failure'; }
@@ -38,7 +61,7 @@ class Process {
         } else if (argv[0] === '@proxyMode@') this.stdout = 'SEOUL';
         else if (argv[0] === '@systemctl@') {
             const unit = argv.at(-1);
-            if (argv[1] === 'is-active') { this.stdout = units[unit]; this.ok = this.stdout === 'active'; }
+            if (argv[1] === 'show') this.stdout = argv.slice(3).map(unit => `Id=${unit}\nActiveState=${units[unit] || 'inactive'}`).join('\n\n');
             else units[unit] = argv.includes('start') ? 'active' : 'inactive';
         }
     }
@@ -50,8 +73,12 @@ class Process {
 let registered;
 const sandbox = {
     Gio: {Subprocess: Process, SubprocessFlags: {NONE: 0, STDOUT_PIPE: 1, STDERR_PIPE: 2},
+          FileQueryInfoFlags: {NONE: 0},
+          File: {new_for_path: () => ({query_info: () => ({get_attribute_as_string: () => String(fileId)})})},
           Cancellable: class {cancel() { this.cancelled = true; }}},
-    GLib: {PRIORITY_DEFAULT: 0, SOURCE_CONTINUE: true, timeout_add_seconds: () => 42,
+    TextDecoder,
+    GLib: {file_get_contents: () => { configReads++; return [true, new TextEncoder().encode(JSON.stringify(config))]; }, PRIORITY_DEFAULT: 0, SOURCE_CONTINUE: true, get_monotonic_time: () => now, SOURCE_REMOVE: false,
+           timeout_add: (priority, ms, callback) => { scheduled = callback; return 42; },
            Source: {remove: id => removed.push(id)}},
     GObject: {registerClass: cls => cls}, St: {Icon: class {}},
     Extension: class {constructor() { this.uuid = 'test-vpn'; }},
@@ -70,7 +97,29 @@ const extension = new sandbox.TestExtension();
 extension.enable();
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 await settle();
-assert.equal(registered._routes.length, 12);
+assert.equal(calls.length, 0, 'Enabling the indicator must not spawn status processes');
+assert.ok(registered._routes.every(r => r.choices.size === 0), 'Submenus must be created lazily');
+registered.menu.isOpen = true;
+registered.menu.signals.get('open-state-changed')(registered.menu, true);
+assert.equal(calls.length, 0, 'Opening must render before spawning processes');
+assert.equal(configReads, 1, 'Unchanged config must not be reread');
+scheduled();
+await settle();
+assert.equal(calls.length, 2, 'Opening the menu needs exactly one API call and one systemd call');
+registered.menu.signals.get('open-state-changed')(registered.menu, true);
+await settle();
+assert.equal(calls.length, 2, 'Repeated opening must use cached state');
+fileId++;
+registered._build();
+assert.equal(configReads, 2, 'A new store file must be read even with an unchanged mtime');
+await registered._refresh();
+assert.equal(registered._routes.length, config.groups.length + config.legacyPorts.length);
+for (const route of registered._routes) {
+    route.item.menu.signals.get('open-state-changed')(route.item.menu, true);
+    const count = route.choices.size;
+    route.item.menu.signals.get('open-state-changed')(route.item.menu, true);
+    assert.equal(route.choices.size, count);
+}
 for (const route of registered._routes) {
     assert.ok(registered.menu.items.includes(route.item), 'Each route must appear directly in the panel menu');
 }
@@ -157,8 +206,33 @@ google.item.signals.get('toggled')(google.item, false);
 await settle();
 assert.equal(units[google.unit], 'inactive');
 assert.equal(units[udp.unit], 'active');
+// API failure and malformed responses must not disable independent VPN controls.
+apiFailure = true;
+await registered._refresh();
+assert.ok(registered._routes.every(r => !r.item.sensitive));
+assert.equal(registered._vpns[0].item.sensitive, true);
+apiFailure = false;
+invalidJson = true;
+await registered._refresh();
+assert.ok(registered._routes.every(r => !r.item.sensitive));
+invalidJson = false;
+await registered._refresh();
+assert.ok(registered._routes.every(r => r.item.sensitive));
+// Expired status refresh is deferred; repeated open events share one timer.
+now += 11000000;
+const cachedCalls = calls.length;
+registered.menu.signals.get('open-state-changed')(registered.menu, true);
+assert.ok(registered._refreshSource);
+registered.menu.signals.get('open-state-changed')(registered.menu, true);
+assert.equal(calls.length, cachedCalls);
+scheduled();
+await settle();
+assert.equal(calls.length - cachedCalls, 2);
+const before = calls.length;
+await registered._refresh();
+assert.equal(calls.length - before, 2);
 extension.disable();
 assert.equal(registered.destroyed, true);
 assert.equal(registered._cancellable.cancelled, true);
-assert.deepEqual(removed, [42]);
-console.log('PASS: panel menu, independent choices, error recovery, VPN refresh and cleanup');
+assert.deepEqual(removed, []);
+console.log('PASS: cached config/status, deferred refresh (2 processes), lazy submenus, independent choices, API failure recovery and cleanup');
