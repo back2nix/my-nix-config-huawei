@@ -25,7 +25,7 @@
 #
 # vpn3 доступен только из CLI: в меню оставлены четыре пункта, которыми
 # пользуются на практике.
-{pkgs, ...}: let
+{pkgs, lib, config, ...}: let
   proxyMode = pkgs.writeShellScriptBin "proxy-mode" ''
     set -u
     PATH=${pkgs.lib.makeBinPath [pkgs.curl pkgs.jq pkgs.libnotify]}:$PATH
@@ -190,7 +190,11 @@
     legacyAliases = {usa = "seoul"; fra = "frankfurt"; kz = "astana";};
     legacySelectors = {"1082" = "usa-select"; "1088" = "frankfurt-select"; "1090" = "astana-select";};
     inherit modes;
-    vpns = [
+    vpns = lib.optional config.services.k3s.enable {
+      label = "K3s — локальный кластер";
+      unit = "k3s.service";
+      stopUnit = "local-cluster-off.service";
+    } ++ [
       {label = "WinJoy VPN"; unit = "amneziawg-egg.service";}
       {label = "Personal VPN"; unit = "amneziawg-personal.service";}
       {label = "WebRTC: блокировать Google STUN"; unit = "webrtc-google-block.service";}

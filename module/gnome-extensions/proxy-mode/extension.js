@@ -99,7 +99,9 @@ class VpnMenu extends PanelMenu.Button {
                     return;
                 entry.changing = true;
                 item.setSensitive(false);
-                this._run([config.systemctl, '--no-ask-password', enabled ? 'start' : 'stop', vpn.unit])
+                const verb = enabled || vpn.stopUnit ? 'start' : 'stop';
+                const unit = !enabled && vpn.stopUnit ? vpn.stopUnit : vpn.unit;
+                this._run([config.systemctl, '--no-ask-password', verb, unit])
                     .then(result => {
                         if (!this._alive)
                             return;

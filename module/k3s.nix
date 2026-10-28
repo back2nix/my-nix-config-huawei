@@ -20,6 +20,29 @@
   };
   pauseRef = "${pauseImage.imageName}:${pauseImage.imageTag}";
 in {
+  # Отдельный oneshot: killall сам останавливает k3s*.service, поэтому
+  # имя этого юнита не должно начинаться с k3s (иначе он остановит себя).
+  systemd.services.local-cluster-off = lib.mkIf cfg.enable {
+    description = "Stop local K3s and all its containers";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${cfg.package}/bin/k3s-killall.sh";
+      TimeoutStartSec = "120s";
+    };
+  };
+
+  security.polkit.extraConfig = lib.mkIf cfg.enable ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          action.lookup("verb") == "start" &&
+          (action.lookup("unit") == "k3s.service" ||
+           action.lookup("unit") == "local-cluster-off.service") &&
+          subject.user == "bg" && subject.local && subject.active) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
   systemd.services.k3s-lo-ip = {
     description = "Add 10.0.0.1/32 to loopback for k3s node IP";
     before = ["k3s.service"];
