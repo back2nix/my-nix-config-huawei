@@ -98,7 +98,8 @@ extension.enable();
 const settle = async () => { for (let i = 0; i < 5; i++) await new Promise(r => setImmediate(r)); };
 await settle();
 assert.equal(calls.length, 0, 'Enabling the indicator must not spawn status processes');
-assert.ok(registered._routes.every(r => r.choices.size === 0), 'Submenus must be created lazily');
+// PopupSubMenu.open() refuses empty submenus, so choices must exist before opening.
+assert.ok(registered._routes.every(r => r.choices.size > 0), 'Submenu choices must exist before opening');
 registered.menu.isOpen = true;
 registered.menu.signals.get('open-state-changed')(registered.menu, true);
 assert.equal(calls.length, 0, 'Opening must render before spawning processes');
@@ -114,12 +115,6 @@ registered._build();
 assert.equal(configReads, 2, 'A new store file must be read even with an unchanged mtime');
 await registered._refresh();
 assert.equal(registered._routes.length, config.groups.length + config.legacyPorts.length);
-for (const route of registered._routes) {
-    route.item.menu.signals.get('open-state-changed')(route.item.menu, true);
-    const count = route.choices.size;
-    route.item.menu.signals.get('open-state-changed')(route.item.menu, true);
-    assert.equal(route.choices.size, count);
-}
 for (const route of registered._routes) {
     assert.ok(registered.menu.items.includes(route.item), 'Each route must appear directly in the panel menu');
 }

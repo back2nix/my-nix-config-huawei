@@ -130,28 +130,26 @@ class VpnMenu extends PanelMenu.Button {
         const item = new PopupMenu.PopupSubMenuMenuItem(`${label}: проверка…`);
         const choices = new Map();
         const route = {label, command, modes, selector, item, choices, changing: false, mode: null};
-        item.menu.connect('open-state-changed', (_, open) => {
-            if (!open || choices.size)
-                return;
-            // Status still resolves against all modes; only the selectable choices are limited.
-            for (const mode of modes.filter(m => !only || only.includes(m.id))) {
-                const choice = new PopupMenu.PopupMenuItem(mode.label);
-                choice.connect('activate', async () => {
-                    route.changing = true;
-                    item.setSensitive(false);
-                    const result = await this._run([...command, mode.id]);
-                    if (!this._alive)
-                        return;
-                    route.changing = false;
-                    if (!result.ok)
-                        Main.notifyError(label, result.stderr || 'Не удалось изменить маршрут');
-                    await this._refresh();
-                });
-                item.menu.addMenuItem(choice);
-                choices.set(mode.id, choice);
-            }
-            this._markChoices(route);
-        });
+        // Choices must exist up front: PopupSubMenu.open() refuses to open an
+        // empty submenu, so lazy creation on open-state-changed never fires.
+        // Status still resolves against all modes; only the selectable choices are limited.
+        for (const mode of modes.filter(m => !only || only.includes(m.id))) {
+            const choice = new PopupMenu.PopupMenuItem(mode.label);
+            choice.connect('activate', async () => {
+                route.changing = true;
+                item.setSensitive(false);
+                const result = await this._run([...command, mode.id]);
+                if (!this._alive)
+                    return;
+                route.changing = false;
+                if (!result.ok)
+                    Main.notifyError(label, result.stderr || 'Не удалось изменить маршрут');
+                await this._refresh();
+            });
+            item.menu.addMenuItem(choice);
+            choices.set(mode.id, choice);
+        }
+        this._markChoices(route);
         item.setSensitive(false);
         this.menu.addMenuItem(item);
         this._routes.push(route);
