@@ -98,6 +98,11 @@ in {
         scanRandMacAddress = true;
       };
       ethernet.macAddress = "stable";
+      # IPv6: временные адреса для исходящих (RFC 4941), MAC не светится в адресе.
+      settings.connection = {
+        "ipv6.ip6-privacy" = 2;
+        "ipv6.addr-gen-mode" = "stable-privacy";
+      };
     };
 
     nat = {
@@ -219,7 +224,18 @@ in {
             }
 
             ip protocol icmp accept
+            # ICMPv6 обязателен (NDP, PMTU), но ping извне ограничиваем по частоте.
+            icmpv6 type echo-request limit rate 5/second accept
+            icmpv6 type echo-request drop
             ip6 nexthdr ipv6-icmp accept
+
+            # DHCPv6-ответы роутера приходят с link-local на 546.
+            ip6 saddr fe80::/10 udp dport 546 accept
+
+            # IPv6 без NAT: каждый глобальный адрес доступен из интернета напрямую.
+            # Наборы портов ниже (redis, postgres, k3s, ssh...) по IPv4 скрыты
+            # за NAT роутера — по IPv6 пускаем к ним только link-local и ULA.
+            meta nfproto ipv6 ip6 saddr != { fe80::/10, fc00::/7 } drop comment "No public IPv6 ingress"
 
             tcp dport @allowed_tcp accept
             udp dport @system_udp accept
@@ -238,6 +254,12 @@ in {
 
           chain forward {
             type filter hook forward priority filter; policy accept;
+
+            # IPv6-форвардинг включён ради контейнеров — не даём снаружи
+            # открывать новые соединения внутрь через нас.
+            meta nfproto ipv6 ct state established,related accept
+            meta nfproto ipv6 iifname "wl*" drop
+            meta nfproto ipv6 iifname "en*" drop
 
             # Разрешаем форвардинг для контейнеров
             iifname "cilium_*" accept
