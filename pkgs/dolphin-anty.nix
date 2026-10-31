@@ -9,7 +9,7 @@
 
   src = fetchurl {
     url = "https://dolphin-anty-cdn.com/anty-app/dolphin-anty-linux-x86_64-latest.AppImage";
-    hash = "sha256-bRyJ+wn0FO5JzG1FNa7D0FN5yOA+59cjyJRhwIFRZHw=";
+    hash = "sha256-UfaqZefqBW+EVeogUgA4lh+oFDJD288HQylHgULWJJs=";
   };
 
   appimageContents = appimageTools.extractType2 {inherit pname version src;};
