@@ -1,0 +1,32 @@
+Oct 10 00:53:47 yoga14 kernel: i2c_designware i2c_designware.0: [Firmware Bug]: DSDT uses known not-working I2C bus speed 400000, forcing it to 100000
+Oct 10 00:53:48 yoga14 kernel: input: Wacom HID 53FD Pen as /devices/pci0000:00/0000:00:19.1/i2c_designware.2/i2c-14/i2c-WACF220053FD:00/0018:056A:53FD.0002/input/input6
+Oct 10 00:53:48 yoga14 kernel: input: Wacom HID 53FD Finger as /devices/pci0000:00/0000:00:19.1/i2c_designware.2/i2c-14/i2c-WACF220053FD:00/0018:056A:53FD.0002/input/input7
+Oct 10 00:53:48 yoga14 kernel: input: ELAN06FA:00 04F3:327E Mouse as /devices/pci0000:00/0000:00:15.0/i2c_designware.0/i2c-12/i2c-ELAN06FA:00/0018:04F3:327E.0003/input/input9
+Oct 10 00:53:48 yoga14 kernel: input: ELAN06FA:00 04F3:327E Touchpad as /devices/pci0000:00/0000:00:15.0/i2c_designware.0/i2c-12/i2c-ELAN06FA:00/0018:04F3:327E.0003/input/input11
+Oct 10 00:53:48 yoga14 kernel: hid-multitouch 0018:04F3:327E.0003: input,hidraw2: I2C HID v1.00 Mouse [ELAN06FA:00 04F3:327E] on i2c-ELAN06FA:00
+Oct 10 01:09:00 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/696)
+Oct 10 03:02:41 yoga14 kernel: PM: suspend entry (s2idle)
+Oct 10 13:03:56 yoga14 kernel: PM: suspend exit
+Oct 10 16:03:58 yoga14 kernel: PM: suspend entry (s2idle)
+Oct 10 16:28:26 yoga14 kernel: PM: suspend exit
+Oct 10 18:06:31 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: IRQ triggered but there's no data
+Oct 10 18:06:32 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:06:32 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65295)
+Oct 10 18:06:32 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:33 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:06:33 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:39 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:39 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:06:39 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:39 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:06:52 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:06:52 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:55 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:06:57 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65311)
+Oct 10 18:07:57 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:08:21 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:08:21 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:08:21 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:08:21 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65343)
+Oct 10 18:08:22 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)
+Oct 10 18:15:25 yoga14 kernel: i2c_hid_acpi i2c-ELAN06FA:00: i2c_hid_get_input: incomplete report (31/65407)

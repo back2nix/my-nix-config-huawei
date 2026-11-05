@@ -1,0 +1,64 @@
+# WARN: this file will get overwritten by $ cachix use <name>
+{
+  pkgs,
+  lib,
+  ...
+}: let
+  folder = ./cachix;
+  toImport = name: value: folder + ("/" + name);
+  filterCaches = key: value: value == "regular" && lib.hasSuffix ".nix" key;
+  imports = lib.mapAttrsToList toImport (lib.filterAttrs filterCaches (builtins.readDir folder));
+in {
+  inherit imports;
+  nix.settings = {
+    # HTTP/2 (nghttp2) в nix залипает на середине NAR через прокси (offset-обрыв,
+    # "Less than 1 byte/sec"); curl работает по HTTP/1.1. См. NixOS/nix#11352.
+    http2 = false;
+
+    substituters = [
+      "https://cache.nixos.org/"
+      # "https://cache.flox.dev"
+      "https://robotnix.cachix.org"
+      "https://nix-community.cachix.org"
+
+      "https://nixpkgs-wayland.cachix.org"
+      "https://nixpkgs-unfree.cachix.org"
+      # "https://cache.nixos-cuda.org"
+      # "http://127.0.0.1:8080/system"
+      # "http://devready.work:8080/system"
+    ];
+
+    trusted-substituters = [
+      "https://cache.nixos.org/"
+      "https://nix-community.cachix.org"
+      # "http://127.0.0.1:8080/system"
+      # "http://devready.work:8080/system"
+    ];
+
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "nixpkgs-unfree.cachix.org-1:hqvoInulhbV4nJ9yJOEr+4wxhDV4xq2d1DK7S6Nj6rs="
+      "nixpkgs-wayland.cachix.org-1:3lwxaILxMRkVhehr5StQprHdEo4IrE8sRho9R9HOLYA="
+      # "flox-cache-public-1:7F4OyH7ZCnFhcze3fJdfyXYLQw/aV7GEed86nQ7IsOs="
+      # "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "system:Pq0rLW2CHR7DK6bnqoNlpfbjVf6AA1rCbBgf3zaPiCE="
+      "system:R0BqH3u7f2NsG4ySt87TfzMecyeh1daZWDjk/8h1z8g="
+    ];
+  };
+
+  # Dedicated selector: changing an agent/browser route never affects caches.
+  # Direct means direct-out in sing-box, with no daemon restart required.
+  systemd.services.nix-daemon.environment = {
+    HTTP_PROXY = "socks5h://127.0.0.1:1104";
+    HTTPS_PROXY = "socks5h://127.0.0.1:1104";
+    ALL_PROXY = "socks5h://127.0.0.1:1104";
+    http_proxy = "socks5h://127.0.0.1:1104";
+    https_proxy = "socks5h://127.0.0.1:1104";
+    all_proxy = "socks5h://127.0.0.1:1104";
+    NO_PROXY = "localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8";
+    no_proxy = "localhost,127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8";
+  };
+  systemd.services.nix-daemon.after = ["sing-box.service"];
+}

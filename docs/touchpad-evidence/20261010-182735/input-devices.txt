@@ -1,0 +1,172 @@
+I: Bus=0019 Vendor=0000 Product=0005 Version=0000
+N: Name="Lid Switch"
+P: Phys=PNP0C0D/button/input0
+S: Sysfs=/devices/pci0000:00/0000:00:1f.0/PNP0C09:00/PNP0C0D:00/input/input0
+U: Uniq=
+H: Handlers=event0 
+B: PROP=0
+B: EV=21
+B: SW=1
+
+I: Bus=0019 Vendor=0000 Product=0001 Version=0000
+N: Name="Power Button"
+P: Phys=PNP0C0C/button/input0
+S: Sysfs=/devices/platform/PNP0C0C:00/input/input1
+U: Uniq=
+H: Handlers=kbd event1 
+B: PROP=0
+B: EV=3
+B: KEY=8000 10000000000000 0
+
+I: Bus=0011 Vendor=0001 Product=0001 Version=ab83
+N: Name="AT Translated Set 2 keyboard"
+P: Phys=isa0060/serio0/input0
+S: Sysfs=/devices/platform/i8042/serio0/input/input2
+U: Uniq=
+H: Handlers=sysrq kbd leds event2 
+B: PROP=0
+B: EV=120013
+B: KEY=402000007 ff803078f800d001 feffffdfffcfffff fffffffffffffffe
+B: MSC=10
+B: LED=7
+
+I: Bus=0019 Vendor=0000 Product=0006 Version=0000
+N: Name="Video Bus"
+P: Phys=LNXVIDEO/video/input0
+S: Sysfs=/devices/pci0000:00/acpi.video_bus.0/input/input3
+U: Uniq=
+H: Handlers=kbd event3 
+B: PROP=0
+B: EV=3
+B: KEY=3e000b00000000 0 0 0
+
+I: Bus=0019 Vendor=0000 Product=0000 Version=0000
+N: Name="Ideapad extra buttons"
+P: Phys=ideapad/input0
+S: Sysfs=/devices/pci0000:00/0000:00:1f.0/PNP0C09:00/VPC2004:00/input/input4
+U: Uniq=
+H: Handlers=kbd event4 rfkill 
+B: PROP=0
+B: EV=13
+B: KEY=400040000000000 40000001c0000 0 6000000000000000 100000000000 0 181000800100c00 400000000300400 0 2
+B: MSC=10
+
+I: Bus=0019 Vendor=0000 Product=0000 Version=0000
+N: Name="Lenovo Yoga Tablet Mode Control switch"
+P: Phys=06129D99-6083-4164-81AD-F092F9D773A6/input0
+S: Sysfs=/devices/platform/PNP0C14:03/wmi_bus/wmi_bus-PNP0C14:03/06129D99-6083-4164-81AD-F092F9D773A6-16/input/input5
+U: Uniq=
+H: Handlers=event5 
+B: PROP=0
+B: EV=21
+B: SW=2
+
+I: Bus=0018 Vendor=056a Product=53fd Version=0100
+N: Name="Wacom HID 53FD Pen"
+P: Phys=i2c-WACF220053FD:00
+S: Sysfs=/devices/pci0000:00/0000:00:19.1/i2c_designware.2/i2c-14/i2c-WACF220053FD:00/0018:056A:53FD.0002/input/input6
+U: Uniq=
+H: Handlers=event6 mouse0 
+B: PROP=2
+B: EV=1b
+B: KEY=1c03 0 0 0 0 0
+B: ABS=1000d000003
+B: MSC=21
+
+I: Bus=0018 Vendor=056a Product=53fd Version=0100
+N: Name="Wacom HID 53FD Finger"
+P: Phys=i2c-WACF220053FD:00
+S: Sysfs=/devices/pci0000:00/0000:00:19.1/i2c_designware.2/i2c-14/i2c-WACF220053FD:00/0018:056A:53FD.0002/input/input7
+U: Uniq=
+H: Handlers=event7 mouse1 
+B: PROP=2
+B: EV=1b
+B: KEY=400 0 0 0 0 0
+B: ABS=260800000000003
+B: MSC=20
+
+I: Bus=0018 Vendor=04f3 Product=327e Version=0100
+N: Name="ELAN06FA:00 04F3:327E Mouse"
+P: Phys=i2c-ELAN06FA:00
+S: Sysfs=/devices/pci0000:00/0000:00:15.0/i2c_designware.0/i2c-12/i2c-ELAN06FA:00/0018:04F3:327E.0003/input/input9
+U: Uniq=
+H: Handlers=event8 mouse2 
+B: PROP=0
+B: EV=17
+B: KEY=30000 0 0 0 0
+B: REL=3
+B: MSC=10
+
+I: Bus=0018 Vendor=04f3 Product=327e Version=0100
+N: Name="ELAN06FA:00 04F3:327E Touchpad"
+P: Phys=i2c-ELAN06FA:00
+S: Sysfs=/devices/pci0000:00/0000:00:15.0/i2c_designware.0/i2c-12/i2c-ELAN06FA:00/0018:04F3:327E.0003/input/input11
+U: Uniq=
+H: Handlers=event9 mouse3 
+B: PROP=5
+B: EV=1b
+B: KEY=e520 10000 0 0 0 0
+B: ABS=2e0800000000003
+B: MSC=20
+
+I: Bus=0000 Vendor=0000 Product=0000 Version=0000
+N: Name="sof-hda-dsp Mic"
+P: Phys=ALSA
+S: Sysfs=/devices/pci0000:00/0000:00:1f.3/skl_hda_dsp_generic/sound/card0/input12
+U: Uniq=
+H: Handlers=event10 
+B: PROP=0
+B: EV=21
+B: SW=10
+
+I: Bus=0000 Vendor=0000 Product=0000 Version=0000
+N: Name="sof-hda-dsp Headphone"
+P: Phys=ALSA
+S: Sysfs=/devices/pci0000:00/0000:00:1f.3/skl_hda_dsp_generic/sound/card0/input13
+U: Uniq=
+H: Handlers=kbd event11 
+B: PROP=0
+B: EV=23
+B: KEY=40 0 0 0 0 0 0 1000000000 c000000000000 0
+B: SW=4
+
+I: Bus=0000 Vendor=0000 Product=0000 Version=0000
+N: Name="sof-hda-dsp HDMI/DP,pcm=3"
+P: Phys=ALSA
+S: Sysfs=/devices/pci0000:00/0000:00:1f.3/skl_hda_dsp_generic/sound/card0/input14
+U: Uniq=
+H: Handlers=event12 
+B: PROP=0
+B: EV=21
+B: SW=140
+
+I: Bus=0000 Vendor=0000 Product=0000 Version=0000
+N: Name="sof-hda-dsp HDMI/DP,pcm=4"
+P: Phys=ALSA
+S: Sysfs=/devices/pci0000:00/0000:00:1f.3/skl_hda_dsp_generic/sound/card0/input15
+U: Uniq=
+H: Handlers=event13 
+B: PROP=0
+B: EV=21
+B: SW=140
+
+I: Bus=0000 Vendor=0000 Product=0000 Version=0000
+N: Name="sof-hda-dsp HDMI/DP,pcm=5"
+P: Phys=ALSA
+S: Sysfs=/devices/pci0000:00/0000:00:1f.3/skl_hda_dsp_generic/sound/card0/input16
+U: Uniq=
+H: Handlers=event14 
+B: PROP=0
+B: EV=21
+B: SW=140
+
+I: Bus=0005 Vendor=0000 Product=0000 Version=0000
+N: Name="Computer (MCS)"
+P: Phys=d0:57:7e:2a:08:4f
+S: Sysfs=/devices/virtual/input/input17
+U: Uniq=
+H: Handlers=kbd event15 
+B: PROP=0
+B: EV=3
+B: KEY=300 6800000000 0 0
+

@@ -1,0 +1,97 @@
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
+  imports = [
+    ./hardware-configuration.nix
+    # ./powersave.nix
+    ./power-profiles.nix
+    # Admin-VPN до casino-VPS, как на yoga14, но свой пир: 10.100.0.5,
+    # ключ wireguard/eggventure_desktop_private (сервер: casino-vps/modules/wireguard.nix).
+    ../../module/wireguard-eggventure.nix
+    # Личный VPN (10.101.0.0/24), свой пир 10.101.0.8, отдельно от admin-VPN.
+    ../../module/wireguard-personal-peer.nix
+  ];
+
+  my.eggventureVpn = {
+    address = "10.100.0.5";
+    secret = "wireguard/eggventure_desktop_private";
+  };
+
+  my.personalVpn.address = "10.101.0.8";
+
+  nix.settings = {
+    substituters = lib.mkAfter [
+      "https://cache.nixos-cuda.org"
+    ];
+    trusted-public-keys = lib.mkAfter [
+      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+    ];
+  };
+
+  networking.hostName = "desktop";
+
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # --- CUDA and NVIDIA Configuration ---
+  hardware.graphics = {
+    enable = true;
+  };
+
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia = {
+    modesetting.enable = true;
+    powerManagement.enable = false;
+    powerManagement.finegrained = false;
+    open = false;
+    nvidiaSettings = true;
+    # 595.71.05 из nixpkgs не собирается под ядро 7.2 (там удалён strncpy),
+    # см. https://github.com/NixOS/nixpkgs/issues/554125 — вернуть .stable, когда обновят
+    package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+      version = "595.99.02";
+      sha256_64bit = "sha256-6HR3lYv3YwcFSTJL1a1slI66btIQ5EAFs+/4SUD24ew=";
+      openSha256 = "sha256-T36x/jx8yQ8l3LFp1rZIrTfcSwbGy8YSAvXOUSptpb4=";
+      settingsSha256 = "sha256-GYCcnxfKPrTCrsmd25sMyzfC5cqJQJx0c31haooyTYM=";
+      persistencedSha256 = "sha256-VyKtF/HdHPQrHHK6opSO69M72LmnGZtauuchj9uuje8=";
+    };
+  };
+
+  boot.kernelModules = ["nvidia-uvm" "v4l2loopback"];
+  boot.extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
+
+  # --- Virtualisation with NVIDIA support ---
+  hardware.nvidia-container-toolkit.enable = true;
+
+  virtualisation.docker.daemon.settings.runtimes = {
+    nvidia = {
+      path = "${config.hardware.nvidia-container-toolkit.package}/bin/nvidia-container-runtime";
+    };
+  };
+
+  # --- Desktop-specific packages ---
+  environment.systemPackages = with pkgs; [
+    cudaPackages.cudatoolkit
+    voicestudio
+    # neuralnote
+    nvtopPackages.nvidia
+    nvitop
+  ];
+
+  # Модель MuScriptor large для NeuralNote: приложение ищет её в
+  # ~/.config/NeuralNote/models и проверяет только имя и размер.
+  # systemd.tmpfiles.rules = [
+  #   "d /home/bg/.config/NeuralNote 0755 bg users -"
+  #   "d /home/bg/.config/NeuralNote/models 0755 bg users -"
+  #   "L+ /home/bg/.config/NeuralNote/models/muscriptor-large-f16.gguf - - - - ${pkgs.neuralnote.modelLarge}"
+  # ];
+
+  # --- K3s standalone server ---
+  services.k3s = {
+    enable = true;
+    role = "server";
+  };
+}

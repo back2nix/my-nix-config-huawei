@@ -1,0 +1,26 @@
+layout {
+    pane size=1 borderless=false {
+        plugin location="zellij:tab-bar"
+    }
+    pane split_direction="vertical" {
+        pane split_direction="horizontal" {
+            pane {
+                name "speaker"
+                command "make"
+                args "run"
+                cwd "/home/bg/Documents/code/github.com/back2nix/speaker"
+            }
+            pane {
+                size "80%"
+                cwd "/home/bg/Documents/code/github.com/back2nix/info"
+            }
+        }
+        pane {
+            cwd "/home/bg/Documents/code/github.com/back2nix/nix/my-nix-config-huawei"
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
+

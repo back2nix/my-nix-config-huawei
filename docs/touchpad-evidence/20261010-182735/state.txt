@@ -1,0 +1,21 @@
+2026-10-10T18:29:28+05:00
+
+Linux yoga14 7.2.8-cachyos #1-NixOS SMP PREEMPT_DYNAMIC Sat Sep 26 14:39:58 UTC 2026 x86_64 GNU/Linux
+
+/proc/sys/kernel/random/boot_id
+0eaa1854-b4f7-41b1-9fe5-dfdc50084b36
+
+/sys/bus/pci/devices/0000:00:15.0/power/control
+on
+
+/sys/bus/pci/devices/0000:00:15.0/power/runtime_status
+active
+
+/sys/bus/i2c/devices/i2c-ELAN06FA:00/power/control
+on
+
+/sys/bus/i2c/devices/i2c-ELAN06FA:00/power/runtime_status
+unsupported
+
+/sys/power/mem_sleep
+[s2idle] deep

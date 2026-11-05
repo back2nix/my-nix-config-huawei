@@ -1,0 +1,7 @@
+{
+  "uuid": "dual-clock@back2nix",
+  "name": "Almaty and Moscow Clock",
+  "description": "Show Moscow time beside the system clock set to Almaty.",
+  "shell-version": ["50"],
+  "version": 1
+}
