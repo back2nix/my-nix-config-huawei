@@ -47,6 +47,10 @@ in {
   xdg.configFile = {
     "kitty/kitty.conf".source = ./kitty.conf;
     "wal/templates/colorskitty.conf".source = ./pywalkittytemplate;
+    # adb-wifi-autoconnect (ручной таймер: nmap-скан 192.168.3.0/24 каждые 30с) — не нужен.
+    # Маскируем декларативно: unit -> /dev/null, systemd его не запустит.
+    "systemd/user/adb-wifi-autoconnect.timer".source = config.lib.file.mkOutOfStoreSymlink "/dev/null";
+    "systemd/user/adb-wifi-autoconnect.service".source = config.lib.file.mkOutOfStoreSymlink "/dev/null";
   };
 
   xdg.dataFile."gnome-shell/extensions/dual-clock@back2nix" = {

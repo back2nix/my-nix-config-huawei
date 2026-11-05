@@ -186,6 +186,40 @@
         description = "Маршрут Nix/Cachix: direct, usa, casino, fra";
         body = "command ${pkgs.vpn-route}/bin/vpn-route nix $argv";
       };
+      screenrec = {
+        description = "Запись экрана (gpu-screen-recorder): screenrec [файл.mp4]; остановка Ctrl+C или screenrec-stop";
+        body = ''
+          if pgrep -x gpu-screen-reco >/dev/null
+            echo "screenrec: запись уже идёт:" >&2
+            pgrep -ax gpu-screen-reco >&2
+            echo "screenrec: останови её через screenrec-stop" >&2
+            return 1
+          end
+          set -l out $argv[1]
+          test -z "$out"; and set out ~/Videos/Screencasts/rec-(date +%Y%m%d-%H%M%S).mp4
+          echo "screenrec: пишу в $out (Ctrl+C чтобы остановить)"
+          gpu-screen-recorder -w screen -k h264 -bm qp -q high -f 30 -a default_output -o $out
+          # если что-то пошло не так (Ctrl+Z, закрытый терминал) — не оставлять висеть
+          pkill -INT -x gpu-screen-reco 2>/dev/null
+          echo "screenrec: сохранено $out"
+        '';
+      };
+      screenrec-stop = {
+        description = "Остановить все gpu-screen-recorder (SIGINT — файл корректно дописывается)";
+        body = ''
+          if not pgrep -x gpu-screen-reco >/dev/null
+            echo "screenrec-stop: запись не идёт"
+            return 0
+          end
+          pkill -INT -x gpu-screen-reco
+          for i in (seq 20)
+            pgrep -x gpu-screen-reco >/dev/null; or begin; echo "screenrec-stop: остановлено"; return 0; end
+            sleep 0.5
+          end
+          echo "screenrec-stop: не остановился за 10с, убиваю" >&2
+          pkill -KILL -x gpu-screen-reco
+        '';
+      };
       # prompt_virtual_env = ''
       #   set envs
 
