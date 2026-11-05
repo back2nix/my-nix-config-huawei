@@ -94,4 +94,5 @@
     enable = true;
     role = "server";
   };
+  local.k3s.autostart = true; # постоянный сервер: поднимать при загрузке
 }

@@ -3,7 +3,8 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   cfg = config.services.k3s;
   isServer = cfg.role == "server";
   isAgent = cfg.role == "agent";
@@ -16,93 +17,111 @@
   pauseImage = pkgs.dockerTools.buildLayeredImage {
     name = "nix.local/pause";
     tag = pkgs.kubernetes.version;
-    config.Entrypoint = ["${pkgs.kubernetes.pause}/bin/pause"];
+    config.Entrypoint = [ "${pkgs.kubernetes.pause}/bin/pause" ];
   };
   pauseRef = "${pauseImage.imageName}:${pauseImage.imageTag}";
-in {
-  # Отдельный oneshot: killall сам останавливает k3s*.service, поэтому
-  # имя этого юнита не должно начинаться с k3s (иначе он остановит себя).
-  systemd.services.local-cluster-off = lib.mkIf cfg.enable {
-    description = "Stop local K3s and all its containers";
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${cfg.package}/bin/k3s-killall.sh";
-      TimeoutStartSec = "120s";
-    };
+in
+{
+  options.local.k3s.autostart = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = ''
+      Запускать k3s при загрузке и при nixos-rebuild switch.
+      false: k3s стартует только тумблером в трее. Иначе k3s в WantedBy=multi-user.target,
+      и switch-to-configuration поднимает его после каждого switch (юнит меняется вместе
+      с путями nix store), даже если в трее он выключен.
+    '';
   };
 
-  security.polkit.extraConfig = lib.mkIf cfg.enable ''
-    polkit.addRule(function(action, subject) {
-      if (action.id == "org.freedesktop.systemd1.manage-units" &&
-          action.lookup("verb") == "start" &&
-          (action.lookup("unit") == "k3s.service" ||
-           action.lookup("unit") == "local-cluster-off.service") &&
-          subject.user == "bg" && subject.local && subject.active) {
-        return polkit.Result.YES;
-      }
-    });
-  '';
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && !config.local.k3s.autostart) {
+      systemd.services.k3s.wantedBy = lib.mkForce [ ];
+    })
+    {
+      # Отдельный oneshot: killall сам останавливает k3s*.service, поэтому
+      # имя этого юнита не должно начинаться с k3s (иначе он остановит себя).
+      systemd.services.local-cluster-off = lib.mkIf cfg.enable {
+        description = "Stop local K3s and all its containers";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${cfg.package}/bin/k3s-killall.sh";
+          TimeoutStartSec = "120s";
+        };
+      };
 
-  systemd.services.k3s-lo-ip = {
-    description = "Add 10.0.0.1/32 to loopback for k3s node IP";
-    before = ["k3s.service"];
-    wantedBy = ["k3s.service"];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr add 10.0.0.1/32 dev lo || true'";
-      ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr del 10.0.0.1/32 dev lo || true'";
-    };
-  };
+      security.polkit.extraConfig = lib.mkIf cfg.enable ''
+        polkit.addRule(function(action, subject) {
+          if (action.id == "org.freedesktop.systemd1.manage-units" &&
+              action.lookup("verb") == "start" &&
+              (action.lookup("unit") == "k3s.service" ||
+               action.lookup("unit") == "local-cluster-off.service") &&
+              subject.user == "bg" && subject.local && subject.active) {
+            return polkit.Result.YES;
+          }
+        });
+      '';
 
-  services.k3s = {
-    enable = lib.mkDefault true;
-    role = lib.mkDefault "server";
-    package = pkgs.k3s;
-    images = [pauseImage];
+      systemd.services.k3s-lo-ip = {
+        description = "Add 10.0.0.1/32 to loopback for k3s node IP";
+        before = [ "k3s.service" ];
+        wantedBy = [ "k3s.service" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr add 10.0.0.1/32 dev lo || true'";
+          ExecStop = "${pkgs.bash}/bin/bash -c '${pkgs.iproute2}/bin/ip addr del 10.0.0.1/32 dev lo || true'";
+        };
+      };
 
-    # Эти опции стандартные для модуля k3s в NixOS
-    # serverAddr = ...;
-    # token = ...;
-    # Но мы будем использовать их через передачу в устройствах
+      services.k3s = {
+        enable = lib.mkDefault true;
+        role = lib.mkDefault "server";
+        package = pkgs.k3s;
+        images = [ pauseImage ];
 
-    extraFlags = toString ([
-        "--kubelet-arg=fail-swap-on=false"
-        # Абсолютный порог вместо k3s-дефолта 5% + minimumReclaim 10%: на диске 1ТБ
-        # кратковременная просадка <50G (nix-сборка) защёлкивала DiskPressure до 151G свободных
-        # и блокировала шедулинг всего узла (helm pre-upgrade hook висел в Pending).
-        "--kubelet-arg=eviction-hard=nodefs.available<10Gi,imagefs.available<10Gi"
-        "--kubelet-arg=eviction-minimum-reclaim=nodefs.available=1Gi,imagefs.available=1Gi"
-        "--node-ip 10.0.0.1"
-        "--node-external-ip 10.0.0.1"
-        "--advertise-address 10.0.0.1"
-        "--flannel-iface lo"
-        "--pause-image ${pauseRef}"
-      ]
-      ++ (lib.optionals isServer [
-        "--write-kubeconfig-mode 644"
-        "--disable=traefik"
-      ]));
-  };
+        # Эти опции стандартные для модуля k3s в NixOS
+        # serverAddr = ...;
+        # token = ...;
+        # Но мы будем использовать их через передачу в устройствах
 
-  # Создаем группу k3s
-  users.groups.k3s = {};
+        extraFlags = toString (
+          [
+            "--kubelet-arg=fail-swap-on=false"
+            # Абсолютный порог вместо k3s-дефолта 5% + minimumReclaim 10%: на диске 1ТБ
+            # кратковременная просадка <50G (nix-сборка) защёлкивала DiskPressure до 151G свободных
+            # и блокировала шедулинг всего узла (helm pre-upgrade hook висел в Pending).
+            "--kubelet-arg=eviction-hard=nodefs.available<10Gi,imagefs.available<10Gi"
+            "--kubelet-arg=eviction-minimum-reclaim=nodefs.available=1Gi,imagefs.available=1Gi"
+            "--node-ip 10.0.0.1"
+            "--node-external-ip 10.0.0.1"
+            "--advertise-address 10.0.0.1"
+            "--flannel-iface lo"
+            "--pause-image ${pauseRef}"
+          ]
+          ++ (lib.optionals isServer [
+            "--write-kubeconfig-mode 644"
+            "--disable=traefik"
+          ])
+        );
+      };
 
-  # Настраиваем права доступа к сокету
-  systemd.tmpfiles.rules = [
-    "z /run/k3s/containerd/containerd.sock 0660 root k3s -"
+      # Создаем группу k3s
+      users.groups.k3s = { };
+
+      # Настраиваем права доступа к сокету
+      systemd.tmpfiles.rules = [
+        "z /run/k3s/containerd/containerd.sock 0660 root k3s -"
+      ];
+
+      environment.systemPackages = with pkgs; [
+        k3s
+        cilium-cli
+        kubernetes-helm
+      ];
+
+      environment.variables = {
+        KUBECONFIG = if isServer then "/etc/rancher/k3s/k3s.yaml" else null;
+      };
+    }
   ];
-
-  environment.systemPackages = with pkgs; [
-    k3s
-    cilium-cli
-    kubernetes-helm
-  ];
-
-  environment.variables = {
-    KUBECONFIG =
-      if isServer
-      then "/etc/rancher/k3s/k3s.yaml"
-      else null;
-  };
 }
