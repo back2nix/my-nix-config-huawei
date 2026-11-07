@@ -60,6 +60,7 @@ in {
     # ./module/kvm.nix
     # ./module/virtualbox.nix
     ./module/k3s.nix
+    ./module/plymouth.nix # Тихая загрузка с анимацией и вводом пароля LUKS
 
     # DNS настройки
     # ./module/dns-dot-tls.nix

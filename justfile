@@ -19,8 +19,12 @@ switch:
     # --sudo вместо `sudo nixos-rebuild`: eval/fetch флейка идёт от пользователя
     # (нужен его ssh-ключ для приватного git+ssh инпута mutter-src),
     # root используется только для активации.
-    nixos-rebuild switch --sudo --flake ".#${device}" \
-        --option http2 false
+    # Фолбэк на nixos-rebuild, пока nh ещё не установлен (первая сборка).
+    if command -v nh >/dev/null; then
+        nh os switch . -H "${device}" -- --option http2 false
+    else
+        nixos-rebuild switch --sudo --flake ".#${device}" --option http2 false
+    fi
 
 # Пересборка NixOS
 nix:
