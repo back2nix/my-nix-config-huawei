@@ -4,8 +4,10 @@ set dotenv-load
 # Основная команда для пересборки системы (автоопределение устройства по hostname)
 default: switch
 
-# Пересборка текущей системы: сам определяет цель flake по hostname
-switch:
+# Пересборка текущей системы: сам определяет цель flake по hostname.
+# Опционально: `just switch desktop` — компилировать на удалённой машине (ssh-хост),
+# результат копируется обратно и активируется локально.
+switch build_host="":
     #!/usr/bin/env bash
     set -euo pipefail
     case "$(hostname)" in
@@ -20,10 +22,15 @@ switch:
     # (нужен его ssh-ключ для приватного git+ssh инпута mutter-src),
     # root используется только для активации.
     # Фолбэк на nixos-rebuild, пока nh ещё не установлен (первая сборка).
+    bh=()
+    if [ -n "{{build_host}}" ]; then
+        echo "Сборка на удалённом хосте: {{build_host}}"
+        bh=(--build-host "{{build_host}}")
+    fi
     if command -v nh >/dev/null; then
-        nh os switch . -H "${device}" -- --option http2 false
+        nh os switch . -H "${device}" "${bh[@]}" -- --option http2 false
     else
-        nixos-rebuild switch --sudo --flake ".#${device}" --option http2 false
+        nixos-rebuild switch --sudo --flake ".#${device}" "${bh[@]}" --option http2 false
     fi
 
 # Пересборка NixOS
