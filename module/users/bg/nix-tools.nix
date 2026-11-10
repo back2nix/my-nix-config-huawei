@@ -35,6 +35,8 @@
       inline_height = 20;
       filter_mode_shell_up_key_binding = "session";
       enter_accept = false;
+      # Стрелка за край списка не выходит из поиска (выход — Esc/Ctrl-C).
+      exit_past_line_one = false;
       auto_sync = true;
       sync_frequency = "10m";
       update_check = false;
