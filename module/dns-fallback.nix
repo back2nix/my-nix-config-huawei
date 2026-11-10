@@ -72,6 +72,11 @@
     table inet dns_strict {
       chain output {
         type filter hook output priority -10; policy accept;
+        # k3s: hostNetwork-поды (gateway) ходят в CoreDNS по 10.43.0.10:53.
+        # Маршрута в кластер у хоста нет, oif = wl*, без исключения запрос
+        # отклоняется и Envoy теряет все бэкенды (no healthy upstream).
+        ip daddr { 10.42.0.0/16, 10.43.0.0/16 } accept
+        ct status dnat accept
         oifname "wl*" meta l4proto { tcp, udp } th dport 53 counter reject
         oifname "en*" meta l4proto { tcp, udp } th dport 53 counter reject
         oifname "eth*" meta l4proto { tcp, udp } th dport 53 counter reject
