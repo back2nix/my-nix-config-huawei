@@ -36,7 +36,7 @@ in {
     aggressiveResize = false;
     historyLimit = 100000;
     resizeAmount = 5;
-    escapeTime = 0;
+    escapeTime = 10; # 0 рвёт стрелки на ESC+[A — atuin видит Esc и закрывается
     secureSocket = false;
     clock24 = true;
     baseIndex = 1;
