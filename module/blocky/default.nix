@@ -13,18 +13,20 @@
         http = "127.0.0.1:4000";
       };
 
-      # bootstrapDns нужен, чтобы зарезолвить hostname'ы DoH/DoT upstream'ов.
-      # Только plain IP и только напрямую (без прокси) — иначе курица/яйцо.
+      # ☢️ ЗДЕСЬ ОПИСАН СТРОГИЙ ВАРИАНТ: ни одного открытого резолвера.
+      # Вариант с откатом на plain (9.9.9.9 и т.д.) собирается из этого же
+      # конфига в module/dns-fallback.nix и включается только тумблером
+      # «Открытый DNS (откат)». Не добавлять сюда plain-адреса.
+      #
+      # bootstrapDns резолвит hostname'ы блок-листов. Тоже через dnscrypt-proxy:
+      # иначе при каждом старте blocky эти имена уходили бы открытым текстом.
       bootstrapDns = [
-        "9.9.9.9"
-        "1.1.1.1"
+        "tcp+udp:127.0.0.1:5300"
       ];
 
       upstreams = {
-        # strict = строгий порядок с откатом: сначала защищённый DNS (DoH→DoT),
-        # и только если оба недоступны — откат на plain. Это honest secure-first
-        # с failover внутри blocky. Если же сам blocky умрёт — отдельный plain
-        # fallback живёт в /etc/resolv.conf (network-configuration.nix).
+        # strict = строгий порядок. В строгом варианте upstream один; в варианте
+        # с откатом (module/dns-fallback.nix) после него дописываются plain.
         strategy = "strict";
         # blocky всегда стартует, даже если upstream'ы недоступны (init в фоне) —
         # критично, чтобы DNS не падал намертво. В blocky v0.26 это ключ
@@ -35,9 +37,6 @@
             # secure через proxy: dnscrypt-proxy → socks5 1082 → ssh-out1-via-casino → Quad9 DoH
             # (module/dnscrypt-proxy.nix). Обходит цензуру/отравление DNS под GFW.
             "127.0.0.1:5300"
-            # если dnscrypt-proxy/тоннель недоступны — strict откатывается на plain.
-            "9.9.9.9"
-            "149.112.112.112"
           ];
         };
       };

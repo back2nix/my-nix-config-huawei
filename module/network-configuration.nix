@@ -80,12 +80,8 @@ in {
   # (иначе ассерт-конфликт с environment.etc."resolv.conf")
   networking.resolvconf.enable = lib.mkForce false;
 
-  environment.etc."resolv.conf".text = ''
-    nameserver 127.0.0.1
-    nameserver 8.8.8.8
-    nameserver 1.1.1.1
-    options edns0 trust-ad timeout:1 attempts:1
-  '';
+  # Сам /etc/resolv.conf — в module/dns-fallback.nix: по умолчанию в нём только
+  # 127.0.0.1 (blocky), открытые 8.8.8.8/1.1.1.1 появляются лишь по тумблеру.
 
   # ☢️ ЗАПРЕТ СКРЫТЫХ (hidden) Wi-Fi ПРОФИЛЕЙ — защита от утечки через probe requests.
   # Обычно wpa_supplicant шлёт пустые (wildcard) probe requests, имена сетей в эфир не уходят.

@@ -12,7 +12,8 @@
 #   blocky (127.0.0.1:53)
 #     └─ strict, по порядку:
 #        1. 127.0.0.1:5300  → dnscrypt-proxy → socks5 1082 → casino-VPS → ssh-out1-via-casino (Seoul) → Quad9 DoH
-#        2. 9.9.9.9 / 149...  → plain напрямую (твой failover, остаётся как есть)
+#        2. 9.9.9.9 / 149...  → plain напрямую — ТОЛЬКО при включённом тумблере
+#           «Открытый DNS (откат)», см. module/dns-fallback.nix
 #
 # Петли нет: Quad9 задан static-стампом с зашитым IP 9.9.9.9, поэтому
 # bootstrap-резолв hostname'а не нужен (курица/яйцо исключена).
@@ -36,6 +37,10 @@
 
       # IP уже зашит в стамп → bootstrap не используется, но поле обязательно.
       bootstrap_resolvers = ["9.9.9.9:53" "1.1.1.1:53"];
+      # Проверка сети на старте — это UDP-пакет на 9.9.9.9:53 мимо тоннеля.
+      # В строгом режиме (module/dns-fallback.nix) порт 53 наружу закрыт, и
+      # проверка ждала бы свои 60 с. Выключаем: тоннель и так проверяет sing-box.
+      netprobe_timeout = 0;
 
       static.quad9-doh-proxied.stamp = "sdns://AgcAAAAAAAAABzkuOS45LjkADWRucy5xdWFkOS5uZXQKL2Rucy1xdWVyeQ";
     };

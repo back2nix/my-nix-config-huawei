@@ -124,7 +124,7 @@ in {
     # тихо исчезнет, и это будет выглядеть как «VPN отвалился».
     # VPN switches live in the dedicated VPN Routes panel menu.
     "org/gnome/shell/extensions/custom-command-toggle" = {
-      numbuttons-setting = 3;
+      numbuttons-setting = 4;
       # Кнопка 1: экранная клавиатура GNOME (OSK). Выключенная — не всплывает
       # вообще, включённая — появляется в нужные моменты (ввод с тачскрина).
       # Это ровно тот же ключ a11y, что задан ниже как значение по умолчанию;
@@ -172,6 +172,22 @@ in {
       initialtogglestate3-setting = 3;
       showindicator3-setting = true;
       runcommandatboot3-setting = false;
+
+      # Кнопка 4: откат на незашифрованный DNS (module/dns-fallback.nix).
+      # Выключен = только DoH через тоннель, без тоннеля имена не резолвятся.
+      # Индикатор обязателен: забытый включённым откат = запросы открытым
+      # текстом при любом сбое тоннеля.
+      entryrow34-setting = "Открытый DNS (откат)";
+      entryrow44-setting = "dialog-warning-symbolic,security-high-symbolic";
+      entryrow14-setting = "dns-fallback on";
+      entryrow24-setting = "dns-fallback off";
+      checkcommand4-setting = "dns-fallback status";
+      checkregex4-setting = "ON";
+      checkcommandsync4-setting = true;
+      checkcommandinterval4-setting = 10;
+      initialtogglestate4-setting = 3; # не трогать юнит при логине
+      showindicator4-setting = true;
+      runcommandatboot4-setting = false;
     };
     "org/gnome/desktop/interface" = {
       enable-animations = false;

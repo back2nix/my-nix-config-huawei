@@ -67,6 +67,7 @@ in {
     # ./module/dns-doh-https.nix
     # ./module/dns-blocky.nix
     ./module/blocky/default.nix
+    ./module/dns-fallback.nix # Открытый DNS только по тумблеру; по умолчанию строго зашифрованный
     ./module/dnscrypt-proxy.nix
 
     # Сеть и контейнеры
