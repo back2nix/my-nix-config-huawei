@@ -18,6 +18,7 @@ in {
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
         "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/"
+        "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/"
       ];
     };
     "org/gnome/settings-daemon/plugins/power" = {
@@ -53,6 +54,12 @@ in {
       binding = "<Primary><Alt>A";
       command = "anon-mode";
       name = "Anon Mode (Tor-only kill-switch)";
+    };
+    # То же, но сеть отключается и ждёт ручного подключения в другой сети.
+    "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5" = {
+      binding = "<Primary><Alt><Shift>A";
+      command = "anon-mode fresh";
+      name = "Anon Mode: fresh network (disconnect, connect elsewhere)";
     };
     "org/gnome/desktop/peripherals/touchpad" = {
       natural-scroll = true;
