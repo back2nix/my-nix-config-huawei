@@ -202,6 +202,10 @@
 
       {label = "WebRTC: блокировать Google STUN"; unit = "webrtc-google-block.service";}
       {label = "WebRTC: запретить UDP (bg, кроме DNS)"; unit = "webrtc-udp-block.service";}
+
+      # Откат на незашифрованный DNS (module/dns-fallback.nix). Выключен =
+      # только DoH через тоннель. Сбрасывается перезагрузкой.
+      {label = "Открытый DNS (откат)"; unit = "dns-fallback.service";}
     ];
     # direct = true добавляет режим Direct.
     # only ограничивает выбор в меню (статус показывается любой).
