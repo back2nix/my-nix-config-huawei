@@ -1,0 +1,137 @@
+--- a/extension.js
++++ b/extension.js
+@@ -52,9 +52,92 @@
+ let shortcutId4; let shortcutId5; let shortcutId6;
+ 
+ let checkIntervals = []; let commandTimeouts = [];
++let checkWatchers = [];
+ let isRunning = [];
+ let debug = false;
+ 
++//#region Event Watch (local patch)
++// Polling by a timer forks gnome-shell every N seconds: the compositor stalls
++// for 60-120 ms on each fork. A "watch:" check command follows the state by
++// events instead:
++//   watch:gsettings:<schema>:<key>   value text is tested against the regex
++//   watch:user-unit:<name.service>   ON when systemd ActiveState is "active"
++//   watch:system-unit:<name.service> same, on the system bus
++function stopWatch(i) {
++    const stop = checkWatchers[i - 1];
++    if (stop) {
++        stop();
++        checkWatchers[i - 1] = null;
++    }
++}
++
++function stopAllWatches() {
++    checkWatchers.forEach(stop => { if (stop) stop(); });
++    checkWatchers = [];
++}
++
++function watchGSettings(schema, key, regex, apply) {
++    const settings = new Gio.Settings({schema_id: schema});
++    const read = () => apply(new RegExp(regex).test(settings.get_value(key).print(false)));
++    const id = settings.connect(`changed::${key}`, read);
++    read();
++    return () => settings.disconnect(id);
++}
++
++function watchUnit(bus, unit, apply) {
++    const SD = 'org.freedesktop.systemd1';
++    const cancel = new Gio.Cancellable();
++    let sigId = 0;
++    const call = (path, iface, method, args, type, done) =>
++        bus.call(SD, path, iface, method, args, type ? new GLib.VariantType(type) : null,
++            Gio.DBusCallFlags.NONE, -1, cancel, (conn, res) => {
++                try {
++                    done(conn.call_finish(res));
++                } catch (e) {
++                    if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
++                        console.log(`[Custom Command Toggle] watch ${unit}: ${e.message}`);
++                }
++            });
++    // Without a Subscribe call systemd does not send PropertiesChanged.
++    call('/org/freedesktop/systemd1', `${SD}.Manager`, 'Subscribe', null, null, () => {});
++    call('/org/freedesktop/systemd1', `${SD}.Manager`, 'LoadUnit',
++        new GLib.Variant('(s)', [unit]), '(o)', reply => {
++            const [path] = reply.deep_unpack();
++            sigId = bus.signal_subscribe(SD, 'org.freedesktop.DBus.Properties', 'PropertiesChanged',
++                path, `${SD}.Unit`, Gio.DBusSignalFlags.NONE, (c, s, p, i, n, params) => {
++                    const changed = params.deep_unpack()[1];
++                    if (changed.ActiveState)
++                        apply(changed.ActiveState.deep_unpack() === 'active');
++                });
++            call(path, 'org.freedesktop.DBus.Properties', 'Get',
++                new GLib.Variant('(ss)', [`${SD}.Unit`, 'ActiveState']), '(v)',
++                r => apply(r.deep_unpack()[0].deep_unpack() === 'active'));
++        });
++    return () => {
++        cancel.cancel();
++        if (sigId)
++            bus.signal_unsubscribe(sigId);
++    };
++}
++
++function startWatch(spec, regex, apply) {
++    const [kind, ...rest] = spec.split(':');
++    try {
++        if (kind === 'gsettings')
++            return watchGSettings(rest[0], rest[1], regex, apply);
++        if (kind === 'user-unit')
++            return watchUnit(Gio.DBus.session, rest.join(':'), apply);
++        if (kind === 'system-unit')
++            return watchUnit(Gio.DBus.system, rest.join(':'), apply);
++    } catch (e) {
++        console.log(`[Custom Command Toggle] watch ${spec}: ${e.message}`);
++        return null;
++    }
++    console.log(`[Custom Command Toggle] watch ${spec}: unknown kind`);
++    return null;
++}
++//#endregion Event Watch
++
+ 
+ const myQuickToggle = GObject.registerClass(
+ class myQuickToggle extends QuickToggle {
+@@ -478,6 +561,7 @@
+                 if (id) GLib.source_remove(id);
+                 checkIntervals[i] = 0;
+             });
++            stopAllWatches();
+ 
+             // Reset running flags
+             isRunning.forEach((_, i) => isRunning[i] = false);
+@@ -760,11 +844,25 @@
+                 checkIntervals[i - 1] = 0;
+             }
+ 
++            stopWatch(i);
++
+             if (!this._settings.get_boolean(`enabled${i}-setting`)) {
+                 if (debug) console.log(`[Custom Command Toggle] Toggle ${i} | Sync skipped (visibility off)`);
+                 return;
+             }
+ 
++            // Local patch: "watch:<spec>" follows state by events, no process spawn.
++            if (cmd.startsWith('watch:')) {
++                checkWatchers[i - 1] = startWatch(cmd.slice('watch:'.length), key, (result) => {
++                    if (toggleStates[i - 1] !== result) {
++                        toggleStates[i - 1] = result;
++                        this._settings.set_boolean(toggleStateKey, result);
++                        refreshIndicator.call(this);
++                    }
++                });
++                return;
++            }
++
+             isRunning[i - 1] = false;            
+ 
+             if (startup) {
+@@ -1072,6 +1170,7 @@
+                 GLib.source_remove(id);
+         }
+         checkIntervals = [];
++        stopAllWatches();
+ 
+         for (let id of commandTimeouts) {
+             if (id)

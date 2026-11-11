@@ -133,12 +133,13 @@ in {
       entryrow4-setting = "input-keyboard-symbolic,input-keyboard-symbolic";
       entryrow1-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled true";
       entryrow2-setting = "gsettings set org.gnome.desktop.a11y.applications screen-keyboard-enabled false";
+      # Состояние: "watch:" - локальный патч расширения (home.nix), события
+      # вместо опроса процессом. Опрос раз в 10 с давал фриз композитора.
       # Состояние читаем из самого gsettings, а не из памяти расширения:
       # ключ могли поменять из Настроек или home-manager'ом при пересборке.
-      checkcommand1-setting = "gsettings get org.gnome.desktop.a11y.applications screen-keyboard-enabled";
+      checkcommand1-setting = "watch:gsettings:org.gnome.desktop.a11y.applications:screen-keyboard-enabled";
       checkregex1-setting = "true";
       checkcommandsync1-setting = true;
-      checkcommandinterval1-setting = 10;
       initialtogglestate1-setting = 3; # не трогать ключ при логине
       showindicator1-setting = false;
       runcommandatboot1-setting = false;
@@ -151,10 +152,9 @@ in {
       entryrow42-setting = "system-run-symbolic,system-suspend-symbolic";
       entryrow12-setting = "bag-mode on";
       entryrow22-setting = "bag-mode off";
-      checkcommand2-setting = "bag-mode status";
+      checkcommand2-setting = "watch:user-unit:bag-mode.service";
       checkregex2-setting = "ON";
       checkcommandsync2-setting = true;
-      checkcommandinterval2-setting = 10;
       initialtogglestate2-setting = 3; # не трогать юнит при логине
       showindicator2-setting = true;
       runcommandatboot2-setting = false;
@@ -165,10 +165,9 @@ in {
       entryrow43-setting = "security-high-symbolic,security-low-symbolic";
       entryrow13-setting = "anon-mode on";
       entryrow23-setting = "anon-mode off";
-      checkcommand3-setting = "anon-mode status";
+      checkcommand3-setting = "watch:system-unit:anon-mode.service";
       checkregex3-setting = "ON";
       checkcommandsync3-setting = true;
-      checkcommandinterval3-setting = 10;
       initialtogglestate3-setting = 3;
       showindicator3-setting = true;
       runcommandatboot3-setting = false;

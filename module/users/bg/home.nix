@@ -315,7 +315,11 @@ in {
 
       gnomeExtensions.window-calls
       # Тумблер+индикатор admin-VPN в Quick Settings (настройка — dconf.nix).
-      gnomeExtensions.custom-command-toggle
+      # Патч: состояние по событиям (watch:...), а не опросом раз в 10 с.
+      # Опрос форкал gnome-shell, композитор вставал на 60-120 мс.
+      (gnomeExtensions.custom-command-toggle.overrideAttrs (old: {
+        patches = (old.patches or []) ++ [./patches/custom-command-toggle-watch.patch];
+      }))
     ];
 
     file = {
