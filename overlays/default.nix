@@ -241,6 +241,7 @@
       photocraft = final.callPackage ../pkgs/photocraft.nix {};
       # upstream needs Rust >= 1.98 (isolate_lowest_one); stable nixpkgs is on 1.95.
       figcraft = final.callPackage ../pkgs/figcraft.nix {rustPlatform = final.unstable.rustPlatform;};
+      pdfcraft = final.callPackage ../pkgs/pdfcraft.nix {rustPlatform = final.unstable.rustPlatform;};
       effectcraft = final.callPackage ../pkgs/effectcraft.nix {};
       dolphin-anty = final.callPackage ../pkgs/dolphin-anty.nix {};
       voicestudio = final.callPackage ../pkgs/voicestudio.nix {proxyPort = 1123;};

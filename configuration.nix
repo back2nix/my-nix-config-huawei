@@ -409,6 +409,7 @@ in {
       # pkgs-unstable.antigravity
       rtk
       figcraft
+      # pdfcraft
       # photocraft
       # effectcraft
       valgrind
