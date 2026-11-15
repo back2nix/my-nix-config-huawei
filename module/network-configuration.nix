@@ -274,6 +274,8 @@ in {
             # ноут не отвечает на эти порты: нет постоянного host key sshd и
             # уникального набора открытых портов, по которым его узнают.
             iifname "awg-*" tcp dport @allowed_tcp accept
+            # SSH из домашней LAN (bagau и др.) без туннеля.
+            ip saddr 192.168.0.0/24 tcp dport 22 accept comment "SSH from LAN"
             iifname "awg-*" udp dport @system_udp accept
           }
 
