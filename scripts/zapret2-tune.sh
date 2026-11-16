@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Подбор стратегий zapret2 под текущую сеть. Методика — docs/zapret2-tuning.md.
 #
-# Для каждой стратегии из module/zapret2/candidates.txt поднимает nfqws2 с этой
-# одной стратегией на весь tcp/443 и проверяет напрямую (без прокси) каждый
-# домен из module/zapret2/hosts.txt: прошёл ли TLS-handshake. Домен получает
-# первую по списку рабочую стратегию. Результат — module/zapret2/profiles.json,
-# его читает module/zapret2.nix; применяется обычным `just switch`.
+# Для каждого домена из module/zapret2/hosts.txt решает, нужен ли обход и какой:
+#   direct   — открывается без обхода, zapret его не трогает;
+#   <имя>    — закрыт, открывается со стратегией <имя> из candidates.txt;
+#   unknown  — закрыт, ни одна стратегия не помогла (или на tcp/443 никого нет).
+# Решения хранятся в module/zapret2/tune-state.txt, из них собирается
+# module/zapret2/profiles.json для module/zapret2.nix. Применяется `just switch`.
 #
-# Запуск: just zapret-tune            (нужен root: nfqueue и nftables)
-#         just zapret-tune --dry-run  (только отчёт, profiles.json не трогать)
-#         just zapret-check           (без root: что не открывается прямо сейчас)
+# Запуск: just zapret-tune            обычный: перепроверить прошлые решения и
+#                                     подобрать заново только то, что сломалось
+#         just zapret-tune --full     с нуля, включая unknown
+#         just zapret-tune --dry-run  только отчёт, файлы не трогать
+#         just zapret-check           без root: что не открывается прямо сейчас
 #
 # На время подбора боевая служба остановлена, в конце возвращается как была.
 # `just switch` во время подбора не запускать: он поднимет службу, и замеры
@@ -18,52 +21,97 @@ set -euo pipefail
 
 DRY=0
 CHECK=0
-case "${1:-}" in
-  --dry-run) DRY=1 ;;
-  --check) CHECK=1 ;;
-  "") ;;
-  *) echo "неизвестный аргумент: $1" >&2; exit 2 ;;
-esac
+FULL=0
+for a in "$@"; do
+  case "$a" in
+    --dry-run) DRY=1 ;;
+    --check) CHECK=1 ;;
+    --full) FULL=1 ;;
+    *) echo "неизвестный аргумент: $a" >&2; exit 2 ;;
+  esac
+done
 
 REPO=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 HOSTS=$REPO/module/zapret2/hosts.txt
 CANDIDATES=$REPO/module/zapret2/candidates.txt
 PROBES=$REPO/module/zapret2/probe-hosts.txt
+STATE=$REPO/module/zapret2/tune-state.txt
 OUT=$REPO/module/zapret2/profiles.json
-# Не задирать: под параллельной нагрузкой сеть даёт ложные отказы даже там,
-# где стратегия рабочая. Проверено на этой сети: при 32 потоках «упали» Discord
-# и YouTube, которые через пять минут открывались 6 раз из 6; при 8 потоках
-# два прогона подряд разложили домены по-разному. Последовательно — стабильно.
-JOBS=${JOBS:-4}
-# Сколько раз перепроверять упавшие домены, прежде чем считать отказ настоящим.
-RETRIES=${RETRIES:-2}
+
+# Параллельность первого прохода. Не задирать: под параллельной нагрузкой сеть
+# даёт ложные отказы на открытых сайтах. Проверено на этой сети:
+#   32 потока — «упали» Discord и YouTube, которые через пять минут открывались
+#               6 раз из 6;
+#   8 потоков — два прогона подряд разложили домены по-разному;
+#   6 потоков, одна параллельная перепроверка — 27 открытых сайтов (debian.org,
+#               trello.com, githubusercontent.com) записаны в закрытые, контроль
+#               итогового набора провалил 22 из 71.
+# Последовательные запросы при этом стабильны. Поэтому первый проход идёт
+# небольшой пачкой, а всё, что в нём упало, перепроверяется по одному: открытый
+# сайт отвечает за доли секунды, так что точность почти ничего не стоит.
+JOBS=${JOBS:-3}
+# Сколько раз перепроверять упавший домен (по одному), прежде чем считать отказ настоящим.
+RETRIES=${RETRIES:-1}
+# Доля провалов в контроле итогового набора, выше которой результат не пишется.
+MAX_CONTROL_FAIL=${MAX_CONTROL_FAIL:-10}
+# Рабочий handshake укладывается в секунду; больше ждать — только копить таймауты.
+MAX_TIME=${MAX_TIME:-3}
 # Отдельные очередь и таблица, чтобы не делить их с боевой службой.
 QNUM=${QNUM:-201}
 TABLE=zapret2tune
-CONNECT_TIMEOUT=${CONNECT_TIMEOUT:-2}
-MAX_TIME=${MAX_TIME:-3}
 
 # Проверяем прямой доступ: прокси из окружения дал бы ложный «работает».
 unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY
 
-# TLS считается пройденным, если curl дошёл до конца handshake (time_appconnect
-# > 0). Код ответа не важен: 403/404 от сервера — это уже «не заблокировано».
-tls_ok() { # $1 = host
-  local t
-  t=$(curl -4 -s -o /dev/null --noproxy '*' --connect-timeout "$CONNECT_TIMEOUT" \
-    --max-time "$MAX_TIME" -w '%{time_appconnect}' "https://$1/" 2>/dev/null || true)
-  [ -n "$t" ] && [ "$t" != "0.000000" ]
-}
-probe_domain() { # $1 = домен, $2.. = хосты для проверки; хватит одного рабочего
+T0=$SECONDS
+stamp() { printf '[%2d:%02d] ' $(((SECONDS - T0) / 60)) $(((SECONDS - T0) % 60)); }
+say() { stamp; echo "$*"; }
+
+# --- проверки -------------------------------------------------------------
+
+# Какой из хостов домена отвечает на tcp/443. Дальше TLS проверяется только на
+# нём: второй хост — это второй таймаут на каждый отказ. Если не отвечает ни
+# один, сайта на этом имени нет или он закрыт по IP: стратегия не поможет.
+pick_host() { # $1 = домен, $2.. = хосты -> «домен хост» или «домен -»
   local d=$1 h
   shift
   for h in "$@"; do
-    if tls_ok "$h"; then echo "$d 1"; return; fi
+    if timeout 2 bash -c "exec 3<>/dev/tcp/$h/443" 2>/dev/null; then echo "$d $h"; return; fi
   done
-  echo "$d 0"
+  echo "$d -"
 }
-export -f tls_ok probe_domain
-export CONNECT_TIMEOUT MAX_TIME
+# TLS считается пройденным, если curl дошёл до конца handshake (time_appconnect
+# > 0). Код ответа не важен: 403/404 от сервера — это уже «не заблокировано».
+probe_one() { # $1 = домен, $2 = хост -> «домен 0|1»
+  local t
+  t=$(curl -4 -s -o /dev/null --noproxy '*' --connect-timeout 2 --max-time "$MAX_TIME" \
+    -w '%{time_appconnect}' "https://$2/" 2>/dev/null || true)
+  if [ -n "$t" ] && [ "$t" != "0.000000" ]; then echo "$1 1"; else echo "$1 0"; fi
+}
+export -f pick_host probe_one
+export MAX_TIME
+
+# probe_list <файл «домен хост»> <файл результата «домен 0|1»>
+# Упавшие перепроверяются после паузы и по одному: разовый сбой или шум от
+# параллельных запросов не должен менять решение.
+probe_list() {
+  local try
+  xargs -r -P "$JOBS" -L1 bash -c 'probe_one "$@"' _ <"$1" | sort >"$2"
+  for try in $(seq "$RETRIES"); do
+    awk 'NR==FNR{if($2==0)f[$1];next} $1 in f' "$2" "$1" >"$2.retry"
+    [ -s "$2.retry" ] || break
+    sleep 2
+    xargs -r -P 1 -L1 bash -c 'probe_one "$@"' _ <"$2.retry" | sort >"$2.b"
+    awk 'NR==FNR{b[$1]=$2;next} {print $1, ($1 in b ? b[$1] : $2)}' "$2.b" "$2" >"$2.m"
+    mv "$2.m" "$2"
+  done
+}
+passed() { awk '$2==1{print $1}' "$1"; }
+failed() { awk '$2==0{print $1}' "$1"; }
+# targets <файл доменов> -> «домен хост» для тех, у кого хост выбран
+targets() { awk 'NR==FNR{h[$1]=$2;next} ($1 in h) && h[$1]!="-"{print $1, h[$1]}' "$WORK/hostmap" "$1"; }
+
+# --- входные данные -------------------------------------------------------
 
 mapfile -t DOMAINS < <(grep -vE '^\s*(#|$)' "$HOSTS" | awk '{print $1}' | sort -u)
 [ "${#DOMAINS[@]}" -gt 0 ] || { echo "пустой $HOSTS" >&2; exit 1; }
@@ -78,12 +126,22 @@ if [ -r "$PROBES" ]; then
   done < <(grep -vE '^\s*(#|$)' "$PROBES")
 fi
 
+# Прошлые решения: «домен группа». С --full не читаются.
+declare -A PREV
+PREV_GGC=
+if [ "$FULL" = 0 ] && [ -r "$STATE" ]; then
+  PREV_GGC=$(sed -n 's/^# youtube_cache //p' "$STATE" | head -1)
+  while read -r d g; do
+    [ -n "$g" ] && PREV[$d]=$g
+  done < <(grep -vE '^\s*(#|$)' "$STATE")
+fi
+
 # Видео YouTube отдаёт кэш Google у провайдера (rrN---sn-XXXX.googlevideo.com),
 # и блокируют его иначе, чем youtube.com. Имя своего кэша узнаём у Google:
 # report_mapping отдаёт код площадки, он переводится в sn-имя заменой букв.
 detect_ggc() {
   local raw code
-  raw=$(curl -4 -s --noproxy '*' --max-time 5 'https://redirector.googlevideo.com/report_mapping?di=no' 2>/dev/null || true)
+  raw=$(curl -4 -s --noproxy '*' --max-time 4 'https://redirector.googlevideo.com/report_mapping?di=no' 2>/dev/null || true)
   code=$(sed -n 's/.*=>[ ]*\([^ (:)]*\).*/\1/p' <<<"$raw" | head -1)
   [ -n "$code" ] || return 1
   echo "rr1---sn-$(tr 'uzpkfa50vqlgb61wrmhc72xsnid83ytoje94' '0123456789abcdefghijklmnopqrstuvwxyz' <<<"$code").googlevideo.com"
@@ -92,56 +150,44 @@ detect_ggc() {
 WORK=$(mktemp -d)
 # nfqws2 после старта сбрасывает root и должен дочитаться до своих списков.
 chmod 755 "$WORK"
-write_targets() { # $1 = файл со списком доменов -> stdout «домен хост...»
-  local d
-  while read -r d; do echo "$d ${PROBE[$d]:-$d www.$d}"; done <"$1"
-}
-# probe_list <файл доменов> <файл результата «домен 0|1»> [файл «кого перепроверять»]
-# Упавшие перепроверяются после паузы: разовый сбой не должен менять группу
-# домена. Третий аргумент ограничивает перепроверку (без него — все упавшие).
-probe_list() {
-  local try
-  write_targets "$1" | xargs -r -P "$JOBS" -L1 bash -c 'probe_domain "$@"' _ | sort >"$2"
-  for try in $(seq "$RETRIES"); do
-    awk '$2==0{print $1}' "$2" >"$2.retry"
-    if [ -n "${3:-}" ]; then
-      grep -Fxf "$3" "$2.retry" >"$2.retry2" || true
-      mv "$2.retry2" "$2.retry"
-    fi
-    [ -s "$2.retry" ] || break
-    sleep 3
-    write_targets "$2.retry" | xargs -r -P "$JOBS" -L1 bash -c 'probe_domain "$@"' _ | sort >"$2.b"
-    awk 'NR==FNR{b[$1]=$2;next} {print $1, ($1 in b ? b[$1] : $2)}' "$2.b" "$2" >"$2.m"
-    mv "$2.m" "$2"
-  done
-}
-# Отвечает ли хоть один проверочный хост домена на tcp/443. Если нет — сайта на
-# этом имени нет или он закрыт по IP: десинхронизация тут не поможет.
-tcp_domain() { # $1 = домен, $2.. = хосты
-  local d=$1 h
-  shift
-  for h in "$@"; do
-    if timeout 2 bash -c "exec 3<>/dev/tcp/$h/443" 2>/dev/null; then echo "$d 1"; return; fi
-  done
-  echo "$d 0"
-}
-export -f tcp_domain
+trap 'rm -rf "$WORK"' EXIT
 printf '%s\n' "${DOMAINS[@]}" >"$WORK/all"
 
+make_hostmap() { # $1 = файл доменов -> $WORK/hostmap («домен хост|-»)
+  local d
+  while read -r d; do echo "$d ${PROBE[$d]:-$d www.$d}"; done <"$1" |
+    xargs -r -P 24 -L1 bash -c 'pick_host "$@"' _ | sort >"$WORK/hostmap"
+}
+
 if [ "$CHECK" = 1 ]; then
-  trap 'rm -rf "$WORK"' EXIT
   systemctl is-active -q zapret2 && echo "zapret2: включён" || echo "zapret2: ВЫКЛЮЧЕН (проверка без обхода)"
-  if [ -z "${PROBE[googlevideo.com]:-}" ] && ggc=$(detect_ggc); then
-    PROBE[googlevideo.com]=$ggc
-    echo "кэш YouTube на этой сети: $ggc"
+  if [ -z "${PROBE[googlevideo.com]:-}" ]; then
+    PROBE[googlevideo.com]=$(detect_ggc || echo "${PREV_GGC:-googlevideo.com}")
+    echo "кэш YouTube: ${PROBE[googlevideo.com]}"
   fi
-  probe_list "$WORK/all" "$WORK/res.check"
-  echo "открывается напрямую: $(awk '$2==1' "$WORK/res.check" | wc -l) из ${#DOMAINS[@]}; не открывается:"
-  awk '$2==0{print "    " $1}' "$WORK/res.check"
+  make_hostmap "$WORK/all"
+  targets "$WORK/all" >"$WORK/t.check"
+  probe_list "$WORK/t.check" "$WORK/res.check"
+  echo "открывается напрямую: $(passed "$WORK/res.check" | wc -l) из ${#DOMAINS[@]}"
+  echo "не проходит TLS:"
+  failed "$WORK/res.check" | while read -r d; do printf '    %-40s %s\n' "$d" "${PREV[$d]:-}"; done
+  echo "не отвечают на tcp/443 (сайта нет или блок по IP): $(awk '$2=="-"' "$WORK/hostmap" | wc -l)"
   exit 0
 fi
 
 [ "$(id -u)" = 0 ] || { echo "нужен root: sudo $0 $*" >&2; exit 1; }
+
+mapfile -t CAND_LINES < <(grep -vE '^\s*(#|$)' "$CANDIDATES")
+[ "${#CAND_LINES[@]}" -gt 0 ] || { echo "пустой $CANDIDATES" >&2; exit 1; }
+NAMES=()
+declare -A ARGS
+for line in "${CAND_LINES[@]}"; do
+  n=$(sed 's/ *|.*//' <<<"$line")
+  NAMES+=("$n")
+  ARGS[$n]=$(sed 's/^[^|]*| *//' <<<"$line")
+done
+
+# --- nfqws2 и nft: те же, что у службы -------------------------------------
 
 # Пути берём из установленного юнита: тот же nfqws2, те же lua и правила nft,
 # что и в боевой службе, — значит, результат переносится на неё один в один.
@@ -183,11 +229,9 @@ sed '/^--name=/,$d' "$CONF" | sed -E "s/^--qnum=.*/--qnum=$QNUM/" >"$WORK/head.c
 # бы через два обхода сразу и замеры потеряли бы смысл.
 guard() {
   case "$(systemctl is-active zapret2 || true)" in active | activating) ;; *) return 0 ;; esac
-  {
-    echo "zapret2.service запустили во время подбора — результаты недостоверны, прерываюсь." >&2
-    WAS_ACTIVE=1
-    exit 1
-  }
+  echo "zapret2.service запустили во время подбора — результаты недостоверны, прерываюсь." >&2
+  WAS_ACTIVE=1
+  exit 1
 }
 
 # Тело профиля — те же фильтры, что ставит module/zapret2.nix.
@@ -208,104 +252,215 @@ start_nfqws() { # $1 = аргументы одной стратегии на в�
   sleep 1
   kill -0 "$NFQ_PID" 2>/dev/null || { NFQ_PID=; return 1; }
 }
+# Все профили разом, как их соберёт служба. $1 = файл «домен группа».
+# nfqws2 берёт первый профиль, в чей список попал хост, а список покрывает и
+# поддомены. Если в одном профиле a.b.com, а в другом b.com, раньше должен идти
+# профиль с более точным именем: сортируем по числу таких «вложенных».
+profile_order() { # $1 = файл «домен группа» -> имена профилей по порядку
+  awk -v names="${NAMES[*]}" '
+    BEGIN { n = split(names, N, " "); for (i = 1; i <= n; i++) known[N[i]] = i }
+    ($2 in known) { g[$1] = $2; used[$2] = 1 }
+    END {
+      for (h in g) for (o in g) if (g[h] != g[o] && length(h) > length(o) + 1 &&
+        substr(h, length(h) - length(o)) == "." o) sub_[g[h]]++
+      for (i = 1; i <= n; i++) if (N[i] in used) printf "%d %d %s\n", -sub_[N[i]], i, N[i]
+    }' "$1" | sort -k1,1n -k2,2n | awk '{print $3}'
+}
+start_combined() { # $1 = файл «домен группа»
+  local opt=--name n
+  : >"$WORK/combined"
+  for n in $(profile_order "$1"); do
+    awk -v g="$n" '$2==g{print $1}' "$1" | sort >"$WORK/hosts.$n"
+    profile_lines "$opt" "$n" "${ARGS[$n]}" "$WORK/hosts.$n" >>"$WORK/combined"
+    opt=--new
+  done
+  [ -s "$WORK/combined" ] || return 2
+  start_nfqws "@$WORK/combined"
+}
 
-mapfile -t CAND_LINES < <(grep -vE '^\s*(#|$)' "$CANDIDATES")
-[ "${#CAND_LINES[@]}" -gt 0 ] || { echo "пустой $CANDIDATES" >&2; exit 1; }
+# --- что проверять ---------------------------------------------------------
 
+# Прошлое решение по домену берём как отправную точку и только перепроверяем:
+#   стратегия -> всё ещё открывается с ней? (один общий запуск на всех)
+#   direct    -> всё ещё открывается без обхода?
+#   unknown   -> пропускаем: это самые дорогие домены (каждая попытка — полный
+#                таймаут на каждой стратегии), а шанс, что они ожили, мал.
+#                Перепроверяются только с --full.
+# Подбор по всем стратегиям идёт лишь для новых доменов и для тех, чьё прошлое
+# решение перестало работать.
+: >"$WORK/keep_strategy" # «домен группа» — перепроверить под прошлой стратегией
+: >"$WORK/keep_direct"   # перепроверить без обхода
+: >"$WORK/fresh"         # решать с нуля
+: >"$WORK/skipped"
+for d in "${DOMAINS[@]}"; do
+  g=${PREV[$d]:-}
+  if [ -z "$g" ]; then
+    echo "$d" >>"$WORK/fresh"
+  elif [ "$g" = direct ]; then
+    echo "$d" >>"$WORK/keep_direct"
+  elif [ "$g" = unknown ]; then
+    echo "$d" >>"$WORK/skipped"
+  elif [ -n "${ARGS[$g]:-}" ]; then
+    echo "$d $g" >>"$WORK/keep_strategy"
+  else
+    echo "$d" >>"$WORK/fresh" # стратегию убрали из candidates.txt
+  fi
+done
+say "доменов: ${#DOMAINS[@]}; перепроверить под стратегией: $(wc -l <"$WORK/keep_strategy"), без обхода: $(wc -l <"$WORK/keep_direct"), с нуля: $(wc -l <"$WORK/fresh"), пропущено unknown: $(wc -l <"$WORK/skipped")"
+
+# Кэш YouTube. Без обхода redirector недоступен, поэтому спрашиваем под
+# стратегией: сначала под той, что уже работала для googlevideo.com.
 if [ -z "${PROBE[googlevideo.com]:-}" ]; then
-  # Без обхода redirector недоступен, поэтому пробуем под каждым кандидатом.
-  for line in "${CAND_LINES[@]}"; do
-    start_nfqws "$(sed 's/^[^|]*| *//' <<<"$line")" || continue
+  order=("${NAMES[@]}")
+  pg=${PREV[googlevideo.com]:-}
+  [ -n "$pg" ] && [ -n "${ARGS[$pg]:-}" ] && order=("$pg" "${NAMES[@]}")
+  for n in "${order[@]}"; do
+    start_nfqws "${ARGS[$n]}" || continue
     if ggc=$(detect_ggc); then PROBE[googlevideo.com]=$ggc; break; fi
   done
   stop_nfqws
-  if [ -n "${PROBE[googlevideo.com]:-}" ]; then
-    echo "кэш YouTube на этой сети: ${PROBE[googlevideo.com]}"
+  if [ -z "${PROBE[googlevideo.com]:-}" ] && [ -n "$PREV_GGC" ]; then
+    PROBE[googlevideo.com]=$PREV_GGC
+    say "кэш YouTube не определился, беру прошлый: $PREV_GGC"
+  elif [ -n "${PROBE[googlevideo.com]:-}" ]; then
+    say "кэш YouTube: ${PROBE[googlevideo.com]}"
   else
     echo "ВНИМАНИЕ: не узнал кэш YouTube; googlevideo.com будет проверен неточно." >&2
     echo "  Задай узел вручную в $PROBES: googlevideo.com rrN---sn-XXXX.googlevideo.com" >&2
   fi
 fi
 
-echo "проверяю ${#DOMAINS[@]} доменов, ${#CAND_LINES[@]} стратегий (+ проход без обхода)"
+# Живой хост для каждого домена, который будем проверять.
+grep -vFxf "$WORK/skipped" "$WORK/all" >"$WORK/scope" || true
+make_hostmap "$WORK/scope"
+awk '$2=="-"{print $1}' "$WORK/hostmap" >"$WORK/dead"
+say "не отвечают на tcp/443: $(wc -l <"$WORK/dead") (в проверках не участвуют)"
+
+declare -A ASSIGN
+: >"$WORK/todo" # кому подбирать стратегию
+CHANGED=0
+
+# Мёртвые: прошлое решение не трогаем (сбой сети не должен его стирать),
+# новые получают unknown.
+while read -r d; do
+  if [ -n "${PREV[$d]:-}" ]; then ASSIGN[$d]=${PREV[$d]}; else ASSIGN[$d]=unknown; fi
+done <"$WORK/dead"
+while read -r d; do ASSIGN[$d]=unknown; done <"$WORK/skipped"
+
+# 1. Без обхода: прошлые direct и новые домены.
+cat "$WORK/keep_direct" "$WORK/fresh" | grep -vFxf "$WORK/dead" >"$WORK/d.base" || true
+targets "$WORK/d.base" >"$WORK/t.base"
 stop_nfqws
-probe_list "$WORK/all" "$WORK/res.none"
-echo "  без обхода: открывается $(awk '$2==1' "$WORK/res.none" | wc -l) из ${#DOMAINS[@]}"
+probe_list "$WORK/t.base" "$WORK/res.base"
 guard
+while read -r d; do ASSIGN[$d]=direct; done < <(passed "$WORK/res.base")
+failed "$WORK/res.base" >>"$WORK/todo"
+say "без обхода: открыты $(passed "$WORK/res.base" | wc -l) из $(wc -l <"$WORK/t.base")"
 
-# Стратегии подбираются только для доменов, закрытых без обхода. Открытые
-# zapret не трогает вовсе (группа direct), и это не только экономия времени:
-#   * обход им не нужен, а навредить может — фальшивый ClientHello ломал на
-#     этой сети сайты, которые без него открывались (mozilla.org: 0 из 10);
-#   * замеры открытых сайтов под стратегиями не воспроизводятся от прогона к
-#     прогону (одной и той же стратегии «подходило» то 106, то 203 домена),
-#     а проход без обхода стабилен (160–176 из 281).
-# Имена, где на tcp/443 никто не отвечает, тоже пропускаются: каждая попытка к
-# ним — полный таймаут, а помочь им стратегия не может.
-awk '$2==1{print $1}' "$WORK/res.none" >"$WORK/open"
-awk '$2==0{print $1}' "$WORK/res.none" >"$WORK/closed"
-write_targets "$WORK/closed" | xargs -r -P 16 -L1 bash -c 'tcp_domain "$@"' _ | sort >"$WORK/res.tcp"
-awk '$2==0{print $1}' "$WORK/res.tcp" >"$WORK/dead"
-echo "  из закрытых не отвечают на tcp/443 (сайта нет или блок по IP, пропускаю): $(wc -l <"$WORK/dead")"
-
-# Каждая следующая стратегия проверяет только домены, которым ещё не нашлось
-# рабочей: домен получает первую подошедшую по списку, остальные ему не нужны.
-NAMES=()
-declare -A ARGS ASSIGN
-grep -vFxf "$WORK/dead" "$WORK/closed" >"$WORK/todo" || true
-while read -r d; do ASSIGN[$d]=direct; done <"$WORK/open"
-for line in "${CAND_LINES[@]}"; do
-  [ -s "$WORK/todo" ] || break
-  name=$(sed 's/ *|.*//' <<<"$line")
-  args=$(sed 's/^[^|]*| *//' <<<"$line")
-  if ! start_nfqws "$args"; then
-    echo "  $name: nfqws2 не запустился с этими аргументами, пропускаю:" >&2
+# 2. Прошлые стратегии: все профили разом, один запуск.
+awk 'NR==FNR{dead[$1];next} !($1 in dead)' "$WORK/dead" "$WORK/keep_strategy" >"$WORK/ks"
+if [ -s "$WORK/ks" ]; then
+  if start_combined "$WORK/ks"; then
+    targets <(awk '{print $1}' "$WORK/ks") >"$WORK/t.keep"
+    probe_list "$WORK/t.keep" "$WORK/res.keep"
+    stop_nfqws
+    guard
+    while read -r d; do ASSIGN[$d]=${PREV[$d]}; done < <(passed "$WORK/res.keep")
+    failed "$WORK/res.keep" >>"$WORK/todo"
+    say "прошлые стратегии: работают $(passed "$WORK/res.keep" | wc -l) из $(wc -l <"$WORK/t.keep")"
+  else
+    echo "nfqws2 не запустился с прошлым набором профилей, подбираю их заново:" >&2
     tail -3 "$WORK/nfqws.log" >&2
-    continue
+    awk '{print $1}' "$WORK/ks" >>"$WORK/todo"
   fi
-  probe_list "$WORK/todo" "$WORK/res.$name"
-  guard
-  NAMES+=("$name")
-  ARGS[$name]=$args
-  while read -r d ok; do
-    [ "$ok" = 1 ] && ASSIGN[$d]=$name
-  done <"$WORK/res.$name"
-  echo "  $name: подошла для $(awk '$2==1' "$WORK/res.$name" | wc -l) из $(wc -l <"$WORK/todo")"
-  awk '$2==0{print $1}' "$WORK/res.$name" >"$WORK/todo"
-done
-stop_nfqws
-[ "${#NAMES[@]}" -gt 0 ] || { echo "ни одна стратегия не запустилась" >&2; exit 1; }
+fi
 
-# Раскладка. Для каждого домена:
-#   * открыт без обхода               -> direct (zapret его не трогает);
-#   * закрыт, есть рабочая стратегия  -> профиль первой по приоритету;
-#   * закрыт, ничего не помогло       -> unknown: нет сайта на этом имени,
-#     блокировка по IP или нужна стратегия, которой нет в candidates.txt.
-#     Остаётся в профиле первой стратегии, как было до подбора.
+# 3. Подбор: каждая следующая стратегия проверяет только домены, которым ещё
+# не нашлось рабочей. Домен получает первую подошедшую по списку.
+if [ -s "$WORK/todo" ]; then
+  say "подбираю стратегию для $(wc -l <"$WORK/todo") доменов"
+  for n in "${NAMES[@]}"; do
+    [ -s "$WORK/todo" ] || break
+    if ! start_nfqws "${ARGS[$n]}"; then
+      echo "  $n: nfqws2 не запустился с этими аргументами, пропускаю:" >&2
+      tail -3 "$WORK/nfqws.log" >&2
+      continue
+    fi
+    targets "$WORK/todo" >"$WORK/t.$n"
+    probe_list "$WORK/t.$n" "$WORK/res.$n"
+    guard
+    while read -r d; do ASSIGN[$d]=$n; done < <(passed "$WORK/res.$n")
+    say "  $n: подошла для $(passed "$WORK/res.$n" | wc -l) из $(wc -l <"$WORK/t.$n")"
+    failed "$WORK/res.$n" >"$WORK/todo"
+  done
+  stop_nfqws
+  while read -r d; do ASSIGN[$d]=unknown; done <"$WORK/todo"
+fi
+
 for d in "${DOMAINS[@]}"; do
   [ -n "${ASSIGN[$d]:-}" ] || ASSIGN[$d]=unknown
+  [ "${ASSIGN[$d]}" = "${PREV[$d]:-}" ] || CHANGED=$((CHANGED + 1))
 done
+for d in "${DOMAINS[@]}"; do echo "$d ${ASSIGN[$d]}"; done >"$WORK/assign"
 
-group() { for d in "${DOMAINS[@]}"; do [ "${ASSIGN[$d]}" = "$1" ] && echo "$d"; done; true; }
+# --- отчёт -----------------------------------------------------------------
 
 echo
 echo "=== итог ==="
-for n in "${NAMES[@]}"; do
-  c=$(group "$n" | wc -l)
-  [ "$c" -gt 0 ] && echo "$n: $c"
-done
-echo "direct (открыты без обхода, zapret их не трогает): $(group direct | wc -l)"
-echo "unknown (не отвечают ни с одной стратегией): $(group unknown | wc -l)"
-group unknown | sed 's/^/    /'
+awk '{c[$2]++} END{for(k in c) printf "  %-24s %d\n", k, c[k]}' "$WORK/assign" | sort
+if [ "${#PREV[@]}" -gt 0 ]; then
+  echo "изменилось решений: $CHANGED"
+  for d in "${DOMAINS[@]}"; do
+    [ "${ASSIGN[$d]}" = "${PREV[$d]:-}" ] || printf '    %-40s %s -> %s\n' "$d" "${PREV[$d]:-новый}" "${ASSIGN[$d]}"
+  done
+fi
+[ -s "$WORK/skipped" ] && echo "unknown не перепроверялись ($(wc -l <"$WORK/skipped")); перепроверить: just zapret-tune --full"
 
-# Полная таблица — чтобы было видно, на чём основано решение по каждому домену.
-echo
-echo "=== по доменам: домен | без обхода | назначено ==="
-for d in "${DOMAINS[@]}"; do
-  base=заблокирован
-  grep -qx "$d 1" "$WORK/res.none" && base=открыт
-  printf '%-44s %-13s %s\n' "$d" "$base" "${ASSIGN[$d]}"
-done
+if [ "$CHANGED" = 0 ] && [ -r "$OUT" ] && [ "$FULL" = 0 ]; then
+  echo
+  say "все прошлые решения в силе, файлы не менялись"
+  exit 0
+fi
+
+# Контроль: поднимаем все профили разом, как это сделает служба, и проверяем
+# ещё раз. По отдельности стратегии уже проверены, здесь ловим ошибки сборки:
+# домен попал под чужой профиль, списки пересеклись и т. п.
+awk 'NR==FNR{dead[$1];next} !($1 in dead)' "$WORK/dead" "$WORK/assign" >"$WORK/final"
+if start_combined "$WORK/final"; then
+  targets <(awk -v names="${NAMES[*]}" 'BEGIN{n=split(names,N," ");for(i=1;i<=n;i++)k[N[i]]} ($2 in k){print $1}' "$WORK/final") >"$WORK/t.final"
+  probe_list "$WORK/t.final" "$WORK/res.final"
+  stop_nfqws
+  guard
+  echo
+  say "контроль итогового набора: открывается $(passed "$WORK/res.final" | wc -l) из $(wc -l <"$WORK/t.final")"
+  failed "$WORK/res.final" | sed 's/^/    НЕ ПРОШЁЛ: /'
+  nf=$(failed "$WORK/res.final" | wc -l)
+  nt=$(wc -l <"$WORK/t.final")
+  if [ "$nt" -gt 0 ] && [ $((nf * 100)) -gt $((nt * MAX_CONTROL_FAIL)) ]; then
+    echo >&2
+    echo "Контроль провалил $nf из $nt (больше ${MAX_CONTROL_FAIL}%): замерам этого прогона верить нельзя," >&2
+    echo "файлы НЕ изменены. Сеть шумит — повторить позже или с JOBS=1." >&2
+    exit 1
+  fi
+elif [ -s "$WORK/combined" ]; then
+  echo "nfqws2 не запустился с итоговым набором профилей:" >&2
+  tail -5 "$WORK/nfqws.log" >&2
+  exit 1
+fi
+
+[ "$DRY" = 1 ] && { echo; say "--dry-run: файлы не изменены"; exit 0; }
+
+# --- запись ----------------------------------------------------------------
+
+owner=$(stat -c %u:%g "$HOSTS")
+{
+  echo "# Решения scripts/zapret2-tune.sh (just zapret-tune) по каждому домену hosts.txt."
+  echo "# Руками не править: файл перезаписывается. Группы: direct — открыт без обхода,"
+  echo "# unknown — закрыт и ничего не помогло, остальное — имя стратегии из candidates.txt."
+  echo "# generated $(date +%F)"
+  echo "# youtube_cache ${PROBE[googlevideo.com]:-}"
+  cat "$WORK/assign"
+} >"$WORK/state"
 
 # JSON пишем сами: у root в PATH может не быть jq. В именах доменов и
 # аргументах nfqws2 нет символов, требующих экранирования, кроме \ и ".
@@ -320,58 +475,10 @@ json_list() {
   done
   printf ']'
 }
-
+# unknown остаются в профиле первой стратегии, как было до подбора: среди них
+# имена, у которых живут только поддомены (ytimg.com, twimg.com).
 first=${NAMES[0]}
-declare -A PHOSTS
-USED=()
-for n in "${NAMES[@]}"; do
-  hosts=$(group "$n")
-  [ "$n" = "$first" ] && hosts=$(printf '%s\n%s\n' "$hosts" "$(group unknown)")
-  hosts=$(sed '/^$/d' <<<"$hosts" | sort)
-  [ -n "$hosts" ] || continue
-  PHOSTS[$n]=$hosts
-  USED+=("$n")
-done
-
-# nfqws2 берёт первый профиль, в чей список попал хост, а список покрывает и
-# поддомены. Если в одном профиле a.b.com, а в другом b.com, раньше должен
-# идти профиль с более точным именем: сортируем по числу таких «вложенных».
-ORDER=$(for n in "${USED[@]}"; do
-  c=0
-  for h in ${PHOSTS[$n]}; do
-    for m in "${USED[@]}"; do
-      [ "$m" = "$n" ] && continue
-      for o in ${PHOSTS[$m]}; do
-        [[ $h == *".$o" ]] && c=$((c + 1))
-      done
-    done
-  done
-  echo "$c $n"
-done | sort -s -k1,1nr | awk '{print $2}')
-
-# Контроль: поднимаем все профили разом, как это сделает служба, и проверяем
-# ещё раз. По отдельности стратегии уже проверены, здесь ловим ошибки сборки:
-# домен попал под чужой профиль, списки пересеклись и т. п.
-: >"$WORK/final.profiles"
-opt=--name
-for n in $ORDER; do
-  tr ' ' '\n' <<<"${PHOSTS[$n]}" >"$WORK/hosts.$n"
-  profile_lines "$opt" "$n" "${ARGS[$n]}" "$WORK/hosts.$n" >>"$WORK/final.profiles"
-  opt=--new
-done
-for d in "${DOMAINS[@]}"; do
-  case "${ASSIGN[$d]}" in direct | unknown) ;; *) echo "$d" ;; esac
-done >"$WORK/final.todo"
-start_nfqws "@$WORK/final.profiles" || { echo "nfqws2 не запустился с итоговым набором профилей:" >&2; tail -5 "$WORK/nfqws.log" >&2; exit 1; }
-probe_list "$WORK/final.todo" "$WORK/res.final"
-stop_nfqws
-guard
-echo
-echo "=== контроль итогового набора: открывается $(awk '$2==1' "$WORK/res.final" | wc -l) из $(wc -l <"$WORK/final.todo") ==="
-awk '$2==0{print "    НЕ ПРОШЁЛ: " $1}' "$WORK/res.final"
-
-[ "$DRY" = 1 ] && { echo; echo "--dry-run: $OUT не изменён"; exit 0; }
-
+awk -v f="$first" '{print $1, ($2=="unknown" ? f : $2)}' "$WORK/assign" >"$WORK/assign.json"
 {
   echo '{'
   echo "  \"generated\": \"$(date +%F)\","
@@ -379,18 +486,19 @@ awk '$2==0{print "    НЕ ПРОШЁЛ: " $1}' "$WORK/res.final"
   echo "  \"youtube_cache\": \"${PROBE[googlevideo.com]:-}\","
   echo '  "profiles": ['
   sep=
-  for n in $ORDER; do
+  for n in $(profile_order "$WORK/assign.json"); do
     printf '%s    {\n      "name": "%s",\n      "desync": ' "$sep" "$n"
     # shellcheck disable=SC2086
     json_list ${ARGS[$n]}
     printf ',\n      "hosts": '
-    # shellcheck disable=SC2086
-    json_list ${PHOSTS[$n]}
+    # shellcheck disable=SC2046
+    json_list $(awk -v g="$n" '$2==g{print $1}' "$WORK/assign.json" | sort)
     printf '\n    }'
     sep=$',\n'
   done
   printf '\n  ]\n}\n'
 } >"$WORK/profiles.json"
-install -m 644 -o "$(stat -c %u "$HOSTS")" -g "$(stat -c %g "$HOSTS")" "$WORK/profiles.json" "$OUT"
+install -m 644 -o "${owner%:*}" -g "${owner#*:}" "$WORK/state" "$STATE"
+install -m 644 -o "${owner%:*}" -g "${owner#*:}" "$WORK/profiles.json" "$OUT"
 echo
-echo "записал $OUT — применить: just switch"
+say "записал profiles.json и tune-state.txt — применить: just switch"
