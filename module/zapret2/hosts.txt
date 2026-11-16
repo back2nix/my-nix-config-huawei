@@ -61,6 +61,7 @@ bunny.net
 butlerfortrello.com
 byteplus.com
 cachix.org
+cache.nixos-cuda.org
 capcut.com
 capcutstatic.com
 cave0x.com
