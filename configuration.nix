@@ -595,6 +595,12 @@ in {
     enableSystemSlice = true;
   };
 
+  # Дампы памяти не сохранять: сжатие дампа Chrome (~700 МБ) грузило CPU.
+  systemd.coredump.settings.Coredump = {
+    Storage = "none";
+    ProcessSizeMax = 0;
+  };
+
   fonts.packages = with pkgs; [
     times-newer-roman
     noto-fonts
