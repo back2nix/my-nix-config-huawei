@@ -1,128 +1,22 @@
 {
   "generated": "2026-11-16",
   "note": "Сгенерировано scripts/zapret2-tune.sh (just zapret-tune). Руками не править.",
-  "youtube_cache": "rr1---sn-2oi5h5-54.googlevideo.com",
+  "youtube_cache": "rr1---sn-h0jeener.googlevideo.com",
   "profiles": [
     {
-      "name": "tcpseg",
-      "desync": [
-        "--lua-desync=tcpseg:pos=0,1:ip_id=rnd:repeats=1"
-      ],
-      "hosts": [
-        "aiartes.com",
-        "allohalive.com",
-        "berkeley.edu",
-        "browserleaks.com",
-        "cache.nixos-cuda.org",
-        "haskell.org",
-        "repo.or.cz",
-        "singular.net",
-        "tdesktop.com",
-        "youtubeembeddedplayer.googleapis.com",
-        "youtubei.googleapis.com"
-      ]
+      "name": "fake-md5-disorder",
+      "desync": ["--lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com", "--lua-desync=multidisorder:pos=1,midsld"],
+      "hosts": ["5sim.net", "ads-twitter.com", "adtrafficquality.google", "analytics.google.com", "bemobtrcks.com", "bkrtx.com", "browser-intake-datadoghq.com", "bunny.net", "capcutstatic.com", "cave0x.com", "cdninstagram.com", "cdn-telegram.org", "clicktale.net", "cloudflareinsights.com", "d2hrivdxn8ekm8.cloudfront.net", "discordapp.com", "discordapp.net", "discord.com", "double-click.net", "doubleclick.net", "etahub.com", "everestjs.net", "facebook.com", "facebook.net", "fbcdn.net", "fbsbx.com", "fluffleinfra.net", "gcore.com", "ggpht.com", "githubcopilot.com", "gitlab-static.net", "glazboga.cc", "google-analytics.com", "googletagmanager.com", "grizzlysms.com", "imagedelivery.net", "kamatera.com", "launchpadcontent.net", "licdn.com", "linkedin.com", "magicclick.partners", "me", "medium.com", "meet.google.com", "mixpanel.com", "office.net", "online-metrix.net", "phncdn.com", "pixabay.com", "play.google.com", "pornhub.com", "prompthero.com", "redditmail.com", "rutracker.cc", "rutracker.net", "sentry.io", "singular.net", "sourceforge.io", "t.co", "tdesktop.com", "telegram.org", "telegra.ph", "telesco.pe", "tg.dev", "trellocdn.com", "twiliocdn.com", "twimg.com", "twitter.com", "twtrdns.net", "twttr.com", "wide-youtube.l.google.com", "x.com", "youtu.be", "youtube.com", "youtube-nocookie.com", "ytimg.com"]
     },
     {
       "name": "disorder",
-      "desync": [
-        "--lua-desync=multidisorder:pos=1,midsld"
-      ],
-      "hosts": [
-        "b-cdn.net",
-        "forgejo.org",
-        "godaddy.com",
-        "googlevideo.com",
-        "hetzner.com",
-        "images.unsplash.com",
-        "intercomcdn.com",
-        "mongodb.com",
-        "notabug.org",
-        "torproject.org",
-        "truste.com"
-      ]
+      "desync": ["--lua-desync=multidisorder:pos=1,midsld"],
+      "hosts": ["b-cdn.net", "googlevideo.com", "images.unsplash.com"]
     },
     {
-      "name": "fake-md5-disorder",
-      "desync": [
-        "--lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com",
-        "--lua-desync=multidisorder:pos=1,midsld"
-      ],
-      "hosts": [
-        "ads-twitter.com",
-        "adtrafficquality.google",
-        "analytics.google.com",
-        "atlassian.com",
-        "atlassian.net",
-        "bemobtrcks.com",
-        "bkrtx.com",
-        "browser-intake-datadoghq.com",
-        "bunny.net",
-        "capcutstatic.com",
-        "cave0x.com",
-        "cdninstagram.com",
-        "cdn-telegram.org",
-        "clicktale.net",
-        "cloudflareinsights.com",
-        "d2hrivdxn8ekm8.cloudfront.net",
-        "discordapp.com",
-        "discordapp.net",
-        "discord.com",
-        "double-click.net",
-        "doubleclick.net",
-        "etahub.com",
-        "everestjs.net",
-        "facebook.com",
-        "facebook.net",
-        "fbcdn.net",
-        "fb.com",
-        "fbsbx.com",
-        "fluffleinfra.net",
-        "gcore.com",
-        "ggpht.com",
-        "githubcopilot.com",
-        "gitlab-static.net",
-        "glazboga.cc",
-        "google-analytics.com",
-        "googletagmanager.com",
-        "imagedelivery.net",
-        "instagram.com",
-        "kamatera.com",
-        "launchpadcontent.net",
-        "licdn.com",
-        "linkedin.com",
-        "me",
-        "medium.com",
-        "meet.google.com",
-        "mixpanel.com",
-        "office.net",
-        "online-metrix.net",
-        "phncdn.com",
-        "pixabay.com",
-        "play.google.com",
-        "pornhub.com",
-        "redditmail.com",
-        "rutracker.cc",
-        "rutracker.net",
-        "sentry.io",
-        "sourceforge.io",
-        "t.co",
-        "telegram.org",
-        "telegra.ph",
-        "telesco.pe",
-        "tg.dev",
-        "trellocdn.com",
-        "twiliocdn.com",
-        "twimg.com",
-        "twitter.com",
-        "twtrdns.net",
-        "twttr.com",
-        "wide-youtube.l.google.com",
-        "x.com",
-        "youtu.be",
-        "youtube.com",
-        "youtube-nocookie.com",
-        "ytimg.com"
-      ]
+      "name": "tcpseg",
+      "desync": ["--lua-desync=tcpseg:pos=0,1:ip_id=rnd:repeats=1"],
+      "hosts": ["aiartes.com", "allohalive.com", "berkeley.edu", "cache.nixos-cuda.org", "godaddy.com", "googleapis.com", "hetzner.com", "instagram.com", "kde.org", "kelkoo.com", "remotion.dev", "repo.or.cz", "torproject.org", "youtubeembeddedplayer.googleapis.com", "youtubei.googleapis.com"]
     }
   ]
 }

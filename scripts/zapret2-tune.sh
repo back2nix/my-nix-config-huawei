@@ -4,7 +4,8 @@
 # Для каждого домена из module/zapret2/hosts.txt решает, нужен ли обход и какой:
 #   direct   — открывается без обхода, zapret его не трогает;
 #   <имя>    — закрыт, открывается со стратегией <имя> из candidates.txt;
-#   unknown  — закрыт, ни одна стратегия не помогла (или на tcp/443 никого нет).
+#   unknown  — закрыт, ни одна стратегия не помогла (или на tcp/443 никого нет);
+#   flaky    — мерцает сам по себе, решение не воспроизводится; zapret не трогает.
 # Решения хранятся в module/zapret2/tune-state.txt, из них собирается
 # module/zapret2/profiles.json для module/zapret2.nix. Применяется `just switch`.
 #
@@ -52,8 +53,6 @@ OUT=$REPO/module/zapret2/profiles.json
 JOBS=${JOBS:-3}
 # Сколько раз перепроверять упавший домен (по одному), прежде чем считать отказ настоящим.
 RETRIES=${RETRIES:-1}
-# Доля провалов в контроле итогового набора, выше которой результат не пишется.
-MAX_CONTROL_FAIL=${MAX_CONTROL_FAIL:-10}
 # Рабочий handshake укладывается в секунду; больше ждать — только копить таймауты.
 MAX_TIME=${MAX_TIME:-3}
 # Отдельные очередь и таблица, чтобы не делить их с боевой службой.
@@ -76,7 +75,8 @@ pick_host() { # $1 = домен, $2.. = хосты -> «домен хост» и
   local d=$1 h
   shift
   for h in "$@"; do
-    if timeout 2 bash -c "exec 3<>/dev/tcp/$h/443" 2>/dev/null; then echo "$d $h"; return; fi
+    # 4 с: сюда входит и DNS, а он под пачкой запросов отвечает небыстро.
+    if timeout 4 bash -c "exec 3<>/dev/tcp/$h/443" 2>/dev/null; then echo "$d $h"; return; fi
   done
   echo "$d -"
 }
@@ -84,7 +84,9 @@ pick_host() { # $1 = домен, $2.. = хосты -> «домен хост» и
 # > 0). Код ответа не важен: 403/404 от сервера — это уже «не заблокировано».
 probe_one() { # $1 = домен, $2 = хост -> «домен 0|1»
   local t
-  t=$(curl -4 -s -o /dev/null --noproxy '*' --connect-timeout 2 --max-time "$MAX_TIME" \
+  # -I (HEAD): нужен только handshake, тело страницы качать незачем — на
+  # открытых сайтах это сокращало проход втрое.
+  t=$(curl -4 -sI -o /dev/null --noproxy '*' --connect-timeout 2 --max-time "$MAX_TIME" \
     -w '%{time_appconnect}' "https://$2/" 2>/dev/null || true)
   if [ -n "$t" ] && [ "$t" != "0.000000" ]; then echo "$1 1"; else echo "$1 0"; fi
 }
@@ -98,18 +100,28 @@ probe_list() {
   local try
   xargs -r -P "$JOBS" -L1 bash -c 'probe_one "$@"' _ <"$1" | sort >"$2"
   for try in $(seq "$RETRIES"); do
-    awk 'NR==FNR{if($2==0)f[$1];next} $1 in f' "$2" "$1" >"$2.retry"
+    failed "$2" >"$2.failed"
+    only "$2.failed" <"$1" >"$2.retry"
     [ -s "$2.retry" ] || break
     sleep 2
     xargs -r -P 1 -L1 bash -c 'probe_one "$@"' _ <"$2.retry" | sort >"$2.b"
-    awk 'NR==FNR{b[$1]=$2;next} {print $1, ($1 in b ? b[$1] : $2)}' "$2.b" "$2" >"$2.m"
+    { without "$2.b" <"$2"; cat "$2.b"; } | sort >"$2.m"
     mv "$2.m" "$2"
   done
+}
+# Фильтры по списку из файла. Не писать это через awk 'NR==FNR{...}': на
+# пустом первом файле условие верно и для второго, и фильтр молча выбрасывает
+# всё (так однажды все домены со стратегиями ушли в unknown).
+without() { # $1 = файл со списком доменов; stdin «домен ...» -> строки, чьих доменов в списке нет
+  awk -v f="$1" 'BEGIN{while((getline l < f) > 0){split(l, a, " "); x[a[1]]}} !($1 in x)'
+}
+only() { # то же, но оставить только домены из списка
+  awk -v f="$1" 'BEGIN{while((getline l < f) > 0){split(l, a, " "); x[a[1]]}} ($1 in x)'
 }
 passed() { awk '$2==1{print $1}' "$1"; }
 failed() { awk '$2==0{print $1}' "$1"; }
 # targets <файл доменов> -> «домен хост» для тех, у кого хост выбран
-targets() { awk 'NR==FNR{h[$1]=$2;next} ($1 in h) && h[$1]!="-"{print $1, h[$1]}' "$WORK/hostmap" "$1"; }
+targets() { awk '$2!="-"' "$WORK/hostmap" | only "$1"; }
 
 # --- входные данные -------------------------------------------------------
 
@@ -155,8 +167,13 @@ printf '%s\n' "${DOMAINS[@]}" >"$WORK/all"
 
 make_hostmap() { # $1 = файл доменов -> $WORK/hostmap («домен хост|-»)
   local d
-  while read -r d; do echo "$d ${PROBE[$d]:-$d www.$d}"; done <"$1" |
-    xargs -r -P 24 -L1 bash -c 'pick_host "$@"' _ | sort >"$WORK/hostmap"
+  hosts_of() { while read -r d; do echo "$d ${PROBE[$d]:-$d www.$d}"; done; }
+  hosts_of <"$1" | xargs -r -P 12 -L1 bash -c 'pick_host "$@"' _ | sort >"$WORK/hostmap.a"
+  # Неответившие — ещё раз и по одному: однажды пачка запросов (холодный кэш
+  # DNS) записала в «мёртвые» 107 живых доменов из 196.
+  awk '$2=="-"{print $1}' "$WORK/hostmap.a" >"$WORK/hostmap.retry"
+  hosts_of <"$WORK/hostmap.retry" | xargs -r -P 2 -L1 bash -c 'pick_host "$@"' _ | sort >"$WORK/hostmap.b"
+  { without "$WORK/hostmap.b" <"$WORK/hostmap.a"; cat "$WORK/hostmap.b"; } | sort >"$WORK/hostmap"
 }
 
 if [ "$CHECK" = 1 ]; then
@@ -283,7 +300,7 @@ start_combined() { # $1 = файл «домен группа»
 # Прошлое решение по домену берём как отправную точку и только перепроверяем:
 #   стратегия -> всё ещё открывается с ней? (один общий запуск на всех)
 #   direct    -> всё ещё открывается без обхода?
-#   unknown   -> пропускаем: это самые дорогие домены (каждая попытка — полный
+#   unknown, flaky -> пропускаем: это самые дорогие домены (каждая попытка — полный
 #                таймаут на каждой стратегии), а шанс, что они ожили, мал.
 #                Перепроверяются только с --full.
 # Подбор по всем стратегиям идёт лишь для новых доменов и для тех, чьё прошлое
@@ -298,7 +315,7 @@ for d in "${DOMAINS[@]}"; do
     echo "$d" >>"$WORK/fresh"
   elif [ "$g" = direct ]; then
     echo "$d" >>"$WORK/keep_direct"
-  elif [ "$g" = unknown ]; then
+  elif [ "$g" = unknown ] || [ "$g" = flaky ]; then
     echo "$d" >>"$WORK/skipped"
   elif [ -n "${ARGS[$g]:-}" ]; then
     echo "$d $g" >>"$WORK/keep_strategy"
@@ -306,7 +323,7 @@ for d in "${DOMAINS[@]}"; do
     echo "$d" >>"$WORK/fresh" # стратегию убрали из candidates.txt
   fi
 done
-say "доменов: ${#DOMAINS[@]}; перепроверить под стратегией: $(wc -l <"$WORK/keep_strategy"), без обхода: $(wc -l <"$WORK/keep_direct"), с нуля: $(wc -l <"$WORK/fresh"), пропущено unknown: $(wc -l <"$WORK/skipped")"
+say "доменов: ${#DOMAINS[@]}; перепроверить под стратегией: $(wc -l <"$WORK/keep_strategy"), без обхода: $(wc -l <"$WORK/keep_direct"), с нуля: $(wc -l <"$WORK/fresh"), пропущено unknown/flaky: $(wc -l <"$WORK/skipped")"
 
 # Кэш YouTube. Без обхода redirector недоступен, поэтому спрашиваем под
 # стратегией: сначала под той, что уже работала для googlevideo.com.
@@ -331,7 +348,7 @@ if [ -z "${PROBE[googlevideo.com]:-}" ]; then
 fi
 
 # Живой хост для каждого домена, который будем проверять.
-grep -vFxf "$WORK/skipped" "$WORK/all" >"$WORK/scope" || true
+without "$WORK/skipped" <"$WORK/all" >"$WORK/scope"
 make_hostmap "$WORK/scope"
 awk '$2=="-"{print $1}' "$WORK/hostmap" >"$WORK/dead"
 say "не отвечают на tcp/443: $(wc -l <"$WORK/dead") (в проверках не участвуют)"
@@ -345,10 +362,10 @@ CHANGED=0
 while read -r d; do
   if [ -n "${PREV[$d]:-}" ]; then ASSIGN[$d]=${PREV[$d]}; else ASSIGN[$d]=unknown; fi
 done <"$WORK/dead"
-while read -r d; do ASSIGN[$d]=unknown; done <"$WORK/skipped"
+while read -r d; do ASSIGN[$d]=${PREV[$d]}; done <"$WORK/skipped"
 
 # 1. Без обхода: прошлые direct и новые домены.
-cat "$WORK/keep_direct" "$WORK/fresh" | grep -vFxf "$WORK/dead" >"$WORK/d.base" || true
+cat "$WORK/keep_direct" "$WORK/fresh" | without "$WORK/dead" >"$WORK/d.base"
 targets "$WORK/d.base" >"$WORK/t.base"
 stop_nfqws
 probe_list "$WORK/t.base" "$WORK/res.base"
@@ -358,7 +375,7 @@ failed "$WORK/res.base" >>"$WORK/todo"
 say "без обхода: открыты $(passed "$WORK/res.base" | wc -l) из $(wc -l <"$WORK/t.base")"
 
 # 2. Прошлые стратегии: все профили разом, один запуск.
-awk 'NR==FNR{dead[$1];next} !($1 in dead)' "$WORK/dead" "$WORK/keep_strategy" >"$WORK/ks"
+without "$WORK/dead" <"$WORK/keep_strategy" >"$WORK/ks"
 if [ -s "$WORK/ks" ]; then
   if start_combined "$WORK/ks"; then
     targets <(awk '{print $1}' "$WORK/ks") >"$WORK/t.keep"
@@ -375,8 +392,23 @@ if [ -s "$WORK/ks" ]; then
   fi
 fi
 
+# Перед подбором — второй взгляд без обхода на всех кандидатов. Подбор — самая
+# дорогая часть (домен × все стратегии × таймаут), а большинство попавших сюда
+# из direct — мерцающие сайты, которые через полминуты снова открыты. Их сразу
+# в flaky, без прогона по стратегиям.
+if [ -s "$WORK/todo" ]; then
+  stop_nfqws
+  targets "$WORK/todo" >"$WORK/t.again"
+  probe_list "$WORK/t.again" "$WORK/res.again"
+  guard
+  while read -r d; do ASSIGN[$d]=flaky; done < <(passed "$WORK/res.again")
+  failed "$WORK/res.again" >"$WORK/todo"
+  say "второй взгляд без обхода: открылись сами $(passed "$WORK/res.again" | wc -l) (flaky), закрыты $(wc -l <"$WORK/todo")"
+fi
+
 # 3. Подбор: каждая следующая стратегия проверяет только домены, которым ещё
 # не нашлось рабочей. Домен получает первую подошедшую по списку.
+: >"$WORK/new" # домены, получившие стратегию в этом прогоне
 if [ -s "$WORK/todo" ]; then
   say "подбираю стратегию для $(wc -l <"$WORK/todo") доменов"
   for n in "${NAMES[@]}"; do
@@ -390,18 +422,57 @@ if [ -s "$WORK/todo" ]; then
     probe_list "$WORK/t.$n" "$WORK/res.$n"
     guard
     while read -r d; do ASSIGN[$d]=$n; done < <(passed "$WORK/res.$n")
+    passed "$WORK/res.$n" >>"$WORK/new"
     say "  $n: подошла для $(passed "$WORK/res.$n" | wc -l) из $(wc -l <"$WORK/t.$n")"
     failed "$WORK/res.$n" >"$WORK/todo"
   done
   stop_nfqws
   while read -r d; do ASSIGN[$d]=unknown; done <"$WORK/todo"
 fi
-
 for d in "${DOMAINS[@]}"; do
   [ -n "${ASSIGN[$d]:-}" ] || ASSIGN[$d]=unknown
+done
+
+# 4. Подтверждение новых решений. Часть сайтов на этой сети мерцает сама по
+# себе: trello.com, debian.org, gnome.org (Fastly, CloudFront) за несколько
+# секунд переходят из «открыт» в «закрыт» и обратно без всякого обхода. Такой
+# домен случайно попадает в закрытые, потом случайно «чинится» очередной
+# стратегией — и каждый прогон раскладывает его по-новому. Поэтому решение
+# «закрыт, лечится стратегией X» принимается только если оно повторилось:
+#   а) под всеми профилями разом (как в службе) домен открывается снова;
+#   б) без обхода, спустя время, он по-прежнему закрыт.
+# Не подтвердилось -> flaky: zapret его не трогает (помочь не может, навредить
+# может), в следующих запусках он пропускается, как unknown.
+dump_assign() { for d in "${DOMAINS[@]}"; do echo "$d ${ASSIGN[$d]}"; done; }
+if [ -s "$WORK/new" ]; then
+  dump_assign | without "$WORK/dead" >"$WORK/final"
+  if start_combined "$WORK/final"; then
+    targets "$WORK/new" >"$WORK/t.confirm"
+    probe_list "$WORK/t.confirm" "$WORK/res.confirm"
+    stop_nfqws
+    guard
+    while read -r d; do ASSIGN[$d]=flaky; done < <(failed "$WORK/res.confirm")
+    say "подтверждение под итоговым набором: $(passed "$WORK/res.confirm" | wc -l) из $(wc -l <"$WORK/t.confirm")"
+    passed "$WORK/res.confirm" >"$WORK/new2"
+  else
+    echo "nfqws2 не запустился с итоговым набором профилей:" >&2
+    tail -5 "$WORK/nfqws.log" >&2
+    exit 1
+  fi
+  if [ -s "$WORK/new2" ]; then
+    targets "$WORK/new2" >"$WORK/t.base2"
+    probe_list "$WORK/t.base2" "$WORK/res.base2"
+    guard
+    while read -r d; do ASSIGN[$d]=flaky; done < <(passed "$WORK/res.base2")
+    say "повтор без обхода: всё ещё закрыты $(failed "$WORK/res.base2" | wc -l) из $(wc -l <"$WORK/t.base2")"
+  fi
+fi
+
+CHANGED=0
+for d in "${DOMAINS[@]}"; do
   [ "${ASSIGN[$d]}" = "${PREV[$d]:-}" ] || CHANGED=$((CHANGED + 1))
 done
-for d in "${DOMAINS[@]}"; do echo "$d ${ASSIGN[$d]}"; done >"$WORK/assign"
+dump_assign >"$WORK/assign"
 
 # --- отчёт -----------------------------------------------------------------
 
@@ -414,39 +485,25 @@ if [ "${#PREV[@]}" -gt 0 ]; then
     [ "${ASSIGN[$d]}" = "${PREV[$d]:-}" ] || printf '    %-40s %s -> %s\n' "$d" "${PREV[$d]:-новый}" "${ASSIGN[$d]}"
   done
 fi
-[ -s "$WORK/skipped" ] && echo "unknown не перепроверялись ($(wc -l <"$WORK/skipped")); перепроверить: just zapret-tune --full"
+[ -s "$WORK/skipped" ] && echo "unknown и flaky не перепроверялись ($(wc -l <"$WORK/skipped")); перепроверить: just zapret-tune --full"
 
-if [ "$CHANGED" = 0 ] && [ -r "$OUT" ] && [ "$FULL" = 0 ]; then
-  echo
-  say "все прошлые решения в силе, файлы не менялись"
-  exit 0
-fi
-
-# Контроль: поднимаем все профили разом, как это сделает служба, и проверяем
-# ещё раз. По отдельности стратегии уже проверены, здесь ловим ошибки сборки:
-# домен попал под чужой профиль, списки пересеклись и т. п.
-awk 'NR==FNR{dead[$1];next} !($1 in dead)' "$WORK/dead" "$WORK/assign" >"$WORK/final"
-if start_combined "$WORK/final"; then
-  targets <(awk -v names="${NAMES[*]}" 'BEGIN{n=split(names,N," ");for(i=1;i<=n;i++)k[N[i]]} ($2 in k){print $1}' "$WORK/final") >"$WORK/t.final"
-  probe_list "$WORK/t.final" "$WORK/res.final"
-  stop_nfqws
-  guard
-  echo
-  say "контроль итогового набора: открывается $(passed "$WORK/res.final" | wc -l) из $(wc -l <"$WORK/t.final")"
-  failed "$WORK/res.final" | sed 's/^/    НЕ ПРОШЁЛ: /'
-  nf=$(failed "$WORK/res.final" | wc -l)
-  nt=$(wc -l <"$WORK/t.final")
-  if [ "$nt" -gt 0 ] && [ $((nf * 100)) -gt $((nt * MAX_CONTROL_FAIL)) ]; then
-    echo >&2
-    echo "Контроль провалил $nf из $nt (больше ${MAX_CONTROL_FAIL}%): замерам этого прогона верить нельзя," >&2
-    echo "файлы НЕ изменены. Сеть шумит — повторить позже или с JOBS=1." >&2
-    exit 1
-  fi
-elif [ -s "$WORK/combined" ]; then
-  echo "nfqws2 не запустился с итоговым набором профилей:" >&2
-  tail -5 "$WORK/nfqws.log" >&2
+# Предохранитель: если стратегию разом потеряла заметная часть доменов, это
+# почти наверняка сбой сети или ошибка в скрипте, а не новая реальность.
+lost=0
+had=0
+for d in "${DOMAINS[@]}"; do
+  p=${PREV[$d]:-}
+  [ -n "$p" ] && [ -n "${ARGS[$p]:-}" ] || continue
+  had=$((had + 1))
+  [ -n "${ARGS[${ASSIGN[$d]}]:-}" ] || lost=$((lost + 1))
+done
+if [ "$had" -ge 8 ] && [ $((lost * 3)) -gt "$had" ]; then
+  echo >&2
+  echo "Стратегию потеряли $lost доменов из $had — так не бывает от прогона к прогону." >&2
+  echo "Файлы НЕ изменены. Проверь сеть и повтори; если это правда — just zapret-tune --full." >&2
   exit 1
 fi
+[ "$CHANGED" = 0 ] && [ "${#PREV[@]}" -gt 0 ] && { echo; say "все прошлые решения в силе"; }
 
 [ "$DRY" = 1 ] && { echo; say "--dry-run: файлы не изменены"; exit 0; }
 
@@ -456,7 +513,8 @@ owner=$(stat -c %u:%g "$HOSTS")
 {
   echo "# Решения scripts/zapret2-tune.sh (just zapret-tune) по каждому домену hosts.txt."
   echo "# Руками не править: файл перезаписывается. Группы: direct — открыт без обхода,"
-  echo "# unknown — закрыт и ничего не помогло, остальное — имя стратегии из candidates.txt."
+  echo "# unknown — закрыт и ничего не помогло, flaky — мерцает сам по себе (zapret не трогает),"
+  echo "# остальное — имя стратегии из candidates.txt."
   echo "# generated $(date +%F)"
   echo "# youtube_cache ${PROBE[googlevideo.com]:-}"
   cat "$WORK/assign"

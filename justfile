@@ -158,7 +158,8 @@ update-antigravity:
 
 # zapret2: подобрать стратегии обхода ТСПУ под текущую сеть для всех доменов из
 # module/zapret2/hosts.txt и записать module/zapret2/profiles.json. После — `just switch`.
-# `just zapret-tune --dry-run` — только отчёт. Методика: docs/zapret2-tuning.md
+# Обычный запуск перепроверяет прошлые решения (~3 мин); `--full` — с нуля (10+ мин);
+# `--dry-run` — только отчёт. Методика: docs/zapret2-tuning.md
 zapret-tune *args:
     sudo ./scripts/zapret2-tune.sh {{args}}
 
