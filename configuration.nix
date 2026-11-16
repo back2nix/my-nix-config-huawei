@@ -79,6 +79,7 @@ in {
     ./module/osk-globe-cycle.nix # Глобус на экранной клавиатуре переключает раскладку
     # ./module/monitoring.nix
     ./module/sign-box.nix
+    ./module/zapret2.nix # Обход ТСПУ для прямого трафика (тумблер в меню proxy-mode)
     ./module/proxy-mode.nix # Выбор маршрута для 1082/1083: seoul/casino/frankfurt/direct (тумблеры + CLI)
     ./module/claude-safe.nix # claude-1082-safe: отдельная сеть, фиксированный прокси и локальный k3s
     ./module/system-vpn.nix # «Весь трафик»: TUN sing-box или полный AmneziaWG, выбор списком в трее

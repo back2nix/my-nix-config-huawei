@@ -200,6 +200,9 @@
       {label = "WinJoy VPN"; unit = "amneziawg-egg.service";}
       {label = "Personal VPN"; unit = "amneziawg-personal.service";}
 
+      # Обход ТСПУ для прямого трафика (module/zapret2.nix).
+      {label = "zapret2: обход ТСПУ (прямой трафик)"; unit = "zapret2.service";}
+
       {label = "WebRTC: блокировать Google STUN"; unit = "webrtc-google-block.service";}
       {label = "WebRTC: запретить UDP (bg, кроме DNS)"; unit = "webrtc-udp-block.service";}
 
