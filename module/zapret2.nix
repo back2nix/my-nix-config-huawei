@@ -18,47 +18,64 @@
 #   1. nft: только выход через физический интерфейс, только tcp/443 и udp/443,
 #      только первые пакеты соединения, мимо серверов тоннелей и частных сетей;
 #   2. nfqws2: только TLS ClientHello / QUIC Initial;
-#   3. nfqws2: только домены из module/zapret2/hosts.txt (с поддоменами).
+#   3. nfqws2: только домены из module/zapret2/hosts.txt (с поддоменами),
+#      разложенные по стратегиям в module/zapret2/profiles.json.
 # Соединение без имени хоста (ssh на 443 к Парижу) под профиль не попадает.
 #
-# Стратегия ниже — распространённая отправная точка, на этой сети она не
-# подбиралась. Если не работает — подобрать под провайдера:
-#   sudo systemctl stop zapret2 && sudo blockcheck2
-# и перенести найденные --lua-desync в tlsStrategy/quicStrategy.
+# Стратегии подбираются под провайдера и со временем перестают работать.
+# Если что-то из списка перестало открываться напрямую: `just zapret-tune`,
+# затем `just switch`. Методика и разбор случаев — docs/zapret2-tuning.md.
 #
 # Управление: тумблер «zapret2: обход ТСПУ (прямой трафик)» в меню proxy-mode
 # или `systemctl start|stop zapret2`. Включён по умолчанию.
-{pkgs, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   zapret = pkgs.zapret2;
   lua = "${zapret}/share/zapret2/lua";
   qnum = 200;
   # Метка пакетов, которые сгенерировал сам nfqws2 (его значение по умолчанию).
   desyncMark = "0x40000000";
+  # Полный список доменов: вход для подбора и список для QUIC-профиля.
   hostlist = ./zapret2/hosts.txt;
 
-  tlsStrategy = [
-    "--lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com"
-    "--lua-desync=multidisorder:pos=1,midsld"
-  ];
+  # TLS-профили — результат `just zapret-tune` (scripts/zapret2-tune.sh):
+  # какой группе доменов какая стратегия подходит на этой сети. Одной стратегии
+  # на всех нет: например, кэшам YouTube (googlevideo.com) фальшивый ClientHello
+  # ломает TLS, а Discord и X без него не открываются. nfqws2 берёт первый
+  # профиль, в чей список попал хост. Домены, которые открываются только без
+  # обхода, в профили не попадают вовсе.
+  tlsProfiles = (builtins.fromJSON (builtins.readFile ./zapret2/profiles.json)).profiles;
+
   quicStrategy = [
     "--lua-desync=fake:blob=fake_default_quic:repeats=6"
   ];
 
-  # Файл параметров: nfqws2 читает его как @config.
-  nfqwsConf = pkgs.writeText "nfqws2.conf" (builtins.concatStringsSep "\n" ([
-      "--qnum=${toString qnum}"
-      "--fwmark=${desyncMark}"
-      "--lua-init=@${lua}/zapret-lib.lua"
-      "--lua-init=@${lua}/zapret-antidpi.lua"
-
-      "--name=tls"
-      "--hostlist=${hostlist}"
+  tlsProfileArgs = i: p:
+    [
+      "${
+        if i == 0
+        then "--name"
+        else "--new"
+      }=${p.name}"
+      "--hostlist=${pkgs.writeText "zapret2-hosts-${p.name}.txt" (lib.concatLines p.hosts)}"
       "--filter-tcp=443"
       "--filter-l7=tls"
       "--out-range=-d10"
       "--payload=tls_client_hello"
     ]
-    ++ tlsStrategy
+    ++ p.desync;
+
+  # Файл параметров: nfqws2 читает его как @config.
+  nfqwsConf = pkgs.writeText "nfqws2.conf" (lib.concatLines ([
+      "--qnum=${toString qnum}"
+      "--fwmark=${desyncMark}"
+      "--lua-init=@${lua}/zapret-lib.lua"
+      "--lua-init=@${lua}/zapret-antidpi.lua"
+    ]
+    ++ lib.concatLists (lib.imap0 tlsProfileArgs tlsProfiles)
     ++ [
       "--new=quic"
       "--hostlist=${hostlist}"

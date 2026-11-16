@@ -155,3 +155,32 @@ update-dolphin-anty:
 # Обновление официального Antigravity CLI
 update-antigravity:
     ./scripts/update-antigravity.sh
+
+# zapret2: подобрать стратегии обхода ТСПУ под текущую сеть для всех доменов из
+# module/zapret2/hosts.txt и записать module/zapret2/profiles.json. После — `just switch`.
+# `just zapret-tune --dry-run` — только отчёт. Методика: docs/zapret2-tuning.md
+zapret-tune *args:
+    sudo ./scripts/zapret2-tune.sh {{args}}
+
+# zapret2: что из hosts.txt сейчас не открывается напрямую (root не нужен, ничего не меняет)
+zapret-check:
+    ./scripts/zapret2-tune.sh --check
+
+# zapret2: полный перебор blockcheck2 для одного домена, когда ни один кандидат
+# из module/zapret2/candidates.txt не подошёл. Печатает рабочие наборы --lua-desync.
+zapret-blockcheck domain:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    was_active=0; systemctl is-active -q zapret2 && was_active=1
+    restore() { [ "$was_active" = 1 ] && sudo systemctl start zapret2 || true; }
+    trap restore EXIT
+    sudo systemctl stop zapret2
+    log=$(mktemp)
+    sudo env -u http_proxy -u https_proxy -u all_proxy -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+        BATCH=1 DOMAINS="{{domain}}" IPVS=4 ENABLE_HTTP=0 ENABLE_HTTPS_TLS12=0 ENABLE_HTTPS_TLS13=1 \
+        ENABLE_HTTP3=0 REPEATS=1 PARALLEL=0 SCANLEVEL=standard SKIP_DNSCHECK=1 CURL_MAX_TIME=3 \
+        blockcheck2 | tee "$log"
+    echo
+    echo "=== рабочие стратегии для {{domain}} (строки для module/zapret2/candidates.txt) ==="
+    grep -B1 'AVAILABLE !!!!!' "$log" | sed -n 's/.*: nfqws2 //p' | sort -u
+    rm -f "$log"

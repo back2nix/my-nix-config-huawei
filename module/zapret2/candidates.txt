@@ -1,0 +1,18 @@
+# Стратегии-кандидаты для scripts/zapret2-tune.sh (`just zapret-tune`).
+#
+# Формат: имя | аргументы nfqws2 через пробел
+# Порядок = приоритет: домен получает ПЕРВУЮ стратегию из списка, с которой
+# у него проходит TLS. Поэтому выше — то, что уже работает для большинства,
+# ниже — запасные варианты.
+#
+# Откуда брать новые строки: `just zapret-blockcheck <домен>` печатает рабочие
+# для этого домена наборы --lua-desync; подходящий дописать сюда и повторить
+# `just zapret-tune`.
+
+fake-md5-disorder | --lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com --lua-desync=multidisorder:pos=1,midsld
+disorder | --lua-desync=multidisorder:pos=1,midsld
+fake-badseq-disorder | --lua-desync=fake:blob=fake_default_tls:tcp_seq=-10000:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com --lua-desync=multidisorder:pos=1,midsld
+fake-md5-split | --lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=6:tls_mod=rnd,dupsid,sni=www.google.com --lua-desync=multisplit:pos=1,midsld
+split-seqovl | --lua-desync=multisplit:pos=10,midsld:seqovl=1
+disorder-many | --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
+tcpseg | --lua-desync=tcpseg:pos=0,1:ip_id=rnd:repeats=1
