@@ -1,0 +1,101 @@
+diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
+--- a/protocol/ssh/keepalive.go
++++ b/protocol/ssh/keepalive.go
+@@ -0,0 +1,76 @@
++package ssh
++
++import (
++	"net"
++	"sync/atomic"
++	"time"
++
++	"golang.org/x/crypto/ssh"
++)
++
++// Local patch (my-nix-config): dead session detection.
++//
++// One SSH session carries every stream of the outbound. When a middlebox
++// silently drops the flow (no RST/FIN), the kernel keeps retransmitting for
++// ~15 minutes and every new stream hangs in the dead session until then.
++// Probe a silent session and close it, so the next dial reconnects.
++const (
++	keepaliveTick    = 5 * time.Second
++	keepaliveProbe   = 10 * time.Second // silence before a probe is sent
++	keepaliveTimeout = 25 * time.Second // silence before the session is closed
++)
++
++type watchedConn struct {
++	net.Conn
++	lastRead atomic.Int64
++}
++
++func newWatchedConn(conn net.Conn) *watchedConn {
++	c := &watchedConn{Conn: conn}
++	c.lastRead.Store(time.Now().UnixNano())
++	return c
++}
++
++func (c *watchedConn) Read(p []byte) (n int, err error) {
++	n, err = c.Conn.Read(p)
++	if n > 0 {
++		c.lastRead.Store(time.Now().UnixNano())
++	}
++	return
++}
++
++func (c *watchedConn) silence() time.Duration {
++	return time.Since(time.Unix(0, c.lastRead.Load()))
++}
++
++func (s *Outbound) keepalive(client *ssh.Client, conn *watchedConn) {
++	done := make(chan struct{})
++	go func() {
++		client.Wait()
++		close(done)
++	}()
++	ticker := time.NewTicker(keepaliveTick)
++	defer ticker.Stop()
++	var probing atomic.Bool
++	for {
++		select {
++		case <-done:
++			return
++		case <-ticker.C:
++		}
++		silence := conn.silence()
++		if silence >= keepaliveTimeout {
++			s.logger.Warn("ssh session silent for ", silence.Round(time.Second), ", reconnecting")
++			conn.Close()
++			return
++		}
++		// Any received byte proves the path is alive, so a reply delayed
++		// behind bulk data never counts as a failure.
++		if silence >= keepaliveProbe && probing.CompareAndSwap(false, true) {
++			go func() {
++				defer probing.Store(false)
++				_, _, _ = client.SendRequest("keepalive@openssh.com", true, nil)
++			}()
++		}
++	}
++}
+diff -ruN a/protocol/ssh/outbound.go b/protocol/ssh/outbound.go
+--- a/protocol/ssh/outbound.go
++++ b/protocol/ssh/outbound.go
+@@ -145,6 +145,8 @@
+ 	if err != nil {
+ 		return nil, err
+ 	}
++	watched := newWatchedConn(conn)
++	conn = watched
+ 	if ctx.Done() != nil {
+ 		handshakeConn := conn
+ 		stopContext := context.AfterFunc(ctx, func() {
+@@ -198,6 +200,8 @@
+ 	s.client = client
+ 	s.streams = 1
+ 
++	go s.keepalive(client, watched)
++
+ 	go func() {
+ 		client.Wait()
+ 		conn.Close()

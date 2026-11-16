@@ -12,6 +12,12 @@
     (pkgs-unstable.sing-box.override {
       withNaiveOutbound = false;
     }).overrideAttrs (old: {
+      # SSH-сессия одна на весь outbound, и upstream не проверяет, жива ли она.
+      # Когда ТСПУ молча дропает поток (без RST), ядро ретрансмитит ~15 минут,
+      # и все новые соединения виснут в мёртвой сессии до ручного рестарта.
+      # Патч: 10 с тишины — шлём keepalive@openssh.com, 25 с тишины — рвём
+      # сессию, следующий запрос переподключается сам.
+      patches = (old.patches or []) ++ [./sing-box/ssh-keepalive.patch];
       postPatch =
         (old.postPatch or "")
         + ''
