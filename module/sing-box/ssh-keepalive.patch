@@ -1,7 +1,7 @@
 diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
 --- a/protocol/ssh/keepalive.go
 +++ b/protocol/ssh/keepalive.go
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,89 @@
 +package ssh
 +
 +import (
@@ -22,6 +22,10 @@ diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
 +	keepaliveTick    = 5 * time.Second
 +	keepaliveProbe   = 10 * time.Second // silence before a probe is sent
 +	keepaliveTimeout = 25 * time.Second // silence before the session is closed
++	// The handshake runs under the outbound mutex and upstream bounds it only
++	// by the caller's context. A flow blackholed right after the TCP connect
++	// would otherwise park every later dial behind a caller with no deadline.
++	handshakeTimeout = 10 * time.Second
 +)
 +
 +type watchedConn struct {
@@ -41,6 +45,15 @@ diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
 +		c.lastRead.Store(time.Now().UnixNano())
 +	}
 +	return
++}
++
++func (c *watchedConn) armHandshake() {
++	_ = c.Conn.SetDeadline(time.Now().Add(handshakeTimeout))
++}
++
++func (c *watchedConn) handshakeDone() {
++	_ = c.Conn.SetDeadline(time.Time{})
++	c.lastRead.Store(time.Now().UnixNano())
 +}
 +
 +func (c *watchedConn) silence() time.Duration {
@@ -81,19 +94,21 @@ diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
 diff -ruN a/protocol/ssh/outbound.go b/protocol/ssh/outbound.go
 --- a/protocol/ssh/outbound.go
 +++ b/protocol/ssh/outbound.go
-@@ -145,6 +145,8 @@
+@@ -145,6 +145,9 @@
  	if err != nil {
  		return nil, err
  	}
 +	watched := newWatchedConn(conn)
 +	conn = watched
++	watched.armHandshake()
  	if ctx.Done() != nil {
  		handshakeConn := conn
  		stopContext := context.AfterFunc(ctx, func() {
-@@ -198,6 +200,8 @@
+@@ -198,6 +201,9 @@
  	s.client = client
  	s.streams = 1
  
++	watched.handshakeDone()
 +	go s.keepalive(client, watched)
 +
  	go func() {
