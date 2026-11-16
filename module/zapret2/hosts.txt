@@ -287,3 +287,8 @@ ads-twitter.com
 twtrdns.net
 pscp.tv
 periscope.tv
+tdesktop.com
+telegra.ph
+cdn-telegram.org
+tg.dev
+fragment.com
