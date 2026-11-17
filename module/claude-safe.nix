@@ -43,6 +43,22 @@
   safeSsh = pkgs.writeShellScriptBin "ssh" ''
     exec ${pkgs.openssh}/bin/ssh -F "$CLAUDE_SAFE_SSH_CONFIG" "$@"
   '';
+  # Resolve Match/HostName on the host: Wi-Fi probes cannot run in the sandbox.
+  # Repeated endpoint names are alternative addresses, not separate listeners.
+  endpointSshRelay = pkgs.writeShellScript "claude-safe-endpoint-ssh" ''
+    set -euo pipefail
+    endpoints=$1
+    IFS= read -r host < "$endpoints"
+    address=$(${pkgs.openssh}/bin/ssh -G "$host" | ${pkgs.gawk}/bin/awk '$1 == "hostname" { print $2 }')
+    if [ "$address" = "$host" ]; then
+      address=$(${pkgs.gnused}/bin/sed -n '2p' "$endpoints")
+    fi
+    if ! ${pkgs.coreutils}/bin/tail -n +2 "$endpoints" | ${pkgs.gnugrep}/bin/grep -Fxq -- "$address"; then
+      echo "claude-safe: SSH target for $host is outside its allowed addresses" >&2
+      exit 1
+    fi
+    exec ${pkgs.socat}/bin/socat STDIO "TCP4:$address:22,connect-timeout=10"
+  '';
   mkSafe = {
     name,
     program,
@@ -189,18 +205,30 @@
             "UNIX-CONNECT:$relay_dir/dev-$dev_port" 2>>"$relay_log_dir/dev-$dev_port-host.log" &
           relay_pids+=("$!")
         done
-        # Expose only port 22 of explicitly allowed hosts via Unix sockets.
+        # Group alternative Wi-Fi addresses under one listener per SSH name.
         ssh_endpoints=()
+        mkdir -- "$relay_dir/ssh-targets"
         : > "$relay_dir/ssh-config"
         if [ -r ${sshEndpointsFile} ]; then
           while read -r ep_name ep_address ep_aliases; do
             case "$ep_name" in ""|"#"*) continue ;; esac
-            ssh_endpoints+=("$ep_name")
-            setsid socat -lp ${name}-ssh-"$ep_name"-host "UNIX-LISTEN:$relay_dir/ssh-$ep_name,fork,mode=0600" "TCP4:$ep_address:22" 2>>"$relay_log_dir/ssh-$ep_name-host.log" &
+            # Alias splitting is intentional: the secret contains whitespace-separated names.
+            read -r -a ep_hosts <<< "$ep_name $ep_address $ep_aliases"
+            for ep_host in "''${ep_hosts[@]}"; do
+              target_file="$relay_dir/ssh-targets/$ep_host"
+              if [ ! -f "$target_file" ]; then
+                ssh_endpoints+=("$ep_host")
+                printf '%s\n' "$ep_host" > "$target_file"
+              fi
+              printf '%s\n' "$ep_address" >> "$target_file"
+            done
+          done < ${sshEndpointsFile}
+          for ep_name in "''${ssh_endpoints[@]}"; do
+            setsid socat -lp ${name}-ssh-"$ep_name"-host "UNIX-LISTEN:$relay_dir/ssh-$ep_name,fork,mode=0600" "EXEC:${endpointSshRelay} $relay_dir/ssh-targets/$ep_name" 2>>"$relay_log_dir/ssh-$ep_name-host.log" &
             relay_pids+=("$!")
             printf 'Host %s\n  ProxyCommand ${pkgs.socat}/bin/socat STDIO UNIX-CONNECT:%s\n\n' \
-              "$ep_name $ep_address $ep_aliases" "$relay_dir/ssh-$ep_name" >> "$relay_dir/ssh-config"
-          done < ${sshEndpointsFile}
+              "$ep_name" "$relay_dir/ssh-$ep_name" >> "$relay_dir/ssh-config"
+          done
         fi
         # Any 192.168.*.* host, port 22 only (validated on the host side).
         setsid socat -lp ${name}-ssh-lan-host "UNIX-LISTEN:$relay_dir/ssh-lan,fork,mode=0600" EXEC:${lanSshRelay} 2>>"$relay_log_dir/ssh-lan-host.log" &
@@ -233,6 +261,8 @@
         fi
         # Hide personal data: secrets, browser profiles, messengers, keyrings.
         hide_args=()
+        # The host relay's allowlists must not be writable from the sandbox.
+        hide_args+=(--tmpfs "$relay_dir/ssh-targets")
         for rel in ${lib.escapeShellArgs (secretPaths ++ hide)}; do
           path="$HOME/$rel"
           if [ -d "$path" ]; then
