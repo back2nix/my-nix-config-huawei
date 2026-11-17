@@ -2,12 +2,12 @@
 # Руками не править: файл перезаписывается. Группы: direct — открыт без обхода,
 # unknown — закрыт и ничего не помогло, flaky — мерцает сам по себе (zapret не трогает),
 # остальное — имя стратегии из candidates.txt.
-# generated 2026-11-16
-# youtube_cache rr1---sn-h0jeener.googlevideo.com
+# generated 2026-11-17
+# youtube_cache rr1---sn-5go7yner.googlevideo.com
 2ip.ru direct
 5sim.net fake-md5-disorder
 9grizzlysms.com direct
-ably.net direct
+ably.net flaky
 adobe.com direct
 ads-twitter.com unknown
 adtrafficquality.google unknown
@@ -204,7 +204,7 @@ pagure.io direct
 patreon.com direct
 paxful.com direct
 paypal.com flaky
-paypalobjects.com direct
+paypalobjects.com flaky
 p-cdn.cloud direct
 periscope.tv direct
 perplexity.ai direct
@@ -262,7 +262,7 @@ twttr.com unknown
 typesafe.ai flaky
 valor-casino.co direct
 vaultdcr.com flaky
-vlrcsn.one direct
+vlrcsn.one flaky
 volatiles.gg direct
 vultr.com flaky
 wan.video direct
