@@ -163,6 +163,11 @@ update-antigravity:
 zapret-tune *args:
     sudo ./scripts/zapret2-tune.sh {{args}}
 
+# Нет интернета? Снимает состояние сервисов, DNS по звеньям, sing-box/zapret2/nft и логи
+# в ~/net-diag-<время>.log — запусти ДО перезапуска сервисов и пришли файл.
+net-diag *out:
+    ./scripts/net-diag.sh {{out}}
+
 # zapret2: что из hosts.txt сейчас не открывается напрямую (root не нужен, ничего не меняет)
 zapret-check:
     ./scripts/zapret2-tune.sh --check

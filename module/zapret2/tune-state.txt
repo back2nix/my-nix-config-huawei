@@ -3,7 +3,7 @@
 # unknown — закрыт и ничего не помогло, flaky — мерцает сам по себе (zapret не трогает),
 # остальное — имя стратегии из candidates.txt.
 # generated 2026-11-17
-# youtube_cache rr1---sn-5go7yner.googlevideo.com
+# youtube_cache rr1---sn-aj5goc-5j.googlevideo.com
 2ip.ru direct
 5sim.net fake-md5-disorder
 9grizzlysms.com direct
@@ -22,7 +22,7 @@ a.team direct
 atlassian.com flaky
 atlassian.net flaky
 azureedge.net direct
-b-cdn.net disorder
+b-cdn.net unknown
 bemob.com flaky
 bemobtrcks.com unknown
 berkeley.edu tcpseg
@@ -36,19 +36,19 @@ browserleaks.com flaky
 bunny.net unknown
 butlerfortrello.com flaky
 byteplus.com flaky
-cache.nixos-cuda.org tcpseg
+cache.nixos-cuda.org flaky
 cachix.org direct
 capcut.com flaky
 capcutstatic.com unknown
 cave0x.com fake-md5-disorder
 cdninstagram.com unknown
 cdn-telegram.org unknown
-cerebras.ai direct
+cerebras.ai flaky
 clicktale.net unknown
-clients6.google.com direct
+clients6.google.com flaky
 cloudflare.com direct
 cloudflareinsights.com unknown
-codeberg.org direct
+codeberg.org flaky
 codeberg.page direct
 codewiki.google direct
 coingate.com direct
@@ -58,7 +58,7 @@ crakrevenue.com direct
 crates.io direct
 d2hrivdxn8ekm8.cloudfront.net unknown
 d2lwuy8qc234o3.cloudfront.net direct
-dashboard.helius.dev direct
+dashboard.helius.dev unknown
 dashboard.quicknode.com direct
 debian.org flaky
 deepl.com direct
@@ -70,7 +70,7 @@ discordapp.com fake-md5-disorder
 discordapp.net unknown
 discordcdn.com direct
 discord.com fake-md5-disorder
-discord.gg direct
+discord.gg fake-md5-disorder
 discord.media direct
 docker.com direct
 docker.io direct
@@ -107,7 +107,7 @@ gitea.io direct
 githubapp.com direct
 githubassets.com flaky
 github.blog direct
-github-cloud.s3.amazonaws.com direct
+github-cloud.s3.amazonaws.com unknown
 github.com direct
 githubcopilot.com unknown
 github.dev direct
@@ -123,35 +123,35 @@ gnu.org direct
 godaddy.com tcpseg
 go.dev direct
 go.etcd.io direct
-golang.org direct
+golang.org flaky
 google-analytics.com unknown
 googleapis.com tcpseg
-googlesource.com direct
+googlesource.com flaky
 googletagmanager.com unknown
-googleusercontent.com direct
+googleusercontent.com flaky
 googlevideo.com disorder
-go.opentelemetry.io direct
+go.opentelemetry.io flaky
 gopkg.in direct
 go.uber.org direct
 grizzlysms.com fake-md5-disorder
-grok.com direct
+grok.com flaky
 groq.com flaky
 growthbook.io direct
-gstatic.com direct
+gstatic.com flaky
 gtmetrix.com direct
 haskell.org flaky
 hetzner.com tcpseg
 hf.co direct
-huggingface.co direct
-idealo.de direct
-ieee.org direct
+huggingface.co flaky
+idealo.de flaky
+ieee.org flaky
 imagedelivery.net fake-md5-disorder
 images.unsplash.com disorder
 instagr.am direct
 instagram.com tcpseg
 intercomcdn.com flaky
 intercom.io direct
-intersub.cc direct
+intersub.cc flaky
 jules.google direct
 jules.google.com direct
 k8s.io direct
@@ -163,18 +163,18 @@ kelkoo.fr direct
 kernel.org direct
 launchpadcontent.net unknown
 launchpad.net direct
-leetcode.com direct
+leetcode.com flaky
 licdn.com unknown
 linkedin.com fake-md5-disorder
 live.com flaky
 magicclick.partners fake-md5-disorder
-markojs.com direct
+markojs.com flaky
 me unknown
-measurement-lab.org direct
+measurement-lab.org flaky
 medium.com fake-md5-disorder
 meet.google.com fake-md5-disorder
-meta.ai direct
-meta.com direct
+meta.ai flaky
+meta.com flaky
 miadoll.com direct
 microsoft.com direct
 mivocloud.com direct
@@ -215,7 +215,7 @@ playerly.io direct
 play.google.com fake-md5-disorder
 pornhub.com unknown
 prompthero.com fake-md5-disorder
-pscp.tv direct
+pscp.tv fake-md5-disorder
 pypi.org direct
 pythonhosted.org direct
 python.org direct
@@ -232,7 +232,7 @@ sentry.io unknown
 signalmidi.app direct
 singular.net unknown
 skills.sh flaky
-softswiss.com direct
+softswiss.com fake-md5-disorder
 sourceforge.io fake-md5-disorder
 sourceforge.net direct
 sourcehut.org direct
@@ -265,7 +265,7 @@ vaultdcr.com flaky
 vlrcsn.one flaky
 volatiles.gg direct
 vultr.com flaky
-wan.video direct
+wan.video flaky
 webbrowsertools.com direct
 wellfound.com direct
 whatismyipaddress.com direct
