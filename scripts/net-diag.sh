@@ -38,11 +38,14 @@ for h in ssl.gstatic.com www.google.com api.anthropic.com; do
 done
 
 sec "через sing-box socks"
-for p in 1082 1083 1080 1081 1084 1085; do
+for p in 1082 1083 1084 1085 1088 1089; do
   ss -lnt "sport = :$p" | grep -q LISTEN || continue
-  run curl -sS -m12 -o /dev/null -w "socks:$p google %{http_code} total=%{time_total}s\n" --socks5-hostname 127.0.0.1:$p https://www.google.com
-  run curl -sS -m12 -o /dev/null -w "socks:$p quad9 %{http_code} total=%{time_total}s\n" --socks5-hostname 127.0.0.1:$p https://9.9.9.9
+  # 1082/1088 и т.п. — socks, 1083/1085/1089 — http: пробуем оба, лишний просто упадёт
+  for sch in socks5h http; do
+    run curl -sS -m12 -o /dev/null -w "$sch:$p google %{http_code} total=%{time_total}s\n" -x "$sch://127.0.0.1:$p" https://www.google.com
+  done
 done
+run curl -sS -m5 http://127.0.0.1:9090/proxies   # Clash-API: какие outbound'ы выбраны селекторами
 
 sec "nftables (zapret2 и прочее)"
 S nft list ruleset
@@ -50,6 +53,8 @@ sec "nfqueue"; run cat /proc/net/netfilter/nfnetlink_queue
 
 sec "логи sing-box: ошибки/предупреждения за 30 мин"
 journalctl -u sing-box --since -30min --no-pager | grep -vE 'inbound connection (from|to)' | tail -300
+sec "sing-box: состояние ssh-тоннелей за 30 мин"
+journalctl -u sing-box --since -30min --no-pager | grep -E "outbound/ssh|silent|reconnect|no route|channel open" | tail -60
 sec "логи sing-box: последние 150 строк целиком"
 journalctl -u sing-box -n 150 --no-pager
 for s in zapret2 dnscrypt-proxy blocky NetworkManager; do
