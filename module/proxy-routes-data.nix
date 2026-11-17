@@ -2,7 +2,16 @@
 let
   tunnels = ["ssh-out1" "ssh-usa-2" "ssh-usa-2-via-casino" "ssh-out1-via-casino" "ssh-usa-2-via-fra" "ssh-out1-via-fra" "ssh-frankfurt" "ssh-frankfurt-via-casino" "ssh-france"];
 in {
+  inherit tunnels;
   selectors = [
+    # DNS (DoH к Quad9) для sing-box и dnscrypt-proxy (через 1130). По умолчанию
+    # dns-auto — urltest по всем тоннелям: зависший тоннель не роняет DNS.
+    # Quad9 не шлёт ECS, так что выход DoH на геолокацию ответов не влияет.
+    {
+      name = "dns";
+      default = "dns-auto";
+      outbounds = ["dns-auto"] ++ tunnels ++ ["direct-out"];
+    }
     # ssh/деплой на Франкфурт (~/.ssh/config: ProxyCommand nc -x 127.0.0.1:1124).
     # Без ssh-frankfurt* (петля через сам Франкфурт). Выход с IP французского хоста —
     # двумя путями: ssh-casino-relay (seoul-relay, admin-VPN) и ssh-france
@@ -76,6 +85,12 @@ in {
     }
   ];
   routes = [
+    {
+      name = "dns";
+      httpPort = 1131;
+      socksPort = 1130;
+      outbound = "dns-select";
+    }
     # Вход для TUN-инстанса sing-box-tun (только 127.0.0.1).
     {
       name = "system";

@@ -10,8 +10,8 @@
       api=''${VPN_ROUTE_API:-http://127.0.0.1:9090}
       group=''${1:-}
       case "$group" in
-        system|antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|fra-deploy|paris-deploy) ;;
-        *) echo 'Usage: vpn-route system|antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|fra-deploy|paris-deploy [usa|usa-2|usa-2-casino|casino|usa-fra|usa-2-fra|fra|fra-casino|france|france-relay|wg-paris|wg-fra|direct|status]' >&2; exit 2 ;;
+        dns|system|antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|fra-deploy|paris-deploy) ;;
+        *) echo 'Usage: vpn-route dns|system|antigravity|claude|codex|telegram|git|nix|voicestudio|browser-usa|browser-fra|fra-deploy|paris-deploy [auto|usa|usa-2|usa-2-casino|casino|usa-fra|usa-2-fra|fra|fra-casino|france|france-relay|wg-paris|wg-fra|direct|status]' >&2; exit 2 ;;
       esac
       if [ "$#" -gt 2 ]; then
         echo 'Too many arguments' >&2
@@ -33,6 +33,7 @@
             ssh-france) echo france ;;
             ssh-casino-relay) echo france-relay ;;
             direct-out) echo direct ;;
+            dns-auto) echo auto ;;
             wg-paris) echo wg-paris ;;
             wg-fra) echo wg-fra ;;
             *) echo "Unknown route: $current" >&2; exit 1 ;;
@@ -40,6 +41,13 @@
           ;;
         *)
           case "$mode" in
+            auto)
+              if [[ "$group" != dns ]]; then
+                echo 'auto is available only for dns' >&2
+                exit 2
+              fi
+              tag=dns-auto
+              ;;
             usa|seoul|1082|1083) tag=ssh-out1 ;;
             usa-2) tag=ssh-usa-2 ;;
             usa-2-casino|usa-2-paris) tag=ssh-usa-2-via-casino ;;
@@ -64,8 +72,8 @@
               tag=$mode
               ;;
             direct)
-              if [[ "$group" != system && "$group" != git && "$group" != nix && "$group" != browser-* && "$group" != fra-deploy && "$group" != paris-deploy ]]; then
-                echo 'Direct is available only for Git, Nix, browsers, fra-deploy and paris-deploy.' >&2
+              if [[ "$group" != system && "$group" != dns && "$group" != git && "$group" != nix && "$group" != browser-* && "$group" != fra-deploy && "$group" != paris-deploy ]]; then
+                echo 'Direct is available only for DNS, Git, Nix, browsers, fra-deploy and paris-deploy.' >&2
                 exit 2
               fi
               tag=direct-out

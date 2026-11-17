@@ -31,9 +31,10 @@
       server_names = ["quad9-doh-proxied"];
       ignore_system_dns = true;
 
-      # Весь исходящий трафик dnscrypt-proxy — через sing-box socks-casino (1082),
-      # т.е. SSH-тоннель на google-seoul напрямую, выход за GFW одним прыжком.
-      proxy = "socks5://127.0.0.1:1082";
+      # Весь исходящий трафик dnscrypt-proxy — через sing-box socks-dns (1130):
+      # selector dns-select (трей: «DNS»), по умолчанию dns-auto — urltest по
+      # всем тоннелям, чтобы DNS не зависел от одного тоннеля.
+      proxy = "socks5://127.0.0.1:1130";
 
       # IP уже зашит в стамп → bootstrap не используется, но поле обязательно.
       bootstrap_resolvers = ["9.9.9.9:53" "1.1.1.1:53"];

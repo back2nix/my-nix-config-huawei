@@ -124,7 +124,12 @@ in {
                 enabled = true;
                 server_name = "dns.quad9.net";
               };
-              detour = entry.outbound;
+              # Строгие пары (*-safe) держат DNS в своём тоннеле, остальные
+              # идут через переключатель DNS (группа dns в трее, dns-auto по умолчанию).
+              detour =
+                if entry.strict or false
+                then entry.outbound
+                else "dns-select";
             }) ([
                 {
                   tag = "dns-1082";
@@ -145,10 +150,12 @@ in {
                 {
                   tag = "dns-claude-safe";
                   outbound = "ssh-out1";
+                  strict = true;
                 }
                 {
                   tag = "dns-safe-1088";
                   outbound = "ssh-frankfurt";
+                  strict = true;
                 }
               ]
               ++ map (r: {
@@ -463,6 +470,18 @@ in {
                 "direct-out"
               ];
               default = "ssh-out1";
+              interrupt_exist_connections = true;
+            }
+            # Авто-выбор тоннеля для DNS: живой с наименьшей задержкой.
+            # Мёртвые тоннели (без ключа) вычищает prune-missing-keys.
+            {
+              type = "urltest";
+              tag = "dns-auto";
+              outbounds = consumers.tunnels;
+              url = "https://dns.quad9.net/";
+              interval = "30s";
+              tolerance = 150;
+              idle_timeout = "30m";
               interrupt_exist_connections = true;
             }
             # Переключатель для 1088/1089: тот же набор выходов, но свой выбор.

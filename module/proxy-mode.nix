@@ -158,9 +158,11 @@
     # Только для группы system: полный AmneziaWG-туннель (весь трафик, и UDP).
     {id = "wg-paris"; label = "Париж — WireGuard (всё, вкл. UDP)";}
     {id = "wg-fra"; label = "Франкфурт — WireGuard (всё, вкл. UDP)";}
+    # Только для группы dns: urltest dns-auto по всем тоннелям.
+    {id = "auto"; label = "Авто (живой тоннель с наименьшей задержкой)";}
   ];
   # Режимы, которые не должны появляться у групп без явного only.
-  groupOnlyModes = ["france-relay" "wg-paris" "wg-fra"];
+  groupOnlyModes = ["france-relay" "wg-paris" "wg-fra" "auto"];
   # Группа без only получает все общие режимы — меню остаётся данными в /etc,
   # extension.js не меняется (фильтр only применяется и к Direct/ISP).
   withDefaultOnly = g:
@@ -188,6 +190,7 @@
       direct-out = "direct";
       wg-paris = "wg-paris";
       wg-fra = "wg-fra";
+      dns-auto = "auto";
     };
     legacyAliases = {usa = "seoul"; fra = "frankfurt";};
     legacySelectors = {"1082" = "usa-select"; "1088" = "frankfurt-select";};
@@ -218,6 +221,13 @@
     # в modes + groupOnlyModes + её only (так сделан france-relay для fra-deploy).
     # Ошибка 2026-10-20: под fra-deploy добавлялось поле extraModes в JS.
     groups = map withDefaultOnly [
+      # DNS (DoH Quad9) для sing-box и системы (dnscrypt-proxy → 1130).
+      {
+        id = "dns";
+        label = "DNS (DoH Quad9)";
+        direct = true;
+        only = ["auto" "usa" "usa-2" "casino" "usa-2-casino" "usa-fra" "usa-2-fra" "fra" "fra-casino" "france" "direct"];
+      }
       # Весь трафик системы (module/system-vpn.nix). ssh-выходы — только TCP,
       # UDP при них блокируется; WireGuard-пункты везут всё.
       {

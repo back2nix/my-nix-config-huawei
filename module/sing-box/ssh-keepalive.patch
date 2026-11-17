@@ -20,8 +20,8 @@ diff -ruN a/protocol/ssh/keepalive.go b/protocol/ssh/keepalive.go
 +// Probe a silent session and close it, so the next dial reconnects.
 +const (
 +	keepaliveTick    = 5 * time.Second
-+	keepaliveProbe   = 10 * time.Second // silence before a probe is sent
-+	keepaliveTimeout = 25 * time.Second // silence before the session is closed
++	keepaliveProbe   = 4 * time.Second  // silence before a probe is sent
++	keepaliveTimeout = 12 * time.Second // silence before the session is closed
 +	// The handshake runs under the outbound mutex and upstream bounds it only
 +	// by the caller's context. A flow blackholed right after the TCP connect
 +	// would otherwise park every later dial behind a caller with no deadline.
