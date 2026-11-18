@@ -16,15 +16,15 @@
   ripgrep,
   git,
 }: let
-  version = "0.169.0";
+  version = "0.170.0";
 
   sources = {
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
-      hash = "sha256-mvTXUfzhg/rt6mKUN9UlLb9FjusEEwz0+XvoRGIeqYU=";
+      hash = "sha256-0FSRbM0opTggN2uNL3yHUYTKj0D81Eu6vrjuJAziR/U=";
 
       # Подставить hash из nix store prefetch-file.
-      codeModeHostHash = "sha256-y+1qjSXoJoeSt1d2f7x21MYuhLz47kpj+XVH8N46rOs=";
+      codeModeHostHash = "sha256-GKsp2XBYaJAIXD66HVUGj9ZiYhVIVeUaVPNwhSL6TcU=";
     };
   };
 
