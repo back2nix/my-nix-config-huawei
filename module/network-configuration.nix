@@ -248,6 +248,8 @@ in {
             # устанавливает к нам по Wi-Fi Direct.
             ip saddr 192.168.0.0/24 tcp dport { 7236, 7250 } accept comment "Miracast RTSP"
             iifname "p2p-*" accept comment "Wi-Fi Direct (Miracast)"
+            # Галерея (dump/pornhub scripts/gallery.py) — открыть с телефона в LAN.
+            ip saddr 192.168.0.0/24 tcp dport 8766 accept comment "Gallery -> LAN"
 
             ct state vmap {
               invalid : drop,
