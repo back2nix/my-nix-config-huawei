@@ -24,6 +24,8 @@
 
     # Подключаем наш новый модуль аудио-моста
     ./module/ai-audio.nix
+    # Второй Wi-Fi интерфейс (две сети одновременно)
+    ./module/wifi-second.nix
   ];
 
   networking.hostName = "yoga14";
