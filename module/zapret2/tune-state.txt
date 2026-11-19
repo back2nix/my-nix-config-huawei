@@ -2,8 +2,8 @@
 # Руками не править: файл перезаписывается. Группы: direct — открыт без обхода,
 # unknown — закрыт и ничего не помогло, flaky — мерцает сам по себе (zapret не трогает),
 # остальное — имя стратегии из candidates.txt.
-# generated 2026-11-17
-# youtube_cache rr1---sn-aj5goc-5j.googlevideo.com
+# generated 2026-11-19
+# youtube_cache rr1---sn-gvnuxaxjvh-axq6.googlevideo.com
 2ip.ru direct
 5sim.net fake-md5-disorder
 9grizzlysms.com direct
@@ -162,7 +162,7 @@ kelkoo.com tcpseg
 kelkoo.fr direct
 kernel.org direct
 launchpadcontent.net unknown
-launchpad.net direct
+launchpad.net unknown
 leetcode.com flaky
 licdn.com unknown
 linkedin.com fake-md5-disorder
