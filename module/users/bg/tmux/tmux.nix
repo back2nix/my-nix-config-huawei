@@ -90,6 +90,10 @@ in {
         set -ga terminal-overrides ',screen-256color:Ms=\E]52;%p1%s;%p2%s\007'
 
         set -g mouse on
+        # Shift+Enter и др. модифицированные клавиши (CSI-u) — нужно для claude-code
+        set -s extended-keys on
+        set -s extended-keys-format csi-u
+        set -as terminal-features "xterm-kitty:extkeys"
         unbind -n MouseDrag1Pane
         bind -n MouseDrag1Pane if -F '#{mouse_any_flag}' 'if -F "#{pane_in_mode}" "copy-mode -M" "send-keys -M"' 'copy-mode -M'
 
