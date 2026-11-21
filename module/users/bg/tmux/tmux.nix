@@ -91,7 +91,7 @@ in {
 
         set -g mouse on
         # Shift+Enter и др. модифицированные клавиши (CSI-u) — нужно для claude-code
-        set -s extended-keys on
+        set -s extended-keys always
         set -s extended-keys-format csi-u
         set -as terminal-features "xterm-kitty:extkeys"
         unbind -n MouseDrag1Pane
